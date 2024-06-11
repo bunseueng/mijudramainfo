@@ -2,32 +2,584 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+.circleRating {
+  width: 60px;
+  background-color: #081c22;
+  border-radius: 50%;
+  padding: 2px;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.watchlistCircleRating {
+  width: 45px;
+  background-color: #081c22;
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.CircularProgressbar-text {
+    font-size: 34px;
+    font-weight: 700;
+    fill: var(--black);
+}
+.CircularProgressbar-trail {
+    stroke: transparent;
+}
+
+.overflow-x {
+  overflow-x: scroll;
+}
+.overflow-x::-webkit-scrollbar {
+   width: 12px;
+   height: 10px;
+}
+
+.overflow-x::-webkit-scrollbar-thumb {
+   border-radius: 10px;
+   background-color: rgb(223, 217, 217);
+   cursor: pointer;
+}
+.overflow-y {
+  overflow-x: scroll;
+}
+.overflow-y::-webkit-scrollbar {
+   width: 12px;
+   height: 10px;
+}
+
+.overflow-y::-webkit-scrollbar-thumb {
+   border-radius: 10px;
+   background-color: rgb(223, 217, 217);
+   cursor: pointer;
+}
+
+.list .nav {
+  width: 100%;
+}
+
+.list .nav .item{
+  position: relative;
+  display: block;
+  height: 50px;
+  color: black;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.list .nav:nth-child(1) .item {
+  border-left: 10px solid red;
+}
+.list .nav:nth-child(2) .item {
+  border-left: 10px solid yellow;
+}
+.list .nav:nth-child(3) .item {
+  border-left: 10px solid green;
+}
+.list .nav:nth-child(4) .item {
+  border-left: 10px solid cadetblue;
+}
+.list .nav:nth-child(5) .item {
+  border-left: 10px solid orange;
+}
+
+.list .nav .item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 100%;
+  transition: all 0.3s;
+  z-index: -1;
+}
+
+.list .nav .item:hover::after {
+  width: 100%;
+}
+
+.list .nav:nth-child(1) .item::after {
+  background-color:  red;
+}
+.list .nav:nth-child(2) .item::after {
+  background-color:  yellow;
+}
+.list .nav:nth-child(3) .item::after {
+  background-color:  green;
+}
+.list .nav:nth-child(4) .item::after {
+  background-color:  cadetblue;
+}
+.list .nav:nth-child(5) .item::after {
+  background-color:  orange;
+}
+
+.container {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default radio button */
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom radio button */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+
+/* On mouse-over, add a grey background color */
+.container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the radio button is checked, add a blue background */
+.container input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+
+/* Create the indicator (the dot/circle - hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the indicator (dot/circle) when checked */
+.container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the indicator (dot/circle) */
+.container .checkmark:after {
+  top: 9px;
+  left: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+}
+
+.ul {
+  display: flex;
+}
+
+.ul .li {
+  list-style: none;
+}
+
+.ul .li .link {
+  text-align: center;
+  display: block;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  border: 3px solid #fff;
+  z-index: 1;
+}
+
+.ul .li .link .icon {
+  position: relative;
+  transition: .5s;
+  z-index: 3;
+}
+
+.ul .li .link:hover .icon {
+  color: #fff;
+  transform: rotateY(360deg);
+}
+
+.ul .li .link:before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f00;
+  transition: .5s;
+  z-index: 2;
+}
+
+.ul .li .link:hover:before {
+  top: 0;
+}
+
+.ul .li:nth-child(1) .link:before{
+  background: #3b5999;
+}
+
+.ul .li:nth-child(2) .link:before{
+  background: #55acee;
+}
+
+.ul .darkMode:nth-child(1) .link:before{
+  background: #55acee;
+}
+
+.ul .darkMode:nth-child(2) .link:before{
+  background: #d8ea88;
+}
+
+.ul .li:nth-child(3) .link:before {
+  background: #f00;
+}
+
+.ul .li:nth-child(4) .link:before {
+  background: #cd486b ;
+}
+
+.ProseMirror {
+  display: block;
+  min-height: 250px;
+}
+.ProseMirror-selectednode {
+  position: relative !important;
+}
+
+.tiptap p img{
+  position: relative;
+  height: 100% !important;
+}
+.ProseMirror img {
+  display:unset;
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.truncates {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.truncate-title {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 240px;
+  background-color: #032541;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  right: -101px;
+  bottom: -45px;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.tooltip .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  bottom: 100%;  /* At the top of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #032541 transparent;
+}
+
+/* Tooltip text */
+.searchTooltip .searchTooltipText {
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+}
+
+.searchTooltip .searchTooltipText::after {
+  content: "";
+  position: absolute;
+  top: 73px;
+  left: 25px;  /* At the top of the tooltip */
+  margin-left: -5px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent #3e4042 transparent;
+}
+
+.custom-scroll{
+  float: left;
+  height: 300px;
+  overflow-y: scroll;
+  margin-bottom: 25px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  padding: 2px 0;
+  background-color: #3a3b3c;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+  background-color: #737272;
+}
+
+.vertical_scroller_wrap.should_fade.is_fading_before::before {
+  opacity: 1;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(.4,0,1,1);
+}
+
+.before\:rounded-3xl::before {
+  content: "";
+  border-radius: 1.5rem;
+}
+
+.vertical_scroller_wrap::before {
+  top: 0;
+  background-image: linear-gradient(0deg, rgba(255, 255, 255, 0), rgba(244, 244, 245, 1));
+  z-index: 20;
+}
+
+.vertical_scroller_wrap::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  height: 10rem;
+  width: 100%;
+}
+
+.vertical_scroller_wrap.should_fade.hide_after::after {
+  opacity: 0;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0,0,.2,1);
+}
+
+.after\:rounded-3xl::after {
+  content: "";
+  border-radius: 1.5rem;
+}
+.vertical_scroller_wrap::after {
+  bottom: 0;
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(244, 244, 245, 1));
+}
+.vertical_scroller_wrap::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  height: 10rem;
+  width: 100%;
+}
+
+.MuiSlider-rail {
+  height: 20px !important;
+}
+
+.css-15xoofy-MuiSlider-root {
+  margin-left: -5px;
+}
+
+.scrollspy_item {
+  height: auto;
+  overflow-y: scroll;
+  margin-bottom: 25px;
+}
+
+.scrollspy_item::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollspy_item::-webkit-scrollbar-thumb {
+  background-color: #a0aec0;
+  border-radius: 3px;
+}
+
+.scrollspy_item::-webkit-scrollbar-track {
+  background-color: #edf2f7;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none
+}
+
+.glyphicons_v2 {
+  position: relative;
+  top: 0;
+  left: 0;
+  min-width: 1em;
+  width: 1em;
+  min-height: 1em;
+  height: 1em;
+  line-height: inherit;
+  background-position: center center;
+  background-repeat: no-repeat;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.collapse-line {
+  border: none;
+  background: none;
+  padding: 0;
+  width: 15px;
+  margin-top: .5rem;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transform: translateX(-50%);
+}
+
+.collapse-line:hover::before,
+.collapse-line:focus-visible::before {
+  background-color: hsl(235, 100%, 60%);
+}
+
+.collapse-line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background-color: hsl(235, 50%, 74%);
+  transition: background-color 100ms ease-in-out;
+}
+
+.detail_placeholder::placeholder {
+  color: #ffffffcc;
+}
+
+.reorder-item {
+  display: table-row;
+  width: 100%;
+}
+
+.css-1jqq78o-placeholder {
+  font-size: 13px;
 }
