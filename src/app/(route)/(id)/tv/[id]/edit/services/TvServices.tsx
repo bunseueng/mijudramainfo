@@ -3,7 +3,12 @@
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import TvAddModal from "@/app/component/ui/Modal/TvAddModal";
 import TvEditModal from "@/app/component/ui/Modal/TvEditModal";
-import { Drama, tvId } from "@/helper/type";
+import {
+  Drama,
+  EditDramaPage,
+  EditPageDefaultvalue,
+  tvId,
+} from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -21,42 +26,63 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
   });
-  const [storedData, setStoredData] = useState<any[]>([]);
+
+  const [storedData, setStoredData] = useState<EditDramaPage[]>([]);
   const [tvDatabase, setTvDatabase] = useState(tvDetails?.services);
-  const [drama, setDrama] = useState<any[]>([]);
+  const [drama, setDrama] = useState<EditDramaPage[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [openEditModal, setOpenEditModal] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-  const [defaultValues, setDefaultValues] = useState<any>({});
+  const [defaultValues, setDefaultValues] = useState<EditPageDefaultvalue>();
   const [isItemDataChanged, setIsItemDataChanged] = useState<boolean[]>(
-    Array(drama.length).fill(false)
+    Array(tvDetails?.services?.length || 0).fill(false)
+  );
+  const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
+    Array(tvDetails?.services?.length || 0).fill(false)
   );
 
   const { register, handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
   });
   const router = useRouter();
-  console.log(tvDatabase);
+
   useEffect(() => {
-    setDrama([
-      ...(tv ? [tv] : []),
-      ...(tvDatabase || []),
-      ...storedData.filter((data) => data !== undefined),
-    ]);
-  }, [tv, tvDatabase, storedData]);
+    const extraData = {
+      ...tv,
+      service_name: tv?.networks?.map((net: any) => net?.name).join(" "),
+      service_url: tv?.networks
+        ?.map(
+          (net: any) => `https://image.tmdb.org/t/p/original/${net?.logo_path}`
+        )
+        .join(" "),
+      page_link: tv?.homepage,
+      service_type: "Unknown",
+      availability: "",
+      subtitles: "English",
+    };
+    setDrama(
+      [...(tvDetails?.services || [])].length > 0
+        ? [
+            ...(tvDetails?.services || []),
+            ...storedData.filter((data) => data !== undefined),
+          ]
+        : [...[extraData], ...storedData.filter((data) => data !== undefined)]
+    );
+  }, [tv?.networks, tv, tvDetails?.services, storedData]);
 
-  const onSubmit = async (data: TCreateDetails, e: any) => {
+  const onSubmit = async (data: TCreateDetails) => {
     try {
-      // Combine tvDatabase and storedData, filter out null values
-      const combinedData = [
-        ...(tvDatabase || []),
-        ...storedData.filter((item) => item !== null),
-      ];
-
-      // Prepare data for submission
       const requestData = {
         tv_id: tv_id.toString(),
-        services: combinedData.filter((item) => item !== null), // Filter out null values
+        services: markedForDeletion.includes(true)
+          ? tvDetails?.services?.filter(
+              (item: any, idx: number) =>
+                !markedForDeletion[idx] &&
+                item?.service_name !== defaultValues?.service_name
+            )
+          : drama?.map((item) => ({
+              ...item,
+            })),
       };
 
       const res = await fetch(`/api/tv/${tv_id}/services`, {
@@ -70,6 +96,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       if (res.status === 200) {
         router.refresh();
         setStoredData([]);
+        setMarkedForDeletion(Array(drama?.length || 0).fill(false));
         reset();
         toast.success("Success");
       } else if (res.status === 400) {
@@ -86,7 +113,6 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const handleOpenModal = (idx: number) => {
     setDeleteIndex(idx);
     setOpenEditModal(true);
-    // Set default values for the clicked item
     setDefaultValues({
       service_name: drama[idx]?.service_name,
       service_type: drama[idx]?.service_type,
@@ -95,6 +121,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       subtitles: drama[idx]?.subtitles,
     });
   };
+
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">Services</h1>
@@ -136,12 +163,15 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             <AnimatePresence>
               {drama?.map((show: any, idx: number) => {
                 const network = show?.networks?.[0];
-                const subtitle = show?.subtitles?.map((sub: any) => sub?.label);
+                const subtitle =
+                  Array.isArray(show?.subtitles) &&
+                  show?.subtitles?.map((sub: any) => sub?.label);
+
                 return (
                   <Reorder.Item
                     as="tr"
                     value={show}
-                    key={show?.id ? show.id : `${tvDetails?.id}-${idx}`}
+                    key={show?.id || `${tvDetails?.id}-${idx}`}
                     className="relative w-full h-auto overflow-hidden"
                     whileDrag={{
                       scale: 1.0,
@@ -154,10 +184,11 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <div className="flex items-start">
                         <Image
                           src={
-                            show?.service_logo
-                              ? `/channel${show?.service_logo}`
-                              : show?.service_url
-                              ? show?.service_url || "/default-image.jpg"
+                            show?.service_url
+                              ? show?.service_url
+                              : show?.service_logo
+                              ? `/channel${show?.service_logo}` ||
+                                "/default-image.jpg"
                               : `https://image.tmdb.org/t/p/original/${network?.logo_path}`
                           }
                           alt={
@@ -175,8 +206,8 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             storedData.some((item) => item === show)
                               ? "text-[#5cb85c]"
                               : ""
-                          } ${
-                            isItemDataChanged[idx - 1] ? "text-[#2196f3]" : ""
+                          } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
+                            markedForDeletion[idx] ? "text-red-500" : ""
                           }`}
                         >
                           {show?.service_name
@@ -186,25 +217,30 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       </div>
                     </td>
                     <td className="border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3">
-                      <Link
-                        href={`${show?.link ? show?.link : show?.homepage}`}
+                      <p
                         className={`break-words h-auto ${
                           storedData.some((item) => item === show)
                             ? "text-[#5cb85c]"
                             : ""
-                        } ${
-                          isItemDataChanged[idx - 1] ? "text-[#2196f3]" : ""
+                        } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
+                          markedForDeletion[idx] ? "text-red-500" : ""
                         }`}
                       >
-                        {show?.link ? show?.link : show?.homepage}
-                      </Link>
+                        {show?.page_link
+                          ? show?.page_link
+                          : show?.link
+                          ? show?.link
+                          : show?.homepage}
+                      </p>
                     </td>
                     <td
                       className={`border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3 ${
                         storedData.some((item) => item === show)
                           ? "text-[#5cb85c]"
                           : ""
-                      } ${isItemDataChanged[idx - 1] ? "text-[#2196f3]" : ""}`}
+                      } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
+                        markedForDeletion[idx] ? "text-red-500" : ""
+                      }`}
                     >
                       {show?.service_type ? show?.service_type : "Unknown"}
                     </td>
@@ -213,7 +249,9 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         storedData.some((item) => item === show)
                           ? "text-[#5cb85c]"
                           : ""
-                      } ${isItemDataChanged[idx - 1] ? "text-[#2196f3]" : ""}`}
+                      } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
+                        markedForDeletion[idx] ? "text-red-500" : ""
+                      }`}
                     >
                       <div className="font-semibold">Availability</div>
                       {show?.availability?.length > 0 ? (
@@ -222,7 +260,9 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] inline-block rounded-sm m-1 p-1"
                             key={avail?.value}
                           >
-                            {avail?.label}
+                            {avail?.availability
+                              ? avail?.availability
+                              : avail?.label}
                           </span>
                         ))
                       ) : (
@@ -238,7 +278,9 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] inline-block rounded-sm m-1 p-1"
                               key={sub?.value}
                             >
-                              {sub?.label
+                              {sub?.subtitles
+                                ? sub?.subtitles
+                                : sub?.label
                                 ? sub?.label
                                 : "No subtitle available"}
                             </span>
@@ -264,21 +306,21 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       >
                         <CiEdit />
                       </button>
-                      {openEditModal && (
+                      {openEditModal && deleteIndex === idx && (
                         <TvEditModal
                           setOpenEditModal={setOpenEditModal}
                           openEditModal={openEditModal}
-                          setDeleteIndex={setDeleteIndex}
-                          show={drama[idx]}
+                          show={[drama[deleteIndex]]}
                           setTvDatabase={setTvDatabase}
                           tvDatabase={tvDatabase}
-                          tv_id={tv_id}
-                          idx={idx}
+                          idx={deleteIndex}
                           setStoredData={setStoredData}
                           storedData={storedData}
                           defaultValue={defaultValues}
                           setIsItemDataChanged={setIsItemDataChanged}
                           isItemDataChanged={isItemDataChanged}
+                          markedForDeletion={markedForDeletion}
+                          setMarkedForDeletion={setMarkedForDeletion}
                         />
                       )}
                     </td>
@@ -302,11 +344,11 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         drama.map((item, idx) => (
           <div key={idx}>
             <TvAddModal
+              tv={tv}
               setOpen={setOpen}
               open={open}
               setDeleteIndex={setDeleteIndex}
               drama={drama}
-              tv_id={tv_id}
               idx={idx}
               setStoredData={setStoredData}
               storedData={storedData}
@@ -314,8 +356,8 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           </div>
         ))}
       <button
-        className="bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
         type="submit"
+        className="bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
       >
         Submit
       </button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchParamsType } from "@/helper/type";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -7,7 +8,7 @@ const SearchDrama = () => {
   const [search, setSearch] = useState("");
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const query = searchParams.get("query") ?? "";
+  const query = searchParams?.get("query") ?? "";
   const router = useRouter();
 
   const onInput = (e: any) => {
@@ -17,7 +18,7 @@ const SearchDrama = () => {
     } else {
       setSearch(value);
     }
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams as SearchParamsType);
 
     if (value) {
       params.set("query", value);
@@ -29,7 +30,7 @@ const SearchDrama = () => {
 
   const onSearch = (e: any) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams as SearchParamsType);
     router.push(`/search/?${params.toString()}`);
   };
 

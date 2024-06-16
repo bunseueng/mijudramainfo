@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import DramaMain from "./DramaMain";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 export default async function tvPage({ params }: any) {
   const tv_id = params.id;
@@ -34,7 +35,7 @@ export default async function tvPage({ params }: any) {
   });
 
   return (
-    <Suspense fallback="loading">
+    <Suspense fallback={<SearchLoading />}>
       <DramaMain
         tv_id={tv_id}
         existedWatchlist={existedWatchlist}

@@ -12,8 +12,8 @@ import {
 
 export function PaginationBtn({ totalItems, setPage }: any) {
   const searchParams = useSearchParams();
-  const currentPage = parseInt(searchParams.get("page") || "1");
-  const perPage = parseInt(searchParams.get("per_page") || "20");
+  const currentPage = parseInt(searchParams?.get("page") || "1");
+  const perPage = parseInt(searchParams?.get("per_page") || "20");
 
   const totalPages = Math.ceil(totalItems / perPage);
   const currentPageGroup = Math.ceil(currentPage / 6);

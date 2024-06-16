@@ -18,9 +18,7 @@ import {
   IoMdArrowDropdown,
   IoMdClose,
 } from "react-icons/io";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
+import { useSession, signOut } from "next-auth/react";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import SearchResult from "../Search/SearchResult";
 import NotificationModal from "../Modal/NotificationModal";
@@ -29,6 +27,7 @@ import {
   currentUserProps,
   findSpecificUserProps,
   FriendRequestProps,
+  SearchParamsType,
   UserProps,
 } from "@/helper/type";
 
@@ -56,7 +55,6 @@ const Navbar: React.FC<Notification> = ({
   const [nav, setNav] = useState<boolean>(true);
   const [hovered, setHovered] = useState<boolean>(false); // Track navbar_items and subitems hover
   const [navbarItemsHovered, setNavbarItemsHovered] = useState<boolean>(false);
-  const [dropLogin, setDropLogin] = useState<boolean>(false);
   const [sessionDrop, setSessionDrop] = useState<boolean>(false);
   const [notiDrop, setNotiDrop] = useState<boolean>(false);
   const [read, setRead] = useState<boolean>(false);
@@ -65,7 +63,7 @@ const Navbar: React.FC<Notification> = ({
   const [userId, setUserId] = useState<string[]>();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const query = searchParams.get("query") ?? "";
+  const query = searchParams?.get("query") ?? "";
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -76,7 +74,7 @@ const Navbar: React.FC<Notification> = ({
     } else {
       setNavSearch(value);
     }
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams as SearchParamsType);
 
     if (value) {
       params.set("query", value);
@@ -88,7 +86,7 @@ const Navbar: React.FC<Notification> = ({
 
   const onSearch = (e: any) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams as SearchParamsType);
     router.push(`/search/?${params.toString()}`);
     setShowResults(false); // Hide search results when submitting
     setShowSearch(!showSearch);
@@ -178,7 +176,11 @@ const Navbar: React.FC<Notification> = ({
   const findRpNoti = findReply.filter(
     (item: any) => item?.notification === "unread"
   ).length;
-
+  const isRepliedItself = comment
+    .map((com) =>
+      com.replies?.filter((rp: any) => rp?.repliedUserId === currentUser?.id)
+    )
+    .flat();
   // Check if there are any read reply notifications
   const readRepliesCount = findReply.filter(
     (item: any) => item?.notification === "unread"
@@ -195,7 +197,7 @@ const Navbar: React.FC<Notification> = ({
             className="no-underline hover:no-underline font-bold text-2xl lg:text-4xl flex items-center"
             href="/"
           >
-            <p className="text-lg md:text-2xl text-cyan-400">MijuDramaList</p>
+            <p className="text-lg md:text-2xl text-cyan-400">MijuDramaInfo</p>
             <Image
               src="/untitled.svg"
               alt="Website logo"
@@ -332,12 +334,14 @@ const Navbar: React.FC<Notification> = ({
             onClick={() => setNotiDrop(!notiDrop)}
           >
             <span className="relative">
-              <IoIosNotificationsOutline className="text-lg md:text-2xl" />
-              {hasUnreadFriends ? (
+              <IoIosNotificationsOutline className="text-lg md:text-2xl text-white" />
+              {hasUnreadFriends && isRepliedItself?.length < 1 ? (
                 <span className="absolute -top-2">
                   <span
                     className={`min-w-[4px] min-h-[4px] text-xs px-1 rounded-md ${
-                      hasUnreadFriends ? "bg-[#f44455]" : "bg-transparent"
+                      hasUnreadFriends && isRepliedItself?.length < 1
+                        ? "bg-[#f44455]"
+                        : "bg-transparent"
                     }`}
                   >
                     {(isPending?.length > 0 &&
@@ -349,11 +353,13 @@ const Navbar: React.FC<Notification> = ({
                   </span>
                 </span>
               ) : null}
-              {findRpNoti ? (
+              {findRpNoti && isRepliedItself?.length < 1 ? (
                 <span className="absolute -top-2">
                   <span
                     className={`min-w-[4px] min-h-[4px] text-xs px-1 rounded-md ${
-                      findRpNoti ? "bg-[#f44455]" : "bg-transparent"
+                      findRpNoti && isRepliedItself?.length < 1
+                        ? "bg-[#f44455]"
+                        : "bg-transparent"
                     }`}
                   >
                     {hasUnreadFriends
@@ -372,15 +378,10 @@ const Navbar: React.FC<Notification> = ({
           {notiDrop && (
             <NotificationModal
               users={users}
-              user={user}
               currentUser={currentUser}
               findSpecificUser={findSpecificUser}
               yourFriend={yourFriend}
               friend={friend}
-              userId={userId}
-              repliedUserId={repliedUserId}
-              read={read}
-              setRead={setRead}
               comment={comment}
             />
           )}
@@ -410,30 +411,12 @@ const Navbar: React.FC<Notification> = ({
           </button>
           {!session && (
             <div className="relative">
-              <button
+              <Link
                 className="text-sm md:text-lg text-white mx-2 md:mx-4 border border-cyan-400 bg-cyan-400 px-4 py-1"
-                onClick={() => setDropLogin(!dropLogin)}
+                href={`/signin`}
               >
                 Login
-              </button>
-              {dropLogin && (
-                <ul className="absolute top-[51.5px] right-2 md:top-[55.87px] md:right-4 bg-white dark:bg-[#242424] pl-4 pr-14 py-5">
-                  <li
-                    className="flex items-center mb-4 cursor-pointer"
-                    onClick={() => signIn("google")}
-                  >
-                    <FcGoogle size={25} />{" "}
-                    <span className="pl-3 font-semibold">Google</span>
-                  </li>
-                  <li
-                    className="flex items-center mb-4 cursor-pointer"
-                    onClick={() => signIn("github")}
-                  >
-                    <FaGithub size={25} />
-                    <span className="pl-3 font-semibold">Github</span>
-                  </li>
-                </ul>
-              )}
+              </Link>
             </div>
           )}
           {session && (

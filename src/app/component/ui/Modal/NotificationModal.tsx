@@ -11,37 +11,26 @@ import {
   FriendRequestProps,
   UserProps,
 } from "@/helper/type";
-import { useEffect } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 interface Notification {
   users: UserProps[] | undefined;
-  user: UserProps | undefined;
   currentUser: currentUserProps | null;
   friend: FriendRequestProps[];
   findSpecificUser: findSpecificUserProps[] | null[];
   yourFriend: findSpecificUserProps[] | null[];
-  read: boolean;
-  setRead: React.Dispatch<React.SetStateAction<boolean>>;
-  userId: string[] | undefined;
-  repliedUserId: string[] | undefined;
   comment: CommentProps[];
 }
 
 const NotificationModal: React.FC<Notification> = ({
   users,
-  user,
   currentUser,
   yourFriend,
   friend,
   findSpecificUser,
-  read,
-  setRead,
-  userId,
-  repliedUserId,
   comment,
 }) => {
   const router = useRouter();
@@ -59,7 +48,6 @@ const NotificationModal: React.FC<Notification> = ({
       new Date(a.actionDatetime).getTime()
     );
   });
-
   const tv_id = comment.map((item) => item.postId);
 
   const {
@@ -80,6 +68,11 @@ const NotificationModal: React.FC<Notification> = ({
   const findRpNoti = findReply.map(
     (item: any) => item?.notification === "unread"
   );
+  const isRepliedItself = comment
+    .map((com) =>
+      com.replies?.filter((rp: any) => rp?.repliedUserId === currentUser?.id)
+    )
+    .flat();
   const hasUnreadReplies = findRpNoti.includes(true);
   // Check if there are any unread friend notifications
   const hasUnreadFriends = friendNoti.includes("unread");
@@ -177,7 +170,8 @@ const NotificationModal: React.FC<Notification> = ({
             </span>
           </button>
         </div>
-        {hasUnreadReplies || hasUnreadFriends ? (
+        {(isRepliedItself?.length < 1 && hasUnreadReplies) ||
+        hasUnreadFriends ? (
           <div className="border-t-2 border-t-[#3e4042]">
             {hasUnreadFriends && (
               <>
@@ -207,7 +201,7 @@ const NotificationModal: React.FC<Notification> = ({
                       req.friendRequestId === user?.id ||
                       req.friendRespondId === user?.id
                   );
-
+                  console.log(user);
                   return (
                     <Link
                       href="#"
@@ -252,54 +246,47 @@ const NotificationModal: React.FC<Notification> = ({
                 {comment.map((commentItem) => {
                   return commentItem.replies
                     ?.filter((rp: any) => rp?.notification !== "read")
+                    ?.filter((rp: any) => rp?.userId === currentUser.id)
                     ?.map((reply: any, idx) => {
-                      if (reply?.userId === currentUser.id) {
-                        const repliedUser = commentItem.replies?.filter(
-                          (rp: any) => rp?.userId === currentUser?.id
-                        );
-                        const user = users?.find((user) =>
-                          repliedUser?.find((rp: any) =>
-                            rp.repliedUserId.includes(user.id)
-                          )
-                        );
-                        const date = reply.createdAt;
-                        if (!user) return null;
-                        if (reply.userId === reply.repliedUserId) {
-                          return null;
-                        } else
-                          return (
-                            <Link
-                              href="#"
-                              className="flex hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
-                              key={idx}
-                            >
-                              <Image
-                                src={user.profileAvatar || user.image || ""}
-                                alt={`${user.name} image`}
-                                width={40}
-                                height={40}
-                                quality={100}
-                                className="w-[40px] h-[40px] bg-center bg-cover object-cover rounded-full"
-                              />
-                              <div className="pl-3">
-                                <div>
-                                  <span className="text-[#1675b6]">
-                                    {user.name}{" "}
-                                  </span>
-                                  replied to your comment on{" "}
-                                  <Link
-                                    href={`/tv/${allTv?.id}`}
-                                    className="text-[#1675b6]"
-                                  >
-                                    {allTv?.name || allTv?.title}
-                                  </Link>
-                                </div>
-                                <p>{moment(date).fromNow()}</p>
-                              </div>
-                            </Link>
-                          );
-                      }
-                      return null;
+                      // Step 1: Find the user details based on repliedUserId
+                      const user = users?.find(
+                        (user: any) => user.id === reply.repliedUserId
+                      );
+                      if (!user || reply.userId === reply.repliedUserId)
+                        return null;
+
+                      const date = reply.createdAt;
+                      return (
+                        <Link
+                          href="#"
+                          className="flex hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
+                          key={idx}
+                        >
+                          <Image
+                            src={user.profileAvatar || user.image || ""}
+                            alt={`${user.name} image`}
+                            width={40}
+                            height={40}
+                            quality={100}
+                            className="w-[40px] h-[40px] bg-center bg-cover object-cover rounded-full"
+                          />
+                          <div className="pl-3">
+                            <div>
+                              <span className="text-[#1675b6]">
+                                {user.name}{" "}
+                              </span>
+                              replied to your comment on{" "}
+                              <Link
+                                href={`/tv/${allTv?.id}`}
+                                className="text-[#1675b6]"
+                              >
+                                {allTv?.name || allTv?.title}
+                              </Link>
+                            </div>
+                            <p>{moment(date).fromNow()}</p>
+                          </div>
+                        </Link>
+                      );
                     });
                 })}
               </>

@@ -11,35 +11,30 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { useForm } from "react-hook-form";
 import { customStyles } from "@/helper/MuiStyling";
+import { Drama, EditDramaPage, EditPageDefaultvalue } from "@/helper/type";
+import { JsonValue } from "@prisma/client/runtime/library";
 
 interface EditModal {
-  //   handleRemoveItem: (
-  //     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  //     indexToRemove: number
-  //   ) => void;
   idx: number;
   setOpenEditModal: (open: boolean) => void;
   openEditModal: boolean;
-  setDeleteIndex: (ind: number) => void;
-  show: any;
-  tv_id: string;
-  setStoredData: [] | any;
-  storedData: any;
-  defaultValue: any;
-  setTvDatabase: any;
-  tvDatabase: any;
-  setIsItemDataChanged: any;
-  isItemDataChanged: any;
+  show: EditDramaPage[];
+  setStoredData: (data: EditDramaPage[]) => void;
+  storedData: EditDramaPage[];
+  defaultValue: EditPageDefaultvalue | undefined;
+  setTvDatabase: (data: JsonValue[] | undefined) => void;
+  tvDatabase: JsonValue[] | undefined;
+  setIsItemDataChanged: (data: boolean[]) => void;
+  isItemDataChanged: boolean[]; // Update the type here
+  markedForDeletion: boolean[];
+  setMarkedForDeletion: (data: boolean[]) => void;
 }
 
 const TvEditModal: React.FC<EditModal> = ({
-  //   handleRemoveItem,
   idx,
   setOpenEditModal,
   openEditModal,
-  setDeleteIndex,
   show,
-  tv_id,
   setStoredData,
   setTvDatabase,
   storedData,
@@ -47,6 +42,8 @@ const TvEditModal: React.FC<EditModal> = ({
   tvDatabase,
   setIsItemDataChanged,
   isItemDataChanged,
+  markedForDeletion,
+  setMarkedForDeletion,
 }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [service, setService] = useState<
@@ -69,12 +66,12 @@ const TvEditModal: React.FC<EditModal> = ({
   });
   const options = useMemo(() => countryList().getData(), []);
 
-  const changeHandler = (value: any) => {
-    setCountries(value);
+  const changeHandler = (selectedOptions: any) => {
+    setCountries(selectedOptions);
   };
 
-  const subtitleChangeHandler = (value: any) => {
-    setSubtitle(value);
+  const subtitleChangeHandler = (selectedOptions: any) => {
+    setSubtitle(selectedOptions);
   };
 
   const handleDropdownToggle = (dropdown: string, idx: number) => {
@@ -85,11 +82,11 @@ const TvEditModal: React.FC<EditModal> = ({
 
   useEffect(() => {
     if (show) {
-      setValue("services.link", defaultValue.link || ""); // Assuming "services.link" is the name of the form field
-      setValue("services.service", defaultValue.service_name); // Populate other fields similarly
-      setValue("services.service_type", defaultValue.service_type || "");
-      setCountries(defaultValue.availability || []);
-      setSubtitle(defaultValue.subtitles || []);
+      setValue("services.link", defaultValue?.link || ""); // Assuming "services.link" is the name of the form field
+      setValue("services.service", defaultValue?.service_name); // Populate other fields similarly
+      setValue("services.service_type", defaultValue?.service_type || "");
+      setCountries(defaultValue?.availability || []);
+      setSubtitle(defaultValue?.subtitles || []);
     }
     if (storedData && storedData[idx]) {
       const data = storedData[idx];
@@ -102,7 +99,7 @@ const TvEditModal: React.FC<EditModal> = ({
       setValue("services.link", data.link);
       setValue("services.service", data.service_name);
       setValue("services.service_type", data.service_type);
-      reset(data);
+      reset(data as unknown as Drama);
     }
   }, [idx, openEditModal, defaultValue, show, storedData, reset, setValue]);
 
@@ -127,23 +124,21 @@ const TvEditModal: React.FC<EditModal> = ({
   // Custom styles for react-select
   const updatingItems = async (data: TCreateDetails) => {
     try {
-      const updatedData = tvDatabase.map((item: any, index: number) => {
-        if (item?.service_name === defaultValue.service_name) {
+      const updatedData = tvDatabase?.map((item: any, index: number) => {
+        if (item?.service_name === defaultValue?.service_name) {
           const newData = {
             ...item,
             service: service[idx]?.logoPath,
             service_logo: service[idx]?.logo,
             link: data?.services?.link || item.link,
             service_type: servicesType[idx] || item.service_type,
-            availability: countries.length > 0 ? countries : item.availability,
-            subtitles: subtitle.length > 0 ? subtitle : item.subtitles,
+            availability: countries,
+            subtitles: subtitle,
           };
           if (newData) {
-            setIsItemDataChanged((prev: any) => {
-              const newState = [...prev];
-              newState[index] = true; // Use the index from the map function
-              return newState;
-            });
+            const newState = [...isItemDataChanged];
+            newState[index] = true; // Assuming `index` is the index of the item that changed
+            setIsItemDataChanged(newState);
           }
           return newData;
         }
@@ -152,7 +147,7 @@ const TvEditModal: React.FC<EditModal> = ({
       setTvDatabase(updatedData);
 
       const updatedStoredData = storedData.map((item: any, index: number) => {
-        if (item?.service_name === defaultValue.service_name) {
+        if (item?.service_name === defaultValue?.service_name) {
           const newData = {
             ...item,
             service_name: service[idx]?.label || item?.service_name,
@@ -160,15 +155,13 @@ const TvEditModal: React.FC<EditModal> = ({
             service_logo: service[idx]?.logo || item.service_logo,
             link: data?.services?.link || item.link,
             service_type: servicesType[idx] || item.service_type,
-            availability: countries.length > 0 ? countries : item.availability,
-            subtitles: subtitle.length > 0 ? subtitle : item.subtitles,
+            availability: countries,
+            subtitles: subtitle,
           };
           if (newData) {
-            setIsItemDataChanged((prev: any) => {
-              const newState = [...prev];
-              newState[index] = true;
-              return newState;
-            });
+            const newState = [...isItemDataChanged];
+            newState[index] = true; // Assuming `index` is the index of the item that changed
+            setIsItemDataChanged(newState);
           }
           return newData;
         }
@@ -183,11 +176,33 @@ const TvEditModal: React.FC<EditModal> = ({
     }
   };
 
+  const markForDeletion = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const newMarkedForDeletion = [...markedForDeletion];
+    newMarkedForDeletion[idx] = true; // Toggle the deletion status
+    setMarkedForDeletion(newMarkedForDeletion);
+    setOpenEditModal(false);
+  };
+
   const handleDeleteStoredData = () => {
-    if (storedData) {
-      setStoredData([]);
-      setOpenEditModal(false);
+    console.log("Deleting item at index:", idx);
+
+    // Remove the item at the specified index (idx) from the storedData array
+    const updatedStoredData = storedData.filter((_, index) => index !== idx);
+    console.log("Updated storedData:", updatedStoredData);
+    setStoredData(updatedStoredData);
+
+    // Ensure tvDatabase is updated correctly by removing the item based on a matching property
+    if (tvDatabase) {
+      const updatedTvDatabase = tvDatabase.filter(
+        (item: any) => item?.service_name !== defaultValue?.service_name
+      );
+      console.log("Updated tvDatabase:", updatedTvDatabase);
+      setTvDatabase(updatedTvDatabase);
     }
+
+    // Close the modal after deletion
+    setOpenEditModal(false);
   };
 
   return (
@@ -411,8 +426,8 @@ const TvEditModal: React.FC<EditModal> = ({
                     <div className="relative ml-[150px]">
                       <Select
                         isMulti
+                        value={countries} // Ensure the format of options matches the expected format of react-select
                         options={options}
-                        value={countries}
                         onChange={changeHandler}
                         styles={customStyles}
                         closeMenuOnSelect={false}
@@ -435,11 +450,8 @@ const TvEditModal: React.FC<EditModal> = ({
                     <div className="relative ml-[150px]">
                       <Select
                         isMulti
-                        options={tvSubtitle.map((sub) => ({
-                          label: sub.label,
-                          value: sub.value,
-                        }))}
                         value={subtitle}
+                        options={options}
                         onChange={subtitleChangeHandler}
                         styles={customStyles}
                         closeMenuOnSelect={false}
@@ -458,7 +470,7 @@ const TvEditModal: React.FC<EditModal> = ({
               <div className="flex items-end justify-between">
                 <button
                   className="bg-[#f56c6c4d] text-sm text-white dark:text-[#f56c6c] border-2 border-[#f56c6c4d] rounded-sm px-5 py-3"
-                  onClick={handleDeleteStoredData}
+                  onClick={(e) => markForDeletion(e)}
                 >
                   Delete
                 </button>

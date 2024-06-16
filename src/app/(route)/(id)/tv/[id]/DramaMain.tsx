@@ -31,6 +31,7 @@ import { useState } from "react";
 import { IoIosAddCircle } from "react-icons/io";
 import Link from "next/link";
 import RatingModal from "@/app/component/ui/CircleRating/RatingModal";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 export const getYearFromDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -112,9 +113,7 @@ const DramaMain = ({
   const matchedLanguage = language?.find(
     (lang: any) => lang?.iso_3166_1 === original_country
   );
-
   const allTvShowsArray = Array.isArray(allTvShows) ? allTvShows : [];
-
   // Find the index of the matched TV show in allTvShows array
   const matchedIndex = allTvShowsArray.findIndex(
     (show: any) => show.id === tv.id
@@ -140,7 +139,7 @@ const DramaMain = ({
   const calculatedRating = sumRating / existingRatings?.length;
 
   if (isLoading) {
-    return <TvPageLoading />;
+    return <SearchLoading />;
   }
 
   const onSubmit = async () => {
@@ -205,7 +204,6 @@ const DramaMain = ({
       throw new Error(error);
     }
   };
-
   const onDeleteFavorite = async () => {
     try {
       const res = await fetch(`/api/favorite/${tv?.id}`, {
@@ -440,10 +438,12 @@ const DramaMain = ({
                     <span className="text-white font-bold">Overview:</span>
                   </p>
                   <p className="text-md text-white mb-3">
-                    {tv?.overview}{" "}
+                    {tv?.overview !== ""
+                      ? tv?.overview
+                      : `${tv?.name} has no overview yet!`}{" "}
                     <span>
                       <Link
-                        href={`/tv/${tv.id}/edit/detail`}
+                        href={`/tv/${tv?.id}/edit/detail`}
                         className="text-sm text-[#2490da] break-words"
                       >
                         Edit Translation

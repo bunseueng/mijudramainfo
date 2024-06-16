@@ -8,6 +8,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SessionAllPage from "./component/ui/Main/SessionAllPage";
 import Footer from "./component/ui/Main/Footer";
+import { PHProvider } from "@/provider/PostHogProvider";
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],
@@ -35,25 +36,27 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`bg-slate-100 dark:bg-[#1e1e1e]  ${nunito.className}`}>
-        <Provider>
-          <TanstackProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <div className="flex flex-col top-0 sticky z-50">
-                <SessionAllPage />
-              </div>
-              {children}
-              <div className="w-full ">
-                <Footer />
-              </div>
-              <ToastContainer position="top-right" />
-            </ThemeProvider>
-          </TanstackProvider>
-        </Provider>
+        <PHProvider>
+          <Provider>
+            <TanstackProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <div className="flex flex-col top-0 sticky z-50">
+                  <SessionAllPage />
+                </div>
+                {children}
+                <div className="w-full ">
+                  <Footer />
+                </div>
+                <ToastContainer position="top-right" />
+              </ThemeProvider>
+            </TanstackProvider>
+          </Provider>
+        </PHProvider>
       </body>
     </html>
   );

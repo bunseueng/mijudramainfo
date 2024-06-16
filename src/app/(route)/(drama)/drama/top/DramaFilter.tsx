@@ -28,15 +28,15 @@ const DramaFilter = () => {
   const [selectedRating, setSelectedRating] = useState<number[]>([1, 10]);
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const country = searchParams.get("country") ?? "";
-  const genre = searchParams.get("genre") ?? "";
-  const type = searchParams.get("type") ?? "";
-  const network = searchParams.get("networks") ?? "";
-  const date = searchParams.get("date") ?? "";
-  const rating = searchParams.get("rating") ?? "";
-  const status = searchParams.get("status") ?? "";
-  const sortby = searchParams.get("sortby") ?? "";
-  const query = searchParams.get("query") ?? "";
+  const country = searchParams?.get("country") ?? "";
+  const genre = searchParams?.get("genre") ?? "";
+  const type = searchParams?.get("type") ?? "";
+  const network = searchParams?.get("networks") ?? "";
+  const date = searchParams?.get("date") ?? "";
+  const rating = searchParams?.get("rating") ?? "";
+  const status = searchParams?.get("status") ?? "";
+  const sortby = searchParams?.get("sortby") ?? "";
+  const query = searchParams?.get("query") ?? "";
   const router = useRouter();
 
   const onInput = (e: any) => {
@@ -180,7 +180,7 @@ const DramaFilter = () => {
           placeholder="Search"
           onChange={onInput}
           value={searchQuery}
-          defaultValue={searchParams.get("query")?.toString()}
+          defaultValue={searchParams?.get("query")?.toString()}
         />
         <button
           className="z-[2] rounded-e border-2 border-primary px-1 lg:px-6 my-4 md:mr-1 lg:mr-4 text-xs uppercase leading-normal text-primary transition duration-150 ease-in-out hover:border-primary-accent-300 hover:bg-primary-50/50 hover:text-primary-accent-300 focus:border-primary-600 focus:bg-primary-50/50 focus:text-primary-600 focus:outline-none focus:ring-0 active:border-primary-700 active:text-primary-700 dark:text-primary-500 dark:hover:bg-blue-950 dark:focus:bg-blue-950"
@@ -224,7 +224,7 @@ const DramaFilter = () => {
                       type="checkbox"
                       value={item.value}
                       defaultChecked={type.split(",").includes(item.value)}
-                      defaultValue={searchParams.get("query")?.toString()}
+                      defaultValue={searchParams?.get("query")?.toString()}
                       className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                     />
                     <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -246,7 +246,7 @@ const DramaFilter = () => {
                       type="checkbox"
                       value={item.value}
                       defaultChecked={type.split(",").includes(item.value)}
-                      defaultValue={searchParams.get("query")?.toString()}
+                      defaultValue={searchParams?.get("query")?.toString()}
                       className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                     />
                     <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -288,7 +288,7 @@ const DramaFilter = () => {
                       type="checkbox"
                       value={item.value}
                       defaultChecked={country.split(",").includes(item.value)}
-                      defaultValue={searchParams.get("query")?.toString()}
+                      defaultValue={searchParams?.get("query")?.toString()}
                       className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                     />
                     <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -330,7 +330,7 @@ const DramaFilter = () => {
                       type="checkbox"
                       value={item.id}
                       defaultChecked={genre.split(",").includes(item.id)}
-                      defaultValue={searchParams.get("query")?.toString()}
+                      defaultValue={searchParams?.get("query")?.toString()}
                       className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                     />
                     <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -352,7 +352,7 @@ const DramaFilter = () => {
                       type="checkbox"
                       value={item.id}
                       defaultChecked={genre.split(",").includes(item.id)}
-                      defaultValue={searchParams.get("query")?.toString()}
+                      defaultValue={searchParams?.get("query")?.toString()}
                       className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                     />
                     <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -422,7 +422,7 @@ const DramaFilter = () => {
                       type="checkbox"
                       value={item.id}
                       defaultChecked={network.split(",").includes(item.id)}
-                      defaultValue={searchParams.get("query")?.toString()}
+                      defaultValue={searchParams?.get("query")?.toString()}
                       className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                     />
                     <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -444,7 +444,7 @@ const DramaFilter = () => {
                       type="checkbox"
                       value={item.id}
                       defaultChecked={network.split(",").includes(item.id)}
-                      defaultValue={searchParams.get("query")?.toString()}
+                      defaultValue={searchParams?.get("query")?.toString()}
                       className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                     />
                     <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -576,7 +576,7 @@ const DramaFilter = () => {
                       type="checkbox"
                       value={item.id}
                       defaultChecked={status.split(",").includes(item.id)}
-                      defaultValue={searchParams.get("query")?.toString()}
+                      defaultValue={searchParams?.get("query")?.toString()}
                       className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                     />
                     <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">

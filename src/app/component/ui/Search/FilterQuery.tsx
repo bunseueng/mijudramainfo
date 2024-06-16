@@ -16,18 +16,18 @@ import moment from "moment";
 const FilterQuery = ({ BASE_URL }: any) => {
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams(); // Assuming you have this declared somewhere
-  const currentPage = parseInt(searchParams.get("page") || "1");
-  let searchQuery = searchParams.get("country") ?? "";
-  let type = searchParams.get("type") ?? "";
-  let genreQuery = searchParams.get("genre") ?? "";
-  let keywords = searchParams.get("keywords") ?? "";
-  let network = searchParams.get("networks") ?? "";
-  let date = searchParams.get("date") ?? "";
-  let to = searchParams.get("to") ?? "";
-  let rating = searchParams.get("rating") ?? "";
-  let rto = searchParams.get("rto") ?? "";
-  let status = searchParams.get("status") ?? "";
-  let sortby = searchParams.get("sortby") ?? "";
+  const currentPage = parseInt(searchParams?.get("page") || "1");
+  let searchQuery = searchParams?.get("country") ?? "";
+  let type = searchParams?.get("type") ?? "";
+  let genreQuery = searchParams?.get("genre") ?? "";
+  let keywords = searchParams?.get("keywords") ?? "";
+  let network = searchParams?.get("networks") ?? "";
+  let date = searchParams?.get("date") ?? "";
+  let to = searchParams?.get("to") ?? "";
+  let rating = searchParams?.get("rating") ?? "";
+  let rto = searchParams?.get("rto") ?? "";
+  let status = searchParams?.get("status") ?? "";
+  let sortby = searchParams?.get("sortby") ?? "";
   // Get the current date
   const currentDate = moment();
 
@@ -71,7 +71,7 @@ const FilterQuery = ({ BASE_URL }: any) => {
     placeholderData: keepPreviousData,
   });
 
-  const per_page = searchParams.get("per_page") || (20 as any);
+  const per_page = searchParams?.get("per_page") || (20 as any);
   const start = (Number(page) - 1) * Number(per_page);
   const end = start + Number(per_page);
   const items = results?.total_results;

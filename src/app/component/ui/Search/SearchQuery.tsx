@@ -16,29 +16,66 @@ import SearchLoading from "../Loading/SearchLoading";
 const SearchQuery = ({ BASE_URL, currentUser }: any) => {
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams(); // Assuming you have this declared somewhere
-  const currentPage = parseInt(searchParams.get("page") || "1");
+  const currentPage = parseInt(searchParams?.get("page") || "1");
 
-  let searchQuery = searchParams.get("query") ?? "";
+  let searchQuery = searchParams?.get("query") ?? "";
 
-  const fetchMultiSearch = async (pages = 1) => {
+  const fetchMultipleSearch = async (pages = 1) => {
     const res = await fetch(
       `${BASE_URL}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&page=${pages}`
     );
+    const countryUrl = await fetch(
+      `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+    );
+    const data = await res.json();
+    const countryRes = await countryUrl.json();
+    // Function to determine country type for an item
+    const determineCountryType = (item: any, countryData: any) => {
+      const originCountries = item.origin_country || [];
+      const countryNames = originCountries.map((countryCode: string) => {
+        const country = countryData.find(
+          (c: any) => c.iso_3166_1 === countryCode
+        );
+        return country ? country.english_name : countryCode;
+      });
+      return countryNames.join(" ");
+    };
+
+    // Add countryType field to each item in results
+    const resultsWithCountryType = data.results.map((item: any) => ({
+      ...item,
+      country: determineCountryType(item, countryRes),
+    }));
+
+    return resultsWithCountryType;
+  };
+
+  const getTotalResults = async (pages = 1) => {
+    const res = await fetch(
+      `${BASE_URL}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&page=${pages}`
+    );
+
     const data = await res.json();
     return data;
   };
 
-  const { data: results, isLoading } = useQuery({
-    queryKey: ["results", searchQuery],
-    queryFn: () => fetchMultiSearch(currentPage),
+  const { data: totalResults } = useQuery({
+    queryKey: ["totalResults", searchQuery],
+    queryFn: () => getTotalResults(currentPage),
     placeholderData: keepPreviousData,
   });
 
-  const per_page = searchParams.get("per_page") || (20 as any);
+  const { data: results, isLoading } = useQuery({
+    queryKey: ["results", searchQuery],
+    queryFn: () => fetchMultipleSearch(currentPage),
+    placeholderData: keepPreviousData,
+  });
+
+  const per_page = searchParams?.get("per_page") || (20 as any);
   const start = (Number(page) - 1) * Number(per_page);
   const end = start + Number(per_page);
-  const items = results?.total_results;
-  const totalItems = results?.results?.slice(start, end);
+  const items = totalResults?.total_results;
+  const totalItems = results?.slice(start, end);
 
   const { data: fetchTv } = useQuery({
     queryKey: ["tv"],
@@ -64,7 +101,7 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
     return <SearchLoading />;
   }
   return (
-    <div>
+    <div className="mt-10">
       {totalItems?.length === 0 && (
         <h1 className="text-center pt-6">No results found</h1>
       )}

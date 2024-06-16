@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import NestedComment from "./NestedComment";
 import { toast } from "react-toastify";
+import { useSession } from "next-auth/react";
 
 const Discuss = ({ user, users, tv_id, getComment }: any) => {
   const [loading, setLoading] = useState<Record<string, boolean>>({});
@@ -14,6 +15,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
   const [replyText, setReplyText] = useState<string>("");
   const [replyingTo, setReplyingTo] = useState<Record<string, boolean>>({});
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handlePostComment = async (parentId: string | null, postId: string) => {
     const loadingKey = parentId || "main";
@@ -144,7 +146,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
           <div className="text-md font-bold">
             <div className="relative inline-block float-left w-[48px] h-[48px] bg-[#3e4042] mr-3 rounded-full">
               <Image
-                src={user?.profileAvatar || user?.image}
+                src={user?.profileAvatar || user?.image || "/default-pf.jpg"}
                 alt={`${user?.displayName || user?.name}'s profile avatar`}
                 width={200}
                 height={200}
@@ -174,9 +176,9 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                 </label>
                 <button
                   onClick={() => handlePostComment(null, tv_id)}
-                  className={`inline-block text-center text-sm text-[#ffffffde] bg-[#3a3b3c] hover:bg-opacity-75 border-2 border-[#3e4042] shadow-md rounded-md whitespace-nowrap cursor-pointer ml-2 py-3 px-5 outline-none ${
+                  className={`inline-block text-center text-sm text-[#ffffffde] bg-[#3a3b3c] hover:bg-opacity-75 border-2 border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-3 px-5 outline-none ${
                     loading.main ? "opacity-50 pointer-events-none" : ""
-                  }`}
+                  } ${!session ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   {loading.main ? "Posting..." : "Post"}
                 </button>

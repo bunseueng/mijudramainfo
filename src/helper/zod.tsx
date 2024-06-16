@@ -113,9 +113,10 @@ export const createDetails = z.object({
     .optional(),
   services: z
     .object({
-      service: z.string().min(3, { message: "Service provider is required" }),
+      id: any(),
+      service: z.any(),
       link: z.string().min(3, { message: "Page link is required" }),
-      service_type: z.string().min(3, { message: "Service type is required" }),
+      service_type: z.any(),
       availability: z.any(),
       subtitles: z.any(),
     })
@@ -126,3 +127,53 @@ export const createDetails = z.object({
 });
 
 export type TCreateDetails = z.infer<typeof createDetails>;
+
+export const signInForm = z.object({
+  email: z.string().min(1, { message: "Email is required" }).email({
+    message: "Must be a valid email",
+  }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be atleast 6 characters" }),
+});
+
+export type TSignInForm = z.infer<typeof signInForm>;
+
+export const signUpForm = z.object({
+  name: z.string().min(3, { message: "Username is required" }),
+  email: z.string().min(1, { message: "Email is required" }).email({
+    message: "Must be a valid email",
+  }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be atleast 6 characters" }),
+
+  terms: z.literal(true, {
+    errorMap: () => ({ message: "You must accept Terms and Conditions" }),
+  }),
+});
+
+export type TSignUpForm = z.infer<typeof signUpForm>;
+
+export const forgotPassword = z.object({
+  email: z.string().email("This is not a valid email."),
+});
+
+export type TForgotPassword = z.infer<typeof forgotPassword>;
+
+export const resetPassword = z
+  .object({
+    token: z.any(),
+    password: z
+      .string()
+      .min(6, { message: "Password must be atleast 6 characters" }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Confirm Password is required" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Password don't match",
+  });
+
+export type TResetPassword = z.infer<typeof resetPassword>;

@@ -10,33 +10,27 @@ import Select from "react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
 import { customStyles } from "@/helper/MuiStyling";
+import { Drama, EditDramaPage } from "@/helper/type";
+import { JsonValue } from "@prisma/client/runtime/library";
 
 interface EditModal {
-  //   handleRemoveItem: (
-  //     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  //     indexToRemove: number
-  //   ) => void;
+  tv?: JsonValue | [];
   idx: number;
   setOpen: (open: boolean) => void;
   open: boolean;
   setDeleteIndex: (ind: number) => void;
-  drama: string[];
-  tv_id: string;
-  setStoredData: [] | any;
-  storedData: any;
+  drama: EditDramaPage[];
+  setStoredData: (data: EditDramaPage[]) => void;
+  storedData: EditDramaPage[];
 }
 
 const TvAddModal: React.FC<EditModal> = ({
-  //   handleRemoveItem,
+  tv,
   idx,
   setOpen,
   open,
-  setDeleteIndex,
   drama,
-  tv_id,
   setStoredData,
   storedData,
 }) => {
@@ -71,7 +65,7 @@ const TvAddModal: React.FC<EditModal> = ({
   const changeHandler = (value: any) => {
     setCountries(value);
   };
-
+  console.log(tv);
   const subtitleChangeHandler = (value: any) => {
     setSubtitle(value);
   };
@@ -94,7 +88,7 @@ const TvAddModal: React.FC<EditModal> = ({
       setValue("services.link", data.link);
       setValue("services.service", data.service_name);
       setValue("services.service_type", data.service_type);
-      reset(data);
+      reset(data as unknown as Drama);
     }
   }, [idx, open, reset, storedData, setValue]);
 
@@ -116,23 +110,50 @@ const TvAddModal: React.FC<EditModal> = ({
     });
   };
 
-  // Custom styles for react-select
-
   const addingItem = async (data: TCreateDetails) => {
     try {
-      const newItem = {
-        service: service[idx]?.logoPath,
-        service_logo: service[idx]?.logo,
-        service_name: service[idx]?.label,
-        link: data?.services?.link,
-        service_type: servicesType[idx],
-        availability: countries,
-        subtitles: subtitle,
-      };
-      const updatedItems = [...storedData]; // Copy existing items
-      updatedItems[idx] = newItem; // Replace the item at the specified index with the new item
-      setStoredData(updatedItems);
-      setOpen(false);
+      if (drama.length > 0) {
+        const newItem: EditDramaPage = {
+          id: storedData[idx]?.id || "", // Use the existing id or provide a default
+          public_id: storedData[idx]?.public_id || "", // Use the existing public_id or provide a default
+          service: service[idx]?.logoPath || "", // Ensure logoPath is defined
+          service_logo: service[idx]?.logo || "", // Ensure logo is defined
+          service_name: service[idx]?.label || "", // Ensure label is defined
+          link: data?.services?.link || "", // Ensure link is defined
+          service_type: servicesType[idx] || "", // Ensure serviceType is defined
+          availability: countries, // Use the selected countries
+          subtitles: subtitle, // Use the selected subtitles
+          service_url: storedData[idx]?.service_url || "", // Use the existing service_url or provide a default
+          logo: storedData[idx]?.logo || "", // Use the existing logo or provide a default
+          order: storedData[idx]?.order || 0,
+        };
+
+        const updatedItems = [...storedData]; // Copy existing items
+        updatedItems[idx] = newItem; // Replace the item at the specified index with the new item
+        setStoredData(updatedItems);
+        setOpen(false);
+      } else {
+        const newItem = {
+          tv,
+          id: storedData[idx]?.id || "", // Use the existing id or provide a default
+          public_id: storedData[idx]?.public_id || "", // Use the existing public_id or provide a default
+          service: service[idx]?.logoPath || "", // Ensure logoPath is defined
+          service_logo: service[idx]?.logo || "", // Ensure logo is defined
+          service_name: service[idx]?.label || "", // Ensure label is defined
+          link: data?.services?.link || "", // Ensure link is defined
+          service_type: servicesType[idx] || "", // Ensure serviceType is defined
+          availability: countries, // Use the selected countries
+          subtitles: subtitle, // Use the selected subtitles
+          service_url: storedData[idx]?.service_url || "", // Use the existing service_url or provide a default
+          logo: storedData[idx]?.logo || "", // Use the existing logo or provide a default
+          order: storedData[idx]?.order || 0,
+        };
+
+        const updatedItems = [...storedData]; // Copy existing items
+        updatedItems[idx] = newItem; // Replace the item at the specified index with the new item
+        setStoredData(updatedItems);
+        setOpen(false);
+      }
     } catch (error: any) {
       console.log("Bad Request");
       throw new Error(error);
@@ -181,11 +202,11 @@ const TvAddModal: React.FC<EditModal> = ({
 
                         <IoIosArrowDown className="absolute bottom-3 right-2" />
                       </div>
-                      {errors.services?.service && (
+                      {/* {errors.services?.service && (
                         <p className="text-xs italic text-red-500 mt-2">
                           {errors.services?.service.message}
                         </p>
-                      )}
+                      )} */}
                       {openDropdown === `service-${idx}` && (
                         <ul
                           className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
@@ -280,11 +301,11 @@ const TvAddModal: React.FC<EditModal> = ({
 
                         <IoIosArrowDown className="absolute bottom-3 right-2" />
                       </div>
-                      {errors.services?.service_type && (
+                      {/* {errors.services?.service_type && (
                         <p className="text-xs italic text-red-500 mt-2">
                           {errors.services?.service_type.message}
                         </p>
-                      )}
+                      )} */}
                       {openDropdown === `service_type-${idx}` && (
                         <ul
                           className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10`}

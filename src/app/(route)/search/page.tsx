@@ -7,7 +7,7 @@ const SearchPage = async () => {
   const BASE_URL = "https://api.themoviedb.org/3/search/multi";
   const currentUser = await getCurrentUser();
   return (
-    <div className="mt-10">
+    <div>
       <Suspense fallback={<SearchLoading />}>
         <SearchQuery BASE_URL={BASE_URL} currentUser={currentUser} />
       </Suspense>

@@ -2,6 +2,11 @@ import { UseFormRegister, UseFormReset } from "react-hook-form";
 import { TCreateList, TProfileSetting } from "./zod";
 import { Prisma } from "@prisma/client";
 
+export type SearchParamsType =
+  | string
+  | URLSearchParams
+  | Record<string, string>
+  | string[][];
 export interface FriendRequestProps {
   id: string;
   status: string;
@@ -288,4 +293,40 @@ export interface DramaDetails {
   duration: number;
   episode: number;
   story: string;
+}
+
+export interface EditDramaPage {
+  availability: {
+    label: string;
+    value: string;
+  }[];
+  id: string;
+  link: string;
+  public_id: string;
+  service: string;
+  service_logo: string;
+  service_name: string;
+  service_type: string;
+  service_url: string;
+  logo: string;
+  subtitles: {
+    label: string;
+    value: string;
+  }[];
+  order: number;
+}
+[];
+
+export interface EditPageDefaultvalue {
+  service_name: string;
+  service_type: string;
+  link: string;
+  availability: {
+    label: string;
+    value: string;
+  }[];
+  subtitles: {
+    label: string;
+    value: string;
+  }[];
 }

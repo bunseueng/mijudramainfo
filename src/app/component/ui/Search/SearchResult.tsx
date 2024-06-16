@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchMultiSearch } from "@/app/actions/fetchMovieApi";
+import { SearchParamsType } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -10,13 +11,12 @@ import { RiHistoryFill } from "react-icons/ri";
 const SearchResult = () => {
   const [showResults, setShowResults] = useState(true); // State to manage visibility of search results
   const searchParams = useSearchParams();
-  let searchQuery = searchParams.get("query") ?? "";
-  const params = new URLSearchParams(searchParams);
+  let searchQuery = searchParams?.get("query") ?? "";
+  const params = new URLSearchParams(searchParams as SearchParamsType);
   const { data: results } = useQuery({
     queryKey: ["searchResults", searchQuery],
     queryFn: () => fetchMultiSearch(searchQuery),
   });
-
   const handleClick = () => {
     setShowResults(false); // Hide search results when clicking on a result
   };

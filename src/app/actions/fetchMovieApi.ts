@@ -55,6 +55,8 @@ export const fetchLatest = async () => {
 
 // fetch card when searching
 export const fetchEpisodeCount = async (result_id: any) => {
+  try {
+    
     const url = `https://api.themoviedb.org/3/tv/${result_id}?api_key=${apiKey}&language=en-US`;
     const options = {
       method: 'GET',
@@ -64,11 +66,19 @@ export const fetchEpisodeCount = async (result_id: any) => {
     const res = await fetch(url, options);
   
     if (!res.ok) {
-      throw new Error('Failed to fetch movies');
+      if (res.status === 404) {
+        console.log('TV show not found');
+        return null; // or handle appropriately
+      }
+      throw new Error('Failed to fetch TV show');
     }
   
     const json = await res.json();
     return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the TV show data:', error);
+    return null; // Return null or handle appropriately
+  }
 }
 
 // fetch trailer
@@ -156,21 +166,46 @@ export const fetchActor = async () => {
 
 // fetch tv
 export const fetchTv = async (tv_id: any) => {
-  const url = `https://api.themoviedb.org/3/tv/${tv_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+  const url = `https://api.themoviedb.org/3/tv/${tv_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
+  const countryUrl = `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
+  
   const options = {
     method: 'GET',
-    headers,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   };
   
-  const res = await fetch(url, options);
+  try {
+    const [res, resOfCountry] = await Promise.all([fetch(url, options), fetch(countryUrl, options)]);
 
-  if (!res.ok) {
-    console.log('Failed to fetch movies');
+    if (!res.ok || !resOfCountry.ok) {
+      console.log('Failed to fetch data');
+      return null;
+    }
+
+    const tvShowData = await res.json();
+    const countryData = await resOfCountry.json();
+
+    // Find the matching country
+    const originCountries = tvShowData.origin_country || [];
+    const countryNames = originCountries.map((countryCode: string) => {
+      const country = countryData.find((c: any) => c.iso_3166_1 === countryCode);
+      return country ? country.english_name : countryCode;
+    });
+
+    // Add the 'type' field and origin country names
+    const extraData = {
+      ...tvShowData,
+      type: countryNames,
+    };
+
+    return extraData;
+  } catch (error) {
+    console.error('An error occurred while fetching the data:', error);
+    return null;
   }
-
-  const json = await res.json();
-  return json;
-}
+};
 
 // fetch tv trailer
 export const fetchTrailer = async (tv_id: any) => {
@@ -449,6 +484,8 @@ export const fetchEpCast = async (tv_id: any, season_number: any, episodes: any)
 }
 
 export const fetchPerson = async (tv_id: any) => {
+  try {
+    
   const url = `https://api.themoviedb.org/3/person/${tv_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&with_original_language=zh&region=CN`
   const options = {
     method: 'GET',
@@ -463,6 +500,10 @@ export const fetchPerson = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
+  } catch (error) {
+    console.log("Failed to fetch", error)
+    return null
+  }
 }
 
 export const fetchPersonTv = async (tv_id: any) => {
@@ -518,21 +559,56 @@ export const fetchYtThumbnail = async (key: any, api: any) => {
 
 // fetch multifor searching 
 export const fetchMultiSearch = async (searchQuery: any) => {
-  const url = `https://api.themoviedb.org/3/search/multi?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`
+  const url = `https://api.themoviedb.org/3/search/multi?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`;
+  const countryUrl = `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
+
   const options = {
     method: 'GET',
     headers,
   };
-  
-  const res = await fetch(url, options);
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch movies');
+  try {
+    // Fetch search results
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+
+    const json = await res.json();
+
+    // Fetch country data
+    const countryRes = await fetch(countryUrl, options);
+
+    if (!countryRes.ok) {
+      throw new Error('Failed to fetch countries');
+    }
+
+    const countryData = await countryRes.json();
+
+    // Function to determine country type for an item
+    const determineCountryType = (item: any, countryData: any) => {
+      const originCountries = item.origin_country || [];
+      const countryNames = originCountries.map((countryCode: string) => {
+        const country = countryData.find((c: any) => c.iso_3166_1 === countryCode);
+        return country ? country.english_name : countryCode;
+      });
+      return countryNames.join(' ');
+    };
+
+    // Add countryType field to each item in results
+    const resultsWithCountryType = json.results.map((item: any) => ({
+      ...item,
+      country: determineCountryType(item, countryData),
+    }));
+
+    return resultsWithCountryType;
+  } catch (error) {
+    console.error('An error occurred while fetching multi search data:', error);
+    return null;
   }
+};
 
-  const json = await res.json();
-  return json.results;
-}
 // fetch tv for searching 
 export const fetchTvSearch = async (searchQuery: any) => {
   const url = `https://api.themoviedb.org/3/search/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`

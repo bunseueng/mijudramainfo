@@ -94,14 +94,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       };
 
       // Check and record changes for all fields
-      recordChange('details', existingDrama.details, details);
-      recordChange('related_title', existingDrama.related_title, related_title);
-      recordChange('cast', existingDrama.cast, cast);
-      recordChange('crew', existingDrama.crew, crew);
       recordChange('services', existingDrama?.services, updatedServices);
-      recordChange('released_information', existingDrama.released_information, released_information);
-      recordChange('production_information', existingDrama.production_information, production_information);
-      recordChange('genres_tags', existingDrama.genres_tags, genres_tags);
 
       // Update the drama in the database
       const updateDetails = await prisma.drama.update({
@@ -208,14 +201,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       };
 
       // Check and record changes for all fields
-      recordChange('details', existingDrama.details, details);
-      recordChange('related_title', existingDrama.related_title, related_title);
-      recordChange('cast', existingDrama.cast, cast);
-      recordChange('crew', existingDrama.crew, crew);
       recordChange('services', existingDrama?.services, updatedServices);
-      recordChange('released_information', existingDrama.released_information, released_information);
-      recordChange('production_information', existingDrama.production_information, production_information);
-      recordChange('genres_tags', existingDrama.genres_tags, genres_tags);
 
       // Update the drama in the database
       const updateDetails = await prisma.drama.update({

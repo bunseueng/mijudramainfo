@@ -16,7 +16,6 @@ export default function Results({
   currentUser,
 }: any) {
   const path = BASE_URL.split("/").pop();
-  const personId = results?.find((item: any) => item.id);
   return (
     <div className="flex flex-col items-start justify-start max-w-[1520px] mx-auto py-4 overflow-hidden">
       <div className="w-full h-full flex flex-col md:flex-row justify-between">

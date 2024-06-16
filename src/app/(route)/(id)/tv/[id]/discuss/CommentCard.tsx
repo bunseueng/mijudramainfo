@@ -35,7 +35,9 @@ const CommentCard = ({
         <div className="float-left relative inline-block w-[48px] h-[48px] bg-[#242526] mr-3">
           <Link href="">
             <Image
-              src={eachUser?.profileAvatar || eachUser?.image}
+              src={
+                eachUser?.profileAvatar || eachUser?.image || "/default-pf.jpg"
+              }
               alt=""
               width={200}
               height={200}

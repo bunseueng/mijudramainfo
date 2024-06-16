@@ -1,7 +1,7 @@
 "use client";
 
 import { getYearFromDate } from "@/app/(route)/(id)/tv/[id]/DramaMain";
-import { fetchTv } from "@/app/actions/fetchMovieApi";
+import { fetchEpisodeCount, fetchTv } from "@/app/actions/fetchMovieApi";
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -13,6 +13,7 @@ import { styled } from "@mui/material";
 import Link from "next/link";
 import PlayTrailer from "@/app/(route)/(drama)/drama/top/PlayTrailer";
 import DramaFilter from "@/app/(route)/(drama)/drama/top/DramaFilter";
+import { useQuery } from "@tanstack/react-query";
 
 interface TotalEpisodes {
   [key: string]: number;
@@ -35,25 +36,13 @@ export const convertToFiveStars = (value: number, totalValue: number) => {
 const ExploreCard = ({ title, topDramas, total_results }: any) => {
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
-  const per_page = searchParams.get("per_page") || (20 as any);
+  const per_page = searchParams?.get("per_page") || (20 as any);
   const start = (Number(page) - 1) * Number(per_page);
   const end = start + Number(per_page);
   const items = topDramas?.total_results;
   const totalItems = topDramas?.results?.slice(start, end);
   const [totalEpisodes, setTotalEpisodes] = useState<TotalEpisodes>({});
   const [tvRating, setTvRating] = useState<any>();
-
-  useEffect(() => {
-    if (topDramas) {
-      topDramas?.results?.forEach(async (drama: any) => {
-        const tvData = await fetchTv(drama.id);
-        setTotalEpisodes((prev) => ({
-          ...prev,
-          [drama.id]: calculateTotalEpisodes(tvData),
-        }));
-      });
-    }
-  }, [topDramas]);
 
   useEffect(() => {
     const fetchRating = async () => {
@@ -106,22 +95,36 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
     fetchRating();
   }, [topDramas]);
 
-  const calculateTotalEpisodes = (tvData: any) => {
-    let totalEpisodes = 0;
-    const seasonIds: string[] = [];
+  const fetchEpisodeCount = async (ids: number[]) => {
+    const promises = ids.map((id) =>
+      fetch(
+        `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch episode count");
+          }
+          return response.json();
+        })
+        .then((data) => ({
+          id: id,
+          episode_count: data.number_of_episodes, // Adjust to match API response structure
+        }))
+    );
 
-    if (tvData && tvData.seasons) {
-      Object.keys(tvData.seasons).forEach((key) => {
-        const season = tvData.seasons[key];
-        if (season.episode_count) {
-          totalEpisodes += parseInt(season.episode_count);
-          seasonIds.push(season.id); // Push the ID of the season
-        }
-      });
-    }
-
-    return totalEpisodes;
+    const results = await Promise.all(promises);
+    const episodeCounts: { [key: number]: number } = {};
+    results.forEach((result) => {
+      episodeCounts[result.id] = result.episode_count;
+    });
+    return episodeCounts;
   };
+
+  const result_id = totalItems?.map((drama: any) => drama?.id);
+  const { data: episodes, isError } = useQuery({
+    queryKey: ["episodes", result_id],
+    queryFn: () => fetchEpisodeCount(result_id || []),
+  });
 
   return (
     <div className="max-w-[1520px] mx-auto py-4 px-4 md:px-6">
@@ -209,9 +212,9 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                         {getYearFromDate(
                           drama?.first_air_date || drama?.release_date
                         )}
-                        {!totalEpisodes[drama.id] ? "" : ","}{" "}
-                        {totalEpisodes[drama.id]}{" "}
-                        {!totalEpisodes[drama.id] ? "" : "Episodes"}
+                        {episodes && !episodes[drama.id] ? "" : ","}{" "}
+                        {episodes && episodes[drama.id]}{" "}
+                        {episodes && !episodes[drama.id] ? "" : "Episodes"}
                       </span>
                     </p>
                     <div className="flex items-center">

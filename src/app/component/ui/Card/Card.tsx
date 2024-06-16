@@ -19,25 +19,20 @@ export default function Card({ result, BASE_URL }: any) {
         const getRatings = await fetch(`/api/rating/${result?.id}`);
         const data = await getRatings.json();
         const ratings = data?.ratings || [];
-
         // Filter ratings by tvId
         const filteredRatings = ratings.filter(
           (rating: any) => rating.tvId === result?.id.toString()
         );
-
         // Sum up all the ratings
         const sumOfRatings = filteredRatings.reduce(
           (sum: number, rating: any) => sum + rating.rating,
           0
         );
-
         // Get the number of ratings
         const numberOfRatings = filteredRatings.length;
-
         // Calculate the average rating
         const averageRating =
           numberOfRatings > 0 ? sumOfRatings / numberOfRatings : 0;
-
         setTvRating(averageRating);
       } catch (error) {
         console.error("Error fetching rating:", error);
@@ -49,15 +44,13 @@ export default function Card({ result, BASE_URL }: any) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const result_id = result?.id;
-  const query = searchParams.get("query") ?? "";
-  const type = searchParams.get("type") ?? "";
-  const country = searchParams.get("country") ?? "";
-
+  const query = searchParams?.get("query") ?? "";
+  const type = searchParams?.get("type") ?? "";
+  const country = searchParams?.get("country") ?? "";
   const { data: episode, isError } = useQuery({
     queryKey: ["episodes", result_id],
     queryFn: () => fetchEpisodeCount(result_id),
   });
-
   const path = BASE_URL.split("/").pop();
   const parts = BASE_URL.split("/");
   const searchTerm = parts[5]; // Assuming the "movie" part is at index 5
@@ -70,63 +63,40 @@ export default function Card({ result, BASE_URL }: any) {
   const isChineseDrama =
     dramaType &&
     originCountries.includes("CN") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
+    episode &&
+    !genreIds?.includes(16);
   const isKoreanDrama =
     dramaType &&
     originCountries.includes("KR") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
+    episode &&
+    !genreIds?.includes(16);
   const isJapanDrama =
     dramaType &&
     originCountries.includes("JP") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
+    episode &&
+    !genreIds?.includes(16);
   const isHKDrama =
     dramaType &&
     originCountries.includes("HK") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
+    episode &&
+    !genreIds?.includes(16);
   const isTaiwanDrama =
     dramaType &&
     originCountries.includes("TW") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
+    episode &&
+    !genreIds?.includes(16);
   const isThaiDrama =
     dramaType &&
     originCountries.includes("TH") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
+    episode &&
+    !genreIds?.includes(16);
   const isChineseMovie =
-    movieType &&
-    originCountries.includes("CN") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
-  const isKoreanMovie =
-    movieType &&
-    originCountries.includes("KR") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
-  const isJapanMovie =
-    movieType &&
-    originCountries.includes("JP") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
-  const isHKMovie =
-    movieType &&
-    originCountries.includes("HK") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
-  const isTaiwanMovie =
-    movieType &&
-    originCountries.includes("TW") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
-  const isThaiMovie =
-    movieType &&
-    originCountries.includes("TH") &&
-    !genreIds.includes(10764) &&
-    !genreIds.includes(16);
+    movieType && originCountries.includes("CN") && !episode;
+  const isKoreanMovie = movieType && originCountries.includes("KR") && !episode;
+  const isJapanMovie = movieType && originCountries.includes("JP") && !episode;
+  const isHKMovie = movieType && originCountries.includes("HK") && !episode;
+  const isTaiwanMovie = movieType && originCountries.includes("TW") && !episode;
+  const isThaiMovie = movieType && originCountries.includes("TH") && !episode;
   const isChineseShow =
     genreIds.includes(10764) && originCountries.includes("CN");
   const isKoreanShow =
@@ -205,11 +175,8 @@ export default function Card({ result, BASE_URL }: any) {
           {movieType && !genreIds.includes(16) && "Movie"}
           {type === "movie" && !country ? "Movie" : ""}
           {type === "tv" && !country ? "Drama" : ""}
-          {country === "CN" &&
-          !genreIds.includes(16) &&
-          !genreIds.includes(10764)
-            ? "Chinese Drama"
-            : ""}
+          {type === "tvShows" && !country ? "Tv Show" : ""}
+          {country === "CN" && episode && !type ? "Chinese Drama" : ""}
           {country === "KR" && !genreIds.includes(16) ? "Korean Drama" : ""}
           {country === "JP" && !genreIds.includes(16) ? "Japanese Drama" : ""}
           {country === "HK" && !genreIds.includes(16) ? "Hongkong Drama" : ""}
@@ -289,12 +256,6 @@ export default function Card({ result, BASE_URL }: any) {
             ? "Hongkong Drama"
             : ""}
           {genreIds.includes(16) && "Anime"}
-          {/* {originCountries?.length > 0 &&
-          !genreIds?.includes(10764) &&
-          !genreIds?.includes(16) &&
-          !genreIds?.includes(10767)
-            ? ""
-            : "Drama"} */}
           <span
             className={`px-2 opacity-70 ${
               result?.release_date === "" ? "hidden" : "block"
@@ -303,8 +264,16 @@ export default function Card({ result, BASE_URL }: any) {
             -
           </span>
           <span className="font-semibold truncate opacity-70">
-            {result?.first_air_date === "" ? "TBA" : result?.first_air_date}
-            {result?.release_date === "" ? "TBA" : result?.release_date}
+            {result?.first_air_date === "" ? (
+              <span className="pl-2">- TBA</span>
+            ) : (
+              result?.first_air_date
+            )}
+            {result?.release_date === "" ? (
+              <span className="pl-2">- TBA</span>
+            ) : (
+              result?.release_date
+            )}
             <span className={`${!episode?.number_of_episodes && "hidden"}`}>
               ,
             </span>{" "}
