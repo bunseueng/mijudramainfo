@@ -1,7 +1,7 @@
 "use client";
 
 import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
-import MediaPage from "@/app/(route)/(id)/tv/[id]/media/page";
+import MediaPhoto from "@/app/(route)/(id)/tv/[id]/media/Media";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -63,7 +63,7 @@ const ReviewCard = ({
   }, [video]);
   return (
     <div className="">
-      <MediaPage
+      <MediaPhoto
         tv={tv}
         mediaActive={mediaActive}
         setMediaActive={setMediaActive}
