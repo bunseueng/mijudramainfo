@@ -36,7 +36,7 @@ const PhotoAlbum = () => {
   // If there are fewer items than expected per page,
   // display all available items
 
-  const per_page = searchParams.get("per_page") || (20 as any);
+  const per_page = searchParams?.get("per_page") || (20 as any);
   const start = (Number(page) - 1) * Number(per_page);
   const end = start + Number(per_page);
   const totalItems = combinedItems?.length;

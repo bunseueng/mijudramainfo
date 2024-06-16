@@ -1,6 +1,6 @@
 import MediaPhoto from "./Media";
 
-export const MediaPage = ({
+const MediaPage = ({
   tv,
   mediaActive,
   setMediaActive,
@@ -25,3 +25,5 @@ export const MediaPage = ({
     />
   );
 };
+
+export default MediaPage;
