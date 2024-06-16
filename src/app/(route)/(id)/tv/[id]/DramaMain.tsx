@@ -24,7 +24,6 @@ import {
 } from "@/app/actions/fetchMovieApi";
 import DramaCast from "./DramaCast";
 import { useQuery } from "@tanstack/react-query";
-import TvPageLoading from "@/app/component/ui/Loading/TvPageLoading";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useState } from "react";
