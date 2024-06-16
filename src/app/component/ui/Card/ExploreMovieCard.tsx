@@ -15,7 +15,7 @@ import PlayMovieTrailer from "@/app/(route)/(drama)/movie/top/PlayMovieTrailer";
 const ExploreMovieCard = ({ title, movie }: any) => {
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
-  const per_page = searchParams.get("per_page") || (20 as any);
+  const per_page = searchParams?.get("per_page") || (20 as any);
   const start = (Number(page) - 1) * Number(per_page);
   const end = start + Number(per_page);
   const items = movie?.total_results;

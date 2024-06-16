@@ -4,17 +4,13 @@ import React from "react";
 import ActorCard from "../Card/ActorCard";
 import { useQuery } from "@tanstack/react-query";
 import { fetchActor } from "@/app/actions/fetchMovieApi";
-import HomeLoading from "../Loading/HomeLoading";
 
 const Actor = ({ heading }: any) => {
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ["actor"],
     queryFn: fetchActor,
   });
 
-  if (isLoading) {
-    return <HomeLoading />;
-  }
   return (
     <div className="relative top-0 left-0 mt-5 overflow-hidden">
       <h1 className="text-3xl font-bold my-5">{heading}</h1>

@@ -1,7 +1,8 @@
 import React, { Suspense } from "react";
 import NewestDrama from "./NewestDrama";
 import { Metadata } from "next";
-import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import ErrorBoundary from "@/app/component/ui/Loading/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "Newest Drama",
@@ -11,9 +12,11 @@ export const metadata: Metadata = {
 const NewestDramaPage = () => {
   return (
     <div className="mt-10">
-      <Suspense fallback={<ExploreLoading />}>
-        <NewestDrama />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<SearchLoading />}>
+          <NewestDrama />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 };

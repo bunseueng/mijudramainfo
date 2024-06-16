@@ -5,7 +5,7 @@ import { fetchEpisodeCount, fetchTv } from "@/app/actions/fetchMovieApi";
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Rating from "@mui/material/Rating";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -14,10 +14,6 @@ import Link from "next/link";
 import PlayTrailer from "@/app/(route)/(drama)/drama/top/PlayTrailer";
 import DramaFilter from "@/app/(route)/(drama)/drama/top/DramaFilter";
 import { useQuery } from "@tanstack/react-query";
-
-interface TotalEpisodes {
-  [key: string]: number;
-}
 
 export const StyledRating = styled(Rating)({
   "& .MuiRating-iconFilled": {
@@ -41,7 +37,6 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
   const end = start + Number(per_page);
   const items = topDramas?.total_results;
   const totalItems = topDramas?.results?.slice(start, end);
-  const [totalEpisodes, setTotalEpisodes] = useState<TotalEpisodes>({});
   const [tvRating, setTvRating] = useState<any>();
 
   useEffect(() => {
@@ -268,13 +263,17 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
               <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:border-[#272727]">
                 Advanced Search
               </h1>
-              <DramaFilter />
+              <Suspense>
+                <DramaFilter />
+              </Suspense>
             </div>
           </div>
         </div>
       </div>
       <div className="my-5">
-        <DramaPagination setPage={setPage} totalItems={items} />
+        <Suspense>
+          <DramaPagination setPage={setPage} totalItems={items} />
+        </Suspense>
       </div>
     </div>
   );

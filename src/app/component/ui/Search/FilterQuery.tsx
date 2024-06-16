@@ -9,9 +9,10 @@ import {
 import Results from "@/app/component/ui/Search/Results";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { SearchPagination } from "../Pagination/SearchPagination";
 import moment from "moment";
+import SearchLoading from "../Loading/SearchLoading";
 
 const FilterQuery = ({ BASE_URL }: any) => {
   const [page, setPage] = useState(1);
@@ -98,7 +99,7 @@ const FilterQuery = ({ BASE_URL }: any) => {
   });
 
   return (
-    <div>
+    <Suspense fallback={<SearchLoading />}>
       {totalItems?.length === 0 && (
         <h1 className="text-center pt-6">No results found</h1>
       )}
@@ -119,7 +120,7 @@ const FilterQuery = ({ BASE_URL }: any) => {
           </div>
         </>
       )}
-    </div>
+    </Suspense>
   );
 };
 

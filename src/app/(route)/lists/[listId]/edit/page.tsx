@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import EditList from "./EditList";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
@@ -46,7 +46,7 @@ const EditListPage = async ({ params }: { params: { listId: string } }) => {
   });
 
   return (
-    <div>
+    <Suspense fallback="Loading...">
       {user?.id === list?.userId ? (
         <EditList
           list={list}
@@ -59,7 +59,7 @@ const EditListPage = async ({ params }: { params: { listId: string } }) => {
           You cannot access to this page!
         </div>
       )}
-    </div>
+    </Suspense>
   );
 };
 

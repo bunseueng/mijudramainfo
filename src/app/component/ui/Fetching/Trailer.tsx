@@ -5,10 +5,9 @@ import { fetchTrendingVideos } from "@/app/actions/fetchMovieApi";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useQuery } from "@tanstack/react-query";
 import { FaPlay } from "react-icons/fa";
-import HomeLoading from "../Loading/HomeLoading";
 
 const Trailer = ({ heading }: any) => {
-  const { data: trailerVideo, isLoading } = useQuery({
+  const { data: trailerVideo } = useQuery({
     queryKey: ["trailerVideo"],
     queryFn: fetchTrendingVideos,
   });
@@ -32,9 +31,6 @@ const Trailer = ({ heading }: any) => {
     setHoveredImageId(imageId);
   };
 
-  if (isLoading) {
-    return <HomeLoading />;
-  }
   return (
     <section>
       <div className="mt-10 relative">

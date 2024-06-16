@@ -5,17 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchTrending } from "@/app/actions/fetchMovieApi";
 import Link from "next/link";
 import Image from "next/image";
-import HomeLoading from "../Loading/HomeLoading";
 
 const TrendingDrama = ({ heading }: any) => {
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ["trendingDrama"],
     queryFn: fetchTrending,
   });
-
-  if (isLoading) {
-    return <HomeLoading />;
-  }
 
   return (
     <div className="relative top-0 left-0 mt-5 overflow-hidden">

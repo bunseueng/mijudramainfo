@@ -4,11 +4,12 @@ import { fetchTopDrama } from "@/app/actions/fetchMovieApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import ExploreCard from "@/app/component/ui/Card/ExploreCard";
-import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
+import { Suspense } from "react";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 const TopDrama = () => {
   const searchParams = useSearchParams();
-  const currentPage = parseInt(searchParams.get("page") || "1");
+  const currentPage = parseInt(searchParams?.get("page") || "1");
   const title = "Top Drama";
   const { data: topDramas, isLoading } = useQuery({
     queryKey: ["topDrama", currentPage],
@@ -17,15 +18,15 @@ const TopDrama = () => {
   });
 
   const total_results = topDramas?.total_results;
-  if (isLoading) {
-    return <ExploreLoading />;
-  }
+
   return (
-    <ExploreCard
-      title={title}
-      topDramas={topDramas}
-      total_results={total_results}
-    />
+    <Suspense fallback={<SearchLoading />}>
+      <ExploreCard
+        title={title}
+        topDramas={topDramas}
+        total_results={total_results}
+      />
+    </Suspense>
   );
 };
 

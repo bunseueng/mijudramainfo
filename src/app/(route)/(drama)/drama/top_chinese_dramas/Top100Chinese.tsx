@@ -4,15 +4,16 @@ import { fetch100TopDrama } from "@/app/actions/fetchMovieApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import ExploreCard from "@/app/component/ui/Card/ExploreCard";
-import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { Suspense } from "react";
 
 const Top100Chinese = () => {
   const searchParams = useSearchParams();
-  const currentPage = parseInt(searchParams.get("page") || "1");
+  const currentPage = parseInt(searchParams?.get("page") || "1");
   const title = "Top 100 Chinese Drama";
   const countries = ["CN"]; // Example: add your desired countries here
   const countryParam = countries.join("|"); // Join countries with a pipe character"
-  const { data: topDramas, isLoading } = useQuery({
+  const { data: topDramas } = useQuery({
     queryKey: ["top100ChineseDrama", currentPage],
     queryFn: () => fetch100TopDrama(currentPage, countryParam),
     placeholderData: keepPreviousData,
@@ -35,15 +36,14 @@ const Top100Chinese = () => {
   // Display the result as text
   const total_results = displayedItemsCount * 5;
 
-  if (isLoading) {
-    return <ExploreLoading />;
-  }
   return (
-    <ExploreCard
-      title={title}
-      topDramas={topDramas}
-      total_results={total_results}
-    />
+    <Suspense fallback={<SearchLoading />}>
+      <ExploreCard
+        title={title}
+        topDramas={topDramas}
+        total_results={total_results}
+      />
+    </Suspense>
   );
 };
 

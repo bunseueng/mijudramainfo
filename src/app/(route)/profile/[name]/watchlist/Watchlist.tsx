@@ -2,7 +2,7 @@
 
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import WatchlistRating from "@/app/component/ui/CircleRating/WatchlistRating";
-import { WatchListProps } from "@/helper/type";
+import { SearchParamsType, WatchListProps } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -20,7 +20,7 @@ const Watchlist: React.FC<WatchListProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const sortby = searchParams.get("sortby") ?? "";
+  const sortby = searchParams?.get("sortby") ?? "";
 
   const {
     data: tv,
@@ -70,7 +70,7 @@ const Watchlist: React.FC<WatchListProps> = ({
   });
 
   const selectBox = (key: any, value: any) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams as SearchParamsType);
     const query = Object.fromEntries(params);
     let values = query[key] ? query[key].split(",") : [];
 

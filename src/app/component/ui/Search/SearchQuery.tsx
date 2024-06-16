@@ -9,9 +9,8 @@ import {
 import Results from "@/app/component/ui/Search/Results";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { SearchPagination } from "../Pagination/SearchPagination";
-import SearchLoading from "../Loading/SearchLoading";
 
 const SearchQuery = ({ BASE_URL, currentUser }: any) => {
   const [page, setPage] = useState(1);
@@ -65,7 +64,7 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
     placeholderData: keepPreviousData,
   });
 
-  const { data: results, isLoading } = useQuery({
+  const { data: results } = useQuery({
     queryKey: ["results", searchQuery],
     queryFn: () => fetchMultipleSearch(currentPage),
     placeholderData: keepPreviousData,
@@ -97,34 +96,33 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
     queryFn: () => fetchCollectionSearch(searchQuery),
   });
 
-  if (isLoading) {
-    return <SearchLoading />;
-  }
   return (
-    <div className="mt-10">
-      {totalItems?.length === 0 && (
-        <h1 className="text-center pt-6">No results found</h1>
-      )}
-      {totalItems?.length > 0 && (
-        <>
-          <Results
-            items={items}
-            results={totalItems}
-            searchQuery={searchQuery}
-            fetchMovie={fetchMovie}
-            fetchTv={fetchTv}
-            fetchCollection={fetchCollection}
-            fetchPersons={fetchPersons}
-            BASE_URL={BASE_URL}
-            searchParams={searchParams}
-            currentUser={currentUser}
-          />
-          <div className="flex flex-wrap items-start justify-start max-w-[1520px] mx-auto pb-10">
-            <SearchPagination setPage={setPage} totalItems={items} />
-          </div>
-        </>
-      )}
-    </div>
+    <Suspense fallback={""}>
+      <div className="mt-10">
+        {totalItems?.length === 0 && (
+          <h1 className="text-center pt-6">No results found</h1>
+        )}
+        {totalItems?.length > 0 && (
+          <>
+            <Results
+              items={items}
+              results={totalItems}
+              searchQuery={searchQuery}
+              fetchMovie={fetchMovie}
+              fetchTv={fetchTv}
+              fetchCollection={fetchCollection}
+              fetchPersons={fetchPersons}
+              BASE_URL={BASE_URL}
+              searchParams={searchParams}
+              currentUser={currentUser}
+            />
+            <div className="flex flex-wrap items-start justify-start max-w-[1520px] mx-auto pb-10">
+              <SearchPagination setPage={setPage} totalItems={items} />
+            </div>
+          </>
+        )}
+      </div>
+    </Suspense>
   );
 };
 

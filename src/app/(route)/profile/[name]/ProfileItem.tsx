@@ -54,11 +54,10 @@ const ProfileItem: React.FC<
   const [editable, setEditable] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
-  const { data: session } = useSession();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sortby = searchParams.get("sortby") ?? "";
+  const sortby = searchParams?.get("sortby") ?? "";
   const editor = useEditor({
     editable,
     content: user?.biography,

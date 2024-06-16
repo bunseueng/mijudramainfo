@@ -3,6 +3,9 @@ import Trailer from "./component/ui/Fetching/Trailer";
 import LatestDrama from "./component/ui/Fetching/LatestDrama";
 import TrendingDrama from "./component/ui/Fetching/TrendingDrama";
 import Header from "./component/ui/Main/Header";
+import { Suspense } from "react";
+import SearchLoading from "./component/ui/Loading/SearchLoading";
+import HomeLoading from "./component/ui/Loading/HomeLoading";
 
 export default async function Home() {
   const trending = "Trending";
@@ -11,7 +14,7 @@ export default async function Home() {
   const trailer = "Latest Trailer";
 
   return (
-    <>
+    <Suspense fallback={<HomeLoading />}>
       <main className="leading-relaxed tracking-wide flex flex-col md:max-w-[1520px] mx-auto">
         <Header />
       </main>
@@ -29,6 +32,6 @@ export default async function Home() {
           <Trailer heading={trailer} />
         </div>
       </section>
-    </>
+    </Suspense>
   );
 }

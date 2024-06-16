@@ -51,7 +51,9 @@ const CreateList = () => {
       {isSubmitSuccessful ? (
         <EditList
           submittedData={submittedData}
-          setSubmittedData={setSubmittedData}
+          list={null}
+          yourRating={[]}
+          findSpecificRating={[]}
         />
       ) : (
         <div className="max-w-2xl mx-auto py-3 px-4 md:px-6 my-10">
