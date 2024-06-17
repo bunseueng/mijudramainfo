@@ -6,9 +6,9 @@ import {
   contentTypeDetail,
   countryDetails,
   detailsList,
-} from "@/helper/item-list";
-import { Drama, DramaDetails, tvId } from "@/helper/type";
-import { createDetails, TCreateDetails } from "@/helper/zod";
+} from "@/app/helper/item-list";
+import { Drama, DramaDetails, tvId } from "@/app/helper/type";
+import { createDetails, TCreateDetails } from "@/app/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";

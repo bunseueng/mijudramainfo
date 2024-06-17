@@ -1,6 +1,6 @@
 "use client";
 
-import { serviceLogo, serviceType, tvSubtitle } from "@/helper/item-list";
+import { serviceLogo, serviceType, tvSubtitle } from "@/app/helper/item-list";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
@@ -8,11 +8,11 @@ import { IoClose } from "react-icons/io5";
 import countryList from "react-select-country-list";
 import Select from "react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createDetails, TCreateDetails } from "@/helper/zod";
 import { useForm } from "react-hook-form";
-import { customStyles } from "@/helper/MuiStyling";
-import { Drama, EditDramaPage, EditPageDefaultvalue } from "@/helper/type";
+import { customStyles } from "@/app/helper/MuiStyling";
+import { Drama, EditDramaPage, EditPageDefaultvalue } from "@/app/helper/type";
 import { JsonValue } from "@prisma/client/runtime/library";
+import { createDetails, TCreateDetails } from "@/app/helper/zod";
 
 interface EditModal {
   idx: number;
@@ -279,9 +279,11 @@ const TvEditModal: React.FC<EditModal> = ({
                               defaultValue?.service_name === items?.label;
                             return (
                               <li
-                                ref={(el) =>
-                                  isContentRating && scrollIntoViewIfNeeded(el)
-                                }
+                                ref={(el) => {
+                                  if (isContentRating && el) {
+                                    scrollIntoViewIfNeeded(el);
+                                  }
+                                }}
                                 className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
                                   isContentRating
                                     ? "text-[#409eff] bg-[#2a2b2c]"
@@ -376,9 +378,11 @@ const TvEditModal: React.FC<EditModal> = ({
                               defaultValue?.service_type === items?.value;
                             return (
                               <li
-                                ref={(el) =>
-                                  isContentRating && scrollIntoViewIfNeeded(el)
-                                }
+                                ref={(el) => {
+                                  if (isContentRating && el) {
+                                    scrollIntoViewIfNeeded(el);
+                                  }
+                                }}
                                 className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
                                   isContentRating
                                     ? "text-[#409eff] bg-[#2a2b2c]"

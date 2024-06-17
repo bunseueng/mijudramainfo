@@ -5,7 +5,7 @@ import {
 } from "@/app/component/ui/Card/ExploreCard";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { Rating } from "@/helper/type";
+import { Rating } from "@/app/helper/type";
 
 const DramaListRating = ({ item }: any, yourRating: Rating[]) => {
   // Function to find rating for a specific item

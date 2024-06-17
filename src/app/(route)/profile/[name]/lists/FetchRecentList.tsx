@@ -1,5 +1,5 @@
 import { fetchMovie, fetchTv } from "@/app/actions/fetchMovieApi";
-import { FetchRecentListProps } from "@/helper/type";
+import { FetchRecentListProps } from "@/app/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import React from "react";

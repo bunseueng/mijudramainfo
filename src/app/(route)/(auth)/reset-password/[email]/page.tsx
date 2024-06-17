@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import ResetPassword from "./ResetPassword";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 

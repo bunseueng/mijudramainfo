@@ -1,6 +1,5 @@
 "use client";
 
-import { profileSetting, TProfileSetting } from "@/helper/zod";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -11,6 +10,7 @@ import { Bounce, toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import Tiptap from "@/app/component/ui/TextEditor/TipTap";
 import UploadAvatar from "./UploadAvatar";
+import { profileSetting, TProfileSetting } from "@/app/helper/zod";
 
 const ProfileSetting = ({ user }: any) => {
   const { data: session } = useSession();

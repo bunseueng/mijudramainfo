@@ -7,8 +7,8 @@ import Link from "next/link";
 import { FaCheck } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { usePathname, useRouter } from "next/navigation";
-import { friendItems } from "@/helper/item-list";
-import { currentUserProps, IFriend } from "@/helper/type";
+import { friendItems } from "@/app/helper/item-list";
+import { currentUserProps, IFriend } from "@/app/helper/type";
 
 interface currentUser {
   currentUser: currentUserProps | null;

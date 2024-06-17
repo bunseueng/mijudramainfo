@@ -97,13 +97,13 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
   });
 
   return (
-    <Suspense fallback={""}>
-      <div className="mt-10">
-        {totalItems?.length === 0 && (
-          <h1 className="text-center pt-6">No results found</h1>
-        )}
-        {totalItems?.length > 0 && (
-          <>
+    <div className="mt-10">
+      {totalItems?.length === 0 && (
+        <h1 className="text-center pt-6">No results found</h1>
+      )}
+      {totalItems?.length > 0 && (
+        <>
+          <Suspense fallback="Loading...">
             <Results
               items={items}
               results={totalItems}
@@ -116,13 +116,15 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
               searchParams={searchParams}
               currentUser={currentUser}
             />
-            <div className="flex flex-wrap items-start justify-start max-w-[1520px] mx-auto pb-10">
+          </Suspense>
+          <div className="flex flex-wrap items-start justify-start max-w-[1520px] mx-auto pb-10">
+            <Suspense fallback="Loading...">
               <SearchPagination setPage={setPage} totalItems={items} />
-            </div>
-          </>
-        )}
-      </div>
-    </Suspense>
+            </Suspense>
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 

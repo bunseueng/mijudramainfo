@@ -1,13 +1,17 @@
 "use client";
 
-import { friendItems } from "@/helper/item-list";
+import { friendItems } from "@/app/helper/item-list";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { IoSearch } from "react-icons/io5";
 import Image from "next/image";
 import { FaCheck } from "react-icons/fa6";
-import { currentUserProps, IFindSpecificUser, IFriend } from "@/helper/type";
+import {
+  currentUserProps,
+  IFindSpecificUser,
+  IFriend,
+} from "@/app/helper/type";
 
 interface currentUser {
   currentUser: currentUserProps | null;

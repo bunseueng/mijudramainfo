@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import SearchQuery from "../../../component/ui/Search/SearchQuery";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
-const PersonPage = () => {
+const PersonSearch = () => {
   const BASE_URL = "https://api.themoviedb.org/3/search/person";
   return (
     <Suspense fallback={<SearchLoading />}>
@@ -11,4 +11,4 @@ const PersonPage = () => {
   );
 };
 
-export default PersonPage;
+export default PersonSearch;

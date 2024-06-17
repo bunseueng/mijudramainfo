@@ -14,24 +14,32 @@ export default async function Home() {
   const trailer = "Latest Trailer";
 
   return (
-    <Suspense fallback={<HomeLoading />}>
+    <>
       <main className="leading-relaxed tracking-wide flex flex-col md:max-w-[1520px] mx-auto">
         <Header />
       </main>
       <section className="max-w-[90%] lg:max-w-[80%] mx-auto">
         <div className="mb-10">
-          <TrendingDrama heading={trending} />
+          <Suspense fallback="Loading...">
+            <TrendingDrama heading={trending} />
+          </Suspense>
         </div>
         <div className="mb-10">
-          <Actor heading={actress} />
+          <Suspense fallback="Loading...">
+            <Actor heading={actress} />
+          </Suspense>
         </div>
         <div className="mb-10">
-          <LatestDrama heading={latestDrama} />
+          <Suspense fallback="Loading...">
+            <LatestDrama heading={latestDrama} />
+          </Suspense>
         </div>
         <div className="mb-5">
-          <Trailer heading={trailer} />
+          <Suspense fallback="Loading...">
+            <Trailer heading={trailer} />
+          </Suspense>
         </div>
       </section>
-    </Suspense>
+    </>
   );
 }

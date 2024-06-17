@@ -1,5 +1,5 @@
 "use client";
-import { signUpForm, TSignUpForm } from "@/helper/zod";
+import { signUpForm, TSignUpForm } from "@/app/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";

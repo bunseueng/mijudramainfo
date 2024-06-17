@@ -1,8 +1,8 @@
 "use client";
 
 import { fetchTv } from "@/app/actions/fetchMovieApi";
-import { editPageList } from "@/helper/item-list";
-import { Drama, tvId } from "@/helper/type";
+import { editPageList } from "@/app/helper/item-list";
+import { Drama, tvId } from "@/app/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";

@@ -12,7 +12,7 @@ import {
   people_subitems,
   sessionItems,
   tv_subitems,
-} from "@/helper/item-list";
+} from "@/app/helper/item-list";
 import {
   IoIosNotificationsOutline,
   IoMdArrowDropdown,
@@ -29,7 +29,7 @@ import {
   FriendRequestProps,
   SearchParamsType,
   UserProps,
-} from "@/helper/type";
+} from "@/app/helper/type";
 
 interface Notification {
   users: UserProps[] | undefined;

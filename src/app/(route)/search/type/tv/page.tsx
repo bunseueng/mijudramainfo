@@ -1,14 +1,8 @@
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
-import FilterQuery from "@/app/component/ui/Search/FilterQuery";
-import { Suspense } from "react";
+import React from "react";
+import TvSearch from "./TypeTv";
 
-const SearchPage = async () => {
-  const BASE_URL = "https://api.themoviedb.org/3/discover/tv";
-  return (
-    <Suspense fallback={<SearchLoading />}>
-      <FilterQuery BASE_URL={BASE_URL} />
-    </Suspense>
-  );
+const TvSearchPage = () => {
+  return <TvSearch />;
 };
 
-export default SearchPage;
+export default TvSearchPage;

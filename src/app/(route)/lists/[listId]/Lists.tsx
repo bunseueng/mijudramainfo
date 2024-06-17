@@ -12,8 +12,7 @@ import {
   List,
   Rating,
   UserProps,
-} from "@/helper/type";
-import { User } from "../../profile/[name]/ProfileItem";
+} from "@/app/helper/type";
 
 export interface Lists {
   findSpecificRating: IRating[];

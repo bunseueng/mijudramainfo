@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchMultiSearch } from "@/app/actions/fetchMovieApi";
-import { SearchParamsType } from "@/helper/type";
+import { SearchParamsType } from "@/app/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

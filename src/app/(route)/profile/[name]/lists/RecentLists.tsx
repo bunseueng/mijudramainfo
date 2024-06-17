@@ -5,7 +5,7 @@ import { RiComputerLine } from "react-icons/ri";
 import Link from "next/link";
 import FetchRecentList from "./FetchRecentList";
 import { CiHeart } from "react-icons/ci";
-import { IList } from "@/helper/type";
+import { IList } from "@/app/helper/type";
 
 const RecentLists: React.FC<IList> = ({ list }) => {
   const [hoveredIndexes, setHoveredIndexes] = useState<(number | null)[]>([]);

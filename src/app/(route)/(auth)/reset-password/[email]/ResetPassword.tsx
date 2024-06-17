@@ -1,6 +1,6 @@
 "use client";
 
-import { resetPassword, TResetPassword } from "@/helper/zod";
+import { resetPassword, TResetPassword } from "@/app/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";

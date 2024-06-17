@@ -1,7 +1,6 @@
 "use client";
 
 import { fetchPerson } from "@/app/actions/fetchMovieApi";
-import { personLove, TPersonLove } from "@/helper/zod";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +10,7 @@ import { GoHeart } from "react-icons/go";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { personLove, TPersonLove } from "@/app/helper/zod";
 
 export type PersonDb = {
   id: string;

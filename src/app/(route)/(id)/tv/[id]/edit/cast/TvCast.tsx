@@ -7,9 +7,9 @@ import {
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
 import DeleteButton from "@/app/component/ui/Button/DeleteButton";
-import { castRole } from "@/helper/item-list";
-import { Drama, tvId } from "@/helper/type";
-import { createDetails, TCreateDetails } from "@/helper/zod";
+import { castRole } from "@/app/helper/item-list";
+import { Drama, tvId } from "@/app/helper/type";
+import { createDetails, TCreateDetails } from "@/app/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder } from "framer-motion";

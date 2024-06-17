@@ -1,10 +1,9 @@
 "use client";
 
-import { forgotPassword, TForgotPassword } from "@/helper/zod";
+import { forgotPassword, TForgotPassword } from "@/app/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { NextResponse } from "next/server";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -15,9 +14,6 @@ const ForgotPasswordForm = () => {
     formState: { errors },
   } = useForm<TForgotPassword>({
     resolver: zodResolver(forgotPassword),
-    defaultValues: {
-      email: "",
-    },
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,22 +26,24 @@ const ForgotPasswordForm = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: data.email,
+          email: data?.email,
         }),
       });
 
-      if (res.status === 200) {
-        toast.success("Email sent successfully. please check your email.");
-      } else if (res.status === 404) {
-        toast.error("No user found with this email.");
-      } else if (res.status === 500) {
-        toast.error("Something went wrong.please try again!");
+      if (res?.status === 200) {
+        toast?.success("Email sent successfully. Please check your email.");
+      } else if (res?.status === 404) {
+        toast?.error("No user found with this email.");
+      } else if (res?.status === 500) {
+        toast?.error("Something went wrong. Please try again!");
       }
     } catch (error) {
-      return NextResponse.json(error);
+      toast?.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
+
   return (
     <div className="max-w-lg mx-auto mt-[50px] mb-[300px] relative bg-white dark:bg-[#242526] dark:border-[#3a3b3c] dark:shadow-sm p-8 rounded-xl shadow shadow-slate-300">
       <h1 className="text-4xl font-medium dark:text-white">
@@ -70,9 +68,9 @@ const ForgotPasswordForm = () => {
               className="w-full py-3 border border-slate-200 rounded-lg px-3 focus:outline-none focus:border-slate-500 hover:shadow dark:bg-navy-600"
               placeholder="Enter email address"
             />
-            {errors.email && (
+            {errors?.email && (
               <p className="text-xs italic text-red-500 mt-2">
-                {errors.email?.message}
+                {errors?.email?.message}
               </p>
             )}
           </label>
@@ -80,6 +78,7 @@ const ForgotPasswordForm = () => {
           <button
             className="w-full py-3 font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg border-indigo-500 hover:shadow inline-flex space-x-2 items-center justify-center"
             type="submit"
+            disabled={isLoading}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -95,13 +94,12 @@ const ForgotPasswordForm = () => {
                 d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
               />
             </svg>
-
             <span>{isLoading ? "Loading..." : "Request"}</span>
           </button>
           <p className="text-center text-black dark:text-white">
             Not registered yet?
             <Link
-              href="/sign-up"
+              href="/signup"
               className="text-indigo-600 font-medium inline-flex space-x-1 items-center"
             >
               <span className="pl-2">Register now </span>

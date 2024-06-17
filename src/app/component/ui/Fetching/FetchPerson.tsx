@@ -12,7 +12,6 @@ import {
   fetchPersonTv,
 } from "@/app/actions/fetchMovieApi";
 import { toast } from "react-toastify";
-import { personLove, TPersonLove } from "@/helper/zod";
 import { useRouter } from "next/navigation";
 import { GoHeart } from "react-icons/go";
 import { useForm } from "react-hook-form";
@@ -28,6 +27,7 @@ import {
   TwitterShareButton,
 } from "next-share";
 import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
+import { personLove, TPersonLove } from "@/app/helper/zod";
 
 const FetchPerson = ({
   tv_id,

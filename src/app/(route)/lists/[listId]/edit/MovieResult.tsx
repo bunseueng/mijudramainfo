@@ -11,7 +11,7 @@ import { fetchMovie, fetchTv } from "@/app/actions/fetchMovieApi";
 import ClipLoader from "react-spinners/ClipLoader";
 import DramaListRating from "./DramaListRating";
 import CommentModal from "@/app/component/ui/Modal/CommentModal";
-import { MovieResultProps } from "@/helper/type";
+import { MovieResultProps } from "@/app/helper/type";
 
 const MovieResult: React.FC<MovieResultProps> = ({
   setMovieId,

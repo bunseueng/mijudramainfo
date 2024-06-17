@@ -1,7 +1,7 @@
 "use client";
 
 import { User } from "@/app/(route)/profile/[name]/ProfileItem";
-import { currentUserProps } from "@/helper/type";
+import { currentUserProps } from "@/app/helper/type";
 import React, { useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";

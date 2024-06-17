@@ -1,10 +1,9 @@
 "use client";
 
-import { getYearFromDate } from "@/app/(route)/(id)/tv/[id]/DramaMain";
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Link from "next/link";
@@ -101,7 +100,9 @@ const ExploreMovieCard = ({ title, movie }: any) => {
                       {movie?.overview}
                     </p>
                     <div className="flex items-center">
-                      <PlayMovieTrailer movie_id={movie?.id} />
+                      <Suspense fallback={<div>Loading....</div>}>
+                        <PlayMovieTrailer movie_id={movie?.id} />
+                      </Suspense>
                     </div>
                   </div>
                 </div>
@@ -112,7 +113,9 @@ const ExploreMovieCard = ({ title, movie }: any) => {
               <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:bg-[#272727]">
                 Advanced Search
               </h1>
-              <DramaFilter />
+              <Suspense fallback={<div>Loading....</div>}>
+                <DramaFilter />
+              </Suspense>
             </div>
           </div>
         </div>

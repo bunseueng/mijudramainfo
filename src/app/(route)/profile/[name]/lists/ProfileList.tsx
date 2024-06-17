@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { RiComputerLine } from "react-icons/ri";
 import Link from "next/link";
 import FetchList from "./FetchList";
-import { IList } from "@/helper/type";
+import { IList } from "@/app/helper/type";
 
 const ProfileList: React.FC<IList> = ({ list }) => {
   const [hoveredIndexes, setHoveredIndexes] = useState<(number | null)[]>([]);

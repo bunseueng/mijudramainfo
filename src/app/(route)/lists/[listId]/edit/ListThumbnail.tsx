@@ -1,11 +1,11 @@
-import { TCreateList } from "@/helper/zod";
 import Image from "next/image";
 import React, { useState } from "react";
 import { IoCamera } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { SlCloudUpload } from "react-icons/sl";
-import { ListThumbnailProps } from "@/helper/type";
+import { ListThumbnailProps } from "@/app/helper/type";
+import { TCreateList } from "@/app/helper/zod";
 
 const ListThumbnail: React.FC<ListThumbnailProps> = ({
   list,

@@ -91,28 +91,32 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
   }, [topDramas]);
 
   const fetchEpisodeCount = async (ids: number[]) => {
-    const promises = ids.map((id) =>
-      fetch(
-        `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch episode count");
-          }
-          return response.json();
-        })
-        .then((data) => ({
-          id: id,
-          episode_count: data.number_of_episodes, // Adjust to match API response structure
-        }))
-    );
+    try {
+      const promises = ids.map((id) =>
+        fetch(
+          `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to fetch episode count");
+            }
+            return response.json();
+          })
+          .then((data) => ({
+            id: id,
+            episode_count: data.number_of_episodes, // Adjust to match API response structure
+          }))
+      );
 
-    const results = await Promise.all(promises);
-    const episodeCounts: { [key: number]: number } = {};
-    results.forEach((result) => {
-      episodeCounts[result.id] = result.episode_count;
-    });
-    return episodeCounts;
+      const results = await Promise.all(promises);
+      const episodeCounts: { [key: number]: number } = {};
+      results.forEach((result) => {
+        episodeCounts[result.id] = result.episode_count;
+      });
+      return episodeCounts;
+    } catch (error: any) {
+      throw new Error(error);
+    }
   };
 
   const result_id = totalItems?.map((drama: any) => drama?.id);

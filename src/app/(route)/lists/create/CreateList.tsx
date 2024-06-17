@@ -1,6 +1,5 @@
 "use client";
 
-import { createList, TCreateList } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -9,6 +8,7 @@ import { IoMdClose } from "react-icons/io";
 import { IoTvSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 import EditList from "../[listId]/edit/EditList";
+import { createList, TCreateList } from "@/app/helper/zod";
 
 const CreateList = () => {
   const [selectType, setSelectType] = useState<string>("");

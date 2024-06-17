@@ -1,7 +1,6 @@
 "use client";
 
 import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
-import MediaPhoto from "@/app/(route)/(id)/tv/[id]/media/Media";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -63,17 +62,6 @@ const ReviewCard = ({
   }, [video]);
   return (
     <div className="">
-      <MediaPhoto
-        tv={tv}
-        mediaActive={mediaActive}
-        setMediaActive={setMediaActive}
-        image={image}
-        video={video}
-        thumbnails={thumbnails}
-        openTrailer={openTrailer}
-        setOpenTrailer={setOpenTrailer}
-        tv_id={tv_id}
-      />
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         <h1 className="text-2xl font-bold py-4">Recommendations</h1>
         {recommend?.results?.length === 0 ? (
