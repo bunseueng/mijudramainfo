@@ -17,7 +17,7 @@ const Footer = () => {
             >
               <p className="text-lg md:text-2xl text-cyan-400">MijuDramaList</p>
               <Image
-                src="/untitled.svg"
+                src="/Untitled.svg"
                 alt="Website logo"
                 width={200}
                 height={200}
