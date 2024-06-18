@@ -1,15 +1,8 @@
-import dynamic from "next/dynamic";
-import React, { Suspense } from "react";
-const Signin = dynamic(() => import("./Signin"), {
-  ssr: false,
-});
+import React from "react";
+import Signin from "./Signin";
 
 const SigninPage = () => {
-  return (
-    <Suspense fallback="Loading...">
-      <Signin />;
-    </Suspense>
-  );
+  return <Signin />;
 };
 
 export default SigninPage;

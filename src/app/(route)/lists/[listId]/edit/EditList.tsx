@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchMultiSearch } from "@/app/actions/fetchMovieApi";
+import { createList, TCreateList } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -17,8 +18,7 @@ import MovieResult from "./MovieResult";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useDebouncedCallback } from "use-debounce";
 import ListThumbnail from "./ListThumbnail";
-import { EditListProps } from "@/app/helper/type";
-import { createList, TCreateList } from "@/app/helper/zod";
+import { EditListProps } from "@/helper/type";
 
 const EditList: React.FC<EditListProps> = ({
   list,

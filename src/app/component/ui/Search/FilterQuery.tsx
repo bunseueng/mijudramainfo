@@ -9,10 +9,9 @@ import {
 import Results from "@/app/component/ui/Search/Results";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import React, { Suspense, useState } from "react";
+import React, { useState } from "react";
 import { SearchPagination } from "../Pagination/SearchPagination";
 import moment from "moment";
-import SearchLoading from "../Loading/SearchLoading";
 
 const FilterQuery = ({ BASE_URL }: any) => {
   const [page, setPage] = useState(1);
@@ -99,12 +98,12 @@ const FilterQuery = ({ BASE_URL }: any) => {
   });
 
   return (
-    <Suspense fallback={<SearchLoading />}>
+    <div>
       {totalItems?.length === 0 && (
         <h1 className="text-center pt-6">No results found</h1>
       )}
       {totalItems?.length > 0 && (
-        <Suspense fallback={<div>Loading...</div>}>
+        <>
           <Results
             items={items}
             results={totalItems}
@@ -118,9 +117,9 @@ const FilterQuery = ({ BASE_URL }: any) => {
           <div className="flex flex-col items-start justify-start max-w-[1520px] mx-auto pb-10">
             <SearchPagination setPage={setPage} totalItems={items} />
           </div>
-        </Suspense>
+        </>
       )}
-    </Suspense>
+    </div>
   );
 };
 

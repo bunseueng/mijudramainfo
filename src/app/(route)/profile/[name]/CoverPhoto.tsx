@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import { IoCamera } from "react-icons/io5";
 import { useForm } from "react-hook-form";
+import { coverPhoto, TCoverPhoto } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { User } from "./ProfileItem";
-import { currentUserProps } from "@/app/helper/type";
-import { coverPhoto, TCoverPhoto } from "@/app/helper/zod";
+import { currentUserProps } from "@/helper/type";
 
 interface currentUser {
   currentUser: currentUserProps | null;

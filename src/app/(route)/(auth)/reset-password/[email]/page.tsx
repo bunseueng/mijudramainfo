@@ -1,13 +1,8 @@
-import { Suspense } from "react";
+import React from "react";
 import ResetPassword from "./ResetPassword";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 const ResetPasswordPage = ({ params }: { params: { email: string } }) => {
-  return (
-    <Suspense fallback={<SearchLoading />}>
-      <ResetPassword params={params} />
-    </Suspense>
-  );
+  return <ResetPassword params={params} />;
 };
 
 export default ResetPasswordPage;

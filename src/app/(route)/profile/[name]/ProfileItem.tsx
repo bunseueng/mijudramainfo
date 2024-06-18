@@ -1,6 +1,6 @@
 "use client";
 
-import { profileList } from "@/app/helper/item-list";
+import { profileList } from "@/helper/item-list";
 import Color from "@tiptap/extension-color";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Link from "@tiptap/extension-link";
@@ -28,7 +28,7 @@ import {
   IFriend,
   ProfilePageProps,
   UserProps,
-} from "@/app/helper/type";
+} from "@/helper/type";
 import FollowButton from "@/app/component/ui/Button/FollowButton";
 
 export interface User {

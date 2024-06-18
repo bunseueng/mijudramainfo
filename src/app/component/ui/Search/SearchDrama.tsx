@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchParamsType } from "@/app/helper/type";
+import { SearchParamsType } from "@/helper/type";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 

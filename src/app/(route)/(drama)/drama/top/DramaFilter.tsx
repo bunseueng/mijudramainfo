@@ -11,14 +11,14 @@ import {
   statusCheckbox,
   typeCheckbox1,
   typeCheckbox2,
-} from "@/app/helper/item-list";
+} from "@/helper/item-list";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import TagResult from "./TagResult";
 import { Slider } from "@mui/material";
 import { FaCheck } from "react-icons/fa";
-import { SearchParamsType } from "@/app/helper/type";
+import { SearchParamsType } from "@/helper/type";
 
 const DramaFilter = () => {
   const [searchQuery, setSearchQuery] = useState("");

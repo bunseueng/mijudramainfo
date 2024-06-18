@@ -1,6 +1,6 @@
 "use client";
 
-import { serviceLogo, serviceType, tvSubtitle } from "@/app/helper/item-list";
+import { serviceLogo, serviceType, tvSubtitle } from "@/helper/item-list";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
@@ -8,11 +8,11 @@ import { IoClose } from "react-icons/io5";
 import countryList from "react-select-country-list";
 import Select from "react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createDetails, TCreateDetails } from "@/helper/zod";
 import { useForm } from "react-hook-form";
-import { customStyles } from "@/app/helper/MuiStyling";
-import { Drama, EditDramaPage } from "@/app/helper/type";
+import { customStyles } from "@/helper/MuiStyling";
+import { Drama, EditDramaPage } from "@/helper/type";
 import { JsonValue } from "@prisma/client/runtime/library";
-import { createDetails, TCreateDetails } from "@/app/helper/zod";
 
 interface EditModal {
   tv?: JsonValue | [];
@@ -55,6 +55,7 @@ const TvAddModal: React.FC<EditModal> = ({
     handleSubmit,
     reset,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
@@ -64,6 +65,7 @@ const TvAddModal: React.FC<EditModal> = ({
   const changeHandler = (value: any) => {
     setCountries(value);
   };
+  console.log(tv);
   const subtitleChangeHandler = (value: any) => {
     setSubtitle(value);
   };

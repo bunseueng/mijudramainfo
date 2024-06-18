@@ -1,6 +1,4 @@
-"use client";
-
-import { TCreateList } from "@/app/helper/zod";
+import { TCreateList } from "@/helper/zod";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";

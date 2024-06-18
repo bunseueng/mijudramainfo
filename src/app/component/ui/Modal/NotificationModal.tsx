@@ -10,7 +10,7 @@ import {
   findSpecificUserProps,
   FriendRequestProps,
   UserProps,
-} from "@/app/helper/type";
+} from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useRouter } from "next/navigation";

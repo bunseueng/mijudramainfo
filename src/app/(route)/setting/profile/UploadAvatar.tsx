@@ -1,5 +1,5 @@
-import { UploadAvatarProps } from "@/app/helper/type";
-import { TProfileSetting } from "@/app/helper/zod";
+import { UploadAvatarProps } from "@/helper/type";
+import { TProfileSetting } from "@/helper/zod";
 import Image from "next/image";
 import React from "react";
 import { IoCamera } from "react-icons/io5";

@@ -7,7 +7,6 @@ import Cryptr from "cryptr";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-    try {
     const payload = await request.json()
 
     // Check if the user email is exist
@@ -75,7 +74,5 @@ export async function POST(request: Request) {
         status: 500,
         message: "Something went wrong.please try again!",
         });
-    }} catch (error) {
-        return NextResponse.json({message: "Error"}, {status: 500})
     }
 }

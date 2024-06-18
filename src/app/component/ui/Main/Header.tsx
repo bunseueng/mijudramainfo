@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React, { Suspense } from "react";
+import React from "react";
 import SearchDrama from "../Search/SearchDrama";
 
 const Header = () => {
@@ -22,9 +22,7 @@ const Header = () => {
               The reason I created this website just because I love watching
               drama, so I create this to make our life easier. 🤣
             </p>
-            <Suspense fallback="Loading...">
-              <SearchDrama />
-            </Suspense>
+            <SearchDrama />
           </div>
         </div>
       </div>

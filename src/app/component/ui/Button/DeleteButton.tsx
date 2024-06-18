@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";

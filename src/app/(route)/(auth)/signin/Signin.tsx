@@ -1,6 +1,5 @@
 "use client";
-
-import { signInForm, TSignInForm } from "@/app/helper/zod";
+import { signInForm, TSignInForm } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -217,7 +216,7 @@ const Signin = () => {
                   </label>
                 </div>
 
-                <Link href="/forgot_password">Forgot password?</Link>
+                <Link href="/forgot-password">Forgot password?</Link>
               </div>
 
               <div className="text-center lg:text-left">

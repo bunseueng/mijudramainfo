@@ -8,11 +8,14 @@ import React from "react";
 import ListCard from "./ListCard";
 import {
   currentUserProps,
+  ICurrentUser,
+  IList,
   IRating,
   List,
   Rating,
   UserProps,
-} from "@/app/helper/type";
+} from "@/helper/type";
+import { User } from "../../profile/[name]/ProfileItem";
 
 export interface Lists {
   findSpecificRating: IRating[];

@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  currentUserProps,
-  IFindSpecificUser,
-  IFriend,
-} from "@/app/helper/type";
+import { currentUserProps, IFindSpecificUser, IFriend } from "@/helper/type";
 import moment from "moment";
 import Image from "next/image";
 import Link from "next/link";

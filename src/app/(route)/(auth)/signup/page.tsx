@@ -1,12 +1,8 @@
-import React, { Suspense } from "react";
+import React from "react";
 import Signup from "./Signup";
 
 const SignupPage = () => {
-  return (
-    <Suspense>
-      <Signup />
-    </Suspense>
-  );
+  return <Signup />;
 };
 
 export default SignupPage;

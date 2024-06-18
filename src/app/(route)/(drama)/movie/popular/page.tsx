@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import PopularMovie from "./PopularMovie";
 import { Metadata } from "next";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
 
 export const metadata: Metadata = {
   title: "Popular Movie",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const PopularMoviePage = () => {
   return (
     <div className="mt-10">
-      <Suspense fallback={<SearchLoading />}>
+      <Suspense fallback={<ExploreLoading />}>
         <PopularMovie />
       </Suspense>
     </div>

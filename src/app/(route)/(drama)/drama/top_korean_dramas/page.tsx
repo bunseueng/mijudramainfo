@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import React, { Suspense } from "react";
 import Top100Korean from "./Top100Korean";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
-import ErrorBoundary from "@/app/component/ui/Loading/ErrorBoundary";
+import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
 
 export const metadata: Metadata = {
   title: "Top 100 Korean Dramas",
@@ -12,11 +11,9 @@ export const metadata: Metadata = {
 const TopChineseDramas = () => {
   return (
     <div className="mt-10">
-      <ErrorBoundary>
-        <Suspense fallback={<SearchLoading />}>
-          <Top100Korean />
-        </Suspense>
-      </ErrorBoundary>
+      <Suspense fallback={<ExploreLoading />}>
+        <Top100Korean />
+      </Suspense>
     </div>
   );
 };

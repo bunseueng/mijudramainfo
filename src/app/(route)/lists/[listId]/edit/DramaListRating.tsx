@@ -1,11 +1,9 @@
 import React from "react";
-import {
-  convertToFiveStars,
-  StyledRating,
-} from "@/app/component/ui/Card/ExploreCard";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { Rating } from "@/app/helper/type";
+import { Rating } from "@/helper/type";
+import { StyledRating } from "@/app/actions/StyleRating";
+import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 
 const DramaListRating = ({ item }: any, yourRating: Rating[]) => {
   // Function to find rating for a specific item

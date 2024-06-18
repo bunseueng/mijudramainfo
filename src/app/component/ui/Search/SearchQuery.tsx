@@ -9,8 +9,9 @@ import {
 import Results from "@/app/component/ui/Search/Results";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import React, { Suspense, useState } from "react";
+import React, { useState } from "react";
 import { SearchPagination } from "../Pagination/SearchPagination";
+import SearchLoading from "../Loading/SearchLoading";
 
 const SearchQuery = ({ BASE_URL, currentUser }: any) => {
   const [page, setPage] = useState(1);
@@ -64,7 +65,7 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
     placeholderData: keepPreviousData,
   });
 
-  const { data: results } = useQuery({
+  const { data: results, isLoading } = useQuery({
     queryKey: ["results", searchQuery],
     queryFn: () => fetchMultipleSearch(currentPage),
     placeholderData: keepPreviousData,
@@ -96,6 +97,9 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
     queryFn: () => fetchCollectionSearch(searchQuery),
   });
 
+  if (isLoading) {
+    return <SearchLoading />;
+  }
   return (
     <div className="mt-10">
       {totalItems?.length === 0 && (
@@ -103,24 +107,20 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
       )}
       {totalItems?.length > 0 && (
         <>
-          <Suspense fallback="Loading...">
-            <Results
-              items={items}
-              results={totalItems}
-              searchQuery={searchQuery}
-              fetchMovie={fetchMovie}
-              fetchTv={fetchTv}
-              fetchCollection={fetchCollection}
-              fetchPersons={fetchPersons}
-              BASE_URL={BASE_URL}
-              searchParams={searchParams}
-              currentUser={currentUser}
-            />
-          </Suspense>
+          <Results
+            items={items}
+            results={totalItems}
+            searchQuery={searchQuery}
+            fetchMovie={fetchMovie}
+            fetchTv={fetchTv}
+            fetchCollection={fetchCollection}
+            fetchPersons={fetchPersons}
+            BASE_URL={BASE_URL}
+            searchParams={searchParams}
+            currentUser={currentUser}
+          />
           <div className="flex flex-wrap items-start justify-start max-w-[1520px] mx-auto pb-10">
-            <Suspense fallback="Loading...">
-              <SearchPagination setPage={setPage} totalItems={items} />
-            </Suspense>
+            <SearchPagination setPage={setPage} totalItems={items} />
           </div>
         </>
       )}

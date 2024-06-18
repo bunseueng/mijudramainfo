@@ -7,8 +7,9 @@ import { usePathname, useSearchParams } from "next/navigation";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { useQuery } from "@tanstack/react-query";
-import { convertToFiveStars, StyledRating } from "./ExploreCard";
 import { useEffect, useState } from "react";
+import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
+import { StyledRating } from "@/app/actions/StyleRating";
 
 export default function Card({ result, BASE_URL }: any) {
   const [tvRating, setTvRating] = useState<any>();

@@ -1,4 +1,4 @@
-import { footer, footerRecommend } from "@/app/helper/item-list";
+import { footer, footerRecommend } from "@/helper/item-list";
 import ThemeSwitch from "@/components/ui/ThemeIcon";
 import Image from "next/image";
 import Link from "next/link";

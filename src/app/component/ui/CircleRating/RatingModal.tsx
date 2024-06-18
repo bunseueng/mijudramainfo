@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Box, Slider } from "@mui/material";
-import { starLabels } from "@/app/helper/item-list";
+import { starLabels } from "@/helper/item-list";
 import Image from "next/image";
 import {
   afraidIcon,
@@ -12,12 +12,12 @@ import {
   interestedIcon,
   sadIcon,
   suprisedIcon,
-} from "@/app/helper/RatingIcon";
+} from "@/helper/RatingIcon";
+import { createRating, TCreateRating } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { usePathname, useRouter } from "next/navigation";
-import { createRating, TCreateRating } from "@/app/helper/zod";
 
 const RatingModal = ({
   setModal,
