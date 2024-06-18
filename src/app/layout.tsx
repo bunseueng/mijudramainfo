@@ -10,6 +10,8 @@ import SessionAllPage from "./component/ui/Main/SessionAllPage";
 import Footer from "./component/ui/Main/Footer";
 import { PHProvider } from "@/provider/PostHogProvider";
 import { Suspense } from "react";
+import Adsense from "./component/ui/Adsense/Adsense";
+import AdBanner from "./component/ui/Adsense/AdBanner";
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],
@@ -36,6 +38,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Adsense pId="9500233280708226" />
+      </head>
       <body className={`bg-slate-100 dark:bg-[#1e1e1e]  ${nunito.className}`}>
         <PHProvider>
           <Provider>

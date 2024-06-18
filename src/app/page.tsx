@@ -4,6 +4,8 @@ import LatestDrama from "./component/ui/Fetching/LatestDrama";
 import TrendingDrama from "./component/ui/Fetching/TrendingDrama";
 import Header from "./component/ui/Main/Header";
 import { Suspense } from "react";
+import AdArticle from "./component/ui/Adsense/AdArticle";
+import AdBanner from "./component/ui/Adsense/AdBanner";
 
 export default async function Home() {
   const trending = "Trending";
@@ -24,6 +26,7 @@ export default async function Home() {
             <TrendingDrama heading={trending} />
           </Suspense>
         </div>
+
         <div className="mb-10">
           <Suspense fallback={<div>Loading...</div>}>
             <Actor heading={actress} />
@@ -33,6 +36,9 @@ export default async function Home() {
           <Suspense fallback={<div>Loading...</div>}>
             <LatestDrama heading={latestDrama} />
           </Suspense>
+        </div>
+        <div className="py-5 hidden lg:block">
+          <AdBanner dataAdFormat="auto" dataAdSlot="1797555299" />
         </div>
         <div className="mb-5">
           <Suspense fallback={<div>Loading...</div>}>

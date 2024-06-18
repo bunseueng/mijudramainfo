@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import SearchLoading from "../Loading/SearchLoading";
+import AdBanner from "../Adsense/AdBanner";
 
 const ExploreCard = ({ title, topDramas, total_results }: any) => {
   const [page, setPage] = useState(1);
@@ -112,10 +113,13 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
   });
 
   return (
-    <div className="max-w-[1520px] mx-auto py-4 px-4 md:px-6">
+    <div className="max-w-[1134px] mx-auto py-4">
+      <div className="py-5">
+        <AdBanner dataAdFormat="auto" dataAdSlot="9500233280708226" />
+      </div>
       <div className="mt-10">
         <div className="flex flex-col md:flex-row mt-10 w-full">
-          <div className="w-full md:w-[70%]">
+          <div className="w-full md:w-[70%] px-1 md:px-3">
             <div className="flex items-center justify-between mb-5">
               <h1 className="text-2xl font-bold">{title}</h1>
               <p>{total_results} results</p>
@@ -250,14 +254,22 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                 </div>
               ))}
           </div>
-          <div className="w-full md:w-[30%]">
-            <div className="border bg-white dark:bg-[#242424] rounded-lg ml-4 lg:ml-10">
+          <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3">
+            <div className="py-5 hidden md:block">
+              <AdBanner dataAdFormat="auto" dataAdSlot="8869751170" />
+            </div>
+            <div className="border bg-white dark:bg-[#242424] rounded-lg">
               <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:border-[#272727]">
                 Advanced Search
               </h1>
               <Suspense fallback={<SearchLoading />}>
                 <DramaFilter />
               </Suspense>
+            </div>
+            <div className="hidden md:block relative bg-black mx-auto my-5">
+              <div className="min-w-auto min-h-screen">
+                <AdBanner dataAdFormat="auto" dataAdSlot="8869751170" />
+              </div>
             </div>
           </div>
         </div>
