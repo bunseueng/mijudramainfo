@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Card from "../Card/Card";
 import Person from "../Fetching/Person";
+import { Suspense } from "react";
+import SearchLoading from "../Loading/SearchLoading";
 
 export default function Results({
   results,
@@ -30,20 +32,24 @@ export default function Results({
                 key={idx}
               >
                 {!result.gender && !result.known_for ? (
-                  <Card
-                    key={idx}
-                    result={result}
-                    searchQuery={searchQuery}
-                    BASE_URL={BASE_URL}
-                  />
+                  <Suspense fallback={<SearchLoading />}>
+                    <Card
+                      key={idx}
+                      result={result}
+                      searchQuery={searchQuery}
+                      BASE_URL={BASE_URL}
+                    />
+                  </Suspense>
                 ) : (
-                  <Person
-                    key={idx}
-                    result={result}
-                    searchQuery={searchQuery}
-                    BASE_URL={BASE_URL}
-                    currentUser={currentUser}
-                  />
+                  <Suspense fallback={<SearchLoading />}>
+                    <Person
+                      key={idx}
+                      result={result}
+                      searchQuery={searchQuery}
+                      BASE_URL={BASE_URL}
+                      currentUser={currentUser}
+                    />
+                  </Suspense>
                 )}
               </div>
             ))}

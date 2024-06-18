@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import React, { Suspense } from "react";
 import Top100Japanese from "./Top100Japanese";
-import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 export const metadata: Metadata = {
   title: "Top 100 Japanese Dramas",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const TopJapaneseDrama = () => {
   return (
     <div className="mt-10">
-      <Suspense fallback={<ExploreLoading />}>
+      <Suspense fallback={<SearchLoading />}>
         <Top100Japanese />
       </Suspense>
     </div>

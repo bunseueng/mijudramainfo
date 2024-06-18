@@ -35,11 +35,15 @@ const TagResult = ({
   };
 
   const fetchMultiSearch = async (pages = 1) => {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/search/keyword?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${queries}&language=en-US&with_original_language=zh&region=CN&season&page=${pages}`
-    );
-    const data = await res.json();
-    return data.results;
+    try {
+      const res = await fetch(
+        `https://api.themoviedb.org/3/search/keyword?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${queries}&language=en-US&with_original_language=zh&region=CN&season&page=${pages}`
+      );
+      const data = await res.json();
+      return data.results;
+    } catch (error: any) {
+      console.log("Failed to fetch", error);
+    }
   };
 
   const { data: keyword, isLoading } = useQuery({
@@ -101,10 +105,6 @@ const TagResult = ({
       });
     }
   };
-
-  if (isLoading) {
-    <div className="">Fetching...</div>;
-  }
 
   return (
     <>

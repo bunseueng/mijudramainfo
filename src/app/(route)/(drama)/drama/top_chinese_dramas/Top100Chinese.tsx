@@ -4,7 +4,8 @@ import { fetch100TopDrama } from "@/app/actions/fetchMovieApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import ExploreCard from "@/app/component/ui/Card/ExploreCard";
-import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
+import { Suspense } from "react";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 const Top100Chinese = () => {
   const searchParams = useSearchParams();
@@ -35,15 +36,14 @@ const Top100Chinese = () => {
   // Display the result as text
   const total_results = displayedItemsCount * 5;
 
-  if (isLoading) {
-    return <ExploreLoading />;
-  }
   return (
-    <ExploreCard
-      title={title}
-      topDramas={topDramas}
-      total_results={total_results}
-    />
+    <Suspense fallback={<SearchLoading />}>
+      <ExploreCard
+        title={title}
+        topDramas={topDramas}
+        total_results={total_results}
+      />
+    </Suspense>
   );
 };
 

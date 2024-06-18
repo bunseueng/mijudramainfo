@@ -4,7 +4,8 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import ExploreMovieCard from "@/app/component/ui/Card/ExploreMovieCard";
 import { fetchPopularMovie } from "@/app/actions/fetchMovieApi";
-import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
+import { Suspense } from "react";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 const PopularMovie = () => {
   const searchParams = useSearchParams();
@@ -17,10 +18,11 @@ const PopularMovie = () => {
     placeholderData: keepPreviousData,
   });
 
-  if (isLoading) {
-    return <ExploreLoading />;
-  }
-  return <ExploreMovieCard title={title} movie={popularMovie} />;
+  return (
+    <Suspense fallback={<SearchLoading />}>
+      <ExploreMovieCard title={title} movie={popularMovie} />
+    </Suspense>
+  );
 };
 
 export default PopularMovie;

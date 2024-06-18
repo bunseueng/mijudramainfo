@@ -40,7 +40,7 @@ export default function Card({ result, BASE_URL }: any) {
       }
     };
     fetchRating();
-  }, [result.id]);
+  }, [result?.id]);
 
   const pathname = usePathname();
   const searchParams = useSearchParams();

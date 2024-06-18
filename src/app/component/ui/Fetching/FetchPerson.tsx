@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import Drama from "../../../(route)/(id)/person/[id]/Drama";
 import VarietyShow from "../../../(route)/(id)/person/[id]/VarietyShow";
 import PersonMovie from "@/app/(route)/(id)/person/[id]/PersonMovie";
@@ -329,12 +329,14 @@ const FetchPerson = ({
           </div>
         </div>
         <div className="w-full md:w-[60%] lg:w-[70%] md:px-4 mt-4 md:mt-0 float-right">
-          <Discuss
-            user={currentUser}
-            users={users}
-            getComment={getComment}
-            tv_id={tv_id}
-          />
+          <Suspense fallback={<div>Loading...</div>}>
+            <Discuss
+              user={currentUser}
+              users={users}
+              getComment={getComment}
+              tv_id={tv_id}
+            />
+          </Suspense>
         </div>
       </div>
     </>

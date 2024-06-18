@@ -4,7 +4,7 @@ import { getYearFromDate } from "@/app/(route)/(id)/tv/[id]/DramaMain";
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import DramaFilter from "@/app/(route)/(drama)/drama/top/DramaFilter";
 import { useQuery } from "@tanstack/react-query";
 import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
+import SearchLoading from "../Loading/SearchLoading";
 
 const ExploreCard = ({ title, topDramas, total_results }: any) => {
   const [page, setPage] = useState(1);
@@ -76,28 +77,32 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
   }, [topDramas]);
 
   const fetchEpisodeCount = async (ids: number[]) => {
-    const promises = ids.map((id) =>
-      fetch(
-        `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch episode count");
-          }
-          return response.json();
-        })
-        .then((data) => ({
-          id: id,
-          episode_count: data.number_of_episodes, // Adjust to match API response structure
-        }))
-    );
+    try {
+      const promises = ids.map((id) =>
+        fetch(
+          `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to fetch episode count");
+            }
+            return response.json();
+          })
+          .then((data) => ({
+            id: id,
+            episode_count: data.number_of_episodes, // Adjust to match API response structure
+          }))
+      );
 
-    const results = await Promise.all(promises);
-    const episodeCounts: { [key: number]: number } = {};
-    results.forEach((result) => {
-      episodeCounts[result.id] = result.episode_count;
-    });
-    return episodeCounts;
+      const results = await Promise.all(promises);
+      const episodeCounts: { [key: number]: number } = {};
+      results.forEach((result) => {
+        episodeCounts[result.id] = result.episode_count;
+      });
+      return episodeCounts;
+    } catch (error: any) {
+      console.log(error);
+    }
   };
 
   const result_id = totalItems?.map((drama: any) => drama?.id);
@@ -237,7 +242,9 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                       {drama?.overview}
                     </p>
                     <div className="flex items-center">
-                      <PlayTrailer tv_id={drama?.id} />
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <PlayTrailer tv_id={drama?.id} />
+                      </Suspense>
                     </div>
                   </div>
                 </div>
@@ -248,13 +255,17 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
               <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:border-[#272727]">
                 Advanced Search
               </h1>
-              <DramaFilter />
+              <Suspense fallback={<SearchLoading />}>
+                <DramaFilter />
+              </Suspense>
             </div>
           </div>
         </div>
       </div>
       <div className="my-5">
-        <DramaPagination setPage={setPage} totalItems={items} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <DramaPagination setPage={setPage} totalItems={items} />
+        </Suspense>
       </div>
     </div>
   );

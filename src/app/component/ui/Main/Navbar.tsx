@@ -428,7 +428,9 @@ const Navbar: React.FC<Notification> = ({
                 <div className="flex items-center cursor-pointer">
                   <Image
                     src={
-                      user?.profileAvatar || (session?.user?.image as string)
+                      user?.profileAvatar
+                        ? user?.profileAvatar
+                        : (session?.user?.image as string) || "/empty-pf.jpg"
                     }
                     alt="pf"
                     width={100}

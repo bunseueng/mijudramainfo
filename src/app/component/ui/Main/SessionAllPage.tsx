@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import React from "react";
+import React, { Suspense } from "react";
 import prisma from "@/lib/db";
 import Navbar from "./Navbar";
 
@@ -26,15 +26,17 @@ const SessionAllPage = async () => {
     friend?.map((friend: any) => friend?.friendRespondId).includes(user?.id)
   );
   return (
-    <Navbar
-      users={users}
-      user={user}
-      currentUser={currentUser}
-      findSpecificUser={findSpecificUser}
-      yourFriend={yourFriend}
-      friend={friend}
-      comment={comment}
-    />
+    <Suspense fallback={<div>Loading...</div>}>
+      <Navbar
+        users={users}
+        user={user}
+        currentUser={currentUser}
+        findSpecificUser={findSpecificUser}
+        yourFriend={yourFriend}
+        friend={friend}
+        comment={comment}
+      />
+    </Suspense>
   );
 };
 

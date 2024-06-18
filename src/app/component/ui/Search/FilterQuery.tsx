@@ -9,7 +9,7 @@ import {
 import Results from "@/app/component/ui/Search/Results";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { SearchPagination } from "../Pagination/SearchPagination";
 import moment from "moment";
 
@@ -38,31 +38,35 @@ const FilterQuery = ({ BASE_URL }: any) => {
   const formattedDate = sevenDaysAgo.format("YYYY-MM-DD");
 
   const fetchMultiSearch = async (pages = 1) => {
-    let url = `${BASE_URL}?api_key=${
-      process.env.NEXT_PUBLIC_API_KEY
-    }&language=en-US&with_origin_country=${encodeURIComponent(searchQuery)}`;
+    try {
+      let url = `${BASE_URL}?api_key=${
+        process.env.NEXT_PUBLIC_API_KEY
+      }&language=en-US&with_origin_country=${encodeURIComponent(searchQuery)}`;
 
-    // Check if date and to variables are defined before adding them to the URL
-    if (date && to) {
-      url += `&first_air_date.gte=${date}-01-01&first_air_date.lte=${to}-12-31`;
-    } else if (sortby === "formattedDate") {
-      url += `&air_date.gte=${formattedDate}`;
+      // Check if date and to variables are defined before adding them to the URL
+      if (date && to) {
+        url += `&first_air_date.gte=${date}-01-01&first_air_date.lte=${to}-12-31`;
+      } else if (sortby === "formattedDate") {
+        url += `&air_date.gte=${formattedDate}`;
+      }
+
+      // Add genre 10764 (Reality) only if the query type is "tvShows"
+      if (type === "tvShows") {
+        url += "&with_genres=10764"; // Add the Reality genre
+      } else {
+        url += !genreQuery
+          ? "&without_genres=16,10764,10767,99"
+          : `&with_genres=${genreQuery}`;
+      }
+
+      url += `&with_keywords=${keywords}&with_networks=${network}&vote_average.gte=${rating}&vote_average.lte=${rto}&with_status=${status}&sortby=${sortby}&page=${pages}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      return data;
+    } catch (error: any) {
+      console.log(error, "Failed to fetch");
     }
-
-    // Add genre 10764 (Reality) only if the query type is "tvShows"
-    if (type === "tvShows") {
-      url += "&with_genres=10764"; // Add the Reality genre
-    } else {
-      url += !genreQuery
-        ? "&without_genres=16,10764,10767,99"
-        : `&with_genres=${genreQuery}`;
-    }
-
-    url += `&with_keywords=${keywords}&with_networks=${network}&vote_average.gte=${rating}&vote_average.lte=${rto}&with_status=${status}&sortby=${sortby}&page=${pages}`;
-
-    const res = await fetch(url);
-    const data = await res.json();
-    return data;
   };
 
   const { data: results } = useQuery({
@@ -103,7 +107,7 @@ const FilterQuery = ({ BASE_URL }: any) => {
         <h1 className="text-center pt-6">No results found</h1>
       )}
       {totalItems?.length > 0 && (
-        <>
+        <Suspense fallback={<div>Loading...</div>}>
           <Results
             items={items}
             results={totalItems}
@@ -117,7 +121,7 @@ const FilterQuery = ({ BASE_URL }: any) => {
           <div className="flex flex-col items-start justify-start max-w-[1520px] mx-auto pb-10">
             <SearchPagination setPage={setPage} totalItems={items} />
           </div>
-        </>
+        </Suspense>
       )}
     </div>
   );

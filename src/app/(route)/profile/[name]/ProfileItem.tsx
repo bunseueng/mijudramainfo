@@ -15,7 +15,6 @@ import Links from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Watchlist from "./watchlist/Watchlist";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 import { FaCheck, FaList, FaUserCheck } from "react-icons/fa6";
 import { IoPersonAddSharp } from "react-icons/io5";
 import ProfileList from "./lists/ProfileList";

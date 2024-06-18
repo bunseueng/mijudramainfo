@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import MediaPhoto from "./Media";
 
 const MediaPage = ({
@@ -12,17 +13,19 @@ const MediaPage = ({
   tv_id,
 }: any) => {
   return (
-    <MediaPhoto
-      tv={tv}
-      mediaActive={mediaActive}
-      setMediaActive={setMediaActive}
-      image={image}
-      video={video}
-      thumbnails={thumbnails}
-      openTrailer={openTrailer}
-      setOpenTrailer={setOpenTrailer}
-      tv_id={tv_id}
-    />
+    <Suspense fallback={<div>Loading...</div>}>
+      <MediaPhoto
+        tv={tv}
+        mediaActive={mediaActive}
+        setMediaActive={setMediaActive}
+        image={image}
+        video={video}
+        thumbnails={thumbnails}
+        openTrailer={openTrailer}
+        setOpenTrailer={setOpenTrailer}
+        tv_id={tv_id}
+      />
+    </Suspense>
   );
 };
 

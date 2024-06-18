@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import SessionAllPage from "./component/ui/Main/SessionAllPage";
 import Footer from "./component/ui/Main/Footer";
 import { PHProvider } from "@/provider/PostHogProvider";
+import { Suspense } from "react";
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],

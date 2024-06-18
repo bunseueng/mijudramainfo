@@ -63,7 +63,9 @@ const UploadAvatar: React.FC<UploadAvatarProps> = ({
       <div className="w-[100px] h-[100px]">
         <Image
           src={
-            user?.profileAvatar !== null
+            avatar
+              ? avatar
+              : user?.profileAvatar !== null
               ? user?.profileAvatar
               : (user?.image as any)
           }

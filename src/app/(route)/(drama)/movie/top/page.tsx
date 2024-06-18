@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const TopDramaPage = () => {
   return (
     <div className="mt-10">
-      <Suspense fallback={<ExploreLoading />}>
+      <Suspense fallback={<div>Loading...</div>}>
         <TopDrama />
       </Suspense>
     </div>

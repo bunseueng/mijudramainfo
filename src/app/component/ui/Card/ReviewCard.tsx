@@ -4,7 +4,7 @@ import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
 import MediaPage from "@/app/(route)/(id)/tv/[id]/media/page";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaBookmark } from "react-icons/fa";
 import { IoHeartSharp } from "react-icons/io5";
@@ -38,42 +38,48 @@ const ReviewCard = ({
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
   useEffect(() => {
-    const fetchThumbnails = async () => {
-      if (video?.results) {
-        const keys = video.results.map((item: any) => item.key);
-        const promises = keys.map((key: string) =>
-          fetch(
-            `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${key}&key=${api}`
-          ).then((response) => response.json())
-        );
-
-        try {
-          const responses = await Promise.all(promises);
-          const thumbnailsData = responses.map(
-            (response: any) => response.items[0].snippet.thumbnails.medium.url
+    try {
+      const fetchThumbnails = async () => {
+        if (video?.results) {
+          const keys = video.results.map((item: any) => item.key);
+          const promises = keys.map((key: string) =>
+            fetch(
+              `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${key}&key=${api}`
+            ).then((response) => response.json())
           );
-          setThumbnails(thumbnailsData);
-        } catch (error) {
-          console.error("Error fetching thumbnails:", error);
-        }
-      }
-    };
 
-    fetchThumbnails();
+          try {
+            const responses = await Promise.all(promises);
+            const thumbnailsData = responses.map(
+              (response: any) => response.items[0].snippet.thumbnails.medium.url
+            );
+            setThumbnails(thumbnailsData);
+          } catch (error) {
+            console.error("Error fetching thumbnails:", error);
+          }
+        }
+      };
+
+      fetchThumbnails();
+    } catch (error) {
+      console.error("Error fetching thumbnails:", error);
+    }
   }, [video]);
   return (
-    <div className="">
-      <MediaPage
-        tv={tv}
-        mediaActive={mediaActive}
-        setMediaActive={setMediaActive}
-        image={image}
-        video={video}
-        thumbnails={thumbnails}
-        openTrailer={openTrailer}
-        setOpenTrailer={setOpenTrailer}
-        tv_id={tv_id}
-      />
+    <div>
+      <Suspense fallback={<div>Loading...</div>}>
+        <MediaPage
+          tv={tv}
+          mediaActive={mediaActive}
+          setMediaActive={setMediaActive}
+          image={image}
+          video={video}
+          thumbnails={thumbnails}
+          openTrailer={openTrailer}
+          setOpenTrailer={setOpenTrailer}
+          tv_id={tv_id}
+        />
+      </Suspense>
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         <h1 className="text-2xl font-bold py-4">Recommendations</h1>
         {recommend?.results?.length === 0 ? (

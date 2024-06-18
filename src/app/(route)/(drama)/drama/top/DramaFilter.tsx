@@ -13,7 +13,7 @@ import {
   typeCheckbox2,
 } from "@/helper/item-list";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import TagResult from "./TagResult";
 import { Slider } from "@mui/material";
@@ -384,15 +384,17 @@ const DramaFilter = () => {
           }`}
         >
           <div className="my-2 relative">
-            <TagResult
-              searchParams={searchParams}
-              setSearchQueryKeyword={setSearchQueryKeyword}
-              searchQueryKeyword={searchQueryKeyword}
-              router={router}
-              pathname={pathname}
-              showResult={showResult}
-              setShowResult={setShowResult}
-            />
+            <Suspense fallback={<div>Loading...</div>}>
+              <TagResult
+                searchParams={searchParams}
+                setSearchQueryKeyword={setSearchQueryKeyword}
+                searchQueryKeyword={searchQueryKeyword}
+                router={router}
+                pathname={pathname}
+                showResult={showResult}
+                setShowResult={setShowResult}
+              />
+            </Suspense>
           </div>
         </div>
       </div>
@@ -476,24 +478,26 @@ const DramaFilter = () => {
             openDrop === "date" ? "block" : "hidden"
           }`}
         >
-          <Slider
-            value={selectedYear}
-            onChange={handleChange}
-            min={1980}
-            max={2035}
-            step={1}
-            sx={{
-              height: 10,
-              "& .MuiSlider-valueLabel": {
-                // Customize styles for the value label
-                backgroundColor: "#3498db", // Example background color
-                color: "#ffffff", // Example text color
-                borderRadius: "4px", // Example border radius
-                fontSize: "1rem", // Example font size
-              },
-            }}
-            valueLabelDisplay="on"
-          />
+          <Suspense fallback={<div>Loading...</div>}>
+            <Slider
+              value={selectedYear}
+              onChange={handleChange}
+              min={1980}
+              max={2035}
+              step={1}
+              sx={{
+                height: 10,
+                "& .MuiSlider-valueLabel": {
+                  // Customize styles for the value label
+                  backgroundColor: "#3498db", // Example background color
+                  color: "#ffffff", // Example text color
+                  borderRadius: "4px", // Example border radius
+                  fontSize: "1rem", // Example font size
+                },
+              }}
+              valueLabelDisplay="on"
+            />
+          </Suspense>
         </div>
       </div>
 
@@ -513,40 +517,42 @@ const DramaFilter = () => {
             openDrop === "rating" ? "block" : "hidden"
           }`}
         >
-          <Slider
-            value={selectedRating}
-            onChange={handleChangeRating}
-            min={1}
-            max={10}
-            step={0.5}
-            sx={{
-              height: 10,
-              "& .MuiSlider-valueLabel": {
-                backgroundColor: "transparent",
-                color: "#000",
-                borderRadius: "4px",
-                fontSize: "1rem",
-                position: "relative",
-                marginTop: "25px",
-                "&::before": {
-                  content: "''",
-                  position: "absolute",
-                  top: "-20px",
-                  left: "33%",
-                  width: "20px",
-                  height: "20px",
-                  background: "url(/star.png)",
-                  backgroundSize: "cover",
-                  transform: "rotate(0deg)",
+          <Suspense fallback={<div>Loading...</div>}>
+            <Slider
+              value={selectedRating}
+              onChange={handleChangeRating}
+              min={1}
+              max={10}
+              step={0.5}
+              sx={{
+                height: 10,
+                "& .MuiSlider-valueLabel": {
+                  backgroundColor: "transparent",
+                  color: "#000",
+                  borderRadius: "4px",
+                  fontSize: "1rem",
+                  position: "relative",
+                  marginTop: "25px",
+                  "&::before": {
+                    content: "''",
+                    position: "absolute",
+                    top: "-20px",
+                    left: "33%",
+                    width: "20px",
+                    height: "20px",
+                    background: "url(/star.png)",
+                    backgroundSize: "cover",
+                    transform: "rotate(0deg)",
+                  },
                 },
-              },
-              "& .MuiSlider-markLabel": {
-                color: "rgb(52, 152, 219)",
-              },
-            }}
-            marks={starLabels}
-            valueLabelDisplay="on"
-          />
+                "& .MuiSlider-markLabel": {
+                  color: "rgb(52, 152, 219)",
+                },
+              }}
+              marks={starLabels}
+              valueLabelDisplay="on"
+            />
+          </Suspense>
         </div>
       </div>
 
