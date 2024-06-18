@@ -199,7 +199,7 @@ const Navbar: React.FC<Notification> = ({
           >
             <p className="text-lg md:text-2xl text-cyan-400">MijuDramaInfo</p>
             <Image
-              src="/untitled.svg"
+              src="/Untitled.svg"
               alt="Website logo"
               width={200}
               height={200}
