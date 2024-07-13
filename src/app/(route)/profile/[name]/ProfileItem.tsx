@@ -170,7 +170,7 @@ const ProfileItem: React.FC<
       <div className="flex flex-col md:block md:-mx-3">
         <div className="order-2 float-left w-full md:w-[33.33333%] relative px-3">
           <div className="block">
-            <div className="relative bg-[#242526] border-2 border-[#00000024] shadow-sm mb-3">
+            <div className="relative bg-[#fff] dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
               <div className="text-center px-3 py-2">
                 <div className="text-center mb-4">
                   <Image
@@ -184,7 +184,7 @@ const ProfileItem: React.FC<
                 </div>
                 <Links
                   href={`/lists/${list?.map((item) => item?.listId)}`}
-                  className="block w-full text-[#ffffffde] text-md bg-[#3a3b3c] border-2 border-[#3e4042] px-5 py-3 shadow-sm"
+                  className="block w-full text-black dark:text-[#ffffffde] text-md bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#d3d3d38c] dark:border-[#3e4042] px-5 py-3 shadow-sm"
                 >
                   <span className="flex items-center justify-center">
                     <FaList className="mr-2" />{" "}
@@ -221,11 +221,11 @@ const ProfileItem: React.FC<
                 </div>
               </div>
             </div>
-            <div className="block relative bg-[#242526] border-2 border-[#00000024] rounded-sm mb-3 overflow-hidden">
+            <div className="block relative bg-[#fff] dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
               <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
                 <h3>Details</h3>
               </div>
-              <div className="bg-[#1b1c1d] px-3 py-2">
+              <div className="bg-white dark:bg-[#1b1c1d] px-3 py-2">
                 <ul className="rounded-sm">
                   <li className="block relative p-0">
                     <b className="inline-block font-bold">Last Online: </b>
@@ -260,16 +260,16 @@ const ProfileItem: React.FC<
               </div>
             </div>
 
-            <div className="block relative bg-[#242526] border-2 border-[#00000024] rounded-sm mb-3 overflow-hidden">
+            <div className="block relative bg-[#fff] dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
               <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
                 <h3>Recent Lists</h3>
               </div>
-              <div className="bg-[#1b1c1d] px-3 py-2">
+              <div className="bg-white dark:bg-[#1b1c1d] px-3 py-2">
                 <RecentLists list={list} movieId={movieId} tvId={tvid} />
               </div>
             </div>
 
-            <div className="block relative bg-[#242526] border-2 border-[#00000024] rounded-sm mb-3 overflow-hidden">
+            <div className="block relative bg-[#fff] dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
               <div className="relative px-3 py-2">
                 <h3>Friends</h3>
               </div>
@@ -296,7 +296,7 @@ const ProfileItem: React.FC<
           </div>
         </div>
         <div className="order-1 float-left w-full md:w-[66.66667%] relative px-3">
-          <div className="inline-block w-full h-full bg-[#242526] relative border-2 border-[#00000024] shadow-sm mb-3">
+          <div className="inline-block w-full h-full bg-[#fff] dark:bg-[#242526] relative border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
             <div className="inline-block w-full h-full relative mt-5 md:mt-2">
               <div className="float-left relative px-3 mb-2">
                 <div className="md:hidden">

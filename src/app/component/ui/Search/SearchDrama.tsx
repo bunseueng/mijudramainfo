@@ -3,6 +3,7 @@
 import { SearchParamsType } from "@/helper/type";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 const SearchDrama = () => {
   const [search, setSearch] = useState("");
@@ -11,24 +12,27 @@ const SearchDrama = () => {
   const query = searchParams?.get("query") ?? "";
   const router = useRouter();
 
-  const onInput = (e: any) => {
-    const { name, value } = e.target;
-    if (name === "homeSearch") {
-      setSearch(value);
-    } else {
-      setSearch(value);
-    }
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+  const onInput = useDebouncedCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      if (name === "homeSearch") {
+        setSearch(value);
+      } else {
+        setSearch(value);
+      }
+      const params = new URLSearchParams(searchParams as SearchParamsType);
 
-    if (value) {
-      params.set("query", value);
-    } else {
-      params.delete("query");
-    }
-    router.push(`${pathname}/?${params.toString()}`);
-  };
+      if (value) {
+        params.set("query", value);
+      } else {
+        params.delete("query");
+      }
+      router.push(`${pathname}/?${params.toString()}`);
+    },
+    400
+  );
 
-  const onSearch = (e: any) => {
+  const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams(searchParams as SearchParamsType);
     router.push(`/search/?${params.toString()}`);

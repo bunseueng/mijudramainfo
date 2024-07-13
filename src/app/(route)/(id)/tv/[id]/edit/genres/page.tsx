@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import TvEdit from "../detail/TvEdit";
 import TvEditList from "../detail/TvEditList";
 
-const TvServicesPage = async ({ params }: { params: { id: string } }) => {
+const GenresPage = async ({ params }: { params: { id: string } }) => {
   const tv_id = params.id;
   const tvDetails = await prisma.drama.findUnique({
     where: {
@@ -11,11 +11,11 @@ const TvServicesPage = async ({ params }: { params: { id: string } }) => {
     },
   });
   return (
-    <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10">
+    <div className="max-w-6xl mx-auto h-auto my-10 flex flex-col w-full mb-10">
       <TvEdit tv_id={tv_id} />
       <TvEditList tv_id={tv_id} tvDetails={tvDetails} />
     </div>
   );
 };
 
-export default TvServicesPage;
+export default GenresPage;

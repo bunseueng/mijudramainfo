@@ -62,7 +62,7 @@ const FriendRequest: React.FC<IFriend & currentUser> = ({
 
   return (
     <div className="max-w-4xl mx-auto my-10 h-screen">
-      <div className="bg-[#242526] h-[500px] border-2 border-[#00000024] shadow-md border-sm">
+      <div className="bg-white dark:bg-[#242526] h-[500px] border-2 border-[#d3d3d38c] dark:border-[#00000024] shadow-md border-sm rounded-md">
         <h1 className="text-2xl font-bold px-5 pt-4">Friends</h1>
         <ul className="inline-block w-full border-b-2 border-b-[#78828c21] -my-4 pb-1 mt-4">
           {friendItems?.map((list: any, idx: number) => (

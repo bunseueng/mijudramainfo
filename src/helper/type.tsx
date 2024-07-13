@@ -314,6 +314,9 @@ export interface EditDramaPage {
     value: string;
   }[];
   order: number;
+  page_link: string;
+  drama: [{}];
+  networks: [{}];
 }
 [];
 
@@ -330,3 +333,56 @@ export interface EditPageDefaultvalue {
     value: string;
   }[];
 }
+
+export interface ITmdbDrama {
+  adult: boolean;
+  backdrop_path: string;
+  broadcast: {
+    day: string[];
+    time: string;
+    all_episode: [{}];
+  }[];
+  created_by: any[];
+  episode_run_time: any[];
+  first_air_date: string;
+  genres: any[];
+  homepage: string;
+  id: number;
+  in_production: boolean;
+  language: string[];
+  last_air_date: string;
+  last_episode_to_air: any;
+  name: string;
+  networks: any[];
+  next_episode_to_air: any;
+  number_of_episodes: number;
+  number_of_seasons: number;
+  origin_country: string[];
+  original_language: string;
+  original_name: string;
+  overview: string;
+  popularity: number;
+  poster_path: string;
+  production_companies: any[];
+  production_countries: any[];
+  seasons: any[];
+  spoken_languages: any[];
+  status: string;
+  tagline: string;
+  type: string[];
+  vote_average: number;
+  vote_count: number;
+  release_date: string;
+  end_date: string;
+}
+
+export interface AddSeason {
+  title: string | undefined;
+  name: string | undefined;
+  episode_start: number;
+  episode_end: number;
+  air_date: string | undefined;
+  number_of_episodes?: string;
+  first_air_date?: string;
+}
+[];

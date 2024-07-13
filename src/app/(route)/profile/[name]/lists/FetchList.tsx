@@ -44,7 +44,7 @@ const FetchList: React.FC<FetchRecentListProps> = ({
     >
       <div className="flex absolute top-0 left-0">
         {isLoading || !item?.poster_path ? (
-          <span className="block bg-[#303133] border-2 border-[#303133] rounded-md w-[92px] h-[138px] shadow-[0_3px_10px_rgb(0,0,0,0.2)] hover:scale-110 transform duration-300 hover:transform hover:duration-200 cursor-pointer"></span>
+          <span className="block bg-[#efefef] dark:bg-[#303133] border-2 dark:border-[#303133] rounded-md w-[92px] h-[138px] shadow-[0_3px_10px_rgb(0,0,0,0.2)] hover:scale-110 transform duration-300 hover:transform hover:duration-200 cursor-pointer"></span>
         ) : (
           <Image
             src={`https://image.tmdb.org/t/p/original/${item.poster_path}`}

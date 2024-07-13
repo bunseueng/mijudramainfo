@@ -32,7 +32,7 @@ const CommentCard = ({
   return (
     <>
       <div className="relative pb-4 transform duration-300">
-        <div className="float-left relative inline-block w-[48px] h-[48px] bg-[#242526] mr-3">
+        <div className="float-left relative inline-block w-[48px] h-[48px] mr-3">
           <Link href="">
             <Image
               src={
@@ -42,7 +42,7 @@ const CommentCard = ({
               width={200}
               height={200}
               quality={100}
-              className="w-[48px] h-[48px] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
+              className="w-[48px] h-[48px] border-2 border-[#7a7c7e] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
             />
           </Link>
         </div>
@@ -57,12 +57,16 @@ const CommentCard = ({
             </span>
           </div>
           <div className="min-h-[21px] break-words">
-            <p className="text-sm">{comment?.message}</p>
+            <p className="text-sm text-black dark:text-white">
+              {comment?.message}
+            </p>
           </div>
           <div className="mt-2 -ml-2 whitespace-nowrap relative">
             <button
               className={`text-[#ffffff99] min-w-[30px] bg-transparent hover:text-red-500 border-0 rounded-sm transform duration-300 py-1 px-[6px] mr-[2px] cursor-default ${
-                comment.love === 0 ? "text-white" : "text-red-600"
+                comment.love === 0
+                  ? "text-black dark:text-white"
+                  : "text-red-600"
               } `}
               onClick={() => handleLove(null, tv_id)}
             >
@@ -77,7 +81,9 @@ const CommentCard = ({
                 ) : (
                   <CiHeart size={19} />
                 )}
-                <span className="text-start">{comment.love}</span>
+                <span className="text-black dark:text-white text-start">
+                  {comment.love}
+                </span>
               </span>{" "}
             </button>
             <button
@@ -86,13 +92,13 @@ const CommentCard = ({
                 onReply(comment.id);
               }}
             >
-              <span className="inline-flex items-center cursor-pointer">
+              <span className="inline-flex items-center cursor-pointer text-black dark:text-white">
                 <CiChat2 size={19} />
                 <span className="text-start">Reply</span>
               </span>{" "}
             </button>
             <div className="inline-block relative">
-              <button className="text-[#ffffff99] min-w-[30px] bg-transparent rounded-sm py-1 px-[6px] mr-[2px] opacity-60 cursor-default">
+              <button className="text-black dark:text-[#ffffff99] min-w-[30px] bg-transparent rounded-sm py-1 px-[6px] mr-[2px] opacity-60 cursor-default">
                 <HiDotsVertical
                   size={16}
                   className="cursor-pointer"

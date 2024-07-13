@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { IoCloseCircle, IoMenu, IoSearchSharp } from "react-icons/io5";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   movie_subitems,
   navbar_items,
@@ -40,6 +40,10 @@ interface Notification {
   yourFriend: findSpecificUserProps[] | null[];
   comment: CommentProps[];
 }
+const variants = {
+  open: { opacity: 1, x: 0 },
+  closed: { opacity: 0, x: "-100%" },
+};
 
 const Navbar: React.FC<Notification> = ({
   users,
@@ -51,13 +55,12 @@ const Navbar: React.FC<Notification> = ({
   comment,
 }) => {
   const [showResults, setShowResults] = useState<boolean>(true);
-  const [showSearch, setShowSearch] = useState<boolean>(true);
-  const [nav, setNav] = useState<boolean>(true);
+  const [showSearch, setShowSearch] = useState<boolean>(false);
+  const [nav, setNav] = useState<boolean>(false);
   const [hovered, setHovered] = useState<boolean>(false); // Track navbar_items and subitems hover
   const [navbarItemsHovered, setNavbarItemsHovered] = useState<boolean>(false);
   const [sessionDrop, setSessionDrop] = useState<boolean>(false);
   const [notiDrop, setNotiDrop] = useState<boolean>(false);
-  const [read, setRead] = useState<boolean>(false);
   const [navSearch, setNavSearch] = useState<string>("");
   const [repliedUserId, setRepliedUserId] = useState<string[]>();
   const [userId, setUserId] = useState<string[]>();
@@ -189,6 +192,42 @@ const Navbar: React.FC<Notification> = ({
   // Check if there are any unread friend notifications
   const hasUnreadFriends = friendNoti.includes("unread");
 
+  const handleNavClick = () => {
+    setNav(!nav);
+    if (!nav) {
+      setNotiDrop(false); // Close notiDrop when opening sessionDrop
+      setSessionDrop(false);
+      setShowSearch(false);
+    }
+  };
+
+  const handleSearchClick = () => {
+    setShowSearch(!showSearch);
+    if (!showSearch) {
+      setNav;
+      setNotiDrop(false); // Close notiDrop when opening sessionDrop
+      setSessionDrop(false);
+    }
+  };
+
+  const handleNotiDropClick = () => {
+    setNotiDrop(!notiDrop);
+    if (!notiDrop) {
+      setSessionDrop(false);
+      setNav(false);
+      setShowSearch(false);
+    }
+  };
+
+  const handleSessionDropClick = () => {
+    setSessionDrop(!sessionDrop);
+    if (!sessionDrop) {
+      setNotiDrop(false);
+      setNav(false);
+      setShowSearch(false);
+    }
+  };
+
   return (
     <nav className="bg-gradient-to-r from-sky-900 to-blue-800">
       <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-3 px-4 md:px-6">
@@ -208,11 +247,7 @@ const Navbar: React.FC<Notification> = ({
             />
           </Link>
 
-          <div
-            className={`absolute top-0 right-0 left-0 flex items-end overflow-hidden bg-navy-800 lg:h-full lg:relative lg:inset-0 justify-between w-full lg:flex lg:w-auto lg:order-1 ${
-              nav ? "hidden" : "block"
-            }`}
-          >
+          <div className="absolute top-0 right-0 left-0 flex items-end overflow-hidden bg-navy-800 lg:h-full lg:relative lg:inset-0 justify-between w-full lg:flex lg:w-auto lg:order-1">
             <div className="relative mt-3 lg:hidden">
               <input
                 type="text"
@@ -221,7 +256,7 @@ const Navbar: React.FC<Notification> = ({
               />
             </div>
             <ul className="hidden lg:flex flex-col mt-4 font-medium border border-gray-100 rounded-b-md lg:flex-row lg:mt-0 lg:border-0 dark:border-gray-700">
-              {navbar_items?.map((item: any, idx: number) => (
+              {navbar_items?.map((item, idx) => (
                 <li
                   key={idx}
                   onMouseEnter={() => handleNavbarMouseEnter(item?.label)}
@@ -236,31 +271,55 @@ const Navbar: React.FC<Notification> = ({
                 </li>
               ))}
             </ul>
-            <div className="w-[325px] h-screen bg-[#e9eaed] border-[#06090c21] p-5 lg:hidden dark:bg-[#242424] z-10">
-              <IoCloseCircle
-                onClick={() => setNav(!nav)}
-                size={35}
-                className="my-2 text-slate-400 cursor-pointer hover:opacity-70 transform duration-300"
-              />
-              <h1 className="text-2xl font-bold py-4">Shows</h1>
-              {tv_subitems.map((item: any, idx: number) => (
-                <div key={idx} className="text-black dark:text-white pl-4 py-2">
-                  <p>{item.label}</p>
-                </div>
-              ))}
-              <h1 className="text-2xl font-bold py-4">Movies</h1>
-              {movie_subitems.map((item: any, idx: number) => (
-                <div key={idx} className="text-black dark:text-white pl-4 py-2">
-                  <p>{item.label}</p>
-                </div>
-              ))}
-              <h1 className="text-2xl font-bold py-4">People</h1>
-              {people_subitems.map((item: any, idx: number) => (
-                <div key={idx} className="text-black dark:text-white pl-4 py-2">
-                  <p>{item.label}</p>
-                </div>
-              ))}
-            </div>
+            <AnimatePresence>
+              {nav && (
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
+                    duration: 1,
+                  }}
+                  className="w-[325px] h-screen bg-[#e9eaed] border-[#06090c21] p-5 lg:hidden dark:bg-[#242424] z-10"
+                >
+                  <IoCloseCircle
+                    onClick={handleNavClick}
+                    size={35}
+                    className="my-2 text-slate-400 cursor-pointer hover:opacity-70 transform duration-300"
+                  />
+                  <h1 className="text-2xl font-bold py-4">Shows</h1>
+                  {tv_subitems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="text-black dark:text-white pl-4 py-2"
+                    >
+                      <p>{item.label}</p>
+                    </div>
+                  ))}
+                  <h1 className="text-2xl font-bold py-4">Movies</h1>
+                  {movie_subitems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="text-black dark:text-white pl-4 py-2"
+                    >
+                      <p>{item.label}</p>
+                    </div>
+                  ))}
+                  <h1 className="text-2xl font-bold py-4">People</h1>
+                  {people_subitems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="text-black dark:text-white pl-4 py-2"
+                    >
+                      <p>{item.label}</p>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
         <motion.div
@@ -331,14 +390,14 @@ const Navbar: React.FC<Notification> = ({
         <div className="flex items-center lg:order-2">
           <button
             className="mx-1 md:mx-2 relative"
-            onClick={() => setNotiDrop(!notiDrop)}
+            onClick={handleNotiDropClick}
           >
             <span className="relative">
               <IoIosNotificationsOutline className="text-lg md:text-2xl text-white" />
               {hasUnreadFriends && isRepliedItself?.length < 1 ? (
                 <span className="absolute -top-2">
                   <span
-                    className={`min-w-[4px] min-h-[4px] text-xs px-1 rounded-md ${
+                    className={`text-white min-w-[4px] min-h-[4px] text-xs px-1 rounded-md ${
                       hasUnreadFriends && isRepliedItself?.length < 1
                         ? "bg-[#f44455]"
                         : "bg-transparent"
@@ -356,7 +415,7 @@ const Navbar: React.FC<Notification> = ({
               {findRpNoti && isRepliedItself?.length < 1 ? (
                 <span className="absolute -top-2">
                   <span
-                    className={`min-w-[4px] min-h-[4px] text-xs px-1 rounded-md ${
+                    className={`text-white min-w-[4px] min-h-[4px] text-xs px-1 rounded-md ${
                       findRpNoti && isRepliedItself?.length < 1
                         ? "bg-[#f44455]"
                         : "bg-transparent"
@@ -388,25 +447,22 @@ const Navbar: React.FC<Notification> = ({
           <button
             type="button"
             className={`text-white rounded-lg text-sm mx-1 md:mx-2 ${
-              showSearch ? "block" : "hidden"
+              showSearch ? "hidden" : "block"
             }`}
-            onClick={() => setShowSearch(!showSearch)}
+            onClick={handleSearchClick}
           >
             <IoSearchSharp className="text-lg md:text-2xl lg:mr-2" />
           </button>
           <button
             type="button"
             className={`text-white rounded-lg text-sm mx-1 md:mx-4 ${
-              showSearch ? "hidden" : "block"
+              showSearch ? "block" : "hidden"
             }`}
-            onClick={() => setShowSearch(!showSearch)}
+            onClick={handleSearchClick}
           >
             <IoMdClose className="text-lg md:text-2xl" />
           </button>
-          <button
-            onClick={() => setNav(!nav)}
-            className="mx-1 md:mx-2 lg:hidden"
-          >
+          <button onClick={handleNavClick} className="mx-1 md:mx-2 lg:hidden">
             <IoMenu className="text-lg md:text-2xl mr-2" />
           </button>
           {!session && (
@@ -421,10 +477,7 @@ const Navbar: React.FC<Notification> = ({
           )}
           {session && (
             <>
-              <div
-                className="relative"
-                onClick={() => setSessionDrop(!sessionDrop)}
-              >
+              <div className="relative" onClick={handleSessionDropClick}>
                 <div className="flex items-center cursor-pointer">
                   <Image
                     src={
@@ -441,8 +494,14 @@ const Navbar: React.FC<Notification> = ({
                   <IoMdArrowDropdown />
                 </div>
                 {sessionDrop && (
-                  <>
-                    <ul className="w-[300px] flex flex-col absolute top-[54px] right-0 bg-white dark:bg-[#242424]">
+                  <AnimatePresence>
+                    <motion.ul
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="w-[300px] flex flex-col absolute top-[54.5px] right-0 bg-white dark:bg-[#242424] rounded-md shadow-md"
+                    >
                       {sessionItems?.map((item: any, idx: number) => (
                         <li
                           key={idx}
@@ -461,7 +520,7 @@ const Navbar: React.FC<Notification> = ({
                           </Link>
                         </li>
                       ))}
-                      <li className="w-full border-b-2 border-b-slate-700"></li>
+                      <li className="w-full border-b-2 border-b-[#78828c21] dark:border-b-slate-700"></li>
                       <li
                         className="flex items-center m-4 cursor-pointer"
                         onClick={() => signOut()}
@@ -469,8 +528,8 @@ const Navbar: React.FC<Notification> = ({
                         <RiLogoutCircleRLine />
                         <span className="ml-2">Sign out</span>
                       </li>
-                    </ul>
-                  </>
+                    </motion.ul>
+                  </AnimatePresence>
                 )}
               </div>
             </>
@@ -478,7 +537,7 @@ const Navbar: React.FC<Notification> = ({
         </div>
       </div>
       <form
-        className={`w-full fixed bg-white ${showSearch ? "hidden" : "block"}`}
+        className={`w-full fixed bg-white ${showSearch ? "block" : "hidden"}`}
         onSubmit={onSearch}
       >
         <div className="border-b-2 border-b-slate-300">

@@ -4,7 +4,6 @@ import {
   fetchAllCast,
   fetchPerson,
   fetchPersonSearch,
-  fetchTv,
 } from "@/app/actions/fetchMovieApi";
 import DeleteButton from "@/app/component/ui/Button/DeleteButton";
 import { castRole } from "@/helper/item-list";
@@ -12,7 +11,6 @@ import { Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { AnimatePresence, Reorder } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -25,6 +23,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { useDebouncedCallback } from "use-debounce";
+import { AnimatePresence, Reorder, motion } from "framer-motion";
 
 const determineRole = (cast: any) => {
   if (cast?.roles?.some((role: any) => role?.episode_count < 6)) {
@@ -48,6 +47,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [listSearch, setListSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
+  const [character, setCharacter] = useState<string>("");
   const [tvIds, setTvIds] = useState<number[]>(tv_id ? [] : []);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchResultRef = useRef<HTMLDivElement>(null);
@@ -95,6 +95,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       ? [...(tvDetails?.cast || []), ...personResult]
       : cast?.cast || []
   );
+  const prevItemRef = useRef(item);
 
   useEffect(() => {
     refetchData();
@@ -210,6 +211,14 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   };
 
   useEffect(() => {
+    if (prevItemRef.current !== item) {
+    }
+    prevItemRef.current = item; // Update the ref with the current item
+  }, [item]);
+
+  const isItemChanged = prevItemRef.current !== item;
+
+  useEffect(() => {
     refetch();
   }, [searchQuery, refetch]);
 
@@ -321,31 +330,36 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           <IoIosArrowDown className="absolute bottom-3 right-2" />
                         </div>
                         {openDropdown === `cast_role-${ind}` && (
-                          <ul
-                            className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
-                          >
-                            {castRole?.map((items, index) => {
-                              const isContentRating = role
-                                ? role === items?.value
-                                : roles === items?.value;
-                              return (
-                                <li
-                                  className={`hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
-                                    isContentRating
-                                      ? "text-[#409eff] bg-[#2a2b2c]"
-                                      : ""
-                                  } `}
-                                  onClick={() => {
-                                    handleDropdownToggle("cast_role", ind);
-                                    setCastRole(ind, items?.value); // Update the story for this item
-                                  }}
-                                  key={index}
-                                >
-                                  {items?.label}
-                                </li>
-                              );
-                            })}
-                          </ul>
+                          <AnimatePresence>
+                            <motion.ul
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
+                            >
+                              {castRole?.map((items, index) => {
+                                const isContentRating = role
+                                  ? role === items?.value
+                                  : roles === items?.value;
+                                return (
+                                  <li
+                                    className={`hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                      isContentRating
+                                        ? "text-[#409eff] bg-[#2a2b2c]"
+                                        : ""
+                                    } `}
+                                    onClick={() => {
+                                      handleDropdownToggle("cast_role", ind);
+                                      setCastRole(ind, items?.value); // Update the story for this item
+                                    }}
+                                    key={index}
+                                  >
+                                    {items?.label}
+                                  </li>
+                                );
+                              })}
+                            </motion.ul>
+                          </AnimatePresence>
                         )}
                       </div>
                     </td>
@@ -353,6 +367,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <input
                         {...register(`cast.${ind}.character`)}
                         type="text"
+                        onChange={(e) => setCharacter(e.target.value)}
                         defaultValue={
                           cast?.character ||
                           cast?.roles?.map((role: any) => role?.character)
@@ -402,61 +417,67 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 <CiSearch />
               </span>
               {listSearch && (
-                <div
-                  ref={searchResultRef}
-                  className={`w-full h-[300px] absolute bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
-                    openSearch === false ? "block" : "hidden"
-                  }`}
-                >
-                  {isFetching ? (
-                    <div className="absolute top-[45%] left-[50%]">
-                      <ClipLoader color="#fff" size={25} loading={loading} />
-                    </div>
-                  ) : (
-                    <>
-                      {searchPerson?.results?.map(
-                        (person: any, idx: number) => {
-                          const specificPerson = persons?.find(
-                            (p) => p.id === person.id
-                          );
-                          return (
-                            <div
-                              className={`flex items-center hover:bg-[#3a3b3c] cursor-pointer ${
-                                listSearch && "force-overflow"
-                              }`}
-                              key={idx}
-                              onClick={() => onClickAddMovie(person.id)}
-                            >
-                              <Image
-                                src={
-                                  person?.profile_path === null
-                                    ? "/empty-pf.jpg"
-                                    : `https://image.tmdb.org/t/p/original/${person?.profile_path}`
-                                }
-                                alt={person?.name}
-                                width={50}
-                                height={50}
-                                quality={100}
-                                className="w-10 h-10 bg-cover bg-center object-cover mx-4 my-3 rounded-full"
-                              />
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    ref={searchResultRef}
+                    className={`w-full h-[300px] absolute bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
+                      openSearch === false ? "block" : "hidden"
+                    }`}
+                  >
+                    {isFetching ? (
+                      <div className="absolute top-[45%] left-[50%]">
+                        <ClipLoader color="#fff" size={25} loading={loading} />
+                      </div>
+                    ) : (
+                      <>
+                        {searchPerson?.results?.map(
+                          (person: any, idx: number) => {
+                            const specificPerson = persons?.find(
+                              (p) => p.id === person.id
+                            );
+                            return (
+                              <div
+                                className={`flex items-center hover:bg-[#3a3b3c] cursor-pointer ${
+                                  listSearch && "force-overflow"
+                                }`}
+                                key={idx}
+                                onClick={() => onClickAddMovie(person.id)}
+                              >
+                                <Image
+                                  src={
+                                    person?.profile_path === null
+                                      ? "/empty-pf.jpg"
+                                      : `https://image.tmdb.org/t/p/original/${person?.profile_path}`
+                                  }
+                                  alt={person?.name}
+                                  width={50}
+                                  height={50}
+                                  quality={100}
+                                  className="w-10 h-10 bg-cover bg-center object-cover mx-4 my-3 rounded-full"
+                                />
 
-                              <div className="flex flex-col items-start">
-                                <p className="text-[#2490da]">
-                                  {person.name || person.title}
-                                </p>
-                                <small className="text-[#ffffff99]">
-                                  {specificPerson?.place_of_birth !== null
-                                    ? specificPerson?.place_of_birth
-                                    : "NULL"}
-                                </small>
+                                <div className="flex flex-col items-start">
+                                  <p className="text-[#2490da]">
+                                    {person.name || person.title}
+                                  </p>
+                                  <small className="text-[#ffffff99]">
+                                    {specificPerson?.place_of_birth !== null
+                                      ? specificPerson?.place_of_birth
+                                      : "NULL"}
+                                  </small>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        }
-                      )}
-                    </>
-                  )}
-                </div>
+                            );
+                          }
+                        )}
+                      </>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               )}
             </div>
           </div>
@@ -464,7 +485,22 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       </div>
       <button
         onClick={handleSubmit(onSubmit)}
-        className="bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
+        className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+          tvIds?.length > 0 ||
+          castRoles?.length > 0 ||
+          character?.length > 0 ||
+          isItemChanged
+            ? "cursor-pointer"
+            : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+        }`}
+        disabled={
+          tvIds?.length > 0 ||
+          castRoles?.length > 0 ||
+          character?.length > 0 ||
+          isItemChanged
+            ? false
+            : true
+        }
       >
         Submit
       </button>

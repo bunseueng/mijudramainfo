@@ -65,7 +65,7 @@ const DramaMain = ({
   });
   const { data: language } = useQuery({
     queryKey: ["language"],
-    queryFn: () => fetchLanguages(tv_id),
+    queryFn: () => fetchLanguages(),
   });
   const { data: content } = useQuery({
     queryKey: ["content"],
@@ -401,7 +401,7 @@ const DramaMain = ({
                       <div className="tooltip p-2 mr-5 rounded-full bg-cyan-600">
                         <MdOutlineFavorite
                           size={20}
-                          className="text-white cursor-pointer"
+                          className="text-slate-200 cursor-pointer"
                           onClick={onFavorite}
                         />
                         <span className="tooltiptext">Mark as favorite</span>

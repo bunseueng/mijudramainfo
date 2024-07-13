@@ -1,6 +1,10 @@
 "use client";
 
-import { fetchTitle, fetchTv } from "@/app/actions/fetchMovieApi";
+import {
+  fetchContentRating,
+  fetchTitle,
+  fetchTv,
+} from "@/app/actions/fetchMovieApi";
 import {
   contentRatingDetail,
   contentTypeDetail,
@@ -19,37 +23,111 @@ import {
   IoMdArrowDropup,
 } from "react-icons/io";
 import { toast } from "react-toastify";
+import { AnimatePresence, motion } from "framer-motion";
 
 const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
+  const { data: tv } = useQuery({
+    queryKey: ["tvEdit", tv_id],
+    queryFn: () => fetchTv(tv_id),
+  });
+  const { data: content } = useQuery({
+    queryKey: ["content"],
+    queryFn: () => fetchContentRating(tv_id),
+  });
   const [results, setResults] = useState<string[]>([]);
   const [titleResults, setTitleResults] = useState<any[]>([]);
   const [knownAsDetails, setKnownAsDetails] = useState<string[]>([]);
   const [counter, setCounter] = useState<number>(1);
   const [epCounter, setEpCounter] = useState<number>(1);
+  const [isCounterClicked, setIsCounterClicked] = useState<boolean>(false);
+  const [isEpCounterClicked, setIsEpCounterClicked] = useState<boolean>(false);
   const [country, setCountry] = useState<string>(""); // Add state for status
   const [contentType, setContentType] = useState<string>(""); // Add state for status
   const [status, setStatus] = useState<string>(""); // Add state for status
-  const [contentRating, setContentRating] = useState<string>(""); // Add state for status
-  const [isCounterClicked, setIsCounterClicked] = useState<boolean>(false);
-  const [isEpCounterClicked, setIsEpCounterClicked] = useState<boolean>(false);
+  const [contentRating, setContentRating] = useState<string>("");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const { register, handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
   });
-
   const [detail]: DramaDetails[] = (tvDetails?.details ||
     []) as unknown as DramaDetails[]; // get rid of array without using map or filter
-
-  const { data: tv } = useQuery({
-    queryKey: ["tvEdit", tv_id],
-    queryFn: () => fetchTv(tv_id),
-  });
 
   const { data: title } = useQuery({
     queryKey: ["title"],
     queryFn: () => fetchTitle(tv_id),
   });
 
+  useEffect(() => {
+    const getContent = content?.results?.map((item: any) => item?.rating);
+    const hasNumber12Or13 = getContent?.some((rating: any) => {
+      return rating?.includes("12") || rating?.includes("13");
+    });
+    const hasNumber15 = getContent?.some((rating: any) => {
+      return rating?.includes("15");
+    });
+    const hasNumber18 = getContent?.some((rating: any) => {
+      return rating?.includes("18");
+    });
+    const isRestricted = getContent?.some((rating: any) => {
+      return rating?.includes("R");
+    });
+    const teens13 = hasNumber12Or13 && "13+- Teens 13 or older";
+    const teens15 = hasNumber15 && "15+- Teens 15 or older";
+    const teens18 = hasNumber18 && "18+ Restricted (violence & profanity)";
+    const restricted =
+      isRestricted && "R - Restricted Screening (nudity & violence)";
+    const isNoRating = getContent?.length === 0 && "Not Yet Rating";
+    const NR = getContent?.includes("NR") && "Not Yet Rating";
+    const isDrama = tv?.episode_run_time.join() > 50 ? "Drama" : "TV Show";
+    const isEnded = tv?.status === "Ended" && "Finished Airing";
+    const isUnconfirmed = tv?.status === "Pilot" && "Unconfirmed";
+    const isOngoing = tv?.status === "Returning Series" && "Airing";
+    if (detail?.country?.length > 0 ? detail?.country : tv?.type) {
+      setCountry(
+        detail?.country?.length > 0 ? detail?.country : tv?.type?.join(" ")
+      );
+    }
+
+    if (detail?.content_type?.length > 0 ? detail?.content_type : isDrama) {
+      setContentType(
+        detail?.content_type?.length > 0 ? detail?.content_type : isDrama
+      );
+    }
+
+    if (
+      detail?.content_rating?.length > 0
+        ? detail?.content_rating
+        : isNoRating || NR || teens13 || teens15 || teens18 || restricted
+    ) {
+      setContentRating(
+        detail?.content_rating?.length > 0
+          ? detail?.content_rating
+          : isNoRating || NR || teens13 || teens15 || teens18 || restricted
+      );
+    }
+
+    if (
+      detail?.status?.length > 0
+        ? detail?.status
+        : isEnded || isUnconfirmed || (isOngoing as any)
+    ) {
+      setStatus(
+        detail?.status?.length > 0
+          ? detail?.status
+          : isEnded || isUnconfirmed || (isOngoing as any)
+      );
+    }
+  }, [
+    content?.results,
+    tv?.type,
+    tv?.episode_run_time,
+    tv?.status,
+    detail?.content_rating,
+    detail?.content_type,
+    detail?.country,
+    detail?.status,
+  ]);
+  console.log(tv);
   useEffect(() => {
     if (title?.results) {
       setTitleResults(title.results);
@@ -58,6 +136,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       setKnownAsDetails(detail.known_as);
     }
   }, [title, detail]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const value = e.currentTarget.value.trim();
     if (e.key === "Enter") {
@@ -118,9 +197,16 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     setOpenDropdown((prev) => (prev === dropdown ? null : dropdown));
   };
 
+  const mergeAndRemoveDuplicates = (array1: any, array2: any): any => {
+    const map = new Map<string, any>();
+    array1?.forEach((item: any) => map.set(item?.id, item));
+    array2?.forEach((item: any) => map.set(item?.name, item));
+    return Array.from(map.values());
+  };
+
   const onSubmit = async (data: TCreateDetails) => {
     try {
-      const newKnownAs = [...detail?.known_as, ...results];
+      const newKnownAs = mergeAndRemoveDuplicates(detail?.known_as, results);
       const res = await fetch(`/api/tv/${tv?.id}/detail`, {
         method: "POST",
         headers: {
@@ -142,14 +228,6 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               episode: isEpCounterClicked ? epCounter : tv?.number_of_episodes,
             },
           ],
-          cover: data?.cover || "",
-          related_title: data?.related_title || [{}],
-          cast: data?.cast || [{}],
-          crew: data?.crew || [{}],
-          services: data?.services || [{}],
-          released_information: data?.released_information || [{}],
-          production_information: data?.production_information || [{}],
-          genres_tags: data?.genres_tags || [{}],
         }),
       });
       if (res.status === 200) {
@@ -168,7 +246,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="py-3 px-4">
+    <form className="py-3 px-4">
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">
         Primary Details
       </h1>
@@ -217,36 +295,41 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 name="country"
                 readOnly
                 autoComplete="off"
-                placeholder={country || detail?.country}
+                placeholder={country}
                 className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
                 onClick={() => handleDropdownToggle("country")}
               />
               <IoIosArrowDown className="absolute bottom-3 right-2" />
             </div>
             {openDropdown === "country" && (
-              <ul
-                className={`w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10 `}
-              >
-                {countryDetails?.map((item, idx) => {
-                  const isContentRating = country
-                    ? country === item?.value
-                    : detail?.country === item?.value;
-                  return (
-                    <li
-                      className={`px-5 py-2 cursor-pointer ${
-                        isContentRating ? "text-[#409eff] bg-[#2a2b2c]" : ""
-                      } `}
-                      onClick={() => {
-                        handleDropdownToggle("country");
-                        setCountry(item?.value);
-                      }}
-                      key={idx}
-                    >
-                      {item?.label}
-                    </li>
-                  );
-                })}
-              </ul>
+              <AnimatePresence>
+                <motion.ul
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10 `}
+                >
+                  {countryDetails?.map((item, idx) => {
+                    const isContentRating = country
+                      ? country === item?.value
+                      : detail?.country === item?.value;
+                    return (
+                      <li
+                        className={`px-5 py-2 cursor-pointer ${
+                          isContentRating ? "text-[#409eff] bg-[#2a2b2c]" : ""
+                        } `}
+                        onClick={() => {
+                          handleDropdownToggle("country");
+                          setCountry(item?.value);
+                        }}
+                        key={idx}
+                      >
+                        {item?.label}
+                      </li>
+                    );
+                  })}
+                </motion.ul>
+              </AnimatePresence>
             )}
           </div>
         </div>
@@ -332,34 +415,42 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 name="content_type"
                 readOnly
                 autoComplete="off"
-                placeholder={contentType || detail?.content_type}
+                placeholder={contentType}
                 className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-pointer"
                 onClick={() => handleDropdownToggle("content_type")}
               />
               <IoIosArrowDown className="absolute bottom-3 right-2" />
             </div>
             {openDropdown === "content_type" && (
-              <ul className="w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10">
-                {contentTypeDetail?.map((item, idx) => {
-                  const isContentRating = contentType
-                    ? contentType === item?.value
-                    : detail?.content_type === item?.value;
-                  return (
-                    <li
-                      className={`px-5 py-2 cursor-pointer ${
-                        isContentRating ? "text-[#409eff] bg-[#2a2b2c]" : ""
-                      } `}
-                      onClick={() => {
-                        handleDropdownToggle("content_type");
-                        setContentType(item?.value);
-                      }}
-                      key={idx}
-                    >
-                      {item?.label}
-                    </li>
-                  );
-                })}
-              </ul>
+              <AnimatePresence>
+                <motion.ul
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10 `}
+                >
+                  {contentTypeDetail?.map((item, idx) => {
+                    const isContentRating = contentType
+                      ? contentType === item?.value
+                      : detail?.content_type === item?.value;
+
+                    return (
+                      <li
+                        className={`px-5 py-2 cursor-pointer ${
+                          isContentRating ? "text-[#409eff] bg-[#2a2b2c]" : ""
+                        } `}
+                        onClick={() => {
+                          handleDropdownToggle("content_type");
+                          setContentType(item?.value);
+                        }}
+                        key={idx}
+                      >
+                        {item?.label}
+                      </li>
+                    );
+                  })}
+                </motion.ul>
+              </AnimatePresence>
             )}
           </div>
         </div>
@@ -375,34 +466,41 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 name="content_rating"
                 readOnly
                 autoComplete="off"
-                placeholder={contentRating || detail?.content_rating}
+                placeholder={contentRating}
                 className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-pointer"
                 onClick={() => handleDropdownToggle("content_rating")}
               />
               <IoIosArrowDown className="absolute bottom-3 right-2" />
             </div>
             {openDropdown === "content_rating" && (
-              <ul className="w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10">
-                {contentRatingDetail?.map((item, idx) => {
-                  const isContentRating = contentRating
-                    ? contentRating === item?.value
-                    : detail?.content_rating === item?.value;
-                  return (
-                    <li
-                      className={`px-5 py-2 cursor-pointer ${
-                        isContentRating ? "text-[#409eff] bg-[#2a2b2c]" : ""
-                      } `}
-                      onClick={() => {
-                        handleDropdownToggle("content_rating");
-                        setContentRating(item?.value);
-                      }}
-                      key={idx}
-                    >
-                      {item?.label}
-                    </li>
-                  );
-                })}
-              </ul>
+              <AnimatePresence>
+                <motion.ul
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10 `}
+                >
+                  {contentRatingDetail?.map((item, idx) => {
+                    const isContentRating = contentRating
+                      ? contentRating === item?.value
+                      : detail?.content_rating === item?.value;
+                    return (
+                      <li
+                        className={`px-5 py-2 cursor-pointer ${
+                          isContentRating ? "text-[#409eff] bg-[#2a2b2c]" : ""
+                        } `}
+                        onClick={() => {
+                          handleDropdownToggle("content_rating");
+                          setContentRating(item?.value);
+                        }}
+                        key={idx}
+                      >
+                        {item?.label}
+                      </li>
+                    );
+                  })}
+                </motion.ul>
+              </AnimatePresence>
             )}
           </div>
         </div>
@@ -420,34 +518,41 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 name="status"
                 readOnly
                 autoComplete="off"
-                placeholder={status || detail?.status}
+                placeholder={status}
                 className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-pointer"
                 onClick={() => handleDropdownToggle("status")}
               />
               <IoIosArrowDown className="absolute bottom-3 right-2" />
             </div>
             {openDropdown === "status" && (
-              <ul className="w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10">
-                {detailsList?.map((item, idx) => {
-                  const isStatusSelected = status
-                    ? status === item?.value
-                    : detail?.status === item?.value;
-                  return (
-                    <li
-                      className={`px-5 py-2 cursor-pointer ${
-                        isStatusSelected ? "text-[#409eff] bg-[#2a2b2c]" : ""
-                      } `}
-                      onClick={() => {
-                        handleDropdownToggle("status");
-                        setStatus(item?.value);
-                      }}
-                      key={idx}
-                    >
-                      {item?.label}
-                    </li>
-                  );
-                })}
-              </ul>
+              <AnimatePresence>
+                <motion.ul
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10 `}
+                >
+                  {detailsList?.map((item, idx) => {
+                    const isStatusSelected = status
+                      ? status === item?.value
+                      : detail?.status === item?.value;
+                    return (
+                      <li
+                        className={`px-5 py-2 cursor-pointer ${
+                          isStatusSelected ? "text-[#409eff] bg-[#2a2b2c]" : ""
+                        } `}
+                        onClick={() => {
+                          handleDropdownToggle("status");
+                          setStatus(item?.value);
+                        }}
+                        key={idx}
+                      >
+                        {item?.label}
+                      </li>
+                    );
+                  })}
+                </motion.ul>
+              </AnimatePresence>
             )}
           </div>
         </div>
@@ -464,7 +569,9 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               value={
                 isCounterClicked
                   ? counter
-                  : tv?.episode_run_time?.[0] || detail?.duration
+                  : detail?.duration
+                  ? detail?.duration
+                  : tv?.episode_run_time?.[0]
               }
               onChange={(e) => setCounter(Number(e.target.value))}
             />
@@ -501,7 +608,13 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             type="number"
             placeholder="e.g. 12"
             className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] rounded-md outline-none py-2 px-4"
-            value={isEpCounterClicked ? epCounter : tv?.number_of_episodes || 0}
+            value={
+              isEpCounterClicked
+                ? epCounter
+                : detail?.episode
+                ? detail?.episode
+                : tv?.number_of_episodes
+            }
             onChange={(e) => setEpCounter(Number(e.target.value))}
           />
           <div className="absolute right-0 top-0">
@@ -528,6 +641,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         <button
           type="submit"
           className="bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md mt-10"
+          onClick={handleSubmit(onSubmit)}
         >
           Submit
         </button>

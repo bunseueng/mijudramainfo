@@ -14,6 +14,9 @@ import RelatedTitle from "../related/RelatedTitle";
 import TvCast from "../cast/TvCast";
 import TvCrew from "../crew/TvCrew";
 import TvServices from "../services/TvServices";
+import ReleaseInfo from "../release/ReleaseInfo";
+import Production from "../production/Production";
+import Genres from "../genres/Genres";
 
 const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [currentPage, setCurrentPage] = useState("/detail");
@@ -43,8 +46,8 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   }, [pathname]);
 
   return (
-    <div className="max-w-6xl mx-auto my-10">
-      <div className="relative float-right w-full h-auto bg-slate-100 dark:bg-[#242526] border-2 border-slate-200 dark:border-[#232426] shadow-sm rounded-md">
+    <div className=" w-full h-[100%]">
+      <div className="w-full relative h-auto float-right bg-slate-100 dark:bg-[#242526] border-2 border-slate-200 dark:border-[#232426] shadow-sm rounded-md">
         <div className="px-3 mb-2">
           <h1 className="text-2xl font-semibold pt-3 mb-2">
             <Link href={`/tv/${tv?.id}`}>{tv?.title || tv?.name}</Link>
@@ -93,6 +96,12 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             <TvCrew tv_id={tv_id} tvDetails={tvDetails} />
           ) : currentPage === "/services" ? (
             <TvServices tv_id={tv_id} tvDetails={tvDetails} />
+          ) : currentPage === "/release" ? (
+            <ReleaseInfo tv_id={tv_id} tvDetails={tvDetails} />
+          ) : currentPage === "/production" ? (
+            <Production tv_id={tv_id} tvDetails={tvDetails} />
+          ) : currentPage === "/genres" ? (
+            <Genres tv_id={tv_id} tvDetails={tvDetails} />
           ) : null}
         </div>
       </div>

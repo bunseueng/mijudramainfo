@@ -33,7 +33,7 @@ const ProfileList: React.FC<IList> = ({ list }) => {
       <div className="my-5">
         <Link
           href="/lists/create"
-          className="bg-[#3e4042] border-2 border-[#00000033] px-4 py-2 rounded-md"
+          className="bg-white dark:bg-[#3e4042] border-2 dark:border-[#00000033] hover:bg-neutral-400 hover:bg-opacity-40 dark:hover:bg-opacity-40 px-4 py-2 rounded-md"
         >
           Create a new list
         </Link>
@@ -42,7 +42,7 @@ const ProfileList: React.FC<IList> = ({ list }) => {
         <div className="my-10">
           {list?.map((listItem: any, listIndex: number) => (
             <div
-              className="flex flex-col md:flex-row items-start"
+              className="flex flex-col md:flex-row items-start md:justify-between min-[1141px]:justify-start"
               key={listIndex}
             >
               <div className="float-left w-[48.3333%] px-1">
@@ -70,8 +70,8 @@ const ProfileList: React.FC<IList> = ({ list }) => {
                   </Link>
                 </div>
               </div>
-              <div className="flex flex-col items-start mb-5 md:mt-0">
-                <h4 className="text-[#ffffff99] text-sm font-semibold mb-1">
+              <div className="flex float-left flex-col items-start mb-5 md:mt-0">
+                <h4 className="text-black dark:text-[#ffffff99] text-sm font-semibold mb-1">
                   {listItem?.privacy}
                 </h4>
                 <h1 className="text-[#2490da] text-md font-bold mb-1">
@@ -79,7 +79,7 @@ const ProfileList: React.FC<IList> = ({ list }) => {
                 </h1>
                 <div className="flex items-center">
                   <RiComputerLine />
-                  <span className="text-[#ffffff99] pl-2 pt-[1px]">
+                  <span className="text-black dark:text-[#ffffff99] pl-2 pt-[1px]">
                     {listItem?.tvId?.length} titles
                   </span>
                 </div>

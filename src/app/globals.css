@@ -422,10 +422,10 @@
   margin-bottom: 25px;
 }
 
-.custom-scroll::-webkit-scrollbar-track {
+/* .custom-scroll::-webkit-scrollbar-track {
   padding: 2px 0;
   background-color: #3a3b3c;
-}
+} */
 
 .custom-scroll::-webkit-scrollbar {
   width: 10px;
@@ -582,4 +582,34 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .css-1jqq78o-placeholder {
   font-size: 13px;
+}
+
+.css-10o2lyd-MuiStack-root{
+  width: 100%;
+  overflow: hidden !important;
+  padding-top: 0px !important;
+}
+
+.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root {
+  width: 100%;
+  background-color: white;
+}
+
+.css-10o2lyd-MuiStack-root>.MuiTextField-root {
+  min-width: 0px !important;
+}
+
+.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root  input {
+  width: 50%;
+  flex: 1;
+  padding-block: 8px;
+  padding-inline: 5px;
+}
+
+.production .css-9bs1gb-control {
+  padding: 2px !important;
+}
+
+.countries .react-select__menu .css-1tzef7t-menu {
+  height: 100px !important;
 }

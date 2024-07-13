@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface Notification {
   users: UserProps[] | undefined;
@@ -151,162 +152,176 @@ const NotificationModal: React.FC<Notification> = ({
   if (!currentUser) return null; // If currentUser is null, return null or handle as needed
 
   return (
-    <div className="w-[440px] bg-[#242526] border-2 border-[#3e4042] absolute right-[133px] top-[74px] shadow-md">
-      <div className="max-h-[660px] overflow-hidden overflow-y-auto">
-        <div className="flex items-center justify-between">
-          <Link
-            href="/notifications"
-            className="text-[#ffffffde] font-bold p-4"
-          >
-            See All Notifications
-          </Link>
-          <button
-            className="bg-[#3a3b3c] border-2 border-[#3e4042] my-4 mx-3 py-1 px-3 shadow-sm rounded-md"
-            onClick={handleMarkAsRead}
-          >
-            <span className="inline-flex">
-              <FaCheck />
-              <span className="text-sm">Mark these as read</span>
-            </span>
-          </button>
-        </div>
-        {(isRepliedItself?.length < 1 && hasUnreadReplies) ||
-        hasUnreadFriends ? (
-          <div className="border-t-2 border-t-[#3e4042]">
-            {hasUnreadFriends && (
-              <>
-                {status.map((req, idx) => {
-                  const user =
-                    req.friendRespondId !== currentUser?.id
-                      ? yourFriend.find(
-                          (friend) => friend?.id === req.friendRespondId
-                        )
-                      : findSpecificUser.find(
-                          (friend) => friend?.id === req.friendRequestId
-                        );
-                  if (!user) return null;
-
-                  const isPending = pendingRequests.find(
-                    (req) =>
-                      req.friendRequestId === user?.id ||
-                      req.friendRespondId === user?.id
-                  );
-                  const isAccepted = acceptedRequests.find(
-                    (req) =>
-                      req.friendRequestId === user?.id ||
-                      req.friendRespondId === user?.id
-                  );
-                  const isRejected = rejectedRequests.find(
-                    (req) =>
-                      req.friendRequestId === user?.id ||
-                      req.friendRespondId === user?.id
-                  );
-                  console.log(user);
-                  return (
-                    <Link
-                      href="#"
-                      className="flex hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
-                      key={idx}
-                    >
-                      <Image
-                        src={user?.profileAvatar || user?.image || ""}
-                        alt={`${user?.name} image`}
-                        width={40}
-                        height={40}
-                        quality={100}
-                        className="w-[40px] h-[40px] bg-center bg-cover object-cover rounded-full"
-                      />
-                      <div className="pl-3">
-                        <h1>
-                          <span className="text-[#1675b6]">{user?.name} </span>
-                          {yourFriends.includes(user)
-                            ? isAccepted
-                              ? "has accepted your friend request"
-                              : isPending
-                              ? "has sent you a friend request"
-                              : isRejected
-                              ? "has rejected your friend request"
-                              : ""
-                            : isAccepted || isPending
-                            ? "has sending you a friend request"
-                            : isRejected
-                            ? "has rejected your friend request"
-                            : ""}
-                        </h1>
-                        <p>{moment(req?.actionDatetime).fromNow()}</p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </>
-            )}
-
-            {hasUnreadReplies && (
-              <>
-                {comment.map((commentItem) => {
-                  return commentItem.replies
-                    ?.filter((rp: any) => rp?.notification !== "read")
-                    ?.filter((rp: any) => rp?.userId === currentUser.id)
-                    ?.map((reply: any, idx) => {
-                      // Step 1: Find the user details based on repliedUserId
-                      const user = users?.find(
-                        (user: any) => user.id === reply.repliedUserId
-                      );
-                      if (!user || reply.userId === reply.repliedUserId)
-                        return null;
-
-                      const date = reply.createdAt;
-                      return (
-                        <Link
-                          href="#"
-                          className="flex hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
-                          key={idx}
-                        >
-                          <Image
-                            src={user.profileAvatar || user.image || ""}
-                            alt={`${user.name} image`}
-                            width={40}
-                            height={40}
-                            quality={100}
-                            className="w-[40px] h-[40px] bg-center bg-cover object-cover rounded-full"
-                          />
-                          <div className="pl-3">
-                            <div>
-                              <span className="text-[#1675b6]">
-                                {user.name}{" "}
-                              </span>
-                              replied to your comment on{" "}
-                              <Link
-                                href={`/tv/${allTv?.id}`}
-                                className="text-[#1675b6]"
-                              >
-                                {allTv?.name || allTv?.title}
-                              </Link>
-                            </div>
-                            <p>{moment(date).fromNow()}</p>
-                          </div>
-                        </Link>
-                      );
-                    });
-                })}
-              </>
-            )}
-          </div>
-        ) : (
-          <div className="text-center border-t-2 border-t-[#3e4042] py-10 px-4">
-            <h1 className="text-[#ffffffde] font-bold mb-6">
-              No Unread Notifications
-            </h1>
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: "100%" }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: "100%" }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 50,
+          duration: 1,
+        }}
+        className="w-full md:w-[440px] bg-white dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#3e4042] absolute left-0 md:left-auto md:right-[133px] top-[74px] shadow-md"
+      >
+        <div className="max-h-[660px] overflow-hidden overflow-y-auto">
+          <div className="flex items-center justify-between">
             <Link
               href="/notifications"
-              className="text-[#ffffffde] font-bold bg-[#1675b6] border-2 border-[#1f6fa7] rounded-sm py-3 px-5 hover:bg-opacity-80"
+              className="text-black dark:text-[#ffffffde] font-bold p-4"
             >
-              See Past Notifications
+              See All Notifications
             </Link>
+            <button
+              className="bg-white dark:bg-[#3a3b3c] border-2 border-[#d3d3d38c] dark:border-[#3e4042] hover:bg-neutral-400 hover:bg-opacity-40 dark:hover:bg-opacity-50 my-4 mx-3 py-1 px-3 shadow-sm rounded-md"
+              onClick={handleMarkAsRead}
+            >
+              <span className="inline-flex">
+                <FaCheck />
+                <span className="text-sm">Mark these as read</span>
+              </span>
+            </button>
           </div>
-        )}
-      </div>
-    </div>
+          {(isRepliedItself?.length < 1 && hasUnreadReplies) ||
+          hasUnreadFriends ? (
+            <div className="">
+              {hasUnreadFriends && (
+                <>
+                  {status.map((req, idx) => {
+                    const user =
+                      req.friendRespondId !== currentUser?.id
+                        ? yourFriend.find(
+                            (friend) => friend?.id === req.friendRespondId
+                          )
+                        : findSpecificUser.find(
+                            (friend) => friend?.id === req.friendRequestId
+                          );
+                    if (!user) return null;
+
+                    const isPending = pendingRequests.find(
+                      (req) =>
+                        req.friendRequestId === user?.id ||
+                        req.friendRespondId === user?.id
+                    );
+                    const isAccepted = acceptedRequests.find(
+                      (req) =>
+                        req.friendRequestId === user?.id ||
+                        req.friendRespondId === user?.id
+                    );
+                    const isRejected = rejectedRequests.find(
+                      (req) =>
+                        req.friendRequestId === user?.id ||
+                        req.friendRespondId === user?.id
+                    );
+                    return (
+                      <Link
+                        href="#"
+                        className="flex border-t-2 border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-200 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
+                        key={idx}
+                      >
+                        <Image
+                          src={user?.profileAvatar || user?.image || ""}
+                          alt={`${user?.name} image`}
+                          width={40}
+                          height={40}
+                          quality={100}
+                          className="w-[40px] h-[40px] bg-center bg-cover object-cover rounded-full"
+                        />
+                        <div className="pl-3">
+                          <h1>
+                            <span className="text-[#1675b6]">
+                              {user?.name}{" "}
+                            </span>
+                            {yourFriends.includes(user)
+                              ? isAccepted
+                                ? "has accepted your friend request"
+                                : isPending
+                                ? "has sent you a friend request"
+                                : isRejected
+                                ? "has rejected your friend request"
+                                : ""
+                              : isAccepted || isPending
+                              ? "has sending you a friend request"
+                              : isRejected
+                              ? "has rejected your friend request"
+                              : ""}
+                          </h1>
+                          <p>{moment(req?.actionDatetime).fromNow()}</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
+
+              {hasUnreadReplies && (
+                <>
+                  {comment.map((commentItem) => {
+                    return commentItem.replies
+                      ?.filter((rp: any) => rp?.notification !== "read")
+                      ?.filter((rp: any) => rp?.userId === currentUser.id)
+                      ?.map((reply: any, idx) => {
+                        // Step 1: Find the user details based on repliedUserId
+                        const user = users?.find(
+                          (user: any) => user.id === reply.repliedUserId
+                        );
+                        if (!user || reply.userId === reply.repliedUserId)
+                          return null;
+
+                        const date = reply.createdAt;
+                        return (
+                          <Link
+                            href="#"
+                            className="flex border-t-2 border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-100 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
+                            key={idx}
+                          >
+                            <Image
+                              src={user.profileAvatar || user.image || ""}
+                              alt={`${user.name} image`}
+                              width={40}
+                              height={40}
+                              quality={100}
+                              className="w-[40px] h-[40px] bg-center bg-cover object-cover rounded-full"
+                            />
+                            <div className="pl-3">
+                              <div>
+                                <span className="text-[#1675b6]">
+                                  {user.name}{" "}
+                                </span>
+                                replied to your comment on{" "}
+                                <Link
+                                  href={`/tv/${allTv?.id}`}
+                                  className="text-[#1675b6]"
+                                >
+                                  {allTv?.name || allTv?.title}
+                                </Link>
+                              </div>
+                              <p>{moment(date).fromNow()}</p>
+                            </div>
+                          </Link>
+                        );
+                      });
+                  })}
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="text-center border-t-2 border-t-[#3e4042] py-10 px-4">
+              <h1 className="text-[#ffffffde] font-bold mb-6">
+                No Unread Notifications
+              </h1>
+              <Link
+                href="/notifications"
+                className="text-[#ffffffde] font-bold bg-[#1675b6] border-2 border-[#1f6fa7] rounded-sm py-3 px-5 hover:bg-opacity-80"
+              >
+                See Past Notifications
+              </Link>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

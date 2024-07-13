@@ -13,6 +13,8 @@ import { useForm } from "react-hook-form";
 import { customStyles } from "@/helper/MuiStyling";
 import { Drama, EditDramaPage } from "@/helper/type";
 import { JsonValue } from "@prisma/client/runtime/library";
+import { AnimatePresence, motion } from "framer-motion";
+import { v4 as uuidv4 } from "uuid";
 
 interface EditModal {
   tv?: JsonValue | [];
@@ -42,7 +44,8 @@ const TvAddModal: React.FC<EditModal> = ({
       logo: string;
     }[]
   >([]);
-
+  const [openCountries, setOpenCountries] = useState<boolean>(false);
+  const [openSub, setOpenSub] = useState<boolean>(false);
   const [servicesType, setServicesType] = useState<string[]>([]);
   const [subtitle, setSubtitle] = useState<{ label: string; value: string }[]>(
     []
@@ -55,7 +58,6 @@ const TvAddModal: React.FC<EditModal> = ({
     handleSubmit,
     reset,
     setValue,
-    trigger,
     formState: { errors },
   } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
@@ -65,7 +67,7 @@ const TvAddModal: React.FC<EditModal> = ({
   const changeHandler = (value: any) => {
     setCountries(value);
   };
-  console.log(tv);
+
   const subtitleChangeHandler = (value: any) => {
     setSubtitle(value);
   };
@@ -112,9 +114,11 @@ const TvAddModal: React.FC<EditModal> = ({
 
   const addingItem = async (data: TCreateDetails) => {
     try {
+      const randomId = uuidv4();
+      const shortId = randomId.split("-")[0]; // Extract the shorter ID
       if (drama.length > 0) {
         const newItem: EditDramaPage = {
-          id: storedData[idx]?.id || "", // Use the existing id or provide a default
+          id: storedData[idx]?.id || shortId, // Use the existing id or provide a default
           public_id: storedData[idx]?.public_id || "", // Use the existing public_id or provide a default
           service: service[idx]?.logoPath || "", // Ensure logoPath is defined
           service_logo: service[idx]?.logo || "", // Ensure logo is defined
@@ -126,6 +130,9 @@ const TvAddModal: React.FC<EditModal> = ({
           service_url: storedData[idx]?.service_url || "", // Use the existing service_url or provide a default
           logo: storedData[idx]?.logo || "", // Use the existing logo or provide a default
           order: storedData[idx]?.order || 0,
+          page_link: "",
+          networks: [{}],
+          drama: [{}],
         };
 
         const updatedItems = [...storedData]; // Copy existing items
@@ -135,7 +142,7 @@ const TvAddModal: React.FC<EditModal> = ({
       } else {
         const newItem = {
           tv,
-          id: storedData[idx]?.id || "", // Use the existing id or provide a default
+          id: storedData[idx]?.id || shortId, // Use the existing id or provide a default
           public_id: storedData[idx]?.public_id || "", // Use the existing public_id or provide a default
           service: service[idx]?.logoPath || "", // Ensure logoPath is defined
           service_logo: service[idx]?.logo || "", // Ensure logo is defined
@@ -150,7 +157,7 @@ const TvAddModal: React.FC<EditModal> = ({
         };
 
         const updatedItems = [...storedData]; // Copy existing items
-        updatedItems[idx] = newItem; // Replace the item at the specified index with the new item
+        updatedItems[idx] = newItem as any; // Replace the item at the specified index with the new item
         setStoredData(updatedItems);
         setOpen(false);
       }
@@ -208,70 +215,76 @@ const TvAddModal: React.FC<EditModal> = ({
                         </p>
                       )} */}
                       {openDropdown === `service-${idx}` && (
-                        <ul
-                          className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
-                        >
-                          {serviceLogo?.map((items, index) => {
-                            const scrollIntoViewIfNeeded = (element: any) => {
-                              const rect = element?.getBoundingClientRect();
-                              const isVisible =
-                                rect?.top >= 0 &&
-                                rect?.left >= 0 &&
-                                rect?.bottom <=
-                                  (window?.innerHeight ||
-                                    document?.documentElement?.clientHeight) &&
-                                rect?.right <=
-                                  (window?.innerWidth ||
-                                    document?.documentElement.clientWidth);
+                        <AnimatePresence>
+                          <motion.ul
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
+                          >
+                            {serviceLogo?.map((items, index) => {
+                              const scrollIntoViewIfNeeded = (element: any) => {
+                                const rect = element?.getBoundingClientRect();
+                                const isVisible =
+                                  rect?.top >= 0 &&
+                                  rect?.left >= 0 &&
+                                  rect?.bottom <=
+                                    (window?.innerHeight ||
+                                      document?.documentElement
+                                        ?.clientHeight) &&
+                                  rect?.right <=
+                                    (window?.innerWidth ||
+                                      document?.documentElement.clientWidth);
 
-                              if (!isVisible) {
-                                element?.scrollIntoView({
-                                  behavior: "smooth",
-                                  block: "nearest",
-                                  inline: "nearest",
-                                });
-                              }
-                            };
-                            const isContentRating =
-                              service[idx]?.label === items?.label;
-                            return (
-                              <li
-                                ref={(el) => {
-                                  if (isContentRating && el) {
-                                    scrollIntoViewIfNeeded(el);
-                                  }
-                                }}
-                                className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
-                                  isContentRating
-                                    ? "text-[#409eff] bg-[#2a2b2c]"
-                                    : ""
-                                } `}
-                                onClick={() => {
-                                  handleDropdownToggle("service", idx);
-                                  setServices(idx, {
-                                    label: items?.label,
-                                    logoPath: items?.logoPath,
-                                    logo: items?.logo,
-                                  }); // Update the story for this item
-                                }}
-                                key={index}
-                              >
-                                <div className="flex items-center">
-                                  <Image
-                                    src={`/channel${items?.logo}`}
-                                    alt={items?.label}
-                                    width={200}
-                                    height={200}
-                                    className="w-10 h-10 bg-center bg-cover object-cover rounded-full"
-                                  />
-                                  <span className="font-semibold pl-2">
-                                    {items?.label}
-                                  </span>
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
+                                if (!isVisible) {
+                                  element?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "nearest",
+                                    inline: "nearest",
+                                  });
+                                }
+                              };
+                              const isContentRating =
+                                service[idx]?.label === items?.label;
+                              return (
+                                <li
+                                  ref={(el) => {
+                                    if (isContentRating && el) {
+                                      scrollIntoViewIfNeeded(el);
+                                    }
+                                  }}
+                                  className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                    isContentRating
+                                      ? "text-[#409eff] bg-[#2a2b2c]"
+                                      : ""
+                                  } `}
+                                  onClick={() => {
+                                    handleDropdownToggle("service", idx);
+                                    setServices(idx, {
+                                      label: items?.label,
+                                      logoPath: items?.logoPath,
+                                      logo: items?.logo,
+                                    }); // Update the story for this item
+                                  }}
+                                  key={index}
+                                >
+                                  <div className="flex items-center">
+                                    <Image
+                                      src={`/channel${items?.logo}`}
+                                      alt={items?.label}
+                                      width={200}
+                                      height={200}
+                                      className="w-10 h-10 bg-center bg-cover object-cover rounded-full"
+                                    />
+                                    <span className="font-semibold pl-2">
+                                      {items?.label}
+                                    </span>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </motion.ul>
+                        </AnimatePresence>
                       )}
                     </div>
                   </div>
@@ -309,56 +322,62 @@ const TvAddModal: React.FC<EditModal> = ({
                         </p>
                       )} */}
                       {openDropdown === `service_type-${idx}` && (
-                        <ul
-                          className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10`}
-                          style={{ height: "160px" }}
-                        >
-                          {serviceType?.map((items, index) => {
-                            const scrollIntoViewIfNeeded = (element: any) => {
-                              const rect = element?.getBoundingClientRect();
-                              const isVisible =
-                                rect?.top >= 0 &&
-                                rect?.left >= 0 &&
-                                rect?.bottom <=
-                                  (window?.innerHeight ||
-                                    document?.documentElement?.clientHeight) &&
-                                rect?.right <=
-                                  (window?.innerWidth ||
-                                    document?.documentElement.clientWidth);
+                        <AnimatePresence>
+                          <motion.ul
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10`}
+                            style={{ height: "160px" }}
+                          >
+                            {serviceType?.map((items, index) => {
+                              const scrollIntoViewIfNeeded = (element: any) => {
+                                const rect = element?.getBoundingClientRect();
+                                const isVisible =
+                                  rect?.top >= 0 &&
+                                  rect?.left >= 0 &&
+                                  rect?.bottom <=
+                                    (window?.innerHeight ||
+                                      document?.documentElement
+                                        ?.clientHeight) &&
+                                  rect?.right <=
+                                    (window?.innerWidth ||
+                                      document?.documentElement.clientWidth);
 
-                              if (!isVisible) {
-                                element?.scrollIntoView({
-                                  behavior: "smooth",
-                                  block: "nearest",
-                                  inline: "nearest",
-                                });
-                              }
-                            };
-                            const isContentRating =
-                              servicesType[idx] === items?.value;
-                            return (
-                              <li
-                                ref={(el) => {
-                                  if (isContentRating && el) {
-                                    scrollIntoViewIfNeeded(el);
-                                  }
-                                }}
-                                className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
-                                  isContentRating
-                                    ? "text-[#409eff] bg-[#2a2b2c]"
-                                    : ""
-                                } `}
-                                onClick={() => {
-                                  handleDropdownToggle("service_type", idx);
-                                  setServiceType(idx, items?.value); // Update the story for this item
-                                }}
-                                key={index}
-                              >
-                                {items?.label}
-                              </li>
-                            );
-                          })}
-                        </ul>
+                                if (!isVisible) {
+                                  element?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "nearest",
+                                    inline: "nearest",
+                                  });
+                                }
+                              };
+                              const isContentRating =
+                                servicesType[idx] === items?.value;
+                              return (
+                                <li
+                                  ref={(el) => {
+                                    if (isContentRating && el) {
+                                      scrollIntoViewIfNeeded(el);
+                                    }
+                                  }}
+                                  className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                    isContentRating
+                                      ? "text-[#409eff] bg-[#2a2b2c]"
+                                      : ""
+                                  } `}
+                                  onClick={() => {
+                                    handleDropdownToggle("service_type", idx);
+                                    setServiceType(idx, items?.value); // Update the story for this item
+                                  }}
+                                  key={index}
+                                >
+                                  {items?.label}
+                                </li>
+                              );
+                            })}
+                          </motion.ul>
+                        </AnimatePresence>
                       )}
                     </div>
                   </div>
@@ -392,15 +411,20 @@ const TvAddModal: React.FC<EditModal> = ({
                     >
                       <span className="text-red-500 pr-1">*</span>Country
                     </label>
-                    <div className="relative ml-[150px]">
+                    <div
+                      className="relative ml-[150px]"
+                      onClick={() => setOpenCountries(!openCountries)}
+                    >
                       <Select
                         isMulti
                         options={options}
                         value={countries}
                         onChange={changeHandler}
-                        styles={customStyles}
+                        styles={customStyles(openCountries)}
                         closeMenuOnSelect={false}
                         classNamePrefix="react-select"
+                        onBlur={() => setOpenCountries(false)}
+                        menuIsOpen
                         placeholder="Type to add more countries"
                         className="w-full"
                       />
@@ -416,7 +440,10 @@ const TvAddModal: React.FC<EditModal> = ({
                     >
                       <span className="text-red-500 pr-1">*</span>Subtitles
                     </label>
-                    <div className="relative ml-[150px]">
+                    <div
+                      className="relative ml-[150px]"
+                      onClick={() => setOpenSub(!openSub)}
+                    >
                       <Select
                         isMulti
                         options={tvSubtitle.map((sub) => ({
@@ -425,9 +452,11 @@ const TvAddModal: React.FC<EditModal> = ({
                         }))}
                         value={subtitle}
                         onChange={subtitleChangeHandler}
-                        styles={customStyles}
+                        styles={customStyles(openSub)}
                         closeMenuOnSelect={false}
                         classNamePrefix="react-select"
+                        onBlur={() => setOpenSub(false)}
+                        menuIsOpen
                         className="w-full"
                         placeholder="Type to add more translation languages"
                       />

@@ -1,4 +1,19 @@
-export const customStyles = {
+export const customStyles = (open: any) => ({
+  menuList: (base: any) => ({
+    ...base,
+    height: "150px",
+    "::-webkit-scrollbar": {
+      width: "6px",
+      height: "0px",
+    },
+    "::-webkit-scrollbar-thumb": {
+      borderRadius: "3px",
+      background: "#3a3b3c",
+    },
+    "::-webkit-scrollbar-thumb:hover": {
+      background: "#555",
+    },
+  }),
   control: (provided: any) => ({
     ...provided,
     backgroundColor: "#3a3b3c",
@@ -19,6 +34,10 @@ export const customStyles = {
     backgroundColor: "#242424",
     borderColor: "#242424",
     zIndex: 10,
+    overflow: "hidden",
+    opacity: open ? 1 : 0,
+    transition: "all 0.3s ease-in-out",
+    visibility: open ? "visible" : "hidden",
   }),
   option: (provided: any, state: any) => ({
     ...provided,
@@ -32,6 +51,10 @@ export const customStyles = {
     "&:hover": {
       backgroundColor: "#2a2b2c",
     },
+  }),
+  singleValue: (provided: any) => ({
+    ...provided,
+    color: "#fff",
   }),
   multiValue: (provided: any) => ({
     ...provided,
@@ -51,4 +74,4 @@ export const customStyles = {
       color: "#ffffff",
     },
   }),
-};
+});

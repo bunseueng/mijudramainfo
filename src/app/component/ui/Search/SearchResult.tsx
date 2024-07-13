@@ -27,7 +27,7 @@ const SearchResult = () => {
         <div className="w-full bg-white">
           <div className="border-b-2 border-b-slate-300 hover:bg-[#e0e0e040]">
             <div className="max-w-[1520px] mx-auto relative">
-              <div className="bg-white p-8">
+              <div className="h-screen bg-white p-8">
                 <p className="text-slate-400 text-center text-3xl uppercase font-semibold px-14 py-1 cursor-pointer hover:opacity-70 duration-300 truncate">
                   No Results
                 </p>

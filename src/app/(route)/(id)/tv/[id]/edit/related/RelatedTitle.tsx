@@ -8,7 +8,7 @@ import { Drama, DramaDetails, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { AnimatePresence, Reorder } from "framer-motion";
+import { AnimatePresence, Reorder, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -162,7 +162,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     try {
       const updatedItems = item.map((drama, index) => ({
         ...drama,
-        story: itemStories[index],
+        story: itemRelatedStories[index],
       }));
 
       // Combine old and new related titles
@@ -196,7 +196,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       throw new Error(error);
     }
   };
-
+  console.log(itemRelatedStories);
   useEffect(() => {
     refetch();
   }, [query, refetch]);
@@ -299,31 +299,36 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         <IoIosArrowDown className="absolute bottom-3 right-2" />
                       </div>
                       {openDropdown === `related_story-${ind}` && (
-                        <ul
-                          className={`w-full h-auto absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10 overflow-y-auto `}
-                        >
-                          {storyFormat?.map((items, index) => {
-                            const isContentRating = itemRelatedStories[ind]
-                              ? itemRelatedStories[ind] === items?.value
-                              : related?.story === items?.value;
-                            return (
-                              <li
-                                className={`px-5 py-2 cursor-pointer ${
-                                  isContentRating
-                                    ? "text-[#409eff] bg-[#2a2b2c]"
-                                    : ""
-                                } `}
-                                onClick={() => {
-                                  handleDropdownToggle("related_story", ind);
-                                  setItemRelatedStory(ind, items?.value); // Update the story for this item
-                                }}
-                                key={index}
-                              >
-                                {items?.label}
-                              </li>
-                            );
-                          })}
-                        </ul>
+                        <AnimatePresence>
+                          <motion.ul
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className={`w-full h-auto absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10 overflow-y-auto `}
+                          >
+                            {storyFormat?.map((items, index) => {
+                              const isContentRating = itemRelatedStories[ind]
+                                ? itemRelatedStories[ind] === items?.value
+                                : related?.story === items?.value;
+                              return (
+                                <li
+                                  className={`px-5 py-2 cursor-pointer ${
+                                    isContentRating
+                                      ? "text-[#409eff] bg-[#2a2b2c]"
+                                      : ""
+                                  } `}
+                                  onClick={() => {
+                                    handleDropdownToggle("related_story", ind);
+                                    setItemRelatedStory(ind, items?.value); // Update the story for this item
+                                  }}
+                                  key={index}
+                                >
+                                  {items?.label}
+                                </li>
+                              );
+                            })}
+                          </motion.ul>
+                        </AnimatePresence>
                       )}
                     </div>
                   </td>
@@ -368,52 +373,58 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 <CiSearch />
               </span>
               {listSearch && (
-                <div
-                  ref={searchResultRef}
-                  className={`w-full h-[300px] absolute bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
-                    openSearch === false ? "block" : "hidden"
-                  }`}
-                >
-                  {isFetching ? (
-                    <div className="absolute top-[45%] left-[50%]">
-                      <ClipLoader color="#fff" size={25} loading={loading} />
-                    </div>
-                  ) : (
-                    <>
-                      {multiSearch?.map((item: any, idx: number) => (
-                        <div
-                          className={`flex items-center hover:bg-[#3a3b3c] cursor-pointer ${
-                            listSearch && "force-overflow"
-                          }`}
-                          key={idx}
-                          onClick={() =>
-                            onClickAddMovie(item.id, item.media_type)
-                          }
-                        >
-                          <Image
-                            src={`https://image.tmdb.org/t/p/original/${
-                              item.poster_path || item.backdrop_path
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    ref={searchResultRef}
+                    className={`w-full h-[300px] absolute bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
+                      openSearch === false ? "block" : "hidden"
+                    }`}
+                  >
+                    {isFetching ? (
+                      <div className="absolute top-[45%] left-[50%]">
+                        <ClipLoader color="#fff" size={25} loading={loading} />
+                      </div>
+                    ) : (
+                      <>
+                        {multiSearch?.map((item: any, idx: number) => (
+                          <div
+                            className={`flex items-center hover:bg-[#3a3b3c] cursor-pointer ${
+                              listSearch && "force-overflow"
                             }`}
-                            alt="drama image"
-                            width={50}
-                            height={50}
-                            quality={100}
-                            className="bg-cover bg-center mx-4 my-3"
-                          />
+                            key={idx}
+                            onClick={() =>
+                              onClickAddMovie(item.id, item.media_type)
+                            }
+                          >
+                            <Image
+                              src={`https://image.tmdb.org/t/p/original/${
+                                item.poster_path || item.backdrop_path
+                              }`}
+                              alt="drama image"
+                              width={50}
+                              height={50}
+                              quality={100}
+                              className="bg-cover bg-center mx-4 my-3"
+                            />
 
-                          <div className="flex flex-col items-start">
-                            <p className="text-[#2490da]">
-                              {item.name || item.title}
-                            </p>
-                            <h4>
-                              <DramaRegion item={item} />
-                            </h4>
+                            <div className="flex flex-col items-start">
+                              <p className="text-[#2490da]">
+                                {item.name || item.title}
+                              </p>
+                              <h4>
+                                <DramaRegion item={item} />
+                              </h4>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
+                        ))}
+                      </>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               )}
             </div>
           </div>
@@ -421,7 +432,12 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       </div>
       <button
         onClick={handleSubmit(onSubmit)}
-        className="bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md mt-10"
+        className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+          itemStories?.length > 0
+            ? "cursor-pointer"
+            : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+        }`}
+        disabled={itemStories?.length > 0 ? false : true}
       >
         Submit
       </button>

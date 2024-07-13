@@ -526,17 +526,17 @@ export const editPageList = [
   },
   {
     label: "Release Information",
-    link: "/release_info",
+    link: "/release",
     icon: <TiArrowForward />,
   },
   {
     label: "Production Information",
-    link: "/production_info",
+    link: "/production",
     icon: <TiArrowForward />,
   },
   {
     label: "Generes & Tags",
-    link: "/generes_tags",
+    link: "/genres",
     icon: <TiArrowForward />,
   },
 ];
@@ -3368,4 +3368,622 @@ export const tvSubtitle = [
     label: "Vietnamese",
     value: "Vietnamese",
   },
+];
+
+// Release Date
+const startYear = 1900;
+const endYear = 2030;
+const startDay = 1;
+const endDay = 31;
+
+const day = Array.from({ length: endDay - startDay + 1 }, (_, index) => {
+  const dayNumber = (startDay + index).toString();
+  return dayNumber.padStart(2, "0");
+});
+
+const years = Array.from(
+  { length: endYear - startYear + 1 },
+  (_, i) => startYear + i
+);
+
+export const releaseDateByMonth = [
+  {
+    label: "-",
+    value: "-",
+  },
+  {
+    label: "01 - January",
+    value: "01 - January",
+  },
+  {
+    label: "02 - February",
+    value: "02 - February",
+  },
+  {
+    label: "03 - March",
+    value: "03 - March",
+  },
+  {
+    label: "04 - April",
+    value: "04 - April",
+  },
+  {
+    label: "05 - May",
+    value: "05 - May",
+  },
+  {
+    label: "06 - June",
+    value: "06 - June",
+  },
+  {
+    label: "07 - July",
+    value: "07 - July",
+  },
+  {
+    label: "08 - August",
+    value: "08 - August",
+  },
+  {
+    label: "09 - September",
+    value: "09 - September",
+  },
+  {
+    label: "10 - October",
+    value: "10 - October",
+  },
+  {
+    label: "11 - November",
+    value: "11 - November",
+  },
+  {
+    label: "12 - December",
+    value: "12 - December",
+  },
+];
+
+export const releaseDateByDay = [
+  {
+    label: "-",
+    value: "-",
+  },
+  ...day.map((day) => ({
+    label: day.toString(),
+    value: day.toString(),
+  })),
+];
+
+export const releaseDateByYear = [
+  {
+    label: "----",
+    value: "----",
+  },
+  ...years.map((year) => ({
+    label: year.toString(),
+    value: year.toString(),
+  })),
+];
+
+export const weeklyCheckbox = [
+  {
+    label: "Monday",
+    value: "Monday",
+  },
+  {
+    label: "Tuesday",
+    value: "Tuesday",
+  },
+  {
+    label: "Wednesday",
+    value: "Wednesday",
+  },
+  {
+    label: "Thursday",
+    value: "Thursday",
+  },
+  {
+    label: "Friday",
+    value: "Friday",
+  },
+  {
+    label: "Saturday",
+    value: "Saturday",
+  },
+  {
+    label: "Sunday",
+    value: "Sunday",
+  },
+];
+
+export const episodePerDay = [
+  {
+    label: "1 episode per day",
+    value: "1 episode per day",
+  },
+  {
+    label: "2 episodes per day",
+    value: "2 episodes per day",
+  },
+];
+
+export const production_language = [
+  {
+    value: "Cantonese",
+  },
+  {
+    value: "English",
+  },
+  {
+    value: "Filipino",
+  },
+  {
+    value: "Japanese",
+  },
+  {
+    value: "Korean",
+  },
+  {
+    value: "Mandarin",
+  },
+  {
+    value: "Other",
+  },
+  {
+    value: "Thai",
+  },
+];
+
+export const production_country = [
+  {
+    value: "China",
+  },
+  {
+    value: "Hong Kong",
+  },
+  {
+    value: "Japan",
+  },
+  {
+    value: "Philippines",
+  },
+  {
+    value: "South Korea",
+  },
+  {
+    value: "Taiwan",
+  },
+  {
+    value: "Thailand",
+  },
+];
+
+export const china_network = [
+  {
+    value: "Anhui TV",
+  },
+  {
+    value: "BTV",
+  },
+  {
+    value: "CCTV",
+  },
+  {
+    value: "CDITV",
+  },
+  {
+    value: "Chongqing TV",
+  },
+  {
+    value: "CQTV",
+  },
+  {
+    value: "Dragon TV",
+  },
+  {
+    value: "GDTV",
+  },
+  {
+    value: "GZTV",
+  },
+  {
+    value: "HBTV",
+  },
+  {
+    value: "Hubei TV",
+  },
+  {
+    value: "Hunan TV",
+  },
+  {
+    value: "IQiyi",
+  },
+  {
+    value: "JSTV",
+  },
+  {
+    value: "JXTV",
+  },
+  {
+    value: "Mango TV",
+  },
+  {
+    value: "Ningbo TV",
+  },
+  {
+    value: "NNTV",
+  },
+  {
+    value: "Shandong TV",
+  },
+  {
+    value: "Shanghai Television",
+  },
+  {
+    value: "Shenzhen TV",
+  },
+  {
+    value: "Sohu TV",
+  },
+  {
+    value: "Tencent Video",
+  },
+  {
+    value: "WeTV",
+  },
+  {
+    value: "Wuhan TV",
+  },
+  {
+    value: "Youku",
+  },
+];
+
+export const hk_network = [
+  {
+    value: "ZJTV",
+  },
+  {
+    value: "ATV",
+  },
+  {
+    value: "HKTV",
+  },
+  {
+    value: "myTv SUPER",
+  },
+  {
+    value: "RTHK",
+  },
+  {
+    value: "TVB Jade",
+  },
+  {
+    value: "ViuTV",
+  },
+];
+
+export const jp_network = [
+  {
+    value: "ABC",
+  },
+  {
+    value: "AbemaTV",
+  },
+  {
+    value: "Abn",
+  },
+  {
+    value: "Amazon Prime",
+  },
+  {
+    value: "BeeTV",
+  },
+  {
+    value: "BS Asahi",
+  },
+  {
+    value: "BS Fuji",
+  },
+  {
+    value: "BS Shochiku Tokyu",
+  },
+  {
+    value: "BS SKY PerfecTV",
+  },
+  {
+    value: "BS TV Tokyo",
+  },
+  {
+    value: "BS-TBS",
+  },
+  {
+    value: "BS4",
+  },
+  {
+    value: "CBC",
+  },
+  {
+    value: "Chukyo TV",
+  },
+  {
+    value: "CS TV Asahi Channel 1",
+  },
+  {
+    value: "DATV",
+  },
+  {
+    value: "DMM TV",
+  },
+  {
+    value: "dTV",
+  },
+  {
+    value: "Fuju TV",
+  },
+  {
+    value: "GYAO!",
+  },
+  {
+    value: "HBC",
+  },
+  {
+    value: "Kansai TV",
+  },
+  {
+    value: "MBS",
+  },
+  {
+    value: "Nagoya TV",
+  },
+  {
+    value: "NHK",
+  },
+  {
+    value: "NHK BSP",
+  },
+  {
+    value: "NHK Etele",
+  },
+  {
+    value: "NHK G",
+  },
+  {
+    value: "NHK World Premium",
+  },
+  {
+    value: "NTV",
+  },
+  {
+    value: "Paravi",
+  },
+  { value: "TBS" },
+  { value: "Telasa" },
+  { value: "Tokai TV" },
+  { value: "Tokyo MX" },
+  { value: "TV Aichi" },
+  { value: "TV Asahi" },
+  { value: "TV Hokkaido" },
+  { value: "TV Osaka" },
+  { value: "TV Setouchi" },
+  { value: "TV Shizuoka" },
+  { value: "TV Tokyo" },
+  { value: "TVK" },
+  { value: "TVQ Kyushu Broadcasting" },
+  { value: "UMK" },
+  { value: "WOWOW" },
+  { value: "WOWOW Live" },
+  { value: "YTV" },
+];
+
+export const ph_network = [
+  { value: "A2Z" },
+  { value: "ABS-CBN" },
+  { value: "GMA" },
+  { value: "iWantTFC" },
+  { value: "Kapamilya Channel" },
+  { value: "TV5" },
+];
+
+export const korea_network = [
+  { value: "CGV" },
+  { value: "Channel A" },
+  { value: "Comedy TV" },
+  { value: "COUPANG TV" },
+  { value: "Daum Kakao TV" },
+  { value: "DRAMAcube" },
+  { value: "DramaX" },
+  { value: "E-Channel" },
+  { value: "EBS" },
+  { value: "ENA" },
+  { value: "Genie TV" },
+  { value: "jTBC" },
+  { value: "K-STAR" },
+  { value: "KBS1" },
+  { value: "KBS2" },
+  { value: "MBC" },
+  { value: "MBC Dramanet" },
+  { value: "MBC every1" },
+  { value: "MBC QueeN" },
+  { value: "MBN" },
+  { value: "Mnet" },
+  { value: "Naver TV Cast" },
+  { value: "O'live" },
+  { value: "OBS" },
+  { value: "OCN" },
+  { value: "Oksusu" },
+  { value: "On Style" },
+  { value: "QTV" },
+  { value: "SBS" },
+  { value: "SBS Plus" },
+  { value: "SUPER ACTION" },
+  { value: "TBC" },
+  { value: "Tooniverse" },
+  { value: "TV Chosun" },
+  { value: "TVING" },
+  { value: "tvN" },
+  { value: "vLive" },
+  { value: "Watcha" },
+  { value: "Wavve" },
+  { value: "XTM" },
+  { value: "XtvN" },
+];
+
+export const tw_network = [
+  { value: "Anhui" },
+  { value: "BOBA" },
+  { value: "CHOCO TV" },
+  { value: "CTS" },
+  { value: "CTV" },
+  { value: "DaAi.Tv" },
+  { value: "EBC" },
+  { value: "FTV" },
+  { value: "GTV" },
+  { value: "Hakka TV" },
+  { value: "KKTV" },
+  { value: "LeTV" },
+  { value: "LINE TV" },
+  { value: "MTV Taiwan" },
+  { value: "PTS" },
+  { value: "SET TV" },
+  { value: "StarTV" },
+  { value: "TTV" },
+  { value: "TVBS" },
+  { value: "Vidol" },
+];
+
+export const th_network = [
+  { value: "AIS Play" },
+  { value: "ALTV" },
+  { value: "Amarin TV 34 HD" },
+  { value: "Channel 3" },
+  { value: "Channel 5" },
+  { value: "Channel 7" },
+  { value: "Channel 8" },
+  { value: "Channel 9" },
+  { value: "GMM 25" },
+  { value: "Mello Thailand" },
+  { value: "Mono 29" },
+  { value: "MONOMAX" },
+  { value: "One 31" },
+  { value: "oneD" },
+  { value: "PPTV" },
+  { value: "Thai PBS" },
+  { value: "Thairath TV" },
+  { value: "TITV" },
+  { value: "True4U" },
+  { value: "TrueID" },
+  { value: "Workpoint TV" },
+];
+
+export const other_network = [
+  { value: "Disney+" },
+  { value: "Hulu" },
+  { value: "Kocowa" },
+  { value: "Netflix" },
+  { value: "Viki" },
+];
+
+export const options = [
+  {
+    label: "China",
+    options: china_network?.map((item) => ({
+      label: item.value,
+      value: item.value,
+    })),
+  },
+  {
+    label: "Hong Kong",
+    options: hk_network?.map((item) => ({
+      label: item.value,
+      value: item.value,
+    })),
+  },
+  {
+    label: "Japan",
+    options: jp_network?.map((item) => ({
+      label: item.value,
+      value: item.value,
+    })),
+  },
+  {
+    label: "Philippines",
+    options: ph_network?.map((item) => ({
+      label: item.value,
+      value: item.value,
+    })),
+  },
+  {
+    label: "South Korea",
+    options: korea_network?.map((item) => ({
+      label: item.value,
+      value: item.value,
+    })),
+  },
+  {
+    label: "Taiwan",
+    options: tw_network?.map((item) => ({
+      label: item.value,
+      value: item.value,
+    })),
+  },
+  {
+    label: "Thailand",
+    options: th_network?.map((item) => ({
+      label: item.value,
+      value: item.value,
+    })),
+  },
+  {
+    label: "Others",
+    options: other_network?.map((item) => ({
+      label: item.value,
+      value: item.value,
+    })),
+  },
+];
+
+export const genre_edit = [
+  { name: "Action" },
+  { name: "Adventure" },
+  { name: "Animals" },
+  { name: "Business" },
+  { name: "Comedy" },
+  { name: "Crime" },
+  { name: "Detective" },
+  { name: "Documentary" },
+  { name: "Drama" },
+  { name: "Family" },
+  { name: "Fantasy" },
+  { name: "Food" },
+  { name: "Friendship" },
+  { name: "Historical" },
+  { name: "Horror" },
+  { name: "Investigation" },
+  { name: "Law" },
+  { name: "Life" },
+  { name: "Manga" },
+  { name: "Martial Arts" },
+  { name: "Mature" },
+  { name: "Medical" },
+  { name: "Melodrama" },
+  { name: "Military" },
+  { name: "Music" },
+  { name: "Mystery" },
+  { name: "Political" },
+  { name: "Psychological" },
+  { name: "Romance" },
+  { name: "School" },
+  { name: "Sci-Fi" },
+  { name: "Sitcom" },
+  { name: "Sports" },
+  { name: "Supernatural" },
+  { name: "Suspense" },
+  { name: "Thriller" },
+  { name: "Tokusatsu" },
+  { name: "Tragedy" },
+  { name: "Vampire" },
+  { name: "War" },
+  { name: "Western" },
+  { name: "Wuxia" },
+  { name: "Youth" },
+  { name: "Zombies" },
 ];

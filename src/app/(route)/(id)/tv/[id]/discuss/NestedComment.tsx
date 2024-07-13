@@ -33,7 +33,7 @@ const NestedComment = ({
           <div className="ml-[60px] relative">
             <div className="absolute bottom-0 left-0 top-10 z-2">
               <div className="inline-block h-full w-[26px] align-top mr-1 box-border">
-                <i className="block w-[50%] h-full border-r-2 border-r-[#36383a]"></i>
+                <i className="block w-[50%] h-full border-r-2 border-r-[#edeff1] dark:border-r-[#36383a]"></i>
               </div>
             </div>
             <CommentCard

@@ -11,7 +11,7 @@ import { Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { AnimatePresence, Reorder } from "framer-motion";
+import { AnimatePresence, Reorder, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -79,10 +79,19 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     enabled: true,
   });
 
+  const filterDuplicates = (arr: any) => {
+    const uniqueIds = new Set();
+    return arr.filter((item: any) => {
+      if (!uniqueIds.has(item.id)) {
+        uniqueIds.add(item.id);
+        return true;
+      }
+      return false;
+    });
+  };
+
   const [item, setItem] = useState(() =>
-    [...(tvDetails?.crew || []), ...personResult].length > 0
-      ? [...(tvDetails?.crew || []), ...personResult]
-      : cast?.crew || []
+    filterDuplicates([...(tvDetails?.crew || []), ...personResult])
   );
 
   useEffect(() => {
@@ -92,12 +101,15 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   useEffect(() => {
     if (!isLoading && cast && cast.crew) {
       setItem(
-        [...(tvDetails?.crew || []), ...personResult].length > 0
-          ? [...(tvDetails?.crew || []), ...personResult]
-          : cast.crew || []
+        filterDuplicates([
+          ...(tvDetails?.crew || []),
+          ...personResult,
+          ...cast.crew,
+        ])
       );
     }
   }, [isLoading, cast, personResult, tvDetails?.crew]);
+  const prevItemRef = useRef(item);
 
   const handleDropdownToggle = (dropdown: string, idx: number) => {
     setOpenDropdown((prev) =>
@@ -203,12 +215,21 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   };
 
   useEffect(() => {
+    if (prevItemRef.current !== item) {
+    }
+    prevItemRef.current = item; // Update the ref with the current item
+  }, [item]);
+
+  const isItemChanged = prevItemRef.current !== item;
+
+  useEffect(() => {
     refetch();
   }, [searchQuery, refetch]);
 
   if (isLoading) {
     return <div>Fetching...</div>;
   }
+
   return (
     <form className="py-3 px-4">
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">Crew</h1>
@@ -303,59 +324,66 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             <IoIosArrowDown className="absolute bottom-3 right-2" />
                           </div>
                           {openDropdown === `job-${ind}` && (
-                            <ul
-                              className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
-                            >
-                              {crewRole?.map((items, index) => {
-                                const scrollIntoViewIfNeeded = (
-                                  element: any
-                                ) => {
-                                  const rect = element?.getBoundingClientRect();
-                                  const isVisible =
-                                    rect?.top >= 0 &&
-                                    rect?.left >= 0 &&
-                                    rect?.bottom <=
-                                      (window?.innerHeight ||
-                                        document?.documentElement
-                                          ?.clientHeight) &&
-                                    rect?.right <=
-                                      (window?.innerWidth ||
-                                        document?.documentElement.clientWidth);
+                            <AnimatePresence>
+                              <motion.ul
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
+                              >
+                                {crewRole?.map((items, index) => {
+                                  const scrollIntoViewIfNeeded = (
+                                    element: any
+                                  ) => {
+                                    const rect =
+                                      element?.getBoundingClientRect();
+                                    const isVisible =
+                                      rect?.top >= 0 &&
+                                      rect?.left >= 0 &&
+                                      rect?.bottom <=
+                                        (window?.innerHeight ||
+                                          document?.documentElement
+                                            ?.clientHeight) &&
+                                      rect?.right <=
+                                        (window?.innerWidth ||
+                                          document?.documentElement
+                                            .clientWidth);
 
-                                  if (!isVisible) {
-                                    element?.scrollIntoView({
-                                      behavior: "smooth",
-                                      block: "nearest",
-                                      inline: "nearest",
-                                    });
-                                  }
-                                };
-                                const isContentRating = role
-                                  ? role === items?.value
-                                  : job?.includes(items?.value) ||
-                                    crew?.job === items.value;
-                                return (
-                                  <li
-                                    ref={(el) =>
-                                      isContentRating &&
-                                      scrollIntoViewIfNeeded(el)
+                                    if (!isVisible) {
+                                      element?.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "nearest",
+                                        inline: "nearest",
+                                      });
                                     }
-                                    className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
-                                      isContentRating
-                                        ? "text-[#409eff] bg-[#2a2b2c]"
-                                        : ""
-                                    } `}
-                                    onClick={() => {
-                                      handleDropdownToggle("job", ind);
-                                      setCrewRole(ind, items?.value); // Update the story for this item
-                                    }}
-                                    key={index}
-                                  >
-                                    {items?.label}
-                                  </li>
-                                );
-                              })}
-                            </ul>
+                                  };
+                                  const isContentRating = role
+                                    ? role === items?.value
+                                    : job?.includes(items?.value) ||
+                                      crew?.job === items.value;
+                                  return (
+                                    <li
+                                      ref={(el) =>
+                                        isContentRating &&
+                                        scrollIntoViewIfNeeded(el)
+                                      }
+                                      className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                        isContentRating
+                                          ? "text-[#409eff] bg-[#2a2b2c]"
+                                          : ""
+                                      } `}
+                                      onClick={() => {
+                                        handleDropdownToggle("job", ind);
+                                        setCrewRole(ind, items?.value); // Update the story for this item
+                                      }}
+                                      key={index}
+                                    >
+                                      {items?.label}
+                                    </li>
+                                  );
+                                })}
+                              </motion.ul>
+                            </AnimatePresence>
                           )}
                         </div>
                       </td>
@@ -411,71 +439,77 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 <CiSearch />
               </span>
               {listSearch && (
-                <div
-                  ref={searchResultRef}
-                  className={`w-full h-[300px] absolute bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
-                    openSearch === false ? "block" : "hidden"
-                  }`}
-                >
-                  {isFetching ? (
-                    <div className="absolute top-[45%] left-[50%]">
-                      <ClipLoader color="#fff" size={25} loading={loading} />
-                    </div>
-                  ) : (
-                    <>
-                      {searchPerson?.results?.length > 0 ? (
-                        searchPerson?.results?.map(
-                          (person: any, idx: number) => {
-                            const specificPerson = persons?.find(
-                              (p) => p.id === person.id
-                            );
-                            return (
-                              <div
-                                className={`flex items-center hover:bg-[#3a3b3c] cursor-pointer ${
-                                  listSearch && "force-overflow"
-                                }`}
-                                key={idx}
-                                onClick={() => onClickAddMovie(person.id)}
-                              >
-                                <Image
-                                  src={
-                                    person?.profile_path === null
-                                      ? "/empty-pf.jpg"
-                                      : `https://image.tmdb.org/t/p/original/${person?.profile_path}`
-                                  }
-                                  alt={person?.name}
-                                  width={50}
-                                  height={50}
-                                  quality={100}
-                                  className="w-10 h-10 bg-cover bg-center object-cover mx-4 my-3 rounded-full"
-                                />
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    ref={searchResultRef}
+                    className={`w-full h-[300px] absolute bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
+                      openSearch === false ? "block" : "hidden"
+                    }`}
+                  >
+                    {isFetching ? (
+                      <div className="absolute top-[45%] left-[50%]">
+                        <ClipLoader color="#fff" size={25} loading={loading} />
+                      </div>
+                    ) : (
+                      <>
+                        {searchPerson?.results?.length > 0 ? (
+                          searchPerson?.results?.map(
+                            (person: any, idx: number) => {
+                              const specificPerson = persons?.find(
+                                (p) => p.id === person.id
+                              );
+                              return (
+                                <div
+                                  className={`flex items-center hover:bg-[#3a3b3c] cursor-pointer ${
+                                    listSearch && "force-overflow"
+                                  }`}
+                                  key={idx}
+                                  onClick={() => onClickAddMovie(person.id)}
+                                >
+                                  <Image
+                                    src={
+                                      person?.profile_path === null
+                                        ? "/empty-pf.jpg"
+                                        : `https://image.tmdb.org/t/p/original/${person?.profile_path}`
+                                    }
+                                    alt={person?.name}
+                                    width={50}
+                                    height={50}
+                                    quality={100}
+                                    className="w-10 h-10 bg-cover bg-center object-cover mx-4 my-3 rounded-full"
+                                  />
 
-                                <div className="flex flex-col items-start">
-                                  <p className="text-[#2490da]">
-                                    {person.name || person.title}
-                                  </p>
-                                  <small className="text-[#ffffff99]">
-                                    {`${
-                                      specificPerson?.place_of_birth === null
-                                        ? "NULL"
-                                        : specificPerson?.place_of_birth
-                                    } / ${
-                                      specificPerson?.known_for_department
-                                    }`}
-                                  </small>
+                                  <div className="flex flex-col items-start">
+                                    <p className="text-[#2490da]">
+                                      {person.name || person.title}
+                                    </p>
+                                    <small className="text-[#ffffff99]">
+                                      {`${
+                                        specificPerson?.place_of_birth === null
+                                          ? "NULL"
+                                          : specificPerson?.place_of_birth
+                                      } / ${
+                                        specificPerson?.known_for_department
+                                      }`}
+                                    </small>
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          }
-                        )
-                      ) : (
-                        <div className="text-center mt-20">
-                          Search result is not found!
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
+                              );
+                            }
+                          )
+                        ) : (
+                          <div className="text-center mt-20">
+                            Search result is not found!
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               )}
             </div>
           </div>
@@ -483,7 +517,12 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       </div>
       <button
         onClick={handleSubmit(onSubmit)}
-        className="bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
+        className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+          tvIds?.length > 0 || isItemChanged
+            ? "cursor-pointer"
+            : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+        }`}
+        disabled={tvIds?.length > 0 || isItemChanged ? false : true}
       >
         Submit
       </button>

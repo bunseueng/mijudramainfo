@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { customStyles } from "@/helper/MuiStyling";
 import { Drama, EditDramaPage, EditPageDefaultvalue } from "@/helper/type";
 import { JsonValue } from "@prisma/client/runtime/library";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface EditModal {
   idx: number;
@@ -53,7 +54,7 @@ const TvEditModal: React.FC<EditModal> = ({
       logo: string;
     }[]
   >([]);
-
+  const [openSub, setOpenSub] = useState<boolean>(false);
   const [servicesType, setServicesType] = useState<string[]>([]);
   const [subtitle, setSubtitle] = useState<{ label: string; value: string }[]>(
     []
@@ -70,8 +71,8 @@ const TvEditModal: React.FC<EditModal> = ({
     setCountries(selectedOptions);
   };
 
-  const subtitleChangeHandler = (selectedOptions: any) => {
-    setSubtitle(selectedOptions);
+  const subtitleChangeHandler = (value: any) => {
+    setSubtitle(value);
   };
 
   const handleDropdownToggle = (dropdown: string, idx: number) => {
@@ -86,7 +87,12 @@ const TvEditModal: React.FC<EditModal> = ({
       setValue("services.service", defaultValue?.service_name); // Populate other fields similarly
       setValue("services.service_type", defaultValue?.service_type || "");
       setCountries(defaultValue?.availability || []);
-      setSubtitle(defaultValue?.subtitles || []);
+      const formattedSubtitles = Array.isArray(defaultValue?.subtitles)
+        ? defaultValue.subtitles
+        : defaultValue?.subtitles
+        ? [{ label: defaultValue.subtitles, value: defaultValue.subtitles }]
+        : [];
+      setSubtitle(formattedSubtitles);
     }
     if (storedData && storedData[idx]) {
       const data = storedData[idx];
@@ -184,23 +190,16 @@ const TvEditModal: React.FC<EditModal> = ({
     setOpenEditModal(false);
   };
 
-  const handleDeleteStoredData = () => {
+  const handleDeleteStoredData = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     console.log("Deleting item at index:", idx);
 
     // Remove the item at the specified index (idx) from the storedData array
-    const updatedStoredData = storedData.filter((_, index) => index !== idx);
+    const updatedStoredData = storedData.filter(
+      (item, index) => item?.service_name !== defaultValue?.service_name
+    );
     console.log("Updated storedData:", updatedStoredData);
     setStoredData(updatedStoredData);
-
-    // Ensure tvDatabase is updated correctly by removing the item based on a matching property
-    if (tvDatabase) {
-      const updatedTvDatabase = tvDatabase.filter(
-        (item: any) => item?.service_name !== defaultValue?.service_name
-      );
-      console.log("Updated tvDatabase:", updatedTvDatabase);
-      setTvDatabase(updatedTvDatabase);
-    }
-
     // Close the modal after deletion
     setOpenEditModal(false);
   };
@@ -250,71 +249,77 @@ const TvEditModal: React.FC<EditModal> = ({
                         <IoIosArrowDown className="absolute bottom-3 right-2" />
                       </div>
                       {openDropdown === `service-${idx}` && (
-                        <ul
-                          className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
-                        >
-                          {serviceLogo?.map((items, index) => {
-                            const scrollIntoViewIfNeeded = (element: any) => {
-                              const rect = element?.getBoundingClientRect();
-                              const isVisible =
-                                rect?.top >= 0 &&
-                                rect?.left >= 0 &&
-                                rect?.bottom <=
-                                  (window?.innerHeight ||
-                                    document?.documentElement?.clientHeight) &&
-                                rect?.right <=
-                                  (window?.innerWidth ||
-                                    document?.documentElement.clientWidth);
+                        <AnimatePresence>
+                          <motion.ul
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
+                          >
+                            {serviceLogo?.map((items, index) => {
+                              const scrollIntoViewIfNeeded = (element: any) => {
+                                const rect = element?.getBoundingClientRect();
+                                const isVisible =
+                                  rect?.top >= 0 &&
+                                  rect?.left >= 0 &&
+                                  rect?.bottom <=
+                                    (window?.innerHeight ||
+                                      document?.documentElement
+                                        ?.clientHeight) &&
+                                  rect?.right <=
+                                    (window?.innerWidth ||
+                                      document?.documentElement.clientWidth);
 
-                              if (!isVisible) {
-                                element?.scrollIntoView({
-                                  behavior: "smooth",
-                                  block: "nearest",
-                                  inline: "nearest",
-                                });
-                              }
-                            };
-                            const isContentRating =
-                              service[idx]?.label === items?.label ||
-                              defaultValue?.service_name === items?.label;
-                            return (
-                              <li
-                                ref={(el) => {
-                                  if (isContentRating && el) {
-                                    scrollIntoViewIfNeeded(el);
-                                  }
-                                }}
-                                className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
-                                  isContentRating
-                                    ? "text-[#409eff] bg-[#2a2b2c]"
-                                    : ""
-                                } `}
-                                onClick={() => {
-                                  handleDropdownToggle("service", idx);
-                                  setServices(idx, {
-                                    label: items?.label,
-                                    logoPath: items?.logoPath,
-                                    logo: items?.logo,
-                                  }); // Update the story for this item
-                                }}
-                                key={index}
-                              >
-                                <div className="flex items-center">
-                                  <Image
-                                    src={`/channel${items?.logo}`}
-                                    alt={items?.label}
-                                    width={200}
-                                    height={200}
-                                    className="w-10 h-10 bg-center bg-cover object-cover rounded-full"
-                                  />
-                                  <span className="font-semibold pl-2">
-                                    {items?.label}
-                                  </span>
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
+                                if (!isVisible) {
+                                  element?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "nearest",
+                                    inline: "nearest",
+                                  });
+                                }
+                              };
+                              const isContentRating =
+                                service[idx]?.label === items?.label ||
+                                defaultValue?.service_name === items?.label;
+                              return (
+                                <li
+                                  ref={(el) => {
+                                    if (isContentRating && el) {
+                                      scrollIntoViewIfNeeded(el);
+                                    }
+                                  }}
+                                  className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                    isContentRating
+                                      ? "text-[#409eff] bg-[#2a2b2c]"
+                                      : ""
+                                  } `}
+                                  onClick={() => {
+                                    handleDropdownToggle("service", idx);
+                                    setServices(idx, {
+                                      label: items?.label,
+                                      logoPath: items?.logoPath,
+                                      logo: items?.logo,
+                                    }); // Update the story for this item
+                                  }}
+                                  key={index}
+                                >
+                                  <div className="flex items-center">
+                                    <Image
+                                      src={`/channel${items?.logo}`}
+                                      alt={items?.label}
+                                      width={200}
+                                      height={200}
+                                      className="w-10 h-10 bg-center bg-cover object-cover rounded-full"
+                                    />
+                                    <span className="font-semibold pl-2">
+                                      {items?.label}
+                                    </span>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </motion.ul>
+                        </AnimatePresence>
                       )}
                     </div>
                   </div>
@@ -348,57 +353,63 @@ const TvEditModal: React.FC<EditModal> = ({
                         <IoIosArrowDown className="absolute bottom-3 right-2" />
                       </div>
                       {openDropdown === `service_type-${idx}` && (
-                        <ul
-                          className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10`}
-                          style={{ height: "160px" }}
-                        >
-                          {serviceType?.map((items, index) => {
-                            const scrollIntoViewIfNeeded = (element: any) => {
-                              const rect = element?.getBoundingClientRect();
-                              const isVisible =
-                                rect?.top >= 0 &&
-                                rect?.left >= 0 &&
-                                rect?.bottom <=
-                                  (window?.innerHeight ||
-                                    document?.documentElement?.clientHeight) &&
-                                rect?.right <=
-                                  (window?.innerWidth ||
-                                    document?.documentElement.clientWidth);
+                        <AnimatePresence>
+                          <motion.ul
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10`}
+                            style={{ height: "160px" }}
+                          >
+                            {serviceType?.map((items, index) => {
+                              const scrollIntoViewIfNeeded = (element: any) => {
+                                const rect = element?.getBoundingClientRect();
+                                const isVisible =
+                                  rect?.top >= 0 &&
+                                  rect?.left >= 0 &&
+                                  rect?.bottom <=
+                                    (window?.innerHeight ||
+                                      document?.documentElement
+                                        ?.clientHeight) &&
+                                  rect?.right <=
+                                    (window?.innerWidth ||
+                                      document?.documentElement.clientWidth);
 
-                              if (!isVisible) {
-                                element?.scrollIntoView({
-                                  behavior: "smooth",
-                                  block: "nearest",
-                                  inline: "nearest",
-                                });
-                              }
-                            };
-                            const isContentRating =
-                              servicesType[idx] === items?.value ||
-                              defaultValue?.service_type === items?.value;
-                            return (
-                              <li
-                                ref={(el) => {
-                                  if (isContentRating && el) {
-                                    scrollIntoViewIfNeeded(el);
-                                  }
-                                }}
-                                className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
-                                  isContentRating
-                                    ? "text-[#409eff] bg-[#2a2b2c]"
-                                    : ""
-                                } `}
-                                onClick={() => {
-                                  handleDropdownToggle("service_type", idx);
-                                  setServiceType(idx, items?.value); // Update the story for this item
-                                }}
-                                key={index}
-                              >
-                                {items?.label}
-                              </li>
-                            );
-                          })}
-                        </ul>
+                                if (!isVisible) {
+                                  element?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "nearest",
+                                    inline: "nearest",
+                                  });
+                                }
+                              };
+                              const isContentRating =
+                                servicesType[idx] === items?.value ||
+                                defaultValue?.service_type === items?.value;
+                              return (
+                                <li
+                                  ref={(el) => {
+                                    if (isContentRating && el) {
+                                      scrollIntoViewIfNeeded(el);
+                                    }
+                                  }}
+                                  className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                    isContentRating
+                                      ? "text-[#409eff] bg-[#2a2b2c]"
+                                      : ""
+                                  } `}
+                                  onClick={() => {
+                                    handleDropdownToggle("service_type", idx);
+                                    setServiceType(idx, items?.value); // Update the story for this item
+                                  }}
+                                  key={index}
+                                >
+                                  {items?.label}
+                                </li>
+                              );
+                            })}
+                          </motion.ul>
+                        </AnimatePresence>
                       )}
                     </div>
                   </div>
@@ -433,7 +444,7 @@ const TvEditModal: React.FC<EditModal> = ({
                         value={countries} // Ensure the format of options matches the expected format of react-select
                         options={options}
                         onChange={changeHandler}
-                        styles={customStyles}
+                        styles={customStyles(open)}
                         closeMenuOnSelect={false}
                         classNamePrefix="react-select"
                         placeholder="Type to add more countries"
@@ -451,15 +462,23 @@ const TvEditModal: React.FC<EditModal> = ({
                     >
                       <span className="text-red-500 pr-1">*</span>Subtitles
                     </label>
-                    <div className="relative ml-[150px]">
+                    <div
+                      className="relative ml-[150px]"
+                      onClick={() => setOpenSub(!openSub)}
+                    >
                       <Select
                         isMulti
+                        options={tvSubtitle.map((sub) => ({
+                          label: sub.label,
+                          value: sub.value,
+                        }))}
                         value={subtitle}
-                        options={options}
                         onChange={subtitleChangeHandler}
-                        styles={customStyles}
+                        styles={customStyles(openSub)}
                         closeMenuOnSelect={false}
                         classNamePrefix="react-select"
+                        onBlur={() => setOpenSub(false)}
+                        menuIsOpen
                         className="w-full"
                         placeholder="Type to add more translation languages"
                       />
@@ -474,7 +493,11 @@ const TvEditModal: React.FC<EditModal> = ({
               <div className="flex items-end justify-between">
                 <button
                   className="bg-[#f56c6c4d] text-sm text-white dark:text-[#f56c6c] border-2 border-[#f56c6c4d] rounded-sm px-5 py-3"
-                  onClick={(e) => markForDeletion(e)}
+                  onClick={(e) => {
+                    storedData?.length > 0
+                      ? handleDeleteStoredData(e)
+                      : markForDeletion(e);
+                  }}
                 >
                   Delete
                 </button>

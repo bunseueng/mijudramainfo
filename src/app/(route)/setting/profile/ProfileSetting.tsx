@@ -80,13 +80,13 @@ const ProfileSetting = ({ user }: any) => {
   };
   return (
     <div className="max-w-[1520px] flex flex-wrap justify-between mx-auto py-3 px-4 md:px-6">
-      <div className="w-full h-auto border-2 border-gray-400 dark:border-[#272727]">
-        <h1 className="text-2xl text-black dark:text-white p-5 border-b-2 border-b-slate-400 dark:border-b-[#272727]">
-          Setting
+      <div className="w-full h-auto bg-[#fff] dark:bg-[#242526] border-2 border-[#00000024] dark:border-[#272727] rounded-md">
+        <h1 className="text-2xl text-black dark:text-white p-5 border-b-2 border-b-[#78828c21] dark:border-b-[#272727]">
+          Settings
         </h1>
         <div className="p-5">
           <div className="flex flex-col md:flex-row my-10">
-            <label className="w-full md:w-[20%] lg:w-[15%]">
+            <label className="float-left md:w-[16.66667%]">
               Profile Picture:
             </label>
             <div className="flex flex-col md:flex-row md:items-center relative">
@@ -102,104 +102,121 @@ const ProfileSetting = ({ user }: any) => {
             </div>
           </div>
           <div className="flex flex-col md:flex-row my-10">
-            <label className="w-full md:w-[20%] lg:w-[15%]">
-              Display Name:
-            </label>
-            <input
-              {...register("displayName")}
-              type="text"
-              placeholder={user?.displayName || ""}
-              name="displayName"
-              className="w-full md:w-[35%] lg:w-[25%] rounded-md mt-3 md:mt-0 md:ml-5 py-3 px-6"
-            />
+            <label className="float-left md:w-[16.66667%]">Display Name:</label>
+            <div className="float-left md:w-[33.33333%] md:px-3">
+              <input
+                {...register("displayName")}
+                type="text"
+                placeholder={user?.displayName || ""}
+                name="displayName"
+                className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-2 px-6 outline-none"
+              />
+            </div>
           </div>
           <div className="flex flex-col md:flex-row my-10">
-            <label className="w-full md:w-[20%] lg:w-[15%] ">Username:</label>
-            <input
-              type="text"
-              placeholder={session?.user?.name || ""}
-              className="w-full md:w-[35%] lg:w-[25%] rounded-md mt-3 md:mt-0 md:ml-5 py-3 px-6 cursor-not-allowed"
-              disabled
-            />
+            <label className="float-left md:w-[16.66667%]">Username:</label>
+            <div className="flex flex-col float-left md:w-[33.33333%] md:px-3">
+              <input
+                type="text"
+                placeholder={session?.user?.name || ""}
+                className="w-full bg-[#f5f7fa] dark:bg-[#1f1f1f] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-2 px-6 outline-none cursor-not-allowed"
+                disabled
+              />
+              <div className="text-muted-foreground dark:opacity-80">
+                <small>
+                  http://mijudramainfo.vercel.app/profile/ImPossiBle
+                </small>
+              </div>
+            </div>
           </div>
           <div className="flex flex-col md:flex-row my-10">
-            <label className="w-full md:w-[20%] lg:w-[15%]">Email:</label>
-            <input
-              type="text"
-              placeholder={session?.user?.email || ""}
-              className="w-full md:w-[35%] lg:w-[25%] rounded-md mt-3 md:mt-0 md:ml-5 py-3 px-6 cursor-not-allowed"
-              disabled
-            />
+            <label className="float-left md:w-[16.66667%]">Email:</label>
+            <div className="float-left md:w-[33.33333%] md:px-3">
+              <input
+                type="text"
+                placeholder={session?.user?.email || ""}
+                className="w-full bg-[#f5f7fa] dark:bg-[#1f1f1f] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-2 px-6 outline-none cursor-not-allowed"
+                disabled
+              />
+            </div>
           </div>
           <div className="flex flex-col md:flex-row my-10">
-            <label className="w-full md:w-[20%] lg:w-[15%]">Country:</label>
-            <input
-              {...register("country")}
-              type="text"
-              name="country"
-              placeholder="Enter your country"
-              className="w-full md:w-[35%] lg:w-[25%] rounded-md mt-3 md:mt-0 md:ml-5 py-3 px-6"
-            />
+            <label className="float-left md:w-[16.66667%]">Country:</label>
+            <div className="float-left md:w-[33.33333%] md:px-3">
+              <input
+                {...register("country")}
+                type="text"
+                name="country"
+                placeholder="Enter your country"
+                className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
+              />
+            </div>
           </div>
           <div className="flex flex-col md:flex-row my-10">
-            <label className="w-full md:w-[20%] lg:w-[15%]">Gender:</label>
-            <select
-              {...register("gender")}
-              name="gender"
-              id="gender"
-              className="w-[40%] md:w-[15%] rounded-md mt-3 md:mt-0 md:ml-5 py-3 px-6"
-            >
-              <option value="-">-</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
+            <label className="float-left md:w-[16.66667%]">Gender:</label>
+            <div className="float-left md:w-[33.33333%] md:px-3">
+              <select
+                {...register("gender")}
+                name="gender"
+                id="gender"
+                className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
+              >
+                <option value="-">-</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex flex-col md:flex-row my-10">
-            <label className="w-full md:w-[20%] lg:w-[15%]">
+            <label className="float-left md:w-[16.66667%]">
               Date of Birth:
             </label>
-            <Controller
-              control={control}
-              name="dateOfBirth"
-              render={({ field }) => {
-                return (
-                  <DatePicker
-                    placeholderText={
-                      user?.dateOfBirth?.toISOString()?.split("T")[0] ||
-                      "YYYY-MM-DD"
-                    }
-                    onChange={(date) => {
-                      // Format the date as YYYY-MM-DD before calling field.onChange()
-                      const formattedDate =
-                        date instanceof Date
-                          ? date.toISOString().split("T")[0]
-                          : "";
-                      field.onChange(formattedDate);
-                    }}
-                    selected={field.value}
-                    className="w-[100%] rounded-md mt-3 md:mt-0 md:ml-5 py-3 px-6"
-                  />
-                );
-              }}
-            />
-          </div>
-
-          <div className="my-10">
-            <div className="flex flex-col md:flex-row">
-              <label className="w-full md:w-[20%] lg:w-[15%]">Biography:</label>
+            <div className="float-left md:w-[33.33333%] md:px-3">
               <Controller
                 control={control}
-                name="biography"
+                name="dateOfBirth"
                 render={({ field }) => {
                   return (
-                    <Tiptap
-                      description={user?.biography as string}
-                      onChange={field.onChange}
+                    <DatePicker
+                      placeholderText={
+                        user?.dateOfBirth?.toISOString()?.split("T")[0] ||
+                        "YYYY-MM-DD"
+                      }
+                      onChange={(date) => {
+                        // Format the date as YYYY-MM-DD before calling field.onChange()
+                        const formattedDate =
+                          date instanceof Date
+                            ? date.toISOString().split("T")[0]
+                            : "";
+                        field.onChange(formattedDate);
+                      }}
+                      selected={field.value}
+                      className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
                     />
                   );
                 }}
               />
+            </div>
+          </div>
+
+          <div className="my-10">
+            <div className="flex flex-col md:flex-row">
+              <label className="float-left md:w-[16.66667%]">Biography:</label>
+              <div className="float-left w-full md:px-3">
+                <Controller
+                  control={control}
+                  name="biography"
+                  render={({ field }) => {
+                    return (
+                      <Tiptap
+                        description={user?.biography as string}
+                        onChange={field.onChange}
+                      />
+                    );
+                  }}
+                />
+              </div>
             </div>
             <div className="flex flex-col md:flex-row">
               <span className="w-full md:w-[20%] lg:w-[15%]"></span>
@@ -209,13 +226,13 @@ const ProfileSetting = ({ user }: any) => {
             </div>
           </div>
         </div>
-        <div className="border-t-2 border-t-[#272727] p-4">
+        <div className="border-t-2 border-t-[#78828c21] dark:border-t-[#272727] p-4">
           <button
             type="submit"
             onClick={() => {
               setLoading(!loading), handleSubmit(onSubmit);
             }}
-            className="border-2 border-[#409eff] bg-[#409eff] rounded-md py-2 px-4 flex items-center"
+            className="text-white border-2 border-[#409eff] bg-[#409eff] rounded-md py-2 px-4 flex items-center"
           >
             <ClipLoader color="#272727" size={25} loading={loading} />
             <span className={`${loading && "ml-2"}`}>Submit</span>

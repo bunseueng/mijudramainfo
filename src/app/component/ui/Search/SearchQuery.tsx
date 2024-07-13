@@ -108,7 +108,7 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
   return (
     <div className="mt-10">
       {totalItems?.length === 0 && (
-        <h1 className="text-center pt-6">No results found</h1>
+        <h1 className="h-screen text-xl text-center mt-20">No results found</h1>
       )}
       {totalItems?.length > 0 && (
         <Suspense fallback={<SearchLoading />}>

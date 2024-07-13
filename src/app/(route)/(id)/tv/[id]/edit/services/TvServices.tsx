@@ -14,12 +14,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
 import { toast } from "react-toastify";
+import { v4 as uuidv4 } from "uuid";
 
 const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv } = useQuery({
@@ -41,34 +41,45 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     Array(tvDetails?.services?.length || 0).fill(false)
   );
 
-  const { register, handleSubmit, reset } = useForm<TCreateDetails>({
+  const { handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
   });
   const router = useRouter();
 
   useEffect(() => {
-    const extraData = {
-      ...tv,
-      service_name: tv?.networks?.map((net: any) => net?.name).join(" "),
-      service_url: tv?.networks
-        ?.map(
-          (net: any) => `https://image.tmdb.org/t/p/original/${net?.logo_path}`
-        )
-        .join(" "),
-      page_link: tv?.homepage,
-      service_type: "Unknown",
-      availability: "",
-      subtitles: "English",
-    };
-    setDrama(
-      [...(tvDetails?.services || [])].length > 0
-        ? [
-            ...(tvDetails?.services || []),
-            ...storedData.filter((data) => data !== undefined),
-          ]
-        : [...[extraData], ...storedData.filter((data) => data !== undefined)]
-    );
-  }, [tv?.networks, tv, tvDetails?.services, storedData]);
+    if (!tv) return;
+
+    const extraData =
+      tv?.networks?.map((net: any, idx: number) => ({
+        ...tv,
+        service_name: net?.name,
+        service_url: `https://image.tmdb.org/t/p/original/${net?.logo_path}`,
+        page_link: tv?.homepage,
+        service_type: "Unknown",
+        availability: "",
+        subtitles: "English",
+      })) || [];
+
+    // Merge data ensuring no duplicates
+    const combinedData = [
+      ...(tvDetails?.services || []),
+      ...extraData,
+      ...storedData.filter((data) => data !== undefined),
+    ];
+
+    // Remove duplicates
+    const uniqueData = combinedData.reduce((acc, current) => {
+      const x = acc.find(
+        (item: any) => item.service_name === current.service_name
+      );
+      if (!x) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
+
+    setDrama(uniqueData);
+  }, [tv, tvDetails?.services, storedData]);
 
   const onSubmit = async (data: TCreateDetails) => {
     try {
@@ -111,17 +122,27 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   };
 
   const handleOpenModal = (idx: number) => {
+    const item = drama[idx];
+
+    const filteredNetworks = item?.networks?.filter((network: any) =>
+      drama[idx]?.page_link
+        ?.toLowerCase()
+        ?.includes(network?.name?.toLowerCase())
+    );
+
+    const shouldRenderP = filteredNetworks?.some(
+      (item: any) => item?.name === drama[idx]?.service_name
+    );
     setDeleteIndex(idx);
     setOpenEditModal(true);
     setDefaultValues({
       service_name: drama[idx]?.service_name,
       service_type: drama[idx]?.service_type,
-      link: drama[idx]?.link,
+      link: shouldRenderP && (drama[idx]?.page_link as any),
       availability: drama[idx]?.availability,
       subtitles: drama[idx]?.subtitles,
     });
   };
-
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">Services</h1>
@@ -162,16 +183,26 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <Reorder.Group as="tbody" values={drama} onReorder={setDrama}>
             <AnimatePresence>
               {drama?.map((show: any, idx: number) => {
-                const network = show?.networks?.[0];
                 const subtitle =
                   Array.isArray(show?.subtitles) &&
                   show?.subtitles?.map((sub: any) => sub?.label);
-
+                const filteredNetworks = show?.networks?.filter(
+                  (network: any) =>
+                    show.page_link
+                      .toLowerCase()
+                      .includes(network.name.toLowerCase())
+                );
+                const shouldRenderP = filteredNetworks?.some(
+                  (item: any) => item?.name === show?.service_name
+                );
+                const networkId = show?.networks
+                  ?.filter((net: any) => net?.name !== show?.service_name)
+                  ?.map((item: any) => item.id);
                 return (
                   <Reorder.Item
                     as="tr"
                     value={show}
-                    key={show?.id || `${tvDetails?.id}-${idx}`}
+                    key={networkId}
                     className="relative w-full h-auto overflow-hidden"
                     whileDrag={{
                       scale: 1.0,
@@ -189,12 +220,10 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               : show?.service_logo
                               ? `/channel${show?.service_logo}` ||
                                 "/default-image.jpg"
-                              : `https://image.tmdb.org/t/p/original/${network?.logo_path}`
+                              : `https://image.tmdb.org/t/p/original/${show?.logo_path}`
                           }
                           alt={
-                            show?.service_name
-                              ? show?.service_name
-                              : network?.name
+                            show?.service_name ? show?.service_name : show?.name
                           }
                           width={200}
                           height={200}
@@ -210,28 +239,28 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             markedForDeletion[idx] ? "text-red-500" : ""
                           }`}
                         >
-                          {show?.service_name
-                            ? show?.service_name
-                            : network?.name}
+                          {show?.service_name ? show?.service_name : show?.name}
                         </p>
                       </div>
                     </td>
                     <td className="border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3">
-                      <p
-                        className={`break-words h-auto ${
-                          storedData.some((item) => item === show)
-                            ? "text-[#5cb85c]"
-                            : ""
-                        } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
-                          markedForDeletion[idx] ? "text-red-500" : ""
-                        }`}
-                      >
-                        {show?.page_link
-                          ? show?.page_link
-                          : show?.link
-                          ? show?.link
-                          : show?.homepage}
-                      </p>
+                      {shouldRenderP && (
+                        <p
+                          className={`break-words h-auto ${
+                            storedData.some((item) => item === show)
+                              ? "text-[#5cb85c]"
+                              : ""
+                          } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
+                            markedForDeletion[idx] ? "text-red-500" : ""
+                          }`}
+                        >
+                          {show?.page_link
+                            ? show?.page_link
+                            : show?.link
+                            ? show?.link
+                            : show?.homepage}
+                        </p>
+                      )}
                     </td>
                     <td
                       className={`border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3 ${

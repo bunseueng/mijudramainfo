@@ -279,7 +279,7 @@ export const fetchAllCast = async (tv_id: any) => {
 }
 
 // fetch languages
-export const fetchLanguages = async (tv_id: any) => {
+export const fetchLanguages = async () => {
     const url = `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
     const options = {
       method: 'GET',
@@ -289,16 +289,52 @@ export const fetchLanguages = async (tv_id: any) => {
     const res = await fetch(url, options);
   
     if (!res.ok) {
-      throw new Error('Failed to fetch movies');
+      throw new Error('Failed to fetch language');
     }
   
     const json = await res.json();
     return json;
 }
 
-// Fetch keyword
+//fetch keyword
+export const fetchAllKeywords = async (searchQuery: any) => {
+  const url = `https://api.themoviedb.org/3/search/keyword?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}`
+  const options = {
+    method: 'GET',
+    headers,
+  };
+  
+  const res = await fetch(url, options);
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch keywords');
+  }
+
+  const json = await res.json();
+  return json;
+}
+
+// Fetch tv keyword
 export const fetchKeyword = async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+  const options = {
+    method: 'GET',
+    headers,
+  };
+  
+  const res = await fetch(url, options);
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch tv keyword');
+  }
+
+  const json = await res.json();
+  return json;
+}
+
+// Fetch Genre
+export const fetchGenre = async () => {
+  const url = `https://api.themoviedb.org/3/genre/tv/list?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
     headers,
