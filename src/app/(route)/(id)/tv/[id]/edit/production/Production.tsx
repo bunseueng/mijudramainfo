@@ -56,6 +56,25 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     }
   }, [tv, tvDetails?.production_information]);
 
+  const scrollIntoViewIfNeeded = (element: any) => {
+    const rect = element?.getBoundingClientRect();
+    const isVisible =
+      rect?.top >= 0 &&
+      rect?.left >= 0 &&
+      rect?.bottom <=
+        (window?.innerHeight || document?.documentElement?.clientHeight) &&
+      rect?.right <=
+        (window?.innerWidth || document?.documentElement.clientWidth);
+
+    if (!isVisible) {
+      element?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "nearest",
+      });
+    }
+  };
+
   const handleDropdownToggle = (dropdown: string, idx: number) => {
     setOpenDropdown((prev) =>
       prev === `${dropdown}-${idx}` ? null : `${dropdown}-${idx}`
@@ -173,9 +192,12 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           : data?.language?.join(" ") === items?.value;
                         return (
                           <li
-                            ref={(el) =>
-                              isContentRating && scrollIntoViewIfNeeded(el)
-                            }
+                            // ref={(el) =>
+                            //   isContentRating && scrollIntoViewIfNeeded(el)
+                            // }
+                            ref={(el) => {
+                              if (isContentRating) scrollIntoViewIfNeeded(el);
+                            }}
                             className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
                               isContentRating
                                 ? "text-[#409eff] bg-[#2a2b2c]"
