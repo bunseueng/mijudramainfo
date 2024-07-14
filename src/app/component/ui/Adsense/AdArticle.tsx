@@ -21,7 +21,7 @@ const AdArticle = ({ dataAdSlot, dataAdFormat }: AdArticleType) => {
     <ins
       className="adsbygoogle"
       style={{ display: "block", textAlign: "center" }}
-      data-ad-client="ca-pub-9500233280708226"
+      data-ad-client="ca-pub-3369705912051027"
       data-ad-slot={dataAdSlot}
       data-ad-format={dataAdFormat}
       data-ad-layout="in-article"

@@ -39,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Adsense pId="9500233280708226" />
+        <Adsense pId="3369705912051027" />
       </head>
       <body className={`bg-slate-100 dark:bg-[#1e1e1e]  ${nunito.className}`}>
         <PHProvider>
