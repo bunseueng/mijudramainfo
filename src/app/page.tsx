@@ -38,7 +38,7 @@ export default async function Home() {
           </Suspense>
         </div>
         <div className="py-5 hidden lg:block">
-          <AdBanner dataAdFormat="auto" dataAdSlot="1797555299" />
+          <AdBanner dataAdFormat="auto" dataAdSlot="8077904488" />
         </div>
         <div className="mb-5">
           <Suspense fallback={<div>Loading...</div>}>
