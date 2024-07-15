@@ -278,6 +278,7 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   useEffect(() => {
     refetch();
   }, [searchQuery, refetch]);
+
   return (
     <form className="py-3 px-4" onSubmit={onSubmit}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">

@@ -68,6 +68,7 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       throw new Error(error);
     }
   };
+
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">
@@ -113,7 +114,12 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           </div>
           <button
             type="submit"
-            className="block bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md mt-10"
+            className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+              cover
+                ? "cursor-pointer"
+                : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+            }`}
+            disabled={cover ? false : true}
           >
             Submit
           </button>

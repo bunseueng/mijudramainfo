@@ -120,6 +120,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const [itemStories, setItemStories] = useState<string[]>([]);
   const [itemRelatedStories, setItemRelatedStories] = useState<string[]>([]);
+  const prevItemRef = useRef(item);
 
   useEffect(() => {
     if (tvAndMovieResult.length > 0) {
@@ -160,16 +161,39 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const onSubmit = async (data: TCreateDetails) => {
     try {
-      const updatedItems = item.map((drama, index) => ({
+      // Create a map of updated stories by matching indices
+      const updatedStoriesMap = itemRelatedStories.reduce(
+        (map: any, story, index) => {
+          if (story) {
+            map[item[index].id] = story; // assuming each item has a unique id
+          }
+          return map;
+        },
+        {}
+      );
+
+      // Update the story in existing related titles
+      const existingRelatedTitles = (tvDetails?.related_title || []).map(
+        (drama: any) => ({
+          ...drama,
+          story: updatedStoriesMap[drama.id] || drama.story, // Update story if it exists in the map
+        })
+      );
+
+      // Add new items
+      const newItems = item.filter(
+        (drama) =>
+          !tvDetails?.related_title.some(
+            (existingDrama: any) => existingDrama.id === drama.id
+          )
+      );
+      const updatedItems = newItems.map((drama, index) => ({
         ...drama,
-        story: itemRelatedStories[index],
+        story: itemRelatedStories[index] || drama.story,
       }));
 
-      // Combine old and new related titles
-      const allRelatedTitles = [
-        ...(tvDetails?.related_title || []),
-        ...updatedItems,
-      ];
+      // Combine existing and new updated items
+      const allRelatedTitles = [...existingRelatedTitles, ...updatedItems];
 
       const res = await fetch(`/api/tv/${tv_id}/related`, {
         method: "POST",
@@ -189,14 +213,22 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       } else if (res.status === 400) {
         toast.error("Invalid User");
       } else if (res.status === 500) {
-        console.log("Bad Request");
+        console.log("Server Error");
       }
     } catch (error: any) {
-      console.log("Bad Request");
+      console.error("Error:", error.message);
       throw new Error(error);
     }
   };
-  console.log(itemRelatedStories);
+
+  useEffect(() => {
+    if (prevItemRef.current !== item) {
+    }
+    prevItemRef.current = item; // Update the ref with the current item
+  }, [item]);
+
+  const isItemChanged = prevItemRef.current !== item;
+
   useEffect(() => {
     refetch();
   }, [query, refetch]);
@@ -433,11 +465,19 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <button
         onClick={handleSubmit(onSubmit)}
         className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-          itemStories?.length > 0
+          itemStories?.length > 0 ||
+          itemRelatedStories?.length > 0 ||
+          isItemChanged
             ? "cursor-pointer"
             : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
         }`}
-        disabled={itemStories?.length > 0 ? false : true}
+        disabled={
+          itemStories?.length > 0 ||
+          itemRelatedStories?.length > 0 ||
+          isItemChanged
+            ? false
+            : true
+        }
       >
         Submit
       </button>

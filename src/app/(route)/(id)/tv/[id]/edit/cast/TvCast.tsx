@@ -372,7 +372,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           cast?.character ||
                           cast?.roles?.map((role: any) => role?.character)
                         }
-                        className="w-full h-[44px] leading-10 bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4"
+                        onDragStart={(e) => e.stopPropagation()}
+                        className="w-full h-[44px] leading-10 bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4 "
                       />
                     </td>
                     <td className="text-right border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top pl-4 py-3">

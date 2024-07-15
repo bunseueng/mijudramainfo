@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
+import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
@@ -32,6 +33,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [drama, setDrama] = useState<EditDramaPage[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [openEditModal, setOpenEditModal] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [defaultValues, setDefaultValues] = useState<EditPageDefaultvalue>();
   const [isItemDataChanged, setIsItemDataChanged] = useState<boolean[]>(
@@ -83,6 +85,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const onSubmit = async (data: TCreateDetails) => {
     try {
+      setLoading(true);
       const requestData = {
         tv_id: tv_id.toString(),
         services: markedForDeletion.includes(true)
@@ -118,6 +121,8 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     } catch (error: any) {
       console.log("Bad Request");
       throw new Error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -143,6 +148,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       subtitles: drama[idx]?.subtitles,
     });
   };
+
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">Services</h1>
@@ -188,9 +194,9 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   show?.subtitles?.map((sub: any) => sub?.label);
                 const filteredNetworks = show?.networks?.filter(
                   (network: any) =>
-                    show.page_link
-                      .toLowerCase()
-                      .includes(network.name.toLowerCase())
+                    show?.page_link
+                      ?.toLowerCase()
+                      ?.includes(network?.name?.toLowerCase())
                 );
                 const shouldRenderP = filteredNetworks?.some(
                   (item: any) => item?.name === show?.service_name
@@ -244,23 +250,28 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       </div>
                     </td>
                     <td className="border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3">
-                      {shouldRenderP && (
-                        <p
-                          className={`break-words h-auto ${
-                            storedData.some((item) => item === show)
-                              ? "text-[#5cb85c]"
-                              : ""
-                          } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
-                            markedForDeletion[idx] ? "text-red-500" : ""
-                          }`}
-                        >
-                          {show?.page_link
-                            ? show?.page_link
-                            : show?.link
-                            ? show?.link
-                            : show?.homepage}
-                        </p>
-                      )}
+                      <p
+                        className={`break-words h-auto ${
+                          storedData.some((item) => item === show)
+                            ? "text-[#5cb85c]"
+                            : ""
+                        } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
+                          markedForDeletion[idx] ? "text-red-500" : ""
+                        }`}
+                      >
+                        {" "}
+                        {shouldRenderP ? (
+                          <span>
+                            {show?.page_link
+                              ? show?.page_link
+                              : show?.link
+                              ? show?.link
+                              : show?.homepage}
+                          </span>
+                        ) : (
+                          <span>{show?.link}</span>
+                        )}
+                      </p>
                     </td>
                     <td
                       className={`border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3 ${
@@ -386,8 +397,18 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         ))}
       <button
         type="submit"
-        className="bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
+        className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+          storedData?.length > 0 || markedForDeletion?.length > 0
+            ? "cursor-pointer"
+            : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+        }`}
+        disabled={
+          storedData?.length > 0 || markedForDeletion?.length > 0 ? false : true
+        }
       >
+        <span className="mr-1 pt-1">
+          <ClipLoader color="#242526" loading={loading} size={19} />
+        </span>
         Submit
       </button>
     </form>
