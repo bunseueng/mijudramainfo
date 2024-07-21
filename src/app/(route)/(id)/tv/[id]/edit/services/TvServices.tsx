@@ -26,10 +26,22 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv } = useQuery({
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
+  const extraData =
+    tv?.networks?.map((net: any, idx: number) => ({
+      ...tv,
+      service_name: net?.name,
+      service_url: `https://image.tmdb.org/t/p/original/${net?.logo_path}`,
+      page_link: tv?.homepage,
+      service_type: "Unknown",
+      availability: "",
+      subtitles: "English",
+    })) || [];
+
   const [storedData, setStoredData] = useState<EditDramaPage[]>([]);
-  const [tvDatabase, setTvDatabase] = useState(tvDetails?.services);
+  const [tvDatabase, setTvDatabase] = useState<EditDramaPage[]>(extraData);
   const [drama, setDrama] = useState<EditDramaPage[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [openEditModal, setOpenEditModal] = useState<boolean>(false);
@@ -49,39 +61,43 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!tv) return;
+    if ((tvDetails?.services?.length || 0) < 0) {
+      const combinedData = [
+        ...(tvDetails?.services || []),
+        ...storedData.filter((data) => data !== undefined),
+      ];
+      const uniqueData = combinedData.reduce((acc: any, current: any) => {
+        const x = acc?.find(
+          (item: any) => item?.service_name === current?.service_name
+        );
+        if (!x) {
+          acc?.push(current);
+        }
+        return acc;
+      }, []);
+      setDrama(uniqueData);
+    } else {
+      if (!tv) return;
 
-    const extraData =
-      tv?.networks?.map((net: any, idx: number) => ({
-        ...tv,
-        service_name: net?.name,
-        service_url: `https://image.tmdb.org/t/p/original/${net?.logo_path}`,
-        page_link: tv?.homepage,
-        service_type: "Unknown",
-        availability: "",
-        subtitles: "English",
-      })) || [];
+      const combinedData = [
+        ...(tvDetails?.services || []),
+        ...tvDatabase,
+        ...storedData.filter((data) => data !== undefined),
+      ];
 
-    // Merge data ensuring no duplicates
-    const combinedData = [
-      ...(tvDetails?.services || []),
-      ...extraData,
-      ...storedData.filter((data) => data !== undefined),
-    ];
+      const uniqueData = combinedData.reduce((acc: any, current: any) => {
+        const x = acc?.find(
+          (item: any) => item?.service_name === current?.service_name
+        );
+        if (!x) {
+          acc?.push(current);
+        }
+        return acc;
+      }, []);
 
-    // Remove duplicates
-    const uniqueData = combinedData.reduce((acc, current) => {
-      const x = acc.find(
-        (item: any) => item.service_name === current.service_name
-      );
-      if (!x) {
-        acc.push(current);
-      }
-      return acc;
-    }, []);
-
-    setDrama(uniqueData);
-  }, [tv, tvDetails?.services, storedData]);
+      setDrama(uniqueData);
+    }
+  }, [tv, tvDetails?.services, storedData, tvDatabase]);
 
   const onSubmit = async (data: TCreateDetails) => {
     try {
@@ -221,11 +237,10 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <div className="flex items-start">
                         <Image
                           src={
-                            show?.service_url
-                              ? show?.service_url
-                              : show?.service_logo
-                              ? `/channel${show?.service_logo}` ||
-                                "/default-image.jpg"
+                            show?.service_logo
+                              ? `/channel${show?.service_logo}`
+                              : show?.service_url
+                              ? show?.service_url || "/default-image.jpg"
                               : `https://image.tmdb.org/t/p/original/${show?.logo_path}`
                           }
                           alt={
@@ -348,6 +363,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       </button>
                       {openEditModal && deleteIndex === idx && (
                         <TvEditModal
+                          tv={tv}
                           setOpenEditModal={setOpenEditModal}
                           openEditModal={openEditModal}
                           show={[drama[deleteIndex]]}
@@ -380,30 +396,35 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           Add Service
         </button>
       </div>
-      {open &&
-        drama.map((item, idx) => (
-          <div key={idx}>
-            <TvAddModal
-              tv={tv}
-              setOpen={setOpen}
-              open={open}
-              setDeleteIndex={setDeleteIndex}
-              drama={drama}
-              idx={idx}
-              setStoredData={setStoredData}
-              storedData={storedData}
-            />
-          </div>
-        ))}
+      {open && (
+        <div>
+          <TvAddModal
+            tv={tv}
+            setOpen={setOpen}
+            open={open}
+            setDeleteIndex={setDeleteIndex}
+            drama={drama}
+            idx={drama.length}
+            setStoredData={setStoredData}
+            storedData={storedData}
+          />
+        </div>
+      )}
       <button
         type="submit"
         className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-          storedData?.length > 0 || markedForDeletion?.length > 0
+          storedData?.length > 0 ||
+          markedForDeletion?.length > 0 ||
+          isItemDataChanged?.length > 0
             ? "cursor-pointer"
             : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
         }`}
         disabled={
-          storedData?.length > 0 || markedForDeletion?.length > 0 ? false : true
+          storedData?.length > 0 ||
+          markedForDeletion?.length > 0 ||
+          isItemDataChanged?.length > 0
+            ? false
+            : true
         }
       >
         <span className="mr-1 pt-1">

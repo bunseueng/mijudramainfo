@@ -271,6 +271,7 @@ export interface Drama {
     cast: Prisma.JsonValue[];
     crew: Prisma.JsonValue[];
     services: Prisma.JsonValue[];
+    external_links: Prisma.JsonValue[];
     released_information: Prisma.JsonValue[];
     production_information: Prisma.JsonValue[];
     genres_tags: Prisma.JsonValue[];
@@ -386,3 +387,12 @@ export interface AddSeason {
   first_air_date?: string;
 }
 [];
+
+export interface ExternalLinkType {
+  title: string;
+  url: string;
+  id: string;
+  link_url: string;
+  link_text: string;
+  additional_text: string;
+}

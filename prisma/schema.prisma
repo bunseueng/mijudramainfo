@@ -111,6 +111,7 @@ model Drama {
   cast                   Json[]
   crew                   Json[]
   services               Json[]
+  external_links         Json[]
   released_information   Json[]
   production_information Json[]
   genres_tags            Json[]

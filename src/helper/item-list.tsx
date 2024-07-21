@@ -521,7 +521,7 @@ export const editPageList = [
   },
   {
     label: "External Links",
-    link: "/external_links",
+    link: "/external_link",
     icon: <TiArrowForward />,
   },
   {
@@ -3986,4 +3986,62 @@ export const genre_edit = [
   { name: "Wuxia" },
   { name: "Youth" },
   { name: "Zombies" },
+];
+
+export const external_link = [
+  {
+    label: "IMDb ID",
+    placeholder: "ID",
+    eg: "e.g. https://www.imdb.com/title/ID",
+    link_url: "https://www.imdb.com/title/",
+    error: "ID",
+  },
+  {
+    label: "TMDB ID",
+    placeholder: "ID",
+    eg: "e.g. https://www.themoviedb.org/ID",
+    link_url: "https://www.themoviedb.org/",
+    error: "ID",
+  },
+  {
+    label: "TRAKT",
+    placeholder: "ID",
+    eg: "e.g. https://trakt.tv/ID",
+    link_url: "https://trakt.tv/",
+    error: "ID",
+  },
+  {
+    label: "TVDB ID",
+    placeholder: "ID",
+    eg: "e.g. https://thetvdb.com/series/ID",
+    link_url: "https://thetvdb.com/series/",
+    error: "ID",
+  },
+  {
+    label: "Facebook",
+    placeholder: "Username/Handle",
+    eg: "e.g. https://facebook.com/HANDLE",
+    link_url: "https://facebook.com/",
+    error: "Handle",
+  },
+  {
+    label: "Instagram",
+    placeholder: "Username/Handle",
+    eg: "e.g. https://www.instagram.com/HANDLE",
+    link_url: "https://www.instagram.com/",
+    error: "Handle",
+  },
+  {
+    label: "Twitter",
+    placeholder: "Username/Handle",
+    eg: "e.g. https://twitter.com/HANDLE",
+    link_url: "https://twitter.com/",
+    error: "Handle",
+  },
+  {
+    label: "Website",
+    placeholder: "",
+    eg: "",
+    error: "URL",
+  },
 ];

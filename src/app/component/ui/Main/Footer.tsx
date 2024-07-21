@@ -46,7 +46,7 @@ const Footer = () => {
                 </li>
                 <li className="li">
                   <Link
-                    href=""
+                    href="https://www.youtube.com/@CDramaWorldKH"
                     className="border border-white rounded-full mr-2 link"
                   >
                     <FaYoutube className="m-2 icon" />

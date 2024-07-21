@@ -17,6 +17,7 @@ import TvServices from "../services/TvServices";
 import ReleaseInfo from "../release/ReleaseInfo";
 import Production from "../production/Production";
 import Genres from "../genres/Genres";
+import ExternalLink from "../external_link/ExternalLink";
 
 const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [currentPage, setCurrentPage] = useState("/detail");
@@ -102,6 +103,8 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             <Production tv_id={tv_id} tvDetails={tvDetails} />
           ) : currentPage === "/genres" ? (
             <Genres tv_id={tv_id} tvDetails={tvDetails} />
+          ) : currentPage === "/external_link" ? (
+            <ExternalLink tv_id={tv_id} tvDetails={tvDetails} />
           ) : null}
         </div>
       </div>

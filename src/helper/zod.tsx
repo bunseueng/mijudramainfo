@@ -185,3 +185,13 @@ export const createDetails = z.object({
 });
 
 export type TCreateDetails = z.infer<typeof createDetails>;
+
+export const externalLink = z.object({
+  id: z.string().min(3, { message: "is required." }).optional(),
+  url: z.string().min(3, { message: "is required." }).optional(),
+  link_text: z.string().optional(),
+  additional_text: z.string().optional(),
+  selectedExternal: any(),
+});
+
+export type TExternalLink = z.infer<typeof externalLink>;
