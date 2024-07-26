@@ -10,11 +10,12 @@ import Select from "react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { useForm } from "react-hook-form";
-import { customStyles } from "@/helper/MuiStyling";
+import { customStyles, lightTheme } from "@/helper/MuiStyling";
 import { Drama, EditDramaPage } from "@/helper/type";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
+import { useTheme } from "next-themes";
 
 interface EditModal {
   tv?: JsonValue | [];
@@ -62,6 +63,7 @@ const TvAddModal: React.FC<EditModal> = ({
   } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
   });
+  const { resolvedTheme } = useTheme();
   const options = useMemo(() => countryList().getData(), []);
 
   const changeHandler = (value: any) => {
@@ -103,13 +105,16 @@ const TvAddModal: React.FC<EditModal> = ({
       newServices[idx] = serviceLogo;
       return newServices;
     });
+    setValue("services.service", serviceLogo.label);
   };
+
   const setServiceType = (idx: number, role: string) => {
     setServicesType((prev) => {
       const newRoles = [...prev];
       newRoles[idx] = role;
       return newRoles;
     });
+    setValue("services.service_type", role);
   };
 
   const addingItem = async (data: TCreateDetails) => {
@@ -186,7 +191,7 @@ const TvAddModal: React.FC<EditModal> = ({
                   <div className="mb-5">
                     <label
                       htmlFor="service"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <span className="text-red-500 pr-1">*</span>Service
                     </label>
@@ -198,7 +203,7 @@ const TvAddModal: React.FC<EditModal> = ({
                           name="services.service"
                           readOnly
                           autoComplete="off"
-                          className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
+                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
                           placeholder={
                             service[idx]?.label
                               ? service[idx]?.label
@@ -206,21 +211,20 @@ const TvAddModal: React.FC<EditModal> = ({
                           }
                           onClick={() => handleDropdownToggle("service", idx)}
                         />
-
-                        <IoIosArrowDown className="absolute bottom-3 right-2" />
+                        <IoIosArrowDown className="text-black dark:text-white absolute bottom-3 right-2" />
                       </div>
-                      {/* {errors.services?.service && (
+                      {errors.services?.service && (
                         <p className="text-xs italic text-red-500 mt-2">
                           {errors.services?.service.message}
                         </p>
-                      )} */}
+                      )}
                       {openDropdown === `service-${idx}` && (
                         <AnimatePresence>
                           <motion.ul
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
+                            className="w-full h-[250px] absolute bg-white dark:bg-[#242424] border-2 border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll"
                           >
                             {serviceLogo?.map((items, index) => {
                               const scrollIntoViewIfNeeded = (element: any) => {
@@ -253,9 +257,9 @@ const TvAddModal: React.FC<EditModal> = ({
                                       scrollIntoViewIfNeeded(el);
                                     }
                                   }}
-                                  className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                  className={`text-sm text-black dark:text-white hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
                                     isContentRating
-                                      ? "text-[#409eff] bg-[#2a2b2c]"
+                                      ? "text-[#409eff] bg-[#00000011] dark:bg-[#2a2b2c]"
                                       : ""
                                   } `}
                                   onClick={() => {
@@ -291,7 +295,7 @@ const TvAddModal: React.FC<EditModal> = ({
                   <div className="mb-5">
                     <label
                       htmlFor="service_type"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <span className="text-red-500 pr-1">*</span>Service Type
                     </label>
@@ -303,7 +307,7 @@ const TvAddModal: React.FC<EditModal> = ({
                           name="services.service_type"
                           readOnly
                           autoComplete="off"
-                          className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
+                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
                           placeholder={
                             servicesType[idx]
                               ? servicesType[idx]
@@ -313,21 +317,20 @@ const TvAddModal: React.FC<EditModal> = ({
                             handleDropdownToggle("service_type", idx)
                           }
                         />
-
-                        <IoIosArrowDown className="absolute bottom-3 right-2" />
+                        <IoIosArrowDown className="text-black dark:text-white absolute bottom-3 right-2" />
                       </div>
-                      {/* {errors.services?.service_type && (
+                      {errors.services?.service_type && (
                         <p className="text-xs italic text-red-500 mt-2">
                           {errors.services?.service_type.message}
                         </p>
-                      )} */}
+                      )}
                       {openDropdown === `service_type-${idx}` && (
                         <AnimatePresence>
                           <motion.ul
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10`}
+                            className="w-full h-[250px] absolute bg-white dark:bg-[#242424] border-2 border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll"
                             style={{ height: "160px" }}
                           >
                             {serviceType?.map((items, index) => {
@@ -361,9 +364,9 @@ const TvAddModal: React.FC<EditModal> = ({
                                       scrollIntoViewIfNeeded(el);
                                     }
                                   }}
-                                  className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                  className={`text-sm text-black dark:text-white hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
                                     isContentRating
-                                      ? "text-[#409eff] bg-[#2a2b2c]"
+                                      ? "text-[#409eff] bg-[#00000011] dark:bg-[#2a2b2c]"
                                       : ""
                                   } `}
                                   onClick={() => {
@@ -384,7 +387,7 @@ const TvAddModal: React.FC<EditModal> = ({
                   <div className="mb-5">
                     <label
                       htmlFor="page_link"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <span className="text-red-500 pr-1">*</span>Page Link
                     </label>
@@ -395,7 +398,7 @@ const TvAddModal: React.FC<EditModal> = ({
                         type="text"
                         name="services.link"
                         autoComplete="off"
-                        className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1"
+                        className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
                       />
                       {errors.services?.link && (
                         <p className="text-xs italic text-red-500 mt-2">
@@ -407,7 +410,7 @@ const TvAddModal: React.FC<EditModal> = ({
                   <div className="mb-5">
                     <label
                       htmlFor="country"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <span className="text-red-500 pr-1">*</span>Country
                     </label>
@@ -420,7 +423,11 @@ const TvAddModal: React.FC<EditModal> = ({
                         options={options}
                         value={countries}
                         onChange={changeHandler}
-                        styles={customStyles(openCountries)}
+                        styles={
+                          resolvedTheme === "dark"
+                            ? customStyles(openCountries)
+                            : lightTheme(openCountries)
+                        }
                         closeMenuOnSelect={false}
                         classNamePrefix="react-select"
                         onBlur={() => setOpenCountries(false)}
@@ -428,7 +435,7 @@ const TvAddModal: React.FC<EditModal> = ({
                         placeholder="Type to add more countries"
                         className="w-full"
                       />
-                      <p className="mb-1 text-muted-foreground opacity-60">
+                      <p className="text-sm mb-1 text-muted-foreground opacity-60">
                         Leave blank for no restrictions
                       </p>
                     </div>
@@ -436,7 +443,7 @@ const TvAddModal: React.FC<EditModal> = ({
                   <div className="mb-5">
                     <label
                       htmlFor="country"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <span className="text-red-500 pr-1">*</span>Subtitles
                     </label>
@@ -452,7 +459,11 @@ const TvAddModal: React.FC<EditModal> = ({
                         }))}
                         value={subtitle}
                         onChange={subtitleChangeHandler}
-                        styles={customStyles(openSub)}
+                        styles={
+                          resolvedTheme === "dark"
+                            ? customStyles(openSub)
+                            : lightTheme(openSub)
+                        }
                         closeMenuOnSelect={false}
                         classNamePrefix="react-select"
                         onBlur={() => setOpenSub(false)}
@@ -460,7 +471,7 @@ const TvAddModal: React.FC<EditModal> = ({
                         className="w-full"
                         placeholder="Type to add more translation languages"
                       />
-                      <p className="mb-1 text-muted-foreground opacity-60">
+                      <p className="text-sm mb-1 text-muted-foreground opacity-60">
                         Leave blank for no subtitles available.
                       </p>
                     </div>

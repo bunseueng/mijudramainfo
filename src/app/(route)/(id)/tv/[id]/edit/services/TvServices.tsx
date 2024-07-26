@@ -18,12 +18,12 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
+import { GrPowerReset } from "react-icons/gr";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
-import { v4 as uuidv4 } from "uuid";
 
 const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
-  const { data: tv } = useQuery({
+  const { data: tv, refetch } = useQuery({
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
     staleTime: 1000 * 60 * 10, // 10 minutes
@@ -165,6 +165,19 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     });
   };
 
+  const handleResetItem = (idx: number) => {
+    setMarkedForDeletion((prev) =>
+      prev.map((marked, index) => (index === idx ? false : marked))
+    );
+    setIsItemDataChanged((prev) =>
+      prev.map((changed, index) => (index === idx ? false : changed))
+    );
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">Services</h1>
@@ -176,30 +189,30 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <thead>
             <tr>
               <th
-                className="border-t-2 border-t-[#3e4042] border-[#3e4042] border-b-2 border-b-[#3e4042] align-bottom text-left py-2 px-4"
+                className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
                 style={{ width: "200px" }}
               >
                 Service
               </th>
               <th
-                className="border-t-2 border-t-[#3e4042] border-[#3e4042] border-b-2 border-b-[#3e4042] align-bottom text-left py-2 px-4"
+                className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
                 style={{ width: "150px" }}
               >
                 Page Link
               </th>
               <th
-                className="border-t-2 border-t-[#3e4042] border-[#3e4042] border-b-2 border-b-[#3e4042] align-bottom text-left py-2 px-4"
+                className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
                 style={{ width: "150px" }}
               >
                 Service Type
               </th>
               <th
-                className="border-t-2 border-t-[#3e4042] border-[#3e4042] border-b-2 border-b-[#3e4042] align-bottom text-left py-2 px-4"
+                className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
                 style={{ width: "250px" }}
               >
                 Availability
               </th>
-              <th className="border-t-2 border-t-[#3e4042] border-[#3e4042] border-b-2 border-b-[#3e4042] align-bottom text-left py-2 px-4"></th>
+              <th className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"></th>
             </tr>
           </thead>
           <Reorder.Group as="tbody" values={drama} onReorder={setDrama}>
@@ -233,7 +246,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     }}
                     style={{ display: "table-row" }}
                   >
-                    <td className="border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3">
+                    <td className="border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
                       <div className="flex items-start">
                         <Image
                           src={
@@ -264,7 +277,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         </p>
                       </div>
                     </td>
-                    <td className="border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3">
+                    <td className="border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
                       <p
                         className={`break-words h-auto ${
                           storedData.some((item) => item === show)
@@ -289,7 +302,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       </p>
                     </td>
                     <td
-                      className={`border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3 ${
+                      className={`border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3 ${
                         storedData.some((item) => item === show)
                           ? "text-[#5cb85c]"
                           : ""
@@ -300,7 +313,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       {show?.service_type ? show?.service_type : "Unknown"}
                     </td>
                     <td
-                      className={`border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3 ${
+                      className={`border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3 ${
                         storedData.some((item) => item === show)
                           ? "text-[#5cb85c]"
                           : ""
@@ -312,7 +325,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       {show?.availability?.length > 0 ? (
                         show?.availability?.map((avail: any) => (
                           <span
-                            className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] inline-block rounded-sm m-1 p-1"
+                            className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1"
                             key={avail?.value}
                           >
                             {avail?.availability
@@ -321,7 +334,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           </span>
                         ))
                       ) : (
-                        <span className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] inline-block rounded-sm m-1 p-1">
+                        <span className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
                           No country restrictions
                         </span>
                       )}
@@ -330,7 +343,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         show?.subtitles?.length > 0 ? (
                           show?.subtitles?.map((sub: any) => (
                             <span
-                              className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] inline-block rounded-sm m-1 p-1"
+                              className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1"
                               key={sub?.value}
                             >
                               {sub?.subtitles
@@ -341,44 +354,55 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             </span>
                           ))
                         ) : (
-                          <span className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] inline-block rounded-sm m-1 p-1">
+                          <span className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
                             No subtitle available
                           </span>
                         )
                       ) : (
-                        <span className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] inline-block rounded-sm m-1 p-1">
+                        <span className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
                           English
                         </span>
                       )}
                     </td>
-                    <td className="border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3">
-                      <button
-                        className="min-w-10 bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleOpenModal(idx);
-                        }}
-                      >
-                        <CiEdit />
-                      </button>
-                      {openEditModal && deleteIndex === idx && (
-                        <TvEditModal
-                          tv={tv}
-                          setOpenEditModal={setOpenEditModal}
-                          openEditModal={openEditModal}
-                          show={[drama[deleteIndex]]}
-                          setTvDatabase={setTvDatabase}
-                          tvDatabase={tvDatabase}
-                          idx={deleteIndex}
-                          setStoredData={setStoredData}
-                          storedData={storedData}
-                          defaultValue={defaultValues}
-                          setIsItemDataChanged={setIsItemDataChanged}
-                          isItemDataChanged={isItemDataChanged}
-                          markedForDeletion={markedForDeletion}
-                          setMarkedForDeletion={setMarkedForDeletion}
-                        />
-                      )}
+                    <td className="border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top py-3">
+                      <div>
+                        {(markedForDeletion[idx] || isItemDataChanged[idx]) && (
+                          <button
+                            type="button"
+                            className="min-w-5 text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2 mr-2"
+                            onClick={() => handleResetItem(idx)}
+                          >
+                            <GrPowerReset />
+                          </button>
+                        )}
+                        <button
+                          className="min-w-5 text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleOpenModal(idx);
+                          }}
+                        >
+                          <CiEdit />
+                        </button>
+                        {openEditModal && deleteIndex === idx && (
+                          <TvEditModal
+                            tv={tv}
+                            setOpenEditModal={setOpenEditModal}
+                            openEditModal={openEditModal}
+                            show={[drama[deleteIndex]]}
+                            setTvDatabase={setTvDatabase}
+                            tvDatabase={tvDatabase}
+                            idx={deleteIndex}
+                            setStoredData={setStoredData}
+                            storedData={storedData}
+                            defaultValue={defaultValues}
+                            setIsItemDataChanged={setIsItemDataChanged}
+                            isItemDataChanged={isItemDataChanged}
+                            markedForDeletion={markedForDeletion}
+                            setMarkedForDeletion={setMarkedForDeletion}
+                          />
+                        )}
+                      </div>
                     </td>
                   </Reorder.Item>
                 );
@@ -387,7 +411,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           </Reorder.Group>
         </table>
         <button
-          className="bg-[#3a3b3c] border-2 border-[#3e4042] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
+          className="bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
           onClick={(e) => {
             e.preventDefault();
             setOpen(true);
@@ -412,7 +436,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       )}
       <button
         type="submit"
-        className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+        className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
           storedData?.length > 0 ||
           markedForDeletion?.length > 0 ||
           isItemDataChanged?.length > 0

@@ -16,6 +16,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { MdDelete, MdEdit } from "react-icons/md";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
+import { GrPowerReset } from "react-icons/gr";
 
 const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [storedData, setStoredData] = useState<ExternalLinkType[]>([]);
@@ -31,6 +32,12 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   );
   const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
     Array(tvDetails?.external_links?.length || 0).fill(false)
+  );
+  const [isItemDataChanged, setIsItemDataChanged] = useState<boolean[]>(
+    Array(tvDetails?.external_links?.length || 0).fill(false)
+  );
+  const [initialValues, setInitialValues] = useState(
+    tvDetails?.external_links || []
   );
   const router = useRouter();
   const {
@@ -69,6 +76,12 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const handleDropdownToggle = (dropdown: string) => {
     setOpenDropdown((prev) => (prev === `${dropdown}` ? null : `${dropdown}`));
+  };
+
+  const toggleEdit = (index: number) => {
+    setEditingIndexes((prev) =>
+      prev.map((isEditing, idx) => (idx === index ? !isEditing : isEditing))
+    );
   };
 
   const setExternals = (role: string) => {
@@ -114,7 +127,11 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const handleAdding = (label: string) => {
     // Check if the item is not in the database
-    if (!database?.find((data) => data?.title === label)) {
+    if (
+      !database
+        ?.filter((item) => item?.title !== "Website")
+        ?.find((data) => data?.title === label)
+    ) {
       // Call setExternals and handleDropdownToggle if item is not in database
       handleDropdownToggle("external");
       setExternals(label);
@@ -158,12 +175,6 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     }
   };
 
-  const toggleEdit = (index: number) => {
-    setEditingIndexes((prev) =>
-      prev.map((isEditing, idx) => (idx === index ? !isEditing : isEditing))
-    );
-  };
-
   useEffect(() => {
     if (storedData) {
       setExternals("");
@@ -171,6 +182,23 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       reset();
     }
   }, [storedData, reset]);
+
+  const handleResetItem = (idx: number) => {
+    setDatabase((prev) => {
+      const updatedDatabase = [...prev];
+      updatedDatabase[idx] = initialValues[idx] as ExternalLinkType[] | any;
+      return updatedDatabase;
+    });
+    setEditingIndexes((prev) =>
+      prev.map((edit, index) => (index === idx ? false : edit))
+    );
+    setMarkedForDeletion((prev) =>
+      prev.map((marked, index) => (index === idx ? false : marked))
+    );
+    setIsItemDataChanged((prev) =>
+      prev.map((changed, index) => (index === idx ? false : changed))
+    );
+  };
 
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
@@ -181,7 +209,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         {database?.map((item, idx: number) => {
           return (
             <div
-              className="relative mb-4 bg-[#242526] border-2 border-[#00000024] "
+              className="relative mb-4 bg-[#fff] dark:bg-[#242526] border-2 border-[#f3f3f3] dark:border-[#00000024] rounded-md"
               key={idx}
             >
               <div className="relative font-semibold py-2 px-4">
@@ -190,7 +218,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               <div className="absolute top-2 right-4">
                 <button
                   type="button"
-                  className="bg-[#3a3b3c] border-2 border-[#3e4042] rounded-md px-1 py-0.5 mr-3 shadow-md"
+                  className="bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-1 py-0.5 mr-3 shadow-sm"
                   onClick={(e) => {
                     storedData?.length > 0
                       ? removingStored(item?.title)
@@ -199,8 +227,18 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 >
                   <MdDelete />
                 </button>
+                {(markedForDeletion[idx] || isItemDataChanged[idx]) && (
+                  <button
+                    type="button"
+                    className="bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-1 py-0.5 mr-3 shadow-sm"
+                    onClick={() => handleResetItem(idx)}
+                  >
+                    <GrPowerReset />
+                  </button>
+                )}
+
                 <button
-                  className="bg-[#3a3b3c] border-2 border-[#3e4042] rounded-md px-1 py-0.5 shadow-md"
+                  className="bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-1 py-0.5 shadow-sm"
                   type="button"
                   onClick={() => {
                     toggleEdit(idx);
@@ -214,8 +252,15 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 {editingIndexes[idx] && (
                   <ExternalEditModal
                     item={item}
+                    database={database}
+                    setDatabase={setDatabase}
                     toggleEdit={toggleEdit}
                     setEditingIndex={setEditingIndex}
+                    editingIndex={editingIndex}
+                    isItemDataChanged={isItemDataChanged}
+                    setIsItemDataChanged={setIsItemDataChanged}
+                    selectedExternal={selectedExternal}
+                    setEditingIndexes={setEditingIndexes}
                     idx={idx}
                   />
                 )}
@@ -224,12 +269,16 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     {selectedExternal === "Website" ? (
                       <div
                         className={`relative flex items-center w-full px-3 ${
-                          storedData[idx - 2] && "text-green-400"
+                          storedData.find(
+                            (data) => data.title === item.title
+                          ) && "text-green-400"
                         } ${
                           markedForDeletion[idx] && "text-red-400 line-through"
-                        }`}
+                        } ${isItemDataChanged[idx] && "text-blue-300"}`}
                       >
-                        <span className="pr-1">{item?.link_text}</span>
+                        <span className="pr-1">
+                          {item?.link_text || item?.id}
+                        </span>
                         <a
                           href={item?.url}
                           target="_blank"
@@ -242,12 +291,16 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     ) : (
                       <div
                         className={`relative flex items-center w-full px-3 ${
-                          storedData[idx - 2] && "text-green-400"
+                          storedData.find(
+                            (data) => data.title === item.title
+                          ) && "text-green-400"
                         } ${
                           markedForDeletion[idx] && "text-red-400 line-through"
-                        }`}
+                        } ${isItemDataChanged[idx] && "text-blue-300"}`}
                       >
-                        <span className="pr-1">{item?.id}</span>
+                        <span className="pr-1">
+                          {item?.id || item?.link_text}
+                        </span>
                         <a
                           href={`${item?.link_url}${item?.id}`}
                           target="_blank"
@@ -255,6 +308,10 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         >
                           <FaShare />
                         </a>
+                        <span className="pl-1">
+                          {item?.additional_text !== "" &&
+                            item?.additional_text}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -264,7 +321,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           );
         })}
         {openExternal && (
-          <div className="relative bg-[#242526] border-2 border-[#0000001a] shadow-md rounded-md mb-3">
+          <div className="relative bg-[#fff] dark:bg-[#242526] border-2 border-[#f3f3f3] dark:border-[#00000024]  shadow-sm rounded-md mb-3">
             <div className="relative px-4 py-2">New External Link</div>
             <div className="px-4 py-2">
               <div className="mb-5">
@@ -275,13 +332,13 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       name="job"
                       readOnly
                       autoComplete="off"
-                      className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
+                      className="w-full md:w-[30%] placeholder:text-black dark:placeholder:text-white bg-[#fff] dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
                       placeholder={
                         selectedExternal || "Select an external link"
                       } // Update this line
                       onClick={() => handleDropdownToggle("external")}
                     />
-                    <IoIosArrowDown className="absolute bottom-3 right-2" />
+                    <IoIosArrowDown className="absolute bottom-3 left-52" />
                   </div>
                   {openDropdown === `external` && (
                     <AnimatePresence>
@@ -289,23 +346,23 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
+                        className={`w-full md:w-[30%] h-[250px] absolute bg-[#fff] dark:bg-[#242424] border-2 border-[#edeff0] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
                       >
                         {external_link?.map((items, index) => {
                           const isContentRating =
                             selectedExternal === items?.label;
-                          const isInDatabase = database?.find(
-                            (data) => data?.title === items?.label
-                          );
-
+                          const isInDatabase = database
+                            ?.filter((item) => item?.title !== "Website")
+                            ?.find((data) => data?.title === items?.label);
+                          console.log(isInDatabase);
                           return (
                             <li
                               ref={(el) => {
                                 if (isContentRating) scrollIntoViewIfNeeded(el);
                               }}
-                              className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 ${
+                              className={`text-sm hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 ${
                                 isContentRating
-                                  ? "text-[#409eff] bg-[#2a2b2c]"
+                                  ? "text-[#409eff] bg-[#fff] dark:bg-[#2a2b2c]"
                                   : ""
                               } ${
                                 isInDatabase
@@ -338,7 +395,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         <input
                           {...register("url")}
                           type="text"
-                          className={`h-10 leading-[40px] bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffcc] rounded-md px-4 outline-none focus:border-[#1675b6] ${
+                          className={`h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md px-4 outline-none focus:border-[#1675b6] ${
                             errors?.url && "border-red-400 focus:border-red-400"
                           }`}
                           placeholder="Website URL/Link"
@@ -357,7 +414,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         <input
                           {...register("link_text")}
                           type="text"
-                          className="h-10 leading-[40px] bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
+                          className="h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
                           placeholder="Link Text/Anchor Text"
                         />
                       </div>
@@ -366,7 +423,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         <input
                           {...register("additional_text")}
                           type="text"
-                          className="h-10 leading-[40px] bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
+                          className="h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
                           placeholder="Additional Text"
                         />
                       </div>
@@ -376,7 +433,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <input
                         {...register("id")}
                         type="text"
-                        className="h-10 leading-[40px] bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
+                        className="h-10 leading-[40px] bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
                         placeholder={
                           external_link.find(
                             (item) => item.label === selectedExternal
@@ -405,14 +462,14 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               )}
               <button
                 type="button"
-                className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] rounded-md px-5 py-2"
+                className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-5 py-2"
                 onClick={() => setOpenExternal(!openExternal)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="text-sm bg-[#409effd9] border-2 border-[#409effcc] rounded-md px-5 py-2 ml-3"
+                className="text-sm text-white bg-[#409effd9] border-2 border-[#409effcc] rounded-md px-5 py-2 ml-3"
                 onClick={() => addingItem(getValues())}
               >
                 Add
@@ -425,7 +482,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         (!openExternal && (
           <button
             type="button"
-            className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
+            className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
             onClick={() => setOpenExternal(!openExternal)}
           >
             Add External Link
@@ -434,7 +491,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       {(tvDetails?.external_links?.length || 0) > 0 && (
         <button
           type="button"
-          className="text-sm bg-[#3a3b3c] border-2 border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
+          className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
           onClick={() => setOpenExternal(!openExternal)}
         >
           Add External Link
@@ -443,13 +500,17 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <div className="border-t-2 border-t-[#78828c21] pt-5 mx-3">
         <button
           type="submit"
-          className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-            storedData?.length > 0 || markedForDeletion?.includes(true)
+          className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+            storedData?.length > 0 ||
+            markedForDeletion?.includes(true) ||
+            isItemDataChanged?.includes(true)
               ? "cursor-pointer"
               : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
           }`}
           disabled={
-            storedData?.length > 0 || markedForDeletion?.includes(true)
+            storedData?.length > 0 ||
+            markedForDeletion?.includes(true) ||
+            isItemDataChanged?.includes(true)
               ? false
               : true
           }

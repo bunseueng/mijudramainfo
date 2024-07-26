@@ -12,7 +12,7 @@ const SearchResult = () => {
   const [showResults, setShowResults] = useState(true); // State to manage visibility of search results
   const searchParams = useSearchParams();
   let searchQuery = searchParams?.get("query") ?? "";
-  const params = new URLSearchParams(searchParams as SearchParamsType);
+  const params = new URLSearchParams(searchParams as unknown as SearchParamsType);
   const { data: results } = useQuery({
     queryKey: ["searchResults", searchQuery],
     queryFn: () => fetchMultiSearch(searchQuery),

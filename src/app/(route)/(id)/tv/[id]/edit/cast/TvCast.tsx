@@ -7,7 +7,7 @@ import {
 } from "@/app/actions/fetchMovieApi";
 import DeleteButton from "@/app/component/ui/Button/DeleteButton";
 import { castRole } from "@/helper/item-list";
-import { Drama, tvId } from "@/helper/type";
+import { CrewType, Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -386,13 +386,24 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       >
                         <IoCloseOutline />
                       </button>
-                      {deleteIndex === ind && (
+                      {open && deleteIndex === ind && (
                         <DeleteButton
                           setOpen={setOpen}
                           open={open}
                           handleRemoveItem={handleRemoveItem}
                           ind={ind}
                           setDeleteIndex={setDeleteIndex}
+                          item={[]}
+                          storedData={[]}
+                          setStoredData={function (data: CrewType[]): void {
+                            throw new Error("Function not implemented.");
+                          }}
+                          markedForDeletion={[]}
+                          setMarkedForDeletion={function (
+                            data: boolean[]
+                          ): void {
+                            throw new Error("Function not implemented.");
+                          }}
                         />
                       )}
                     </td>

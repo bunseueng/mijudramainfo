@@ -164,9 +164,15 @@ export const createDetails = z.object({
   services: z
     .object({
       id: any(),
-      service: z.any(),
+      service: z
+        .string()
+        .min(3, { message: "Service provider is required" })
+        .optional(),
       link: z.string().min(3, { message: "Page link is required" }),
-      service_type: z.any(),
+      service_type: z
+        .string()
+        .min(3, { message: "Service type is required" })
+        .optional(),
       availability: z.any(),
       subtitles: z.any(),
     })
@@ -177,7 +183,7 @@ export const createDetails = z.object({
       title: z.string().min(3, { message: "Please input some name" }),
       episode_start: z.any(),
       episode_end: z.any(),
-      air_date: z.string(),
+      air_date: z.string().min(1, { message: "Please pick a date" }),
     })
     .optional(),
   production_information: z.object({}).optional(),

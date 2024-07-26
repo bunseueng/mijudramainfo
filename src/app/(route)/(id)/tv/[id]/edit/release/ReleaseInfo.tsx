@@ -24,6 +24,7 @@ import dayjs from "dayjs";
 import { TimePicker as AntdTimePicker } from "antd";
 import moment from "moment";
 import { AnimatePresence, motion } from "framer-motion";
+import { GrPowerReset } from "react-icons/gr";
 
 const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv = [] } = useQuery({
@@ -47,9 +48,11 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [drama, setDrama] = useState<any>([]);
   const [broadcast, setBroadcast] = useState<string[]>([]);
   const [timeValue, setTimeValue] = useState([]);
-  const [currentBtn, setCurrentBtn] = useState<string | undefined>(
-    tvDatabase?.[0]?.season?.[0]?.title || []
-  );
+  const [currentBtn, setCurrentBtn] = useState<{
+    index: number;
+    title: string | undefined;
+  }>({ index: -1, title: tvDatabase?.[0]?.season?.[0]?.title });
+
   const [defaultValues, setDefaultValues] = useState<AddSeason>();
   const [selectedValues, setSelectedValues] = useState<{
     [key: string]: string;
@@ -142,12 +145,25 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const handleTitleClick = (
     e: React.MouseEvent<HTMLButtonElement>,
+    index: number,
     title: string | undefined
   ) => {
     e.preventDefault();
     setSeasonLoading(true);
     setTimeout(() => setSeasonLoading(false), 200);
-    setCurrentBtn(title);
+    setCurrentBtn({ index, title });
+  };
+
+  const handleReset = (index: number) => {
+    setMarkedForDeletionBroadcast((prev) =>
+      prev.map((marked, idx) => (idx === index ? false : marked))
+    );
+    setMarkedForDeletionDrama((prev) =>
+      prev.map((marked, idx) => (idx === index ? false : marked))
+    );
+    setIsItemDataChanged((prev) =>
+      prev.map((changed, idx) => (idx === index ? false : changed))
+    );
   };
 
   const renderDropdown = (
@@ -162,20 +178,18 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
-        className="w-full absolute bg-[#242424] border-2 border-[#242424] py-1 mt-14 rounded-md z-10 custom-scroll overflow-auto shadow-md"
+        className="w-full absolute text-black dark:text-white bg-white dark:bg-[#242424] border-2 border-[#f3f3f3] dark:border-[#242424]  py-1 mt-14 rounded-md z-10 custom-scroll overflow-auto shadow-md"
         style={
           dropdown === "episode" ? { height: "90px" } : { height: "200px" }
         }
       >
         {items.map((item, index) => {
           const isSelected =
-            selected === item.label ? "text-[#409eff] bg-[#2a2b3c]" : "";
+            selected === item.label ? "text-[#409eff] dark:bg-[#ffffff11]" : "";
           const isMatched =
             selected === undefined && item.label === dramaLabel
-              ? "text-[#409eff] bg-[#2a2b3c]"
+              ? "text-[#409eff] dark:bg-[#ffffff11]"
               : "";
-          console.log(dramaLabel);
-
           return (
             <li
               key={index}
@@ -184,7 +198,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   scrollIntoViewIfNeeded(el);
                 }
               }}
-              className={`text-sm px-2 py-2 cursor-pointer ${isSelected} ${isMatched}`}
+              className={`text-sm hover:bg-[#ffffff11] px-2 py-2 cursor-pointer ${isSelected} ${isMatched}`}
               onClick={() => {
                 handleDropdownToggle(dropdown, uniqueId);
                 handleDropdownSelect(dropdown, uniqueId, item.label);
@@ -219,6 +233,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const handleOpenModal = (idx: number) => {
     setDeleteIndex(idx);
     setOpenEditModal(true);
+    setOpen(false);
     setDefaultValues({
       name: drama[idx]?.name,
       title: drama[idx]?.title,
@@ -226,6 +241,12 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       episode_end: drama[idx]?.episode_end,
       air_date: drama[idx]?.air_date,
     });
+  };
+
+  const handleAddNewSeason = () => {
+    setOpen(true);
+    setOpenEditModal(false); // Ensure only one modal is open
+    setDeleteIndex(null);
   };
 
   const formatDateForSubmission = (date: Date) => {
@@ -485,8 +506,8 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       type === "month" ? "float-left w-[41.66667%]" : "float-left w-[25%]";
     const inputClass =
       type === "episode"
-        ? "w-full bg-[#3a3b3c] placeholder:text-xs border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 pt-1 pb-[2px] px-3 cursor-pointer"
-        : "w-full bg-[#3a3b3c] placeholder:text-sm border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer";
+        ? "w-full bg-white dark:bg-[#3a3b3c] placeholder:text-xs border-2 border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 pt-1 pb-[2px] px-3 cursor-pointer"
+        : "w-full bg-white dark:bg-[#3a3b3c] placeholder:text-sm border-2 border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer";
     const selectedValue = selectedValues[`${type}_${uniqueId}`];
 
     // Assign placeholder and value with default "-" if they are empty
@@ -612,7 +633,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   <button
                     className="inline-flex items-center text-sm font-semibold whitespace-nowrap text-center text-black dark:text-white leading-[1px] bg-[#fff] border-2 border-[#dcdfe6] dark:bg-[#3a3b3c] dark:border-[#3e4042] py-2 px-5 rounded-md ml-3"
                     onClick={(e) => {
-                      e.preventDefault(), setOpen(!open);
+                      e.preventDefault(), handleAddNewSeason();
                     }}
                   >
                     <IoMdAdd />
@@ -709,36 +730,51 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                   {data?.first_air_date || data?.air_date}
                                 </td>
                                 <td className="w-[114px] px-4 py-3">
-                                  <button
-                                    className="min-w-10 bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleOpenModal(index);
-                                    }}
-                                  >
-                                    <CiEdit />
-                                  </button>
-                                  {openEditModal && deleteIndex === index && (
-                                    <EditSeasonModal
-                                      setOpenEditModal={setOpenEditModal}
-                                      openEditModal={openEditModal}
-                                      item={[drama[deleteIndex]]}
-                                      idx={deleteIndex}
-                                      setStoredData={setStoredData}
-                                      storedData={storedData}
-                                      setIsItemDataChanged={
-                                        setIsItemDataChanged
-                                      }
-                                      isItemDataChanged={isItemDataChanged}
-                                      markedForDeletion={markedForDeletionDrama}
-                                      setMarkedForDeletion={
-                                        setMarkedForDeletionDrama
-                                      }
-                                      defaultValue={defaultValues}
-                                      setTvDatabase={setTvDatabase}
-                                      tvDatabase={tvDatabase}
-                                    />
-                                  )}
+                                  <div>
+                                    {(markedForDeletionDrama[index] ||
+                                      markedForDeletionBroadcast[index] ||
+                                      isItemDataChanged[index]) && (
+                                      <button
+                                        type="button"
+                                        className="min-w-5 text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2 mr-2"
+                                        onClick={() => handleReset(index)}
+                                      >
+                                        <GrPowerReset />
+                                      </button>
+                                    )}
+                                    <button
+                                      className="min-w-5 text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handleOpenModal(index);
+                                      }}
+                                    >
+                                      <CiEdit />
+                                    </button>
+                                    {openEditModal && deleteIndex === index && (
+                                      <EditSeasonModal
+                                        setOpenEditModal={setOpenEditModal}
+                                        openEditModal={openEditModal}
+                                        item={[drama[deleteIndex]]}
+                                        idx={deleteIndex}
+                                        setStoredData={setStoredData}
+                                        storedData={storedData}
+                                        setIsItemDataChanged={
+                                          setIsItemDataChanged
+                                        }
+                                        isItemDataChanged={isItemDataChanged}
+                                        markedForDeletion={
+                                          markedForDeletionDrama
+                                        }
+                                        setMarkedForDeletion={
+                                          setMarkedForDeletionDrama
+                                        }
+                                        defaultValue={defaultValues}
+                                        setTvDatabase={setTvDatabase}
+                                        tvDatabase={tvDatabase}
+                                      />
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             </tbody>
@@ -752,6 +788,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     )}
                   </table>
                 </div>
+
                 <label htmlFor="broadcast_times" className="ml-3">
                   Broadcast Times (UTC +8:00)
                 </label>
@@ -760,9 +797,6 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     <div className="border-2 border-white p-3">
                       <ul className="flex items-center text-sm text-[#2196f3] dark:text-gray-200">
                         {weeklyCheckbox?.map((check: any, weekIdx: number) => {
-                          const isMarked = item?.broadcast?.some(
-                            (cast) => cast?.day === check?.value
-                          );
                           return (
                             <li key={weekIdx} className="pt-1 mt-0 mr-5">
                               <label className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center cursor-pointer">
@@ -892,9 +926,6 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                     );
                                   })
                                   .map((timeDay: any, bId: number) => {
-                                    const isMatchedDay = broadcast.some(
-                                      (day) => day === timeDay?.day
-                                    );
                                     return (
                                       <div
                                         key={bId}
@@ -966,20 +997,25 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               ...storedData,
                             ]?.map((data: AddSeason, indx: number) => (
                               <button
-                                className={`text-sm  border-2 py-2 px-5 rounded-md ml-3 ${
-                                  currentBtn === data?.title
-                                    ? "bg-[#2b9effcc] border-[#b3d8ff33]"
-                                    : "bg-[#3a3b3c] border-[#3e4042]"
+                                className={`text-sm border-2 py-2 px-5 rounded-md ml-3 ${
+                                  currentBtn.index === indx &&
+                                  currentBtn.title === data?.title
+                                    ? "text-white bg-[#2b9effcc] border-[#b3d8ff33]"
+                                    : "text-black dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-[#dcdfe6] dark:border-[#3e4042]"
                                 }`}
                                 key={indx}
                                 onClick={(e) => {
-                                  setSeasonLoading(true),
-                                    setTimeout(
-                                      () => setSeasonLoading(false),
-                                      200
-                                    );
-                                  e.preventDefault(),
-                                    handleTitleClick(e, data?.title);
+                                  setSeasonLoading(true);
+                                  setTimeout(
+                                    () => setSeasonLoading(false),
+                                    200
+                                  );
+                                  e.preventDefault();
+                                  handleTitleClick(e, indx, data?.title);
+                                  setCurrentBtn({
+                                    index: indx,
+                                    title: data?.title,
+                                  });
                                 }}
                               >
                                 {data?.title || data?.name}
@@ -995,20 +1031,20 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               />
                             </div>
                           ) : (
-                            <div className="text-[#ffffffde] bg-white dark:bg-[#242526] border-2 border-white dark:border-[#3e4042] overflow-hidden transform transition-transform rounded-md mt-4">
+                            <div className="text-[#ffffffde] bg-white dark:bg-[#242526] border-2 border-[#06090c21] dark:border-[#3e4042] shadow-sm overflow-hidden transform transition-transform rounded-md mt-4">
                               <div className="p-5">
                                 {season?.episodes?.map(
                                   (ep: any, id: number) => (
                                     <div
                                       className={`float-left w-full p-4 ${
                                         id > 0 &&
-                                        " border-t-2 border-t-[#78828c21]"
+                                        "border-t-2 border-t-[#78828c21]"
                                       }`}
                                       key={id}
                                     >
                                       <div>
                                         <div className="m-0">
-                                          <div className="float-left w-[66.66667%] relative">
+                                          <div className="text-black dark:text-white float-left w-[66.66667%] relative">
                                             <h6>{ep?.name}</h6>
                                             <div>Air Date: {ep?.air_date}</div>
                                           </div>
@@ -1031,17 +1067,19 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         })}
       </div>
       <div className="float-left w-full">
-        {(tvDatabase?.[0]?.season || []).length > 0 ||
+        {tvDatabase?.[0]?.season.length > 0 ||
           (storedData.length > 0 && (
             <hr className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] my-4 ml-3 " />
           ))}
         <button
           type="submit"
-          className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-3 ${
+          className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-3 mt-5 ${
             broadcast?.length > 0 ||
             timeValue?.length > 0 ||
             storedData?.length > 0 ||
-            Object.keys(selectedValues).length > 0
+            Object.keys(selectedValues).length > 0 ||
+            markedForDeletionBroadcast?.includes(true) ||
+            markedForDeletionDrama?.includes(true)
               ? "cursor-pointer"
               : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
           }`}
@@ -1049,7 +1087,9 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             broadcast?.length > 0 ||
             timeValue?.length > 0 ||
             storedData?.length > 0 ||
-            Object.keys(selectedValues).length > 0
+            Object.keys(selectedValues).length > 0 ||
+            markedForDeletionBroadcast?.includes(true) ||
+            markedForDeletionDrama?.includes(true)
               ? false
               : true
           }

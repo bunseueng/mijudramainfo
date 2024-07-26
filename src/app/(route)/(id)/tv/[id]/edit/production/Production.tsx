@@ -11,11 +11,12 @@ import Select from "react-select";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { customStyles } from "@/helper/MuiStyling";
+import { customStyles, lightTheme } from "@/helper/MuiStyling";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "next-themes";
 
 const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv = [] } = useQuery({
@@ -30,6 +31,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [openCountries, setOpenCountries] = useState<boolean>(false);
   const [openNetwork, setOpenNetwork] = useState<boolean>(false);
+  const { resolvedTheme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
@@ -148,7 +150,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     name="job"
                     readOnly
                     autoComplete="off"
-                    className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
+                    className="w-full placeholder:text-sm placeholder:text-black dark:placeholder:text-[#606266] dark:placeholder:opacity-60 text-black dark:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
                     placeholder={
                       data?.language
                         ? language[idx] || data?.language
@@ -164,7 +166,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
+                      className={`w-full h-[250px] absolute text-black bg-white dark:bg-[#242424] border-2 border-[#f3f3f3] dark:border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
                     >
                       {production_language?.map((items, index) => {
                         const scrollIntoViewIfNeeded = (element: any) => {
@@ -192,15 +194,12 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           : data?.language?.join(" ") === items?.value;
                         return (
                           <li
-                            // ref={(el) =>
-                            //   isContentRating && scrollIntoViewIfNeeded(el)
-                            // }
                             ref={(el) => {
                               if (isContentRating) scrollIntoViewIfNeeded(el);
                             }}
-                            className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                            className={`text-sm hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
                               isContentRating
-                                ? "text-[#409eff] bg-[#2a2b2c]"
+                                ? "text-[#409eff] dark:bg-[#2a2b2c]"
                                 : ""
                             } `}
                             onClick={() => {
@@ -234,7 +233,11 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   }))}
                   value={countries}
                   onChange={changeHandler}
-                  styles={customStyles(openCountries)}
+                  styles={
+                    resolvedTheme === "dark"
+                      ? customStyles(openCountries)
+                      : lightTheme(openCountries)
+                  }
                   closeMenuOnSelect={false}
                   classNamePrefix="react-select"
                   onBlur={() => setOpenCountries(false)}
@@ -261,7 +264,11 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   options={options}
                   value={network}
                   onChange={networkHandler}
-                  styles={customStyles(openNetwork)}
+                  styles={
+                    resolvedTheme === "dark"
+                      ? customStyles(openNetwork)
+                      : lightTheme(openNetwork)
+                  }
                   closeMenuOnSelect={false}
                   classNamePrefix="react-select"
                   onBlur={() => setOpenNetwork(false)}
@@ -280,7 +287,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <div className="border-t-2 border-t-[#78828c21] pt-5 mx-3">
         <button
           type="submit"
-          className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+          className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
             language?.length > 0 || countries?.length > 0 || network?.length > 0
               ? "cursor-pointer"
               : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"

@@ -48,14 +48,14 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   return (
     <div className=" w-full h-[100%]">
-      <div className="w-full relative h-auto float-right bg-slate-100 dark:bg-[#242526] border-2 border-slate-200 dark:border-[#232426] shadow-sm rounded-md">
+      <div className="w-full relative h-auto float-right bg-white dark:bg-[#242526] border-2 border-slate-200 dark:border-[#232426] shadow-sm rounded-b-md">
         <div className="px-3 mb-2">
           <h1 className="text-2xl font-semibold pt-3 mb-2">
             <Link href={`/tv/${tv?.id}`}>{tv?.title || tv?.name}</Link>
           </h1>
         </div>
         <div className="relative float-left w-[25%] py-3 px-4">
-          <div className="bg-[#3a3b3c] border-2 border-[#242527] rounded-sm px-4 py-2">
+          <div className="bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#242527] rounded-sm px-4 py-2">
             <div className="flex items-center justify-between">
               <h1>Edit</h1>
               <VscQuestion />
@@ -66,7 +66,9 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               <li
                 key={idx}
                 className={`pb-2 ${
-                  currentPage === item?.link ? "text-[#1675b6]" : "text-white"
+                  currentPage === item?.link
+                    ? "text-[#1675b6]"
+                    : "text-black dark:text-white"
                 }`}
               >
                 <Link

@@ -1,8 +1,12 @@
+import { CrewType } from "@/helper/type";
 import React from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 
 interface RemoveBtn {
+  item: CrewType[];
+  storedData: CrewType[];
+  setStoredData: (data: CrewType[]) => void;
   handleRemoveItem: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     indexToRemove: number
@@ -11,15 +15,53 @@ interface RemoveBtn {
   setOpen: (open: boolean) => void;
   open: boolean;
   setDeleteIndex: (ind: number) => void;
+  markedForDeletion: boolean[];
+  setMarkedForDeletion: (data: boolean[]) => void;
 }
 
 const DeleteButton: React.FC<RemoveBtn> = ({
-  handleRemoveItem,
+  item,
+  storedData,
+  setStoredData,
   ind,
   setOpen,
   open,
   setDeleteIndex,
+  markedForDeletion,
+  setMarkedForDeletion,
 }) => {
+  const markForDeletion = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const newMarkedForDeletion = [...markedForDeletion];
+    newMarkedForDeletion[ind] = true; // Toggle the deletion status
+    setMarkedForDeletion(newMarkedForDeletion);
+    setOpen(false);
+  };
+  console.log(storedData);
+
+  const handleDeleteStoredData = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    console.log("Deleting item at index:", ind);
+
+    // Remove the item at the specified index (idx) from the storedData array
+    const updatedStoredData = storedData.filter(
+      (items, index) => items?.name !== item[ind]?.name
+    );
+    console.log("Updated storedData:", updatedStoredData);
+    setStoredData(updatedStoredData);
+    setOpen(false);
+    // Close the modal after deletion
+  };
+
+  const handleDeleteButton = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (storedData?.length > 0) {
+      markForDeletion(e);
+      handleDeleteButton(e);
+    } else {
+      markForDeletion(e);
+    }
+  };
+
   return (
     <div className="relative z-10">
       <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity"></div>
@@ -53,7 +95,7 @@ const DeleteButton: React.FC<RemoveBtn> = ({
                 onClick={(
                   e: React.MouseEvent<HTMLButtonElement, MouseEvent>
                 ) => {
-                  handleRemoveItem(e, ind), setDeleteIndex(-1);
+                  handleDeleteButton(e);
                 }}
               >
                 OK

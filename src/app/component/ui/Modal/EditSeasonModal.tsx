@@ -93,8 +93,16 @@ const EditSeasonModal: React.FC<EditModal> = ({
       );
       reset(defaultValue as unknown as Drama);
     }
+    if (storedData && storedData[idx]) {
+      const data = storedData[idx];
+      setValue("released_information.name", data?.name as string);
+      setValue("released_information.title", data?.title as string);
+      setValue("released_information.episode_start", data?.episode_start);
+      setValue("released_information.episode_end", data?.episode_end);
+      setValue("released_information.air_date", data?.air_date as string);
+      reset(data as unknown as Drama);
+    }
   }, [idx, item, reset, storedData, setValue, defaultValue]);
-  // Custom styles for react-select
 
   const updatingItems = async (data: TCreateDetails) => {
     try {
@@ -190,8 +198,8 @@ const EditSeasonModal: React.FC<EditModal> = ({
                 <form action="">
                   <div className="mb-5">
                     <label
-                      htmlFor="service"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      htmlFor="name"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <span className="text-red-500 pr-1">*</span>Name
                     </label>
@@ -202,24 +210,29 @@ const EditSeasonModal: React.FC<EditModal> = ({
                           type="text"
                           name="released_information.title"
                           autoComplete="off"
-                          className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
-                          placeholder="e.g. Season 1 or 2024"
+                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] border-2 dark:border-0 border-[#f3f3f3f3] rounded-md outline-none py-2 px-4"
+                          placeholder={
+                            defaultValue?.title || storedData[idx]?.title
+                          }
+                          defaultValue={
+                            defaultValue?.title || storedData[idx]?.title
+                          }
                         />
                         <small className="text-muted-foreground opacity-80">
                           The name can be either year or the season number.
                         </small>
                       </div>
-                      {/* {errors.services?.service && (
+                      {errors?.released_information?.title && (
                         <p className="text-xs italic text-red-500 mt-2">
-                          {errors.services?.service.message}
+                          {errors?.released_information?.title?.message}
                         </p>
-                      )} */}
+                      )}
                     </div>
                   </div>
                   <div className="mb-5">
                     <label
                       htmlFor="episode_start"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <b>
                         <span className="text-red-500 pr-1">*</span>Episode
@@ -231,14 +244,14 @@ const EditSeasonModal: React.FC<EditModal> = ({
                         <input
                           type="number"
                           placeholder="e.g. 12"
-                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] rounded-md outline-none py-2 px-4"
+                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] border-2 dark:border-0 border-[#f3f3f3f3] rounded-md outline-none py-2 px-4"
                           value={epStart}
                           onChange={(e) => setEpStart(Number(e.target.value))}
                         />
                         <div className="absolute right-0 top-0">
                           <button
                             type="button"
-                            className={`block bg-[#3a3b3c] border-b-2 border-b-[#46494a] border-l-2 border-l-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
+                            className={`block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b-2 border-b-[#f3f3f3f3] dark:border-b-[#46494a] border-l-2 border-l-[#f3f3f3f3] dark:border-l-[#46494a] border-t-2 dark:border-t-0 border-t-[#f3f3f3f3] dark:border-t-[#46494a] border-r-2 dark:border-r-0 border-r-[#f3f3f3f3] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
                               epStart === defaultValue?.episode_start &&
                               "cursor-not-allowed"
                             }`}
@@ -249,7 +262,7 @@ const EditSeasonModal: React.FC<EditModal> = ({
                           </button>
                           <button
                             type="button"
-                            className="block bg-[#3a3b3c] border-l-2 border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
+                            className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l-2 border-l-[#f3f3f3f3] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
                             onClick={handleEpStartDecrement}
                           >
                             <IoMdArrowDropdown />
@@ -261,7 +274,7 @@ const EditSeasonModal: React.FC<EditModal> = ({
                   <div className="mb-5">
                     <label
                       htmlFor="episode_end"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <b>
                         <span className="text-red-500 pr-1">*</span>Episode End
@@ -272,11 +285,12 @@ const EditSeasonModal: React.FC<EditModal> = ({
                         <input
                           type="number"
                           placeholder="e.g. 12"
-                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] rounded-md outline-none py-2 px-4"
+                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] border-2 dark:border-0 border-[#f3f3f3f3] rounded-md outline-none py-2 px-4"
                           value={
                             isEpEnd
                               ? epEnd
-                              : defaultValue?.episode_end ||
+                              : storedData[idx]?.episode_end ||
+                                defaultValue?.episode_end ||
                                 item?.map(
                                   (data) => data?.number_of_episodes as any
                                 )
@@ -286,7 +300,7 @@ const EditSeasonModal: React.FC<EditModal> = ({
                         <div className="absolute right-0 top-0">
                           <button
                             type="button"
-                            className={`block bg-[#3a3b3c] border-b-2 border-b-[#46494a] border-l-2 border-l-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
+                            className={`block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b-2 border-b-[#f3f3f3f3] dark:border-b-[#46494a] border-l-2 border-l-[#f3f3f3f3] dark:border-l-[#46494a] border-t-2 dark:border-t-0 border-t-[#f3f3f3f3] dark:border-t-[#46494a] border-r-2 dark:border-r-0 border-r-[#f3f3f3f3] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
                               epEnd === defaultValue?.episode_end &&
                               "cursor-not-allowed"
                             }`}
@@ -297,7 +311,7 @@ const EditSeasonModal: React.FC<EditModal> = ({
                           </button>
                           <button
                             type="button"
-                            className="block bg-[#3a3b3c] border-l-2 border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
+                            className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l-2 border-l-[#f3f3f3f3] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
                             onClick={handleEpEndDecrement}
                           >
                             <IoMdArrowDropdown />
@@ -309,8 +323,8 @@ const EditSeasonModal: React.FC<EditModal> = ({
 
                   <div className="mb-5">
                     <label
-                      htmlFor="episode_end"
-                      className="w-[150px] inline-block text-right float-left align-middle leading-[44px] pr-3"
+                      htmlFor="air_date"
+                      className="w-[150px] text-[#00000099] dark:text-white inline-block text-right float-left align-middle leading-[44px] pr-3"
                     >
                       <b>
                         <span className="text-red-500 pr-1">*</span>Air Date
@@ -324,17 +338,28 @@ const EditSeasonModal: React.FC<EditModal> = ({
                           render={({ field }) => {
                             return (
                               <ReactDatePicker
-                                placeholderText={"YYYY-MM-DD"}
+                                placeholderText={
+                                  defaultValue?.air_date ||
+                                  storedData[idx]?.air_date
+                                }
                                 onChange={(date) => {
                                   // Format the date as YYYY-MM-DD before calling field.onChange()
                                   const formattedDate =
                                     date instanceof Date
-                                      ? date.toISOString().split("T")[0]
+                                      ? new Date(
+                                          Date.UTC(
+                                            date.getFullYear(),
+                                            date.getMonth(),
+                                            date.getDate()
+                                          )
+                                        )
+                                          .toISOString()
+                                          .split("T")[0]
                                       : "";
                                   field.onChange(formattedDate);
                                 }}
                                 selected={field.value as any}
-                                className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
+                                className="w-full text-black dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
                               />
                             );
                           }}

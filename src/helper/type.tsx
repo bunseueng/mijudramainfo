@@ -396,3 +396,22 @@ export interface ExternalLinkType {
   link_text: string;
   additional_text: string;
 }
+
+export interface CrewType {
+  adult: boolean;
+  department: string;
+  gender: number;
+  id: number;
+  jobs: [{}];
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number;
+  profile_path: string | null;
+  total_episode_count: number;
+  imdb_id: string;
+  homepage: string | null;
+  deathday: string | null;
+  birthday: string | null;
+  also_known_as: string[];
+}

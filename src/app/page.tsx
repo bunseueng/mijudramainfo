@@ -37,9 +37,9 @@ export default async function Home() {
             <LatestDrama heading={latestDrama} />
           </Suspense>
         </div>
-        <div className="py-5 hidden lg:block">
+        {/* <div className="py-5 hidden lg:block">
           <AdBanner dataAdFormat="auto" dataAdSlot="8077904488" />
-        </div>
+        </div> */}
         <div className="mb-5">
           <Suspense fallback={<div>Loading...</div>}>
             <Trailer heading={trailer} />

@@ -7,7 +7,7 @@ import {
 } from "@/app/actions/fetchMovieApi";
 import DeleteButton from "@/app/component/ui/Button/DeleteButton";
 import { crewRole } from "@/helper/item-list";
-import { Drama, tvId } from "@/helper/type";
+import { CrewType, Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -38,6 +38,12 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
   const [tvIds, setTvIds] = useState<number[]>(tv_id ? [] : []);
+  const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
+    Array(tvDetails?.crew?.length || 0).fill(false)
+  );
+  const [isItemChanging, setIsItemChanging] = useState<string[]>(
+    Array(tvDetails?.crew?.length || 0).fill(false)
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const searchResultRef = useRef<HTMLDivElement>(null);
   const searchQueries = useSearchParams();
@@ -90,7 +96,15 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     });
   };
 
-  const [item, setItem] = useState(() =>
+  const [storedData, setStoredData] = useState<CrewType[]>([]);
+
+  useEffect(() => {
+    if (personResult.length > 0) {
+      setStoredData(personResult);
+    }
+  }, [personResult]);
+
+  const [item, setItem] = useState<CrewType[]>(() =>
     filterDuplicates([...(tvDetails?.crew || []), ...personResult])
   );
 
@@ -104,11 +118,12 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         filterDuplicates([
           ...(tvDetails?.crew || []),
           ...personResult,
+          ...storedData,
           ...cast.crew,
         ])
       );
     }
-  }, [isLoading, cast, personResult, tvDetails?.crew]);
+  }, [isLoading, cast, personResult, storedData, tvDetails?.crew]);
   const prevItemRef = useRef(item);
 
   const handleDropdownToggle = (dropdown: string, idx: number) => {
@@ -121,9 +136,11 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     setCrewRoles((prev) => {
       const newRoles = [...prev];
       newRoles[idx] = role;
+      setIsItemChanging(newRoles);
       return newRoles;
     });
   };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -237,13 +254,16 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         <table className="w-full max-w-full border-collapse bg-transparent mb-4">
           <thead>
             <tr>
-              <th className="w-[235px] border-t-2 border-t-[#3e4042] border-[#3e4042] border-b-2 border-b-[#3e4042] align-bottom text-left py-2 px-4">
+              <th
+                className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
+                colSpan={2}
+              >
                 Person
               </th>
-              <th className="w-[235px] border-t-2 border-t-[#3e4042] border-[#3e4042] border-b-2 border-b-[#3e4042] align-bottom text-left py-2 px-4">
+              <th className="w-[235px] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4">
                 Job
               </th>
-              <th className="w-[112px] border-t-2 border-t-[#3e4042] border-[#3e4042] border-b-2 border-b-[#3e4042] align-bottom text-left py-2 px-4"></th>
+              <th className="w-[112px] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"></th>
             </tr>
           </thead>
           <Reorder.Group
@@ -259,6 +279,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 item?.map((crew: any, ind: number) => {
                   const role = crewRoles[ind];
                   const job = crew?.jobs?.map((rol: any) => rol?.job);
+                  const isNew = personResult.includes(crew);
                   return (
                     <Reorder.Item
                       as="tr"
@@ -272,11 +293,19 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       className="relative w-full"
                       style={{ display: "table-row" }}
                     >
-                      <td className="w-3 border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3">
-                        <div className="flex items-start w-full">
-                          <span className="pr-2">
+                      <td className="w-3 border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
+                        {!markedForDeletion[ind] && (
+                          <span
+                            className={`pr-3 inline-block ${
+                              isNew && "text-green-500"
+                            } ${isItemChanging[ind] && "text-blue-500"}`}
+                          >
                             <GiHamburgerMenu />
                           </span>
+                        )}
+                      </td>
+                      <td className="border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
+                        <div className="flex items-start w-full">
                           <div className="flex-1">
                             <div className="float-left pr-4">
                               <Image
@@ -296,7 +325,12 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               <b>
                                 <Link
                                   href={`/person/${crew?.id}`}
-                                  className="w-full text-sm font-normal pointer-events-none"
+                                  className={`w-full text-sm font-normal pointer-events-none ${
+                                    isNew && "text-green-500"
+                                  } ${isItemChanging[ind] && "text-blue-500"} ${
+                                    markedForDeletion[ind] &&
+                                    "text-red-500 line-through"
+                                  }`}
                                 >
                                   {crew?.name}
                                 </Link>
@@ -305,7 +339,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           </div>
                         </div>
                       </td>
-                      <td className="text-left border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top px-4 p-3">
+                      <td className="text-left border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
                         <div className="relative">
                           <div className="relative">
                             <input
@@ -313,7 +347,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               name="job"
                               readOnly
                               autoComplete="off"
-                              className="w-full bg-[#3a3b3c] detail_placeholder border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
+                              className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
                               placeholder={
                                 crew?.job?.length > 0
                                   ? crewRoles[ind] || crew?.job
@@ -387,9 +421,9 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           )}
                         </div>
                       </td>
-                      <td className="text-right border-[#78828c0b] border-t-2 border-t-[#3e4042] align-top pl-4 py-3">
+                      <td className="text-right border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-4 py-3">
                         <button
-                          className="min-w-10 bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
+                          className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
                           onClick={(e) => {
                             setOpen(!open), e.preventDefault();
                             setDeleteIndex(ind); // Set the index of the item to show delete button
@@ -397,11 +431,16 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         >
                           <IoCloseOutline />
                         </button>
-                        {deleteIndex === ind && (
+                        {open && deleteIndex === ind && (
                           <DeleteButton
+                            item={item}
+                            storedData={storedData}
+                            setStoredData={setStoredData}
                             setOpen={setOpen}
                             open={open}
                             handleRemoveItem={handleRemoveItem}
+                            markedForDeletion={markedForDeletion}
+                            setMarkedForDeletion={setMarkedForDeletion}
                             ind={ind}
                             setDeleteIndex={setDeleteIndex}
                           />
@@ -430,7 +469,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             <div className="relative w-full inline-block">
               <input
                 type="text"
-                className="w-full h-10 leading-10 bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4"
+                className="w-full h-10 leading-10 text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-2 border-[#f3f3f3f3] dark:border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4"
                 placeholder="Search to add a cast member"
                 ref={inputRef}
                 onChange={onInput}
@@ -446,7 +485,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                     ref={searchResultRef}
-                    className={`w-full h-[300px] absolute bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
+                    className={`w-full h-[300px] absolute bg-white dark:bg-[#242526] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
                       openSearch === false ? "block" : "hidden"
                     }`}
                   >
@@ -464,7 +503,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               );
                               return (
                                 <div
-                                  className={`flex items-center hover:bg-[#3a3b3c] cursor-pointer ${
+                                  className={`flex items-center hover:bg-[#00000011] dark:hover:bg-[#3a3b3c] cursor-pointer ${
                                     listSearch && "force-overflow"
                                   }`}
                                   key={idx}
@@ -487,7 +526,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                     <p className="text-[#2490da]">
                                       {person.name || person.title}
                                     </p>
-                                    <small className="text-[#ffffff99]">
+                                    <small className="text-black dark:text-[#ffffff99]">
                                       {`${
                                         specificPerson?.place_of_birth === null
                                           ? "NULL"
@@ -517,7 +556,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       </div>
       <button
         onClick={handleSubmit(onSubmit)}
-        className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+        className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
           tvIds?.length > 0 || isItemChanged
             ? "cursor-pointer"
             : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"

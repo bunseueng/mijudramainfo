@@ -15,9 +15,10 @@ import {
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
 import { genre_edit } from "@/helper/item-list";
-import { customStyles } from "@/helper/MuiStyling";
-import { Drama, tvId } from "@/helper/type";
+import { customStyles, lightTheme } from "@/helper/MuiStyling";
+import { Drama, SearchParamsType, tvId } from "@/helper/type";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "next-themes";
 
 const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv } = useQuery({
@@ -37,6 +38,7 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [addedKeywords, setAddedKeywords] = useState<{ name: string }[]>([]);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
+  const { resolvedTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const searchQueries = useSearchParams();
@@ -164,7 +166,9 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       const { value } = e.target;
       setKeySearch(value);
       // Get current URLSearchParams and update/add the 'q' parameter
-      const params = new URLSearchParams(searchQueries);
+      const params = new URLSearchParams(
+        searchQueries as unknown as SearchParamsType
+      );
       if (value) {
         params.set("q", value);
       } else {
@@ -304,10 +308,10 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   return (
                     <span
                       key={idx}
-                      className={`inline-block bg-[#fff] text-[#1675b6] border-2 border-[#d4d9dd] leading-8 text-sm whitespace-nowrap rounded-md mb-2 mr-2 px-2 ${
+                      className={`inline-block leading-8 text-sm whitespace-nowrap rounded-md mb-2 mr-2 px-2 ${
                         !isExistingGenre
-                          ? "text-[#5cb85c] bg-[#f9fff9] border-2 border-[#5cb85c]"
-                          : "bg-[#fff] text-[#1675b6] border-2 border-[#d4d9dd]"
+                          ? "text-[#5cb85c] bg-[#f9fff9] border-[1px] border-[#5cb85c]"
+                          : "bg-[#f0f2f6] dark:bg-white text-[#1675b6] border-[1px] border-[#f0f2f6] dark:border-[#d4d9dd]"
                       }`}
                     >
                       <span className="flex items-center">
@@ -332,10 +336,10 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   return (
                     <span
                       key={idx}
-                      className={`inline-block bg-[#fff] text-[#1675b6] border-2 border-[#d4d9dd] leading-8 text-sm whitespace-nowrap rounded-md mb-2 mr-2 px-2 ${
+                      className={`inline-block  leading-8 text-sm whitespace-nowrap rounded-md mb-2 mr-2 px-2 ${
                         newGenre[idx - 1] === false
-                          ? "text-[#5cb85c] bg-[#f9fff9] border-2 border-[#5cb85c]"
-                          : "bg-[#fff] text-[#1675b6] border-2 border-[#d4d9dd]"
+                          ? "text-[#5cb85c] bg-[#f9fff9] border-[1px] border-[#5cb85c]"
+                          : "bg-[#f0f2f6] dark:bg-white text-[#1675b6] border-[1px] border-[#f0f2f6] dark:border-[#d4d9dd]"
                       }`}
                     >
                       <span className="flex items-center">
@@ -365,7 +369,9 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 : uniqueCombinedGenresForSelect
             }
             onChange={genreHandler}
-            styles={customStyles(open)}
+            styles={
+              resolvedTheme === "dark" ? customStyles(open) : lightTheme(open)
+            }
             closeMenuOnSelect={true}
             classNamePrefix="react-select"
             className="w-[50%] production countries"
@@ -387,10 +393,6 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         <div className="border-2 border-[#ebeef5] rounded-md p-3 m-3">
           {keyFromData?.length > 0
             ? keyDatabase?.map((tag, idx) => {
-                // console.log(tag);
-                // const isExistingKeyword = keyFromData?.some(
-                //   (k: any) => k.name === tag.name
-                // );
                 const datab = keyFromData?.map((item: any) => item?.name);
                 const isExistingGenre = datab?.some(
                   (it: any) => it === tag?.name
@@ -400,8 +402,8 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     key={idx}
                     className={`inline-block leading-8 text-sm whitespace-nowrap rounded-md mb-2 mr-2 px-2 ${
                       isExistingGenre
-                        ? "bg-[#fff] text-[#1675b6] border-2 border-[#d4d9dd]"
-                        : "text-[#5cb85c] bg-[#f9fff9] border-2 border-[#5cb85c]"
+                        ? "bg-[#fff] text-[#1675b6] border-[1px] border-[#d4d9dd]"
+                        : "text-[#5cb85c] bg-[#f9fff9] border-[1px] border-[#5cb85c]"
                     }`}
                   >
                     <span className="flex items-center">
@@ -426,8 +428,8 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       key={idx}
                       className={`inline-block leading-8 text-sm whitespace-nowrap rounded-md mb-2 mr-2 px-2 ${
                         !newKeys.includes(tag?.name)
-                          ? "bg-[#fff] text-[#1675b6] border-2 border-[#d4d9dd]"
-                          : "text-[#5cb85c] bg-[#f9fff9] border-2 border-[#5cb85c]"
+                          ? "bg-[#fff] text-[#1675b6] border-[1px] border-[#d4d9dd]"
+                          : "text-[#5cb85c] bg-[#f9fff9] border-[1px] border-[#5cb85c]"
                       }`}
                     >
                       <span className="flex items-center">
@@ -453,7 +455,7 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               <div className="relative w-full inline-block">
                 <input
                   type="text"
-                  className="w-full h-10 leading-10 placeholder:text-sm placeholder:color-[#606266] placeholder:opacity-60 bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4"
+                  className="w-full h-10 leading-10 placeholder:text-sm placeholder:text-[#606266] placeholder:opacity-60 text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4"
                   placeholder="Search for tags"
                   ref={inputRef}
                   onChange={onInput}
@@ -473,7 +475,7 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
               ref={searchResultRef}
-              className={`relative block w-[348px] h-[300px] bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ml-3 ${
+              className={`relative block w-[348px] h-[300px] text-black dark:text-white bg-white dark:bg-[#242526] border-2 border-[#dcdfe6] dark:border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ml-3 ${
                 openSearch === false ? "block" : "hidden"
               }`}
             >
@@ -490,7 +492,7 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       );
                       return (
                         <div
-                          className={`flex items-center hover:bg-[#3a3b3c] my-2 ${
+                          className={`flex items-center text-black hover:bg-[#00000011] dark:hover:bg-[#3a3b3c] mb-2 ${
                             keySearch && "force-overflow"
                           } ${
                             isExistingKeyword
@@ -502,7 +504,13 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             !isExistingKeyword && addDataToDatabase(key)
                           }
                         >
-                          <span className="text-md text-[#ffffff99] p-4">
+                          <span
+                            className={`text-md  p-4 ${
+                              isExistingKeyword
+                                ? "text-[#7a8998]"
+                                : "text-black dark:text-[#ffffff99]"
+                            }`}
+                          >
                             {capitalizeFirstLetterOfEachWord(key?.name)}
                           </span>
                         </div>
@@ -523,7 +531,7 @@ const Genres: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <div className="float-left w-full border-t-2 border-t-[#78828c21] mt-5 pt-5 mx-3">
         <button
           type="submit"
-          className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+          className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
             genre?.length > 1 || addedKeywords?.length > 0
               ? "cursor-pointer"
               : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
