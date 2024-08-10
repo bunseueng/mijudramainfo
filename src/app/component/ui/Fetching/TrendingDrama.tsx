@@ -11,7 +11,6 @@ const TrendingDrama = ({ heading }: any) => {
     queryKey: ["trendingDrama"],
     queryFn: fetchTrending,
   });
-
   return (
     <div className="relative top-0 left-0 mt-5 overflow-hidden">
       <h1 className="text-3xl font-bold my-5">{heading}</h1>
@@ -32,7 +31,7 @@ const TrendingDrama = ({ heading }: any) => {
                       src={`https://image.tmdb.org/t/p/original/${
                         result?.poster_path || result?.poster_path
                       }`}
-                      alt="tv image"
+                      alt={result?.name || result?.title}
                       width={600}
                       height={600}
                       quality={100}
@@ -41,7 +40,7 @@ const TrendingDrama = ({ heading }: any) => {
                   ) : (
                     <Image
                       src="/empty-img.jpg"
-                      alt="tv image"
+                      alt={result?.name || result?.title}
                       width={600}
                       height={600}
                       quality={100}

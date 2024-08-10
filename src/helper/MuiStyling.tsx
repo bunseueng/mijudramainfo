@@ -95,7 +95,7 @@ export const lightTheme = (open: any) => ({
   control: (provided: any) => ({
     ...provided,
     backgroundColor: "#fff",
-    borderColor: "#3a3b3c",
+    borderColor: "#c0c4cc",
     color: "#666",
     borderRadius: "0.375rem",
     paddingInline: "0.5rem",

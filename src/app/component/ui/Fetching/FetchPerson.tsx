@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import React, { Suspense, useState } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Drama from "../../../(route)/(id)/person/[id]/Drama";
 import VarietyShow from "../../../(route)/(id)/person/[id]/VarietyShow";
 import PersonMovie from "@/app/(route)/(id)/person/[id]/PersonMovie";
@@ -28,15 +34,20 @@ import {
   TwitterShareButton,
 } from "next-share";
 import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
+import { personPopularity } from "@/helper/item-list";
+import PopularityModal from "../Modal/PopularityModal";
+import { AnimatePresence, motion } from "framer-motion";
 
 const FetchPerson = ({
   tv_id,
   currentUser,
   users,
   getComment,
-  getLoveofPerson,
+  getPersons,
 }: any) => {
   const [more, setMore] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [getPerson, setGetPerson] = useState<any>();
   const router = useRouter();
   const { register, handleSubmit } = useForm<TPersonLove>({
     resolver: zodResolver(personLove),
@@ -68,7 +79,7 @@ const FetchPerson = ({
     )
     .map((item: any) => item.character);
 
-  const isCurrentUserLoved = getLoveofPerson?.lovedBy.find((item: any) =>
+  const isCurrentUserLoved = getPersons?.lovedBy.find((item: any) =>
     item.includes(currentUser?.id)
   );
 
@@ -95,18 +106,96 @@ const FetchPerson = ({
       toast.error("Failed to love");
     }
   };
+
+  const [currentIndex, setCurrentIndex] = useState(0); // Current index in popularitySent
+  const [currentUserIndex, setCurrentUserIndex] = useState(0); // Current user index
+
+  const fetchRandomPerson = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `/api/person/${persons?.id}/send-popularity`,
+        { method: "GET" }
+      );
+      if (!response.ok) {
+        throw new Error("Error fetching random person");
+      }
+      const data = await response.json();
+      setGetPerson(data);
+    } catch (err: any) {
+      console.error(err.message);
+    }
+  }, [persons?.id]);
+
+  useEffect(() => {
+    const fetchAndUpdatePerson = async () => {
+      await fetchRandomPerson();
+    };
+
+    fetchAndUpdatePerson(); // Fetch initially
+
+    const intervalId = setInterval(fetchAndUpdatePerson, 12000); // Fetch every 12 seconds
+
+    return () => clearInterval(intervalId); // Clean up on unmount
+  }, [fetchRandomPerson]);
+
+  const sentByIds = getPerson?.sentBy || [];
+  const getPersonDetail = users?.filter((user: any) =>
+    sentByIds.includes(user?.id)
+  );
+
+  useEffect(() => {
+    if (getPersonDetail.length > 0) {
+      const currentUser = getPersonDetail[currentUserIndex];
+      const popularityArray = currentUser?.popularitySent?.[0] || []; // Access the first array
+
+      if (popularityArray.length > 0) {
+        const timer = setTimeout(() => {
+          if (currentIndex < popularityArray.length - 1) {
+            setCurrentIndex((prevIndex) => prevIndex + 1);
+          } else {
+            setCurrentIndex(0);
+            setCurrentUserIndex(
+              (prevUserIndex) => (prevUserIndex + 1) % getPersonDetail.length
+            );
+          }
+        }, 3000);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentIndex, currentUserIndex, getPersonDetail]);
+
+  const currentUsers = getPersonDetail[currentUserIndex];
+  const currentPopularityItem =
+    currentUsers?.popularitySent?.[0]?.[currentIndex];
+  useEffect(() => {
+    // Lock body scroll when modal is open
+    document.body.style.overflow = openModal ? "hidden" : "auto";
+    // Clean up the effect
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [openModal]);
+  useEffect(() => {
+    if (currentPopularityItem === undefined) {
+      console.log("error");
+      return undefined;
+    }
+    console.log("Popularity Sent Data:", currentPopularityItem);
+  }, [currentPopularityItem]);
+
   return (
     <>
       <div className="max-w-7xl mx-auto pt-0 pb-4 px-2 md:px-5 my-10 md:my-20 overflow-hidden">
         <div className="min-w-[80%] h-full flex flex-col min-[560px]:flex-row justify-between">
           <div className="w-full min-[560px]:w-[40%] lg:w-[30%] h-full">
-            <div className="block border border-[#232425] bg-[#242526] rounded-md">
+            <div className="block bg-white dark:bg-[#242526] border-[1px] border-[#00000024] dark:border-[#232425] rounded-md">
               <div className="lg:w-full h-full min-h-full flex items-center justify-center md:justify-start p-4">
                 <Image
                   src={`https://image.tmdb.org/t/p/original/${
                     persons?.profile_path || persons?.poster_path
                   }`}
-                  alt="image"
+                  alt={`${persons?.name}'s Avartar`}
                   width={600}
                   height={600}
                   quality={100}
@@ -116,14 +205,14 @@ const FetchPerson = ({
               <div className="flex flex-col">
                 <div className="flex items-center justify-center p-4">
                   <div className="px-10">
-                    <p className="text-center text-[#ffffffde] text-lg font-bold">
+                    <p className="text-center text-black dark:text-[#ffffffde] text-lg font-bold">
                       0
                     </p>
                     <p className="text-[#818a91] text-sm">Followers</p>
                   </div>
                   <div className="px-10">
-                    <p className="text-center text-[#ffffffde] text-lg font-bold">
-                      {getLoveofPerson?.love}
+                    <p className="text-center text-black dark:text-[#ffffffde] text-lg font-bold">
+                      {getPersons?.love}
                     </p>
                     <p className="text-[#818a91] text-sm">Hearts</p>
                   </div>
@@ -161,12 +250,12 @@ const FetchPerson = ({
                     {isCurrentUserLoved ? (
                       <span className="flex items-center text-red-600">
                         <GoHeart {...register("love")} className="text-2xl" />
-                        <span className="pl-1">{getLoveofPerson?.love}</span>
+                        <span className="pl-1">{getPersons?.love}</span>
                       </span>
                     ) : (
                       <span className="flex items-center">
                         <GoHeart {...register("love")} className="text-2xl" />
-                        <span className="pl-1">{getLoveofPerson?.love}</span>
+                        <span className="pl-1">{getPersons?.love}</span>
                       </span>
                     )}
                   </button>
@@ -228,7 +317,7 @@ const FetchPerson = ({
                 </div>
               </div>
             </div>
-            <div className="border border-[#232425] bg-[#242526] rounded-md mt-5 hidden min-[560px]:block">
+            <div className="bg-white dark:bg-[#242526] border-[1px] border-[#00000024] dark:border-[#232425] rounded-md mt-5 hidden min-[560px]:block">
               <div className="my-2">
                 <h1 className="text-md font-semibold px-3 md:px-6">Career</h1>
                 <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
@@ -264,6 +353,101 @@ const FetchPerson = ({
                 </p>
               </div>
             </div>
+
+            <div className="w-full bg-white dark:bg-[#242526] border-[1px] border-[#00000024] dark:border-[#232425] rounded-md mt-5 hidden min-[560px]:block overflow-hidden">
+              <div className="flex items-center justify-center py-5">
+                <Image
+                  src={`https://image.tmdb.org/t/p/original/${
+                    persons?.profile_path || persons?.poster_path
+                  }`}
+                  alt={`${persons?.name}'s Avartar`}
+                  width={600}
+                  height={600}
+                  quality={100}
+                  className="w-20 h-20 rounded-full bg-center bg-cover object-cover"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {personPopularity?.map((item, idx) => (
+                  <div key={idx} className="flex items-center">
+                    <Image
+                      src={`/${item?.image}`}
+                      alt={`${item?.name}`}
+                      width={100}
+                      height={100}
+                      className="w-12 h-12 bg-cover bg-center object-cover mx-2"
+                    />
+                    <div>
+                      <div className="font-bold text-md text-black">
+                        {getPersons?.popularity?.find(
+                          (pop: any) => pop?.itemId === item?.name
+                        )?.starCount || 0}
+                      </div>
+                      <div className="font-bold text-sm text-[#00000099] dark:text-[#ffffff99] uppercase">
+                        {item?.name}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[#00000099] dark:text-[#ffffff99] text-center text-sm my-2">
+                Support your favorite stars by sending virtual flowers to boost
+                their popularity.
+              </p>
+              <div className="mx-2">
+                <button
+                  className="block w-full text-white font-bold bg-[#1675b6] border-[1px] border-[#1675b6] hover:bg-[#115889] hover:border-[#0f527f] rounded-md py-2 my-2 mx-auto max-w-xs transform duration-300"
+                  onClick={() => setOpenModal(!openModal)}
+                >
+                  Send Popularity
+                </button>
+                {openModal && (
+                  <PopularityModal
+                    currentUser={currentUser}
+                    persons={persons}
+                    setOpenModal={setOpenModal}
+                    tv_id={tv_id}
+                  />
+                )}
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0, y: "100%" }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: "100%" }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 50,
+                      duration: 1,
+                    }}
+                    className="flex items-center justify-center"
+                  >
+                    <Image
+                      src={
+                        currentUsers?.profileAvatar
+                          ? currentUsers?.profileAvatar
+                          : currentUsers?.image || "/empty-pf.jpg"
+                      }
+                      alt={`${currentUsers?.name}'s Profile`}
+                      width={100}
+                      height={100}
+                      className="w-6 h-6 bg-center object-cover rounded-full"
+                    />
+                    <div className="flex items-center">
+                      <p className="text-xs text-[#2490da] font-semibold px-2">
+                        {currentUsers?.name}
+                      </p>
+                      <div>
+                        <p className="text-xs">
+                          Sent <span>{currentPopularityItem?.starCount}</span>{" "}
+                          <span>{currentPopularityItem?.itemId}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
           <div className="w-full min-[560px]:w-[60%] lg:w-[70%] min-[560px]:px-4 mt-4 min-[560px]:mt-0 ">
             <div className="w-full h-full">
@@ -276,12 +460,12 @@ const FetchPerson = ({
                     {isCurrentUserLoved ? (
                       <span className="flex items-center text-red-600">
                         <GoHeart {...register("love")} className="text-2xl" />
-                        <span className="pl-1">{getLoveofPerson?.love}</span>
+                        <span className="pl-1">{getPersons?.love}</span>
                       </span>
                     ) : (
                       <span className="flex items-center">
                         <GoHeart {...register("love")} className="text-2xl" />
-                        <span className="pl-1">{getLoveofPerson?.love}</span>
+                        <span className="pl-1">{getPersons?.love}</span>
                       </span>
                     )}
                   </button>

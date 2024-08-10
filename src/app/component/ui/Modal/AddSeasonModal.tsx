@@ -125,7 +125,7 @@ const AddSeasonModal: React.FC<EditModal> = ({
                           type="text"
                           name="released_information.title"
                           autoComplete="off"
-                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
+                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
                           placeholder="e.g. Season 1 or 2024"
                         />
                         <small className="text-muted-foreground opacity-80">
@@ -154,14 +154,14 @@ const AddSeasonModal: React.FC<EditModal> = ({
                         <input
                           type="number"
                           placeholder="e.g. 12"
-                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] border-2 dark:border-0 border-[#f3f3f3f3] rounded-md outline-none py-2 px-4"
+                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] dark:border-0 border-[#c0c4cc] rounded-md outline-none py-2 px-4"
                           value={epStart}
                           onChange={(e) => setEpStart(Number(e.target.value))}
                         />
                         <div className="absolute right-0 top-0">
                           <button
                             type="button"
-                            className={`block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b-2 border-b-[#f3f3f3f3] dark:border-b-[#46494a] border-l-2 border-l-[#f3f3f3f3] dark:border-l-[#46494a] border-t-2 dark:border-t-0 border-t-[#f3f3f3f3] dark:border-t-[#46494a] border-r-2 dark:border-r-0 border-r-[#f3f3f3f3] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
+                            className={`block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b-[1px] border-b-[#c0c4cc] dark:border-b-[#46494a] border-l-[1px] border-l-[#c0c4cc] dark:border-l-[#46494a] border-t-[1px] dark:border-t-0 border-t-[#c0c4cc] dark:border-t-[#46494a] border-r-[1px] dark:border-r-0 border-r-[#c0c4cc] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
                               epStart === item?.number_of_episodes &&
                               "cursor-not-allowed"
                             }`}
@@ -172,7 +172,7 @@ const AddSeasonModal: React.FC<EditModal> = ({
                           </button>
                           <button
                             type="button"
-                            className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l-2 border-l-[#f3f3f3f3] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
+                            className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l-[1px] border-l-[#c0c4cc] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
                             onClick={handleEpStartDecrement}
                           >
                             <IoMdArrowDropdown />
@@ -195,7 +195,7 @@ const AddSeasonModal: React.FC<EditModal> = ({
                         <input
                           type="number"
                           placeholder="e.g. 12"
-                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] border-2 dark:border-0 border-[#f3f3f3f3] rounded-md outline-none py-2 px-4"
+                          className="w-full bg-white text-center text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] dark:border-0 border-[#c0c4cc] rounded-md outline-none py-2 px-4"
                           value={
                             isEpEnd ? epEnd : item?.number_of_episodes || 0
                           }
@@ -204,7 +204,7 @@ const AddSeasonModal: React.FC<EditModal> = ({
                         <div className="absolute right-0 top-0">
                           <button
                             type="button"
-                            className={`block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b-2 border-b-[#f3f3f3f3] dark:border-b-[#46494a] border-l-2 border-l-[#f3f3f3f3] dark:border-l-[#46494a] border-t-2 dark:border-t-0 border-t-[#f3f3f3f3] dark:border-t-[#46494a] border-r-2 dark:border-r-0 border-r-[#f3f3f3f3] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
+                            className={`block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b-[1px] border-b-[#c0c4cc] dark:border-b-[#46494a] border-l-[1px] border-l-[#c0c4cc] dark:border-l-[#46494a] border-t-[1px] dark:border-t-0 border-t-[#c0c4cc] dark:border-t-[#46494a] border-r-[1px] dark:border-r-0 border-r-[#c0c4cc] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
                               epEnd === item?.number_of_episodes &&
                               "cursor-not-allowed"
                             }`}
@@ -215,7 +215,7 @@ const AddSeasonModal: React.FC<EditModal> = ({
                           </button>
                           <button
                             type="button"
-                            className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l-2 border-l-[#f3f3f3f3] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
+                            className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l-[1px] border-l-[#c0c4cc] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
                             onClick={handleEpEndDecrement}
                           >
                             <IoMdArrowDropdown />
@@ -260,7 +260,7 @@ const AddSeasonModal: React.FC<EditModal> = ({
                                   field.onChange(formattedDate);
                                 }}
                                 selected={field.value as any}
-                                className="w-full text-black dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
+                                className="w-full text-black dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
                               />
                             );
                           }}
@@ -278,7 +278,7 @@ const AddSeasonModal: React.FC<EditModal> = ({
 
               <div className="flex items-end justify-end">
                 <button
-                  className="bg-[#409eff] text-sm text-white border-2 border-[#409eff] rounded-sm px-5 py-3"
+                  className="bg-[#409eff] text-sm text-white border-[1px] border-[#409eff] rounded-sm px-5 py-3"
                   onClick={handleSubmit(addingItem)}
                 >
                   Add

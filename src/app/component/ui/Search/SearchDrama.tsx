@@ -12,29 +12,35 @@ const SearchDrama = () => {
   const query = searchParams?.get("query") ?? "";
   const router = useRouter();
 
-  const onInput = useDebouncedCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      if (name === "homeSearch") {
-        setSearch(value);
-      } else {
-        setSearch(value);
-      }
-      const params = new URLSearchParams(searchParams as SearchParamsType);
+  const updateQueryParams = useDebouncedCallback((value: string) => {
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
+    if (value) {
+      params.set("query", value);
+    } else {
+      params.delete("query");
+    }
+    router.push(`${pathname}/?${params.toString()}`);
+  }, 300);
 
-      if (value) {
-        params.set("query", value);
-      } else {
-        params.delete("query");
-      }
-      router.push(`${pathname}/?${params.toString()}`);
-    },
-    400
-  );
+  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setSearch(value);
+    updateQueryParams(value);
+  };
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
+    if (search) {
+      params.set("query", search);
+    } else {
+      params.delete("query");
+    }
+    // Push the updated query parameters immediately
     router.push(`/search/?${params.toString()}`);
   };
 

@@ -40,6 +40,7 @@ export interface currentUserProps {
   biography: string | null;
   coverPhoto: string | null;
   profileAvatar: string | null;
+  coin: number | null;
   followers: string[];
   following: string[];
   lastLogin: Date | null;
@@ -414,4 +415,42 @@ export interface CrewType {
   deathday: string | null;
   birthday: string | null;
   also_known_as: string[];
+}
+
+export interface CastType {
+  adult: boolean;
+  gender: number;
+  id: number;
+  known_for_department: string;
+  name: string;
+  order: number;
+  original_name: string;
+  popularity: number;
+  profile_path: string | null;
+  roles: [
+    {
+      character: string;
+      credit_id: string;
+      episode_count: number;
+    }
+  ];
+  total_episode_counter: number;
+}
+
+export interface PersonType {
+  adult: boolean;
+  also_known_as: string[];
+  biography: string | null;
+  birthday: string | null;
+  deathday: string | null;
+  gender: number;
+  id: number;
+  imdb_id: string;
+  homepage: string | null;
+  knwon_for_department: string | null;
+  name: string;
+  place_of_birth: string | null;
+  popularity: number;
+  profile_path: string | null;
+  poster_path: string | null;
 }

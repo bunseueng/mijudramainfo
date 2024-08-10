@@ -15,11 +15,17 @@ import { useEffect, useState } from "react";
 export type PersonDb = {
   id: string;
   personId: string;
+  name: string | null;
   love: number | null;
   lovedBy: string[];
+  popularity: Array<{
+    itemId: string;
+    starCount: number;
+    actorName: string;
+  }>;
   createdAt: Date;
   updatedAt: Date;
-} | null;
+};
 
 export default function Person({ result, currentUser }: any) {
   const [getPerson, setGetPerson] = useState<PersonDb>();
@@ -41,6 +47,7 @@ export default function Person({ result, currentUser }: any) {
         });
         if (res.ok) {
           const data = await res.json();
+          router.refresh();
           setGetPerson(data);
         } else {
           console.error("Failed to fetch person from API");
@@ -50,7 +57,7 @@ export default function Person({ result, currentUser }: any) {
       }
     };
     fetchPerson();
-  }, [result?.id]);
+  }, [result?.id, router]);
 
   const isCurrentUserLoved = getPerson?.lovedBy.find((item) =>
     item.includes(currentUser?.id)
@@ -86,7 +93,7 @@ export default function Person({ result, currentUser }: any) {
             {result?.profile_path !== null ? (
               <Image
                 src={`https://image.tmdb.org/t/p/original/${result.profile_path}`}
-                alt="drama image"
+                alt={`${result?.name}'s Profile`}
                 width={200}
                 height={200}
                 style={{ width: "100%", height: "100%" }}
@@ -96,7 +103,7 @@ export default function Person({ result, currentUser }: any) {
             ) : (
               <Image
                 src="/empty-img.jpg"
-                alt="drama image"
+                alt={`${result?.name}'s Profile`}
                 width={200}
                 height={200}
                 style={{ width: "100%", height: "100%" }}
@@ -112,7 +119,7 @@ export default function Person({ result, currentUser }: any) {
           <div className="flex items-center justify-between">
             <Link
               href={`/person/${result?.id}`}
-              className="text-[#2490da] text-lg font-bold inline-block"
+              className="text-[#2490da] text-md font-bold inline-block"
             >
               {result.title || result.name}
             </Link>
@@ -132,28 +139,28 @@ export default function Person({ result, currentUser }: any) {
           </div>
           <div className="mb-2">
             <div className="flex items-center">
-              <p className="text-sm text-slate-300 font-semibold truncate">
+              <p className="text-sm text-muted-foreground opacity-60 truncate">
                 {person?.known_for_department}
               </p>
               <span
-                className={`px-2 text-sm ${
+                className={`text-sm opacity-60 px-2 ${
                   !person?.place_of_birth ? "hidden" : "block"
                 }`}
               >
                 •
               </span>
-              <p className="text-sm text-slate-300 font-semibold truncate">
+              <p className="text-sm text-muted-foreground opacity-60 truncate">
                 {person?.place_of_birth}
               </p>
             </div>
           </div>
           <div className="mb-2">
             {person?.biography === "" ? (
-              <div className="text-lg font-bold text-center py-5">
+              <div className="text-md font-bold text-center py-5">
                 Sorry!! This person currently has no biography.
               </div>
             ) : (
-              <p className="line-cla line-clamp-4 text-md truncate whitespace-normal">
+              <p className="line-clamp-4 text-sm truncate whitespace-normal">
                 {person?.biography}
               </p>
             )}

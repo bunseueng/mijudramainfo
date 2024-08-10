@@ -40,6 +40,10 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <Adsense pId="3369705912051027" />
+        <meta
+          name="google-adsense-account"
+          content="ca-pub-3369705912051027"
+        ></meta>
       </head>
       <body className={`bg-slate-100 dark:bg-[#1e1e1e]  ${nunito.className}`}>
         <PHProvider>
@@ -54,8 +58,8 @@ export default function RootLayout({
                 <div className="flex flex-col top-0 sticky z-50">
                   <SessionAllPage />
                 </div>
-                {children}
-                <div className="w-full ">
+                <div className="flex-grow h-auto">{children}</div>
+                <div className="flex flex-col relative w-full">
                   <Footer />
                 </div>
                 <ToastContainer position="top-right" />

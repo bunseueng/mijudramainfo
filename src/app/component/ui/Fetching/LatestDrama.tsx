@@ -32,7 +32,7 @@ const LatestDrama = ({ heading }: any) => {
                       src={`https://image.tmdb.org/t/p/original/${
                         item?.poster_path || item?.backdrop_path
                       }`}
-                      alt="tv image"
+                      alt={item?.name || item?.title}
                       width={600}
                       height={600}
                       quality={100}
@@ -41,7 +41,7 @@ const LatestDrama = ({ heading }: any) => {
                   ) : (
                     <Image
                       src="/empty-img.jpg"
-                      alt="tv image"
+                      alt={item?.name || item?.title}
                       width={600}
                       height={600}
                       quality={100}

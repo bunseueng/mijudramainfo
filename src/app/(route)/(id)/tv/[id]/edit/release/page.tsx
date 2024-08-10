@@ -11,7 +11,7 @@ const ReleasePage = async ({ params }: { params: { id: string } }) => {
     },
   });
   return (
-    <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10">
+    <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10 px-2 md:px-5">
       <TvEdit tv_id={tv_id} />
       <TvEditList tv_id={tv_id} tvDetails={tvDetails} />
     </div>

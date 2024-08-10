@@ -57,10 +57,7 @@ export function SearchPagination({ totalItems, setPage }: any) {
         {pageNumbers.map((pageIndex: number) => (
           <PaginationItem key={pageIndex}>
             <PaginationLink
-              href={`${path}/?${new URLSearchParams({
-                ...Object.fromEntries(searchParamsEntries),
-                page: pageIndex.toString(), // Set the page based on the link index
-              })}`}
+              href={`${path}?${queryString}`}
               onClick={() => handlePageChange(pageIndex)}
               className={`bg-white border border-slate-200 px-4 py-2 rounded-sm cursor-pointer dark:bg-[#242424] dark:border-[#272727] ${
                 pageIndex === currentPage

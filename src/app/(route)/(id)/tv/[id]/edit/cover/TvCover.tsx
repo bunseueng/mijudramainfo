@@ -114,7 +114,7 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           </div>
           <button
             type="submit"
-            className={`flex items-center bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+            className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
               cover
                 ? "cursor-pointer"
                 : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"

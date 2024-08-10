@@ -43,7 +43,7 @@ const ActorCard = ({ result }: any) => {
         ) : (
           <Image
             src="/empty-img.jpg"
-            alt="tv image"
+            alt={`${actorName}'s avatar`}
             width={600}
             height={600}
             quality={100}

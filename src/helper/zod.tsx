@@ -201,3 +201,10 @@ export const externalLink = z.object({
 });
 
 export type TExternalLink = z.infer<typeof externalLink>;
+
+export const coin = z.object({
+  email: z.any(),
+  items: z.any(),
+});
+
+export type TCoin = z.infer<typeof externalLink>;

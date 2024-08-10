@@ -209,7 +209,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         {database?.map((item, idx: number) => {
           return (
             <div
-              className="relative mb-4 bg-[#fff] dark:bg-[#242526] border-2 border-[#f3f3f3] dark:border-[#00000024] rounded-md"
+              className="relative mb-4 bg-[#fff] dark:bg-[#242526] border-[1px] border-[#c0c4cc] dark:border-[#00000024] rounded-md"
               key={idx}
             >
               <div className="relative font-semibold py-2 px-4">
@@ -218,7 +218,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               <div className="absolute top-2 right-4">
                 <button
                   type="button"
-                  className="bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-1 py-0.5 mr-3 shadow-sm"
+                  className="bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-1 py-0.5 mr-3 shadow-sm"
                   onClick={(e) => {
                     storedData?.length > 0
                       ? removingStored(item?.title)
@@ -230,7 +230,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 {(markedForDeletion[idx] || isItemDataChanged[idx]) && (
                   <button
                     type="button"
-                    className="bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-1 py-0.5 mr-3 shadow-sm"
+                    className="bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-1 py-0.5 mr-3 shadow-sm"
                     onClick={() => handleResetItem(idx)}
                   >
                     <GrPowerReset />
@@ -238,7 +238,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 )}
 
                 <button
-                  className="bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-1 py-0.5 shadow-sm"
+                  className="bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-1 py-0.5 shadow-sm"
                   type="button"
                   onClick={() => {
                     toggleEdit(idx);
@@ -321,7 +321,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           );
         })}
         {openExternal && (
-          <div className="relative bg-[#fff] dark:bg-[#242526] border-2 border-[#f3f3f3] dark:border-[#00000024]  shadow-sm rounded-md mb-3">
+          <div className="relative bg-[#fff] dark:bg-[#242526] border-[1px] border-[#c0c4cc] dark:border-[#00000024]  shadow-sm rounded-md mb-3">
             <div className="relative px-4 py-2">New External Link</div>
             <div className="px-4 py-2">
               <div className="mb-5">
@@ -332,7 +332,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       name="job"
                       readOnly
                       autoComplete="off"
-                      className="w-full md:w-[30%] placeholder:text-black dark:placeholder:text-white bg-[#fff] dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
+                      className="w-full md:w-[30%] placeholder:text-black dark:placeholder:text-white bg-[#fff] dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
                       placeholder={
                         selectedExternal || "Select an external link"
                       } // Update this line
@@ -346,7 +346,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className={`w-full md:w-[30%] h-[250px] absolute bg-[#fff] dark:bg-[#242424] border-2 border-[#edeff0] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
+                        className={`w-full md:w-[30%] h-[250px] absolute bg-[#fff] dark:bg-[#242424] border-[1px] border-[#edeff0] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
                       >
                         {external_link?.map((items, index) => {
                           const isContentRating =
@@ -395,7 +395,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         <input
                           {...register("url")}
                           type="text"
-                          className={`h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md px-4 outline-none focus:border-[#1675b6] ${
+                          className={`h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md px-4 outline-none focus:border-[#1675b6] ${
                             errors?.url && "border-red-400 focus:border-red-400"
                           }`}
                           placeholder="Website URL/Link"
@@ -414,7 +414,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         <input
                           {...register("link_text")}
                           type="text"
-                          className="h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
+                          className="h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
                           placeholder="Link Text/Anchor Text"
                         />
                       </div>
@@ -423,7 +423,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         <input
                           {...register("additional_text")}
                           type="text"
-                          className="h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
+                          className="h-10 leading-[40px] placeholder:text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
                           placeholder="Additional Text"
                         />
                       </div>
@@ -433,7 +433,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <input
                         {...register("id")}
                         type="text"
-                        className="h-10 leading-[40px] bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
+                        className="h-10 leading-[40px] bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
                         placeholder={
                           external_link.find(
                             (item) => item.label === selectedExternal
@@ -462,14 +462,14 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               )}
               <button
                 type="button"
-                className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-5 py-2"
+                className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-5 py-2"
                 onClick={() => setOpenExternal(!openExternal)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="text-sm text-white bg-[#409effd9] border-2 border-[#409effcc] rounded-md px-5 py-2 ml-3"
+                className="text-sm text-white bg-[#409effd9] border-[1px] border-[#409effcc] rounded-md px-5 py-2 ml-3"
                 onClick={() => addingItem(getValues())}
               >
                 Add
@@ -482,7 +482,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         (!openExternal && (
           <button
             type="button"
-            className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
+            className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
             onClick={() => setOpenExternal(!openExternal)}
           >
             Add External Link
@@ -491,7 +491,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       {(tvDetails?.external_links?.length || 0) > 0 && (
         <button
           type="button"
-          className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#f3f3f3] dark:border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
+          className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
           onClick={() => setOpenExternal(!openExternal)}
         >
           Add External Link
@@ -500,7 +500,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <div className="border-t-2 border-t-[#78828c21] pt-5 mx-3">
         <button
           type="submit"
-          className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+          className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
             storedData?.length > 0 ||
             markedForDeletion?.includes(true) ||
             isItemDataChanged?.includes(true)

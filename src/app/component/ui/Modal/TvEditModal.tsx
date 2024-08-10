@@ -247,7 +247,7 @@ const TvEditModal: React.FC<EditModal> = ({
                           }
                           value={service[idx]?.label}
                           onChange={() => {}} // Disable input changes
-                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-[#f5f7fa] dark:bg-[#1f1f1f] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-not-allowed"
+                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-[#f5f7fa] dark:bg-[#1f1f1f] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-not-allowed"
                           onClick={() => handleDropdownToggle("service", idx)}
                           disabled={true}
                         />
@@ -344,7 +344,7 @@ const TvEditModal: React.FC<EditModal> = ({
                           name="service_type"
                           readOnly
                           autoComplete="off"
-                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
+                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
                           placeholder={
                             servicesType[idx]
                               ? servicesType[idx]
@@ -433,7 +433,7 @@ const TvEditModal: React.FC<EditModal> = ({
                         type="text"
                         name="services.link"
                         autoComplete="off"
-                        className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
+                        className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
                       />
                     </div>
                   </div>

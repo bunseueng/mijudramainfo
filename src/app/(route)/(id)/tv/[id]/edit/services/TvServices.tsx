@@ -325,7 +325,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       {show?.availability?.length > 0 ? (
                         show?.availability?.map((avail: any) => (
                           <span
-                            className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1"
+                            className="text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1"
                             key={avail?.value}
                           >
                             {avail?.availability
@@ -334,7 +334,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           </span>
                         ))
                       ) : (
-                        <span className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
+                        <span className="text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
                           No country restrictions
                         </span>
                       )}
@@ -343,7 +343,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         show?.subtitles?.length > 0 ? (
                           show?.subtitles?.map((sub: any) => (
                             <span
-                              className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1"
+                              className="text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1"
                               key={sub?.value}
                             >
                               {sub?.subtitles
@@ -354,12 +354,12 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             </span>
                           ))
                         ) : (
-                          <span className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
+                          <span className="text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
                             No subtitle available
                           </span>
                         )
                       ) : (
-                        <span className="text-sm bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
+                        <span className="text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] inline-block rounded-sm m-1 p-1">
                           English
                         </span>
                       )}
@@ -369,14 +369,14 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         {(markedForDeletion[idx] || isItemDataChanged[idx]) && (
                           <button
                             type="button"
-                            className="min-w-5 text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2 mr-2"
+                            className="min-w-5 text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] hover:bg-[#cdcdcd] dark:hover:bg-[#3e4042] text-[#ffffffde] border-[1px] border-[#cdcdcd] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2 mr-2"
                             onClick={() => handleResetItem(idx)}
                           >
                             <GrPowerReset />
                           </button>
                         )}
                         <button
-                          className="min-w-5 text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2"
+                          className="min-w-5 text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] hover:bg-[#cdcdcd] dark:hover:bg-[#3e4042] text-[#ffffffde] border-[1px] border-[#cdcdcd] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2"
                           onClick={(e) => {
                             e.preventDefault();
                             handleOpenModal(idx);
@@ -411,7 +411,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           </Reorder.Group>
         </table>
         <button
-          className="bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
+          className="bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 cursor-pointer hover:opacity-80 transform duration-300 rounded-md my-5"
           onClick={(e) => {
             e.preventDefault();
             setOpen(true);
@@ -436,7 +436,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       )}
       <button
         type="submit"
-        className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+        className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
           storedData?.length > 0 ||
           markedForDeletion?.length > 0 ||
           isItemDataChanged?.length > 0

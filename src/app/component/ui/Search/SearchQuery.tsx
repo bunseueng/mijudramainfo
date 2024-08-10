@@ -105,8 +105,12 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
     queryFn: () => fetchCollectionSearch(searchQuery),
   });
 
+  if (isLoading) {
+    return <SearchLoading />;
+  }
+
   return (
-    <div className="mt-10">
+    <div className="min-h-screen mt-10">
       {totalItems?.length === 0 && (
         <h1 className="h-screen text-xl text-center mt-20">No results found</h1>
       )}

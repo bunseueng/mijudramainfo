@@ -19,7 +19,7 @@ const headers = {
 };
 
 export const fetchTrending = async () => {
-    const url  = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date.gte=${startDate}&first_air_date.lte${endDate}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN&with_original_language=zh&without_genres=16`
+    const url  = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date.gte=${startDate}&first_air_date.lte${endDate}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN&with_original_language=zh&without_genres=16,10764,35`
  
     const options = {
       method: 'GET',
@@ -37,7 +37,7 @@ export const fetchTrending = async () => {
 };
 
 export const fetchLatest = async () => {
-    const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date_year=2024&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=first_air_date.desc&with_origin_country=CN&with_original_language=zh&without_genres=16,10764,10767`
+    const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date_year=2024&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=first_air_date.desc&with_origin_country=CN&with_original_language=zh&without_genres=16,10764,10767,35`
     const options = {
       method: 'GET',
       headers,
@@ -717,26 +717,53 @@ export const fetchPersonSearch = async (searchQuery: any) => {
   return json;
 }
 
+export const fetchTopPeople = async (pages = 1) => {
+  try {
+    const url = `https://api.themoviedb.org/3/person/popular?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&page=${pages}`;
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch people');
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error: any) {
+    console.error(error)
+    throw new Error(error)
+  }
+}
+
 // fetch top_rated drama
 export const fetchTopDrama = async (pages  = 1) => {
-  const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
-  const countryParam = countries.join('|'); // Join countries with a pipe character
-  
-  const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=${pages}&sort_by=vote_count.desc&with_origin_country=${countryParam}&without_genres=16`;
-  
-  const options = {
-    method: 'GET',
-    headers,
-  };
-  
-  const res = await fetch(url, options);
+  try {
+    const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
+    const countryParam = countries.join('|'); // Join countries with a pipe character
+    
+    const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=${pages}&sort_by=vote_count.desc&with_origin_country=${countryParam}&without_genres=16`;
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch movies');
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error: any) {
+    console.error(error)
+    throw new Error(error)
   }
-
-  const json = await res.json();
-  return json;
 }
 
 // fetch 100 top_rated drama

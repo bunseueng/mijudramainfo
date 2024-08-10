@@ -19,6 +19,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiSearch } from "react-icons/ci";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { GrPowerReset } from "react-icons/gr";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -35,13 +36,15 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [crewRoles, setCrewRoles] = useState<string[]>([]);
   const [listSearch, setListSearch] = useState<string>("");
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
   const [tvIds, setTvIds] = useState<number[]>(tv_id ? [] : []);
+  const [prevCrewRole, setPrevCrewRole] = useState<string[]>([]);
   const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
     Array(tvDetails?.crew?.length || 0).fill(false)
   );
-  const [isItemChanging, setIsItemChanging] = useState<string[]>(
+  const [isItemChanging, setIsItemChanging] = useState<boolean[]>(
     Array(tvDetails?.crew?.length || 0).fill(false)
   );
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +65,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["searchPerson"],
+    queryKey: ["searchPerson", searchQuery],
     queryFn: () => fetchPersonSearch(searchQuery),
   });
 
@@ -105,7 +108,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   }, [personResult]);
 
   const [item, setItem] = useState<CrewType[]>(() =>
-    filterDuplicates([...(tvDetails?.crew || []), ...personResult])
+    filterDuplicates([...(tvDetails?.crew || []), ...storedData])
   );
 
   useEffect(() => {
@@ -114,16 +117,19 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   useEffect(() => {
     if (!isLoading && cast && cast.crew) {
-      setItem(
-        filterDuplicates([
-          ...(tvDetails?.crew || []),
-          ...personResult,
-          ...storedData,
-          ...cast.crew,
-        ])
-      );
+      if (tvDetails?.crew?.length && tvDetails?.crew?.length > 0) {
+        setItem(filterDuplicates([...(tvDetails?.crew || []), ...storedData]));
+      } else {
+        setItem(
+          filterDuplicates([
+            ...(tvDetails?.crew || []),
+            ...cast.crew,
+            ...storedData,
+          ])
+        );
+      }
     }
-  }, [isLoading, cast, personResult, storedData, tvDetails?.crew]);
+  }, [isLoading, cast, storedData, tvDetails?.crew]);
   const prevItemRef = useRef(item);
 
   const handleDropdownToggle = (dropdown: string, idx: number) => {
@@ -136,9 +142,31 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     setCrewRoles((prev) => {
       const newRoles = [...prev];
       newRoles[idx] = role;
-      setIsItemChanging(newRoles);
+      setIsItemChanging(newRoles as any);
       return newRoles;
     });
+    setPrevCrewRole((prev) => {
+      const newRoles = [...prev];
+      newRoles[idx] = role;
+      setIsItemChanging(newRoles as any);
+      return newRoles;
+    });
+  };
+
+  const handleResetChanges = (ind: number) => {
+    setIsItemChanging((prevIsItemChanging) => {
+      const newIsItemChanging = [...prevIsItemChanging];
+      newIsItemChanging[ind] = false;
+      return newIsItemChanging;
+    });
+    setCrewRoles((prevCrewRoles) => {
+      const newRole = [...prevCrewRoles];
+      newRole[ind] = prevCrewRole[ind];
+      return newRole;
+    });
+    setMarkedForDeletion((prev) =>
+      prev.map((marked, index) => (index === ind ? false : marked))
+    );
   };
 
   useEffect(() => {
@@ -203,10 +231,13 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const onSubmit = async (data: TCreateDetails) => {
     try {
-      const updatedItems = item.map((crew: any, index: number) => ({
-        ...crew,
-        job: crewRoles[index] || crew?.job,
-      }));
+      setSubmitLoading(true);
+      const updatedItems = item
+        ?.filter((_: any, idx: number) => !markedForDeletion[idx])
+        ?.map((crew: any, index: number) => ({
+          ...crew,
+          job: crewRoles[index] || crew?.job,
+        }));
 
       const res = await fetch(`/api/tv/${tv_id}/crew`, {
         method: "POST",
@@ -228,6 +259,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     } catch (error: any) {
       console.log("Bad Request");
       throw new Error(error);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -347,7 +380,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               name="job"
                               readOnly
                               autoComplete="off"
-                              className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
+                              className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
                               placeholder={
                                 crew?.job?.length > 0
                                   ? crewRoles[ind] || crew?.job
@@ -363,7 +396,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className={`w-full h-[250px] absolute bg-[#242424] border-2 border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
+                                className="w-full h-[250px] absolute bg-white dark:bg-[#242424] border-2 border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll"
                               >
                                 {crewRole?.map((items, index) => {
                                   const scrollIntoViewIfNeeded = (
@@ -401,11 +434,11 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                         isContentRating &&
                                         scrollIntoViewIfNeeded(el)
                                       }
-                                      className={`text-sm hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
+                                      className={`text-sm hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
                                         isContentRating
-                                          ? "text-[#409eff] bg-[#2a2b2c]"
-                                          : ""
-                                      } `}
+                                          ? "text-[#409eff] font-bold bg-[#00000011] dark:bg-[#2a2b2c]"
+                                          : "text-black dark:text-white"
+                                      }`}
                                       onClick={() => {
                                         handleDropdownToggle("job", ind);
                                         setCrewRole(ind, items?.value); // Update the story for this item
@@ -422,15 +455,28 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         </div>
                       </td>
                       <td className="text-right border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-4 py-3">
-                        <button
-                          className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
-                          onClick={(e) => {
-                            setOpen(!open), e.preventDefault();
-                            setDeleteIndex(ind); // Set the index of the item to show delete button
-                          }}
-                        >
-                          <IoCloseOutline />
-                        </button>
+                        {markedForDeletion[ind] || isItemChanging[ind] ? (
+                          <button
+                            type="button"
+                            className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-2 border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
+                            onClick={(e) => {
+                              e.preventDefault(); // Prevent form submission
+                              handleResetChanges(ind);
+                            }}
+                          >
+                            <GrPowerReset />
+                          </button>
+                        ) : (
+                          <button
+                            className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-2 border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
+                            onClick={(e) => {
+                              setOpen(!open), e.preventDefault();
+                              setDeleteIndex(ind); // Set the index of the item to show delete button
+                            }}
+                          >
+                            <IoCloseOutline />
+                          </button>
+                        )}
                         {open && deleteIndex === ind && (
                           <DeleteButton
                             item={item}
@@ -469,7 +515,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             <div className="relative w-full inline-block">
               <input
                 type="text"
-                className="w-full h-10 leading-10 text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-2 border-[#f3f3f3f3] dark:border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4"
+                className="w-full h-10 leading-10 placeholder:text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-2 border-[#f3f3f3f3] dark:border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4"
                 placeholder="Search to add a cast member"
                 ref={inputRef}
                 onChange={onInput}
@@ -491,7 +537,11 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   >
                     {isFetching ? (
                       <div className="absolute top-[45%] left-[50%]">
-                        <ClipLoader color="#fff" size={25} loading={loading} />
+                        <ClipLoader
+                          color="#c0c4cc"
+                          size={25}
+                          loading={loading}
+                        />
                       </div>
                     ) : (
                       <>
@@ -557,12 +607,27 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <button
         onClick={handleSubmit(onSubmit)}
         className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-          tvIds?.length > 0 || isItemChanged
+          tvIds?.length > 0 ||
+          isItemChanged ||
+          crewRoles?.some((role) => role !== undefined) ||
+          markedForDeletion?.includes(true) ||
+          isItemChanging?.includes(true)
             ? "cursor-pointer"
             : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
         }`}
-        disabled={tvIds?.length > 0 || isItemChanged ? false : true}
+        disabled={
+          tvIds?.length > 0 ||
+          isItemChanged ||
+          crewRoles?.some((role) => role !== undefined) ||
+          markedForDeletion?.includes(true) ||
+          isItemChanging?.includes(true)
+            ? false
+            : true
+        }
       >
+        <span className="mr-1 pt-1">
+          <ClipLoader color="#242526" loading={submitLoading} size={19} />
+        </span>
         Submit
       </button>
     </form>

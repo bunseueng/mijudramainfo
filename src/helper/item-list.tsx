@@ -70,7 +70,7 @@ export const movie_subitems = [
 export const people_subitems = [
   {
     label: "Top Actors",
-    link: "/person/top",
+    link: "/people/top",
   },
 ];
 
@@ -391,10 +391,6 @@ export const footer = [
   {
     link: "/privacy",
     label: "Privacy",
-  },
-  {
-    link: "/support",
-    label: "Support Us",
   },
 ];
 
@@ -4043,5 +4039,28 @@ export const external_link = [
     placeholder: "",
     eg: "",
     error: "URL",
+  },
+];
+
+export const personPopularity = [
+  {
+    name: "Dragon",
+    image: "rounded-dragon.png",
+    length: "10",
+  },
+  {
+    name: "Thuglife",
+    image: "thuglife.png",
+    length: "10",
+  },
+  {
+    name: "Bird",
+    image: "winged-bird.png",
+    length: "10",
+  },
+  {
+    name: "Swan",
+    image: "swan-dream.png",
+    length: "10",
   },
 ];

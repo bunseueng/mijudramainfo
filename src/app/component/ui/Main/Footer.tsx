@@ -7,7 +7,7 @@ import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <div className="bg-gradient-to-r from-sky-900 to-blue-800">
+    <div className="bg-gradient-to-r from-sky-900 to-blue-800 w-full">
       <div className="max-w-[1520px] mx-auto py-4 px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           <div className="text-white">
@@ -38,7 +38,7 @@ const Footer = () => {
                 </li>
                 <li className="li">
                   <Link
-                    href=""
+                    href="https://x.com/cdramaworldkh"
                     className="border border-white rounded-full mr-2 link"
                   >
                     <FaTwitter className="m-2 icon" />
@@ -54,7 +54,7 @@ const Footer = () => {
                 </li>
                 <li className="li">
                   <Link
-                    href=""
+                    href="https://www.instagram.com/cdrama_worldd/"
                     className="border border-white rounded-full mr-2 link"
                   >
                     <FaInstagram className="m-2 icon" />

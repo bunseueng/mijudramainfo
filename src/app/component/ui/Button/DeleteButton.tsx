@@ -1,12 +1,12 @@
-import { CrewType } from "@/helper/type";
+import { CastType, CrewType } from "@/helper/type";
 import React from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 
-interface RemoveBtn {
-  item: CrewType[];
-  storedData: CrewType[];
-  setStoredData: (data: CrewType[]) => void;
+interface RemoveBtn<T> {
+  item: T[];
+  storedData: T[];
+  setStoredData: (data: T[]) => void;
   handleRemoveItem: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     indexToRemove: number
@@ -19,7 +19,7 @@ interface RemoveBtn {
   setMarkedForDeletion: (data: boolean[]) => void;
 }
 
-const DeleteButton: React.FC<RemoveBtn> = ({
+const DeleteButton = <T extends CrewType | CastType>({
   item,
   storedData,
   setStoredData,
@@ -29,7 +29,7 @@ const DeleteButton: React.FC<RemoveBtn> = ({
   setDeleteIndex,
   markedForDeletion,
   setMarkedForDeletion,
-}) => {
+}: RemoveBtn<T>) => {
   const markForDeletion = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const newMarkedForDeletion = [...markedForDeletion];
@@ -37,7 +37,6 @@ const DeleteButton: React.FC<RemoveBtn> = ({
     setMarkedForDeletion(newMarkedForDeletion);
     setOpen(false);
   };
-  console.log(storedData);
 
   const handleDeleteStoredData = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -52,22 +51,27 @@ const DeleteButton: React.FC<RemoveBtn> = ({
     setOpen(false);
     // Close the modal after deletion
   };
-
   const handleDeleteButton = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (storedData?.length > 0) {
-      markForDeletion(e);
-      handleDeleteButton(e);
+    // Determine if item exists in storedData
+    const itemToDelete = item[ind];
+    const isItemInStoredData = storedData.some(
+      (dataItem) => dataItem?.name === itemToDelete?.name
+    );
+
+    if (isItemInStoredData) {
+      // If the item is in storedData, use handleDeleteStoredData
+      handleDeleteStoredData(e);
     } else {
+      // Otherwise, mark for deletion
       markForDeletion(e);
     }
   };
-
   return (
     <div className="relative z-10">
       <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity"></div>
 
       <div className="fixed inset-0 z-10 w-screen">
-        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
           <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
             <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start justify-between">
@@ -92,11 +96,7 @@ const DeleteButton: React.FC<RemoveBtn> = ({
               <button
                 type="button"
                 className="inline-flex w-full justify-center rounded-md bg-red-600 dark:bg-[#3a3b3c] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
-                onClick={(
-                  e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-                ) => {
-                  handleDeleteButton(e);
-                }}
+                onClick={handleDeleteButton}
               >
                 OK
               </button>

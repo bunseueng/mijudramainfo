@@ -58,25 +58,6 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     }
   }, [tv, tvDetails?.production_information]);
 
-  const scrollIntoViewIfNeeded = (element: any) => {
-    const rect = element?.getBoundingClientRect();
-    const isVisible =
-      rect?.top >= 0 &&
-      rect?.left >= 0 &&
-      rect?.bottom <=
-        (window?.innerHeight || document?.documentElement?.clientHeight) &&
-      rect?.right <=
-        (window?.innerWidth || document?.documentElement.clientWidth);
-
-    if (!isVisible) {
-      element?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "nearest",
-      });
-    }
-  };
-
   const handleDropdownToggle = (dropdown: string, idx: number) => {
     setOpenDropdown((prev) =>
       prev === `${dropdown}-${idx}` ? null : `${dropdown}-${idx}`
@@ -150,7 +131,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     name="job"
                     readOnly
                     autoComplete="off"
-                    className="w-full placeholder:text-sm placeholder:text-black dark:placeholder:text-[#606266] dark:placeholder:opacity-60 text-black dark:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
+                    className="w-full placeholder:text-sm placeholder:text-black dark:placeholder:text-[#606266] dark:placeholder:opacity-60 text-black dark:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
                     placeholder={
                       data?.language
                         ? language[idx] || data?.language
@@ -166,7 +147,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className={`w-full h-[250px] absolute text-black bg-white dark:bg-[#242424] border-2 border-[#f3f3f3] dark:border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
+                      className={`w-full h-[250px] absolute text-black bg-white dark:bg-[#242424] border-[1px] border-[#c0c4cc] dark:border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
                     >
                       {production_language?.map((items, index) => {
                         const scrollIntoViewIfNeeded = (element: any) => {
@@ -287,7 +268,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <div className="border-t-2 border-t-[#78828c21] pt-5 mx-3">
         <button
           type="submit"
-          className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+          className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
             language?.length > 0 || countries?.length > 0 || network?.length > 0
               ? "cursor-pointer"
               : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"

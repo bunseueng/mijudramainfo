@@ -178,7 +178,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
-        className="w-full absolute text-black dark:text-white bg-white dark:bg-[#242424] border-2 border-[#f3f3f3] dark:border-[#242424]  py-1 mt-14 rounded-md z-10 custom-scroll overflow-auto shadow-md"
+        className="w-full absolute text-black dark:text-white bg-white dark:bg-[#242424] border-[1px] border-[#f3f3f3] dark:border-[#242424]  py-1 mt-14 rounded-md z-10 custom-scroll overflow-auto shadow-md"
         style={
           dropdown === "episode" ? { height: "90px" } : { height: "200px" }
         }
@@ -506,8 +506,8 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       type === "month" ? "float-left w-[41.66667%]" : "float-left w-[25%]";
     const inputClass =
       type === "episode"
-        ? "w-full bg-white dark:bg-[#3a3b3c] placeholder:text-xs border-2 border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 pt-1 pb-[2px] px-3 cursor-pointer"
-        : "w-full bg-white dark:bg-[#3a3b3c] placeholder:text-sm border-2 border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer";
+        ? "w-full bg-white dark:bg-[#3a3b3c] placeholder:text-xs border-[1px] border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 pt-1 pb-[2px] px-3 cursor-pointer"
+        : "w-full bg-white dark:bg-[#3a3b3c] placeholder:text-sm border-[1px] border-[#f3f3f3] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer";
     const selectedValue = selectedValues[`${type}_${uniqueId}`];
 
     // Assign placeholder and value with default "-" if they are empty
@@ -631,7 +631,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 </label>
                 <div className="w-full">
                   <button
-                    className="inline-flex items-center text-sm font-semibold whitespace-nowrap text-center text-black dark:text-white leading-[1px] bg-[#fff] border-2 border-[#dcdfe6] dark:bg-[#3a3b3c] dark:border-[#3e4042] py-2 px-5 rounded-md ml-3"
+                    className="inline-flex items-center text-sm font-semibold whitespace-nowrap text-center text-black dark:text-white leading-[1px] bg-[#fff] border-[1px] border-[#dcdfe6] dark:bg-[#3a3b3c] dark:border-[#3e4042] py-2 px-5 rounded-md ml-3"
                     onClick={(e) => {
                       e.preventDefault(), handleAddNewSeason();
                     }}
@@ -736,14 +736,14 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                       isItemDataChanged[index]) && (
                                       <button
                                         type="button"
-                                        className="min-w-5 text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2 mr-2"
+                                        className="min-w-5 text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2 mr-2"
                                         onClick={() => handleReset(index)}
                                       >
                                         <GrPowerReset />
                                       </button>
                                     )}
                                     <button
-                                      className="min-w-5 text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2"
+                                      className="min-w-5 text-black dark:text-white bg-white dark:bg-[#3a3b3c] text-[#ffffffde] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-2"
                                       onClick={(e) => {
                                         e.preventDefault();
                                         handleOpenModal(index);
@@ -794,7 +794,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 </label>
                 <div>
                   <div className="ml-3 mt-2">
-                    <div className="border-2 border-white p-3">
+                    <div className="border-[1px] border-white p-3">
                       <ul className="flex items-center text-sm text-[#2196f3] dark:text-gray-200">
                         {weeklyCheckbox?.map((check: any, weekIdx: number) => {
                           return (
@@ -808,7 +808,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                       ? broadcast?.includes(check.value)
                                       : dayFromDB?.includes(check.value)
                                   }
-                                  className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
+                                  className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-[1px] border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                                   onClick={(e: any) => {
                                     if (dayFromDB?.includes(check?.value)) {
                                       markForDeletionBroadcast(weekIdx, e);
@@ -997,7 +997,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               ...storedData,
                             ]?.map((data: AddSeason, indx: number) => (
                               <button
-                                className={`text-sm border-2 py-2 px-5 rounded-md ml-3 ${
+                                className={`text-sm border-[1px] py-2 px-5 rounded-md ml-3 ${
                                   currentBtn.index === indx &&
                                   currentBtn.title === data?.title
                                     ? "text-white bg-[#2b9effcc] border-[#b3d8ff33]"
@@ -1024,14 +1024,14 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           </div>
 
                           {seasonLoading ? (
-                            <div className="text-center text-[#ffffffde] bg-white dark:bg-[#242526] border-2 border-white dark:border-[#3e4042] overflow-hidden transform transition-transform rounded-md mt-4 p-4">
+                            <div className="text-center text-[#ffffffde] bg-white dark:bg-[#242526] border-[1px] border-white dark:border-[#3e4042] overflow-hidden transform transition-transform rounded-md mt-4 p-4">
                               <ClipLoader
                                 loading={seasonLoading}
                                 color="#409effcc"
                               />
                             </div>
                           ) : (
-                            <div className="text-[#ffffffde] bg-white dark:bg-[#242526] border-2 border-[#06090c21] dark:border-[#3e4042] shadow-sm overflow-hidden transform transition-transform rounded-md mt-4">
+                            <div className="text-[#ffffffde] bg-white dark:bg-[#242526] border-[1px] border-[#06090c21] dark:border-[#3e4042] shadow-sm overflow-hidden transform transition-transform rounded-md mt-4">
                               <div className="p-5">
                                 {season?.episodes?.map(
                                   (ep: any, id: number) => (
@@ -1073,7 +1073,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           ))}
         <button
           type="submit"
-          className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-3 mt-5 ${
+          className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-3 mt-5 ${
             broadcast?.length > 0 ||
             timeValue?.length > 0 ||
             storedData?.length > 0 ||

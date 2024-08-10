@@ -47,14 +47,14 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   }, [pathname]);
 
   return (
-    <div className=" w-full h-[100%]">
+    <div className="w-full h-[100%]">
       <div className="w-full relative h-auto float-right bg-white dark:bg-[#242526] border-2 border-slate-200 dark:border-[#232426] shadow-sm rounded-b-md">
         <div className="px-3 mb-2">
           <h1 className="text-2xl font-semibold pt-3 mb-2">
             <Link href={`/tv/${tv?.id}`}>{tv?.title || tv?.name}</Link>
           </h1>
         </div>
-        <div className="relative float-left w-[25%] py-3 px-4">
+        <div className="relative float-left w-full md:w-[25%] py-3 px-4">
           <div className="bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#242527] rounded-sm px-4 py-2">
             <div className="flex items-center justify-between">
               <h1>Edit</h1>
@@ -77,16 +77,18 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   shallow
                   onClick={(e) => handleNavigation(e, item.link)}
                 >
-                  <span className="inline-block text-center mr-5">
+                  <span className="inline-block text-center mr-5 md:mr-3 lg:mr-5">
                     {item?.icon}
                   </span>
-                  <span className="text-center">{item?.label}</span>
+                  <span className="text-center md:text-sm lg:text-md">
+                    {item?.label}
+                  </span>
                 </Link>
               </li>
             ))}
           </ul>
         </div>
-        <div className="relative float-left w-[75%] -px-3">
+        <div className="relative float-left w-full md:w-[75%] -px-3">
           {currentPage === "/detail" ? (
             <TvDetails tv_id={tv_id} tvDetails={tvDetails} />
           ) : currentPage === "/cover" ? (

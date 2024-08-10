@@ -63,47 +63,49 @@ export default function Card({ result, BASE_URL }: any) {
   // Check if genreIds include 10764 and originCountries include "CN"
   const isChineseDrama =
     dramaType &&
-    originCountries.includes("CN") &&
+    originCountries[0] === "CN" &&
     episode &&
-    !genreIds?.includes(16);
+    !genreIds?.includes(16) &&
+    !genreIds?.includes(10764);
   const isKoreanDrama =
     dramaType &&
-    originCountries.includes("KR") &&
+    originCountries[0] === "KR" &&
     episode &&
-    !genreIds?.includes(16);
+    !genreIds?.includes(16) &&
+    !genreIds?.includes(10764);
   const isJapanDrama =
     dramaType &&
-    originCountries.includes("JP") &&
+    originCountries[0] === "JP" &&
     episode &&
-    !genreIds?.includes(16);
+    !genreIds?.includes(16) &&
+    !genreIds?.includes(10764);
   const isHKDrama =
     dramaType &&
-    originCountries.includes("HK") &&
+    originCountries[0] === "HK" &&
     episode &&
-    !genreIds?.includes(16);
+    !genreIds?.includes(16) &&
+    !genreIds?.includes(10764);
   const isTaiwanDrama =
     dramaType &&
-    originCountries.includes("TW") &&
+    originCountries[0] === "TW" &&
     episode &&
-    !genreIds?.includes(16);
+    !genreIds?.includes(16) &&
+    !genreIds?.includes(10764);
   const isThaiDrama =
     dramaType &&
-    originCountries.includes("TH") &&
+    originCountries[0] === "TH" &&
     episode &&
-    !genreIds?.includes(16);
-  const isChineseMovie =
-    movieType && originCountries.includes("CN") && !episode;
-  const isKoreanMovie = movieType && originCountries.includes("KR") && !episode;
-  const isJapanMovie = movieType && originCountries.includes("JP") && !episode;
-  const isHKMovie = movieType && originCountries.includes("HK") && !episode;
-  const isTaiwanMovie = movieType && originCountries.includes("TW") && !episode;
-  const isThaiMovie = movieType && originCountries.includes("TH") && !episode;
-  const isChineseShow =
-    genreIds.includes(10764) && originCountries.includes("CN");
-  const isKoreanShow =
-    genreIds.includes(10764) && originCountries.includes("KR");
-  const isJapanShow =
-    genreIds.includes(10764) && originCountries.includes("JP");
+    !genreIds?.includes(16) &&
+    !genreIds?.includes(10764);
+  const isChineseMovie = movieType && originCountries[0] === "CN" && !episode;
+  const isKoreanMovie = movieType && originCountries[0] === "KR" && !episode;
+  const isJapanMovie = movieType && originCountries[0] === "JP" && !episode;
+  const isHKMovie = movieType && originCountries[0] === "HK" && !episode;
+  const isTaiwanMovie = movieType && originCountries[0] === "TW" && !episode;
+  const isThaiMovie = movieType && originCountries[0] === "TH" && !episode;
+  const isChineseShow = genreIds.includes(10764) && originCountries[0] === "CN";
+  const isKoreanShow = genreIds.includes(10764) && originCountries[0] === "KR";
+  const isJapanShow = genreIds.includes(10764) && originCountries[0] === "JP";
 
   const constructedHref = `/${
     pathname === `/search/${path}` && !movieType && result?.media_type
@@ -114,7 +116,7 @@ export default function Card({ result, BASE_URL }: any) {
   if (isError) {
     console.log("Failed to fetch");
   }
-
+  console.log(result);
   return (
     <div className="p-5 relative box-border h-[90%]">
       <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
@@ -151,19 +153,19 @@ export default function Card({ result, BASE_URL }: any) {
         <div className="flex items-center justify-between">
           <Link
             href={constructedHref}
-            className="text-xl text-sky-700 dark:text-[#2196f3] font-bold truncate"
+            className="text-md text-sky-700 dark:text-[#2196f3] font-bold truncate"
           >
             {result?.title || result?.name}
           </Link>
           {/* <p>#{idx + 1}</p> */}
         </div>
-        <p className="flex flex-wrap items-center py-1 opacity-70">
+        <p className="flex flex-wrap items-center text-sm opacity-70 py-1">
           {isChineseShow && "Chinese Tv Show"}
           {isKoreanShow && "Korean Tv Show"}
-          {isJapanShow && "Japan Tv Show"}
+          {isJapanShow && "Japanese Tv Show"}
           {isChineseDrama && "Chinese Drama"}
           {isKoreanDrama && "Korean Drama"}
-          {isJapanDrama && "Japan Drama"}
+          {isJapanDrama && "Japanese Drama"}
           {isHKDrama && "Hongkong Drama"}
           {isTaiwanDrama && "Taiwanese Drama"}
           {isThaiDrama && "Thai Drama"}
@@ -178,11 +180,31 @@ export default function Card({ result, BASE_URL }: any) {
           {type === "tv" && !country ? "Drama" : ""}
           {type === "tvShows" && !country ? "Tv Show" : ""}
           {country === "CN" && episode && !type ? "Chinese Drama" : ""}
-          {country === "KR" && !genreIds.includes(16) ? "Korean Drama" : ""}
-          {country === "JP" && !genreIds.includes(16) ? "Japanese Drama" : ""}
-          {country === "HK" && !genreIds.includes(16) ? "Hongkong Drama" : ""}
-          {country === "TW" && !genreIds.includes(16) ? "Taiwanese Drama" : ""}
-          {country === "TH" && !genreIds.includes(16) ? "Thai Drama" : ""}
+          {country === "KR" &&
+          !genreIds.includes(16) &&
+          !genreIds.includes(10764)
+            ? "Korean Drama"
+            : ""}
+          {country === "JP" &&
+          !genreIds.includes(16) &&
+          !genreIds.includes(10764)
+            ? "Japanese Drama"
+            : ""}
+          {country === "HK" &&
+          !genreIds.includes(16) &&
+          !genreIds.includes(10764)
+            ? "Hongkong Drama"
+            : ""}
+          {country === "TW" &&
+          !genreIds.includes(16) &&
+          !genreIds.includes(10764)
+            ? "Taiwanese Drama"
+            : ""}
+          {country === "TH" &&
+          !genreIds.includes(16) &&
+          !genreIds.includes(10764)
+            ? "Thai Drama"
+            : ""}
           {type === "movie" && country === "CN" ? "Chinese Movie" : ""}
           {type === "movie" && country === "JP" ? "Japanese Movie" : ""}
           {type === "movie" && country === "KR" ? "Korean Movie" : ""}
@@ -222,35 +244,35 @@ export default function Card({ result, BASE_URL }: any) {
             ? "Movie"
             : ""}
           {pathname === "/search/tv" &&
-          originCountries.includes("CN") &&
+          originCountries[0] === "CN" &&
           !genreIds?.includes(10764) &&
           !genreIds?.includes(16) &&
           !genreIds?.includes(10764)
             ? "Chinese Drama"
             : ""}
           {pathname === "/search/tv" &&
-          originCountries.includes("JP") &&
+          originCountries[0] === "JP" &&
           !genreIds?.includes(10764) &&
           !genreIds?.includes(16) &&
           !genreIds?.includes(10767)
             ? "Japanese Drama"
             : ""}
           {pathname === "/search/tv" &&
-          originCountries.includes("KR") &&
+          originCountries[0] === "KR" &&
           !genreIds?.includes(10764) &&
           !genreIds?.includes(16) &&
           !genreIds?.includes(10767)
             ? "Korean Drama"
             : ""}
           {pathname === "/search/tv" &&
-          originCountries.includes("TW") &&
+          originCountries[0] === "TW" &&
           !genreIds?.includes(10764) &&
           !genreIds?.includes(16) &&
           !genreIds?.includes(10767)
             ? "Taiwan Drama"
             : ""}
           {pathname === "/search/tv" &&
-          originCountries.includes("HK") &&
+          originCountries[0] === "HK" &&
           !genreIds?.includes(10764) &&
           !genreIds?.includes(16) &&
           !genreIds?.includes(10767)
@@ -259,21 +281,18 @@ export default function Card({ result, BASE_URL }: any) {
           {genreIds.includes(16) && "Anime"}
           <span
             className={`px-2 opacity-70 ${
-              result?.release_date === "" ? "hidden" : "block"
+              result?.first_air_date === "" || result?.release_date === ""
+                ? "hidden"
+                : "block"
             }`}
           >
             -
           </span>
           <span className="font-semibold truncate opacity-70">
-            {result?.first_air_date === "" ? (
+            {result?.first_air_date === "" || result?.release_date === "" ? (
               <span className="pl-2">- TBA</span>
             ) : (
-              result?.first_air_date
-            )}
-            {result?.release_date === "" ? (
-              <span className="pl-2">- TBA</span>
-            ) : (
-              result?.release_date
+              result?.first_air_date || result?.release_date
             )}
             <span className={`${!episode?.number_of_episodes && "hidden"}`}>
               ,
@@ -314,11 +333,11 @@ export default function Card({ result, BASE_URL }: any) {
         </div>
 
         {result?.overview === "" ? (
-          <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
+          <p className="text-sm font-semibold line-clamp-3 truncate whitespace-normal my-2">
             {result?.title || result?.name} does not have overview yet!
           </p>
         ) : (
-          <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
+          <p className="text-sm font-semibold line-clamp-3 truncate whitespace-normal my-2">
             {result?.overview}
           </p>
         )}

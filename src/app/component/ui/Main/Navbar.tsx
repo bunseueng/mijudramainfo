@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -77,7 +77,9 @@ const Navbar: React.FC<Notification> = ({
     } else {
       setNavSearch(value);
     }
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
 
     if (value) {
       params.set("query", value);
@@ -89,41 +91,46 @@ const Navbar: React.FC<Notification> = ({
 
   const onSearch = (e: any) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
     router.push(`/search/?${params.toString()}`);
     setShowResults(false); // Hide search results when submitting
     setShowSearch(!showSearch);
   };
 
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
   const handleNavbarMouseEnter = (label: string) => {
     if (label === "Explore") {
-      setNavbarItemsHovered(true); // Set navbarItemsHovered to true when entering navbar_items
-      setHovered(true); // Set hovered to true when entering navbar_items
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+      setNavbarItemsHovered(true);
+      setHovered(true);
     }
   };
 
-  const handleNavbarMouseLeave = (id: number) => {
-    setNavbarItemsHovered(false); // Hide subitems when leaving navbar_items
-    setHovered(false); // Set hovered to false when leaving navbar_items
+  const handleNavbarMouseLeave = (idx: number) => {
+    hoverTimeout.current = setTimeout(() => {
+      setNavbarItemsHovered(false);
+      setHovered(false);
+    }, 200);
   };
 
   const handleSubitemsMouseEnter = () => {
-    if (navbarItemsHovered) {
-      setHovered(true);
-    } else {
-      setHovered(false);
-    }
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    setHovered(true);
   };
 
   const handleSubitemsMouseLeave = () => {
-    setHovered(false); // Set hovered to false when leaving subitems
+    hoverTimeout.current = setTimeout(() => {
+      setHovered(false);
+    }, 200);
   };
 
   useEffect(() => {
     return () => {
-      // Reset the states when component unmounts (page changes)
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
       setHovered(false);
-
       setNavbarItemsHovered(false);
     };
   }, []);
@@ -230,8 +237,8 @@ const Navbar: React.FC<Notification> = ({
 
   return (
     <nav className="bg-gradient-to-r from-sky-900 to-blue-800">
-      <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-3 px-4 md:px-6">
-        <div className="flex items-center">
+      <div className="max-w-[1520px] relative flex flex-wrap items-center justify-between mx-auto px-4 md:px-6">
+        <div className="flex items-center relative py-1">
           <Link
             className="no-underline hover:no-underline font-bold text-2xl lg:text-4xl flex items-center"
             href="/"
@@ -255,7 +262,7 @@ const Navbar: React.FC<Notification> = ({
                 placeholder="Search..."
               />
             </div>
-            <ul className="hidden lg:flex flex-col mt-4 font-medium border border-gray-100 rounded-b-md lg:flex-row lg:mt-0 lg:border-0 dark:border-gray-700">
+            <ul className="hidden lg:flex flex-col relative mt-4 font-medium border border-gray-100 rounded-b-md lg:flex-row lg:mt-0 lg:border-0 dark:border-gray-700">
               {navbar_items?.map((item, idx) => (
                 <li
                   key={idx}
@@ -329,14 +336,14 @@ const Navbar: React.FC<Notification> = ({
             y: hovered ? 0 : 15,
           }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className={`absolute top-2 left-[235px] w-[600px] h-[280px] bg-gray-100 dark:bg-[#272727] flex mt-[45px] mx-3 ${
+          className={`absolute top-[14px] left-[235px] w-[600px] h-[280px] bg-gray-100 dark:bg-[#18191a] flex mt-[45px] rounded-md mx-3 ${
             hovered ? "block" : "hidden"
           }`}
           onMouseEnter={handleSubitemsMouseEnter}
           onMouseLeave={handleSubitemsMouseLeave}
         >
-          <ul className="p-2 border-r border-r-slate-400 bg-white dark:bg-[#595959]">
-            <span className="text-md md:text-lg text-slate-400 font-bold my-1 px-2 xl:px-3">
+          <ul className="p-2 border-r border-r-slate-400 bg-white dark:bg-[#242526]">
+            <span className="text-md text-[#818a91] my-1 px-2 xl:px-3">
               Tv Shows
             </span>
             {tv_subitems?.map((items: any, idx: number) => (
@@ -345,15 +352,13 @@ const Navbar: React.FC<Notification> = ({
                   href={items?.link}
                   className="block py-2 px-2 xl:px-3 text-sm xl:text-md text-black dark:text-white font-semibold rounded lg:bg-transparent cursor-pointer hover:bg-slate-200 transform duration-300"
                 >
-                  <span className="text-[16px] cursor-pointer">
-                    {items?.label}
-                  </span>
+                  <span className="text-xs cursor-pointer">{items?.label}</span>
                 </Link>
               </li>
             ))}
           </ul>
           <ul className="py-2 px-5">
-            <span className="text-md md:text-lg text-slate-400 font-bold my-1 px-2 xl:px-3">
+            <span className="text-md text-[#818a91] my-1 px-2 xl:px-3">
               Movies
             </span>
             {movie_subitems?.map((items: any, idx: number) => (
@@ -362,15 +367,13 @@ const Navbar: React.FC<Notification> = ({
                   href={items?.link}
                   className="block py-2 px-2 xl:px-3 text-sm xl:text-md text-black dark:text-white font-semibold rounded lg:bg-transparent cursor-pointer hover:bg-slate-200 transform duration-300"
                 >
-                  <span className="text-[16px] cursor-pointer">
-                    {items?.label}
-                  </span>
+                  <span className="text-xs cursor-pointer">{items?.label}</span>
                 </Link>
               </li>
             ))}
           </ul>
           <ul className="py-2 px-5">
-            <span className="text-md md:text-lg text-slate-400 font-bold my-1 px-2 xl:px-3">
+            <span className="text-md text-[#818a91] my-1 px-2 xl:px-3">
               People
             </span>
             {people_subitems?.map((items: any, idx: number) => (
@@ -379,9 +382,7 @@ const Navbar: React.FC<Notification> = ({
                   href={items?.link}
                   className="block py-2 px-2 xl:px-3 text-sm xl:text-md text-black dark:text-white font-semibold rounded lg:bg-transparent cursor-pointer hover:bg-slate-200 transform duration-300"
                 >
-                  <span className="text-[16px] cursor-pointer">
-                    {items?.label}
-                  </span>
+                  <span className="text-xs cursor-pointer">{items?.label}</span>
                 </Link>
               </li>
             ))}
@@ -463,7 +464,7 @@ const Navbar: React.FC<Notification> = ({
             <IoMdClose className="text-lg md:text-2xl" />
           </button>
           <button onClick={handleNavClick} className="mx-1 md:mx-2 lg:hidden">
-            <IoMenu className="text-lg md:text-2xl mr-2" />
+            <IoMenu className="text-white text-lg md:text-2xl mr-2" />
           </button>
           {!session && (
             <div className="relative">
@@ -491,7 +492,7 @@ const Navbar: React.FC<Notification> = ({
                     quality={100}
                     className="w-[35px] h-[35px] bg-cover bg-center object-cover rounded-full"
                   />
-                  <IoMdArrowDropdown />
+                  <IoMdArrowDropdown className="text-white" />
                 </div>
                 {sessionDrop && (
                   <AnimatePresence>

@@ -54,6 +54,7 @@ model User {
   biography                String?
   coverPhoto               String?
   profileAvatar            String?
+  coin                     Int         @default(0)
   signature                String?     @unique
   token                    String?     @unique
   role                     UserRole    @default(USER)
@@ -61,6 +62,7 @@ model User {
   createdAt                DateTime    @default(now())
   updatedAt                DateTime    @updatedAt
   lastLogin                DateTime?
+  popularitySent           Json[]
   followers                String[]
   following                String[]
   friends                  Friend[]    @relation("UserFriends")
@@ -137,10 +139,13 @@ model Movie {
 }
 
 model Person {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  personId String   @unique
-  love     Int?
-  lovedBy  String[]
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  personId   String   @unique
+  name       String?
+  love       Int?
+  lovedBy    String[]
+  popularity Json[]
+  sentBy     Json[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -209,6 +214,26 @@ model Rating {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Customers {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  email              String    @unique
+  orderId            String?   @unique
+  paymentMethod      String?
+  subscriptionCancel DateTime?
+}
+
+model CheckoutSession {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String?   @unique
+  orderId       String?   @unique
+  email         String?   @unique
+  orderPaypal   Json?
+  order         Json
+  isPaid        Boolean   @default(false)
+  paidAt        DateTime?
+  paymentResult Json?
 }
 
 enum UserRole {
