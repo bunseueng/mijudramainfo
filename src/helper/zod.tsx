@@ -208,3 +208,57 @@ export const coin = z.object({
 });
 
 export type TCoin = z.infer<typeof externalLink>;
+
+export const CreatePersonDetails = z.object({
+  userId: z.string().optional(),
+  tv_id: z.any(),
+  details: z
+    .object({
+      stage_name: z.string().optional(),
+      first_name: z.string().optional(),
+      last_name: z.string().optional(),
+      native_name: z.string().optional(),
+      nationality: z.string().optional(),
+      gender: z.string().optional(),
+      also_known_as: z.string().optional(),
+      biography: z.string().optional(),
+      birthday: z.string().optional(),
+      date_of_death: z.string().optional(),
+    })
+    .optional(),
+  cover: z.string().optional(),
+  cast: z
+    .array(
+      z.object({
+        person: z.any(),
+        cast_role: z.string().optional(),
+        character: z.string().optional(),
+      })
+    )
+    .optional(),
+  crew: z
+    .array(
+      z.object({
+        person: z.any(),
+        job: z.string().optional(),
+      })
+    )
+    .optional(),
+  external_links: z
+    .object({
+      facebook: z.string().optional(),
+      instagram: z.string().optional(),
+      tiktok: z.string().optional(),
+      douyin: z.string().optional(),
+      twitter: z.string().optional(),
+      weibo: z.string().optional(),
+      youtube: z.string().optional(),
+      IMDB: z.string().optional(),
+      wikidata: z.string().optional(),
+      trakt: z.string().optional(),
+      mdl: z.string().optional(),
+    })
+    .optional(),
+});
+
+export type TCreatePersonDetails = z.infer<typeof CreatePersonDetails>;

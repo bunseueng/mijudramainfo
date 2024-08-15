@@ -42,7 +42,7 @@ const CommentCard = ({
               width={200}
               height={200}
               quality={100}
-              className="w-[48px] h-[48px] border-2 border-[#7a7c7e] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
+              className="w-[48px] h-[48px] border-[1px] border-[#7a7c7e] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
             />
           </Link>
         </div>
@@ -130,7 +130,7 @@ const CommentCard = ({
                       id="reply"
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      className="w-full min-h-[32.6px] h-[32.6px] max-h-[400px] bg-[#3a3b3c] border-2 border-[#46494a] text-[#ffffffcc] focus:border-blue-500 focus:ring-blue-500 focus:transform focus:duration-300 outline-none overflow-hidden rounded-sm py-1 px-4"
+                      className="w-full min-h-[32.6px] h-[32.6px] max-h-[400px] bg-[#3a3b3c] border-[1px] border-[#46494a] text-[#ffffffcc] focus:border-blue-500 focus:ring-blue-500 focus:transform focus:duration-300 outline-none overflow-hidden rounded-sm py-1 px-4"
                       placeholder="Post a comment..."
                     ></textarea>
                   </div>
@@ -144,7 +144,7 @@ const CommentCard = ({
                   </label>
                   <button
                     onClick={() => handlePostComment(comment.id)}
-                    className="inline-block text-center text-sm text-[#ffffffde] bg-[#3a3b3c] hover:bg-opacity-75 border-2 border-[#3e4042] shadow-md rounded-md whitespace-nowrap cursor-pointer ml-2 py-3 px-5 outline-none"
+                    className="inline-block text-center text-sm text-[#ffffffde] bg-[#3a3b3c] hover:bg-opacity-75 border-[1px] border-[#3e4042] shadow-md rounded-md whitespace-nowrap cursor-pointer ml-2 py-3 px-5 outline-none"
                   >
                     <span className="flex items-center">
                       <ClipLoader
@@ -169,7 +169,7 @@ const CommentCard = ({
         </div>
       </div>
       {showActions && (
-        <div className="min-w-[160px] absolute right-auto left-10 top-24 float-right text-start text-[#ffffffcc] bg-[#242526] border-2 border-[#3e4042] z-[9999]">
+        <div className="min-w-[160px] absolute right-auto left-10 top-24 float-right text-start text-[#ffffffcc] bg-[#242526] border-[1px] border-[#3e4042] z-[9999]">
           <button className="block w-full bg-transparent text-left clear-both py-1 px-5">
             Edit
           </button>

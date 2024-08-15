@@ -20,8 +20,8 @@ const nunito = Nunito({
 
 export const metadata: Metadata = {
   title: {
-    default: "MijuDramaList",
-    template: "%s - MijuDramaList",
+    default: "MijuDramaInfo (MDI)",
+    template: "%s - MijuDramaInfo (MDI)",
   },
   description: "Best website to find your favorite movie/drama/actor",
   icons: {
@@ -59,7 +59,7 @@ export default function RootLayout({
                   <SessionAllPage />
                 </div>
                 <div className="flex-grow h-auto">{children}</div>
-                <div className="flex flex-col relative w-full">
+                <div className="flex flex-col items-end justify-end relative w-full h-auto">
                   <Footer />
                 </div>
                 <ToastContainer position="top-right" />

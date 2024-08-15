@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import CoinModal from "@/app/component/ui/Modal/CoinModal";
-import { currentUserProps } from "@/helper/type";
 
 interface UserI {
   getCoin: any;

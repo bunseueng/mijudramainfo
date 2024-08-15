@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 interface PopularityItem {
   itemId: string;
   starCount: number;
+  actorName: string
 }
 
 // Type guard to check if an object is a valid PopularityItem
@@ -68,16 +69,16 @@ export async function PUT(
         }
       }
 
+      // Ensure unique sentBy IDs
+      const uniqueSentBy = Array.from(new Set([...findPerson.sentBy, currentUser.id]));
+
       updatingPopularity = await prisma.person.update({
         where: {
           personId: params.id,
         },
         data: {
           popularity: updatedPopularity as any,
-          // Keep existing sentBy and add the new ID
-          sentBy: {
-            push: currentUser?.id,
-          },
+          sentBy: uniqueSentBy as any,  // Cast to avoid type error
         },
       });
     } else {
@@ -85,7 +86,7 @@ export async function PUT(
         data: {
           personId: params.id,
           popularity,
-          sentBy: [currentUser?.id]
+          sentBy: [currentUser?.id],
         },
       });
     }
@@ -99,39 +100,63 @@ export async function PUT(
           coin: { decrement: calculateTotalCoins },
         },
       });
-
       const existingUserPopularitySent: any[] = currentUser.popularitySent || [];
-
-      // Check if there's already an entry for this person
-      const personIndex = existingUserPopularitySent.findIndex((popArray) =>
-        popArray.some((popItem: PopularityItem) => popItem.itemId === params.id)
-      );
-
-      if (personIndex !== -1) {
-        // Update the existing person's popularity array
-        for (const newPop of popularity) {
-          const existingPopIndex = existingUserPopularitySent[personIndex].findIndex(
-            (pop: PopularityItem) => pop.itemId === newPop.itemId
-          );
-          if (existingPopIndex !== -1) {
-            // Update the existing item
-            existingUserPopularitySent[personIndex][existingPopIndex].starCount += newPop.starCount;
-          } else {
-            // Add the new item
-            existingUserPopularitySent[personIndex].push(newPop);
+      // Merge existing and new popularity arrays
+      const actorMap = new Map<string, PopularityItem[]>();
+      // Populate actorMap with existing data
+      for (const popArray of existingUserPopularitySent) {
+        for (const item of popArray) {
+          const { actorName } = item;
+          if (!actorMap.has(actorName)) {
+            actorMap.set(actorName, []);
           }
+          actorMap.get(actorName)!.push(item);
         }
-      } else {
-        // Add a new array for the new person
-        existingUserPopularitySent.push(popularity);
       }
+
+      // Add/update new data
+      for (const newPop of popularity) {
+        const { actorName } = newPop;
+        if (!actorMap.has(actorName)) {
+          actorMap.set(actorName, []);
+        }
+        const existingArray = actorMap.get(actorName)!;
+        const existingPopIndex = existingArray.findIndex(
+          (pop: PopularityItem) => pop.itemId === newPop.itemId
+        );
+        if (existingPopIndex !== -1) {
+          // Update the existing item
+          existingArray[existingPopIndex].starCount += newPop.starCount;
+        } else {
+          // Add the new item
+          existingArray.push(newPop);
+        }
+      }
+
+      // Convert actorMap to the desired structure
+      const updatedPopularitySent = Array.from(actorMap.values());
+      // Calculate total starCount for each actor and prepare the totalPopularitySent array
+      const updatedTotalPopularitySent = Array.from(actorMap.entries()).map(
+        ([actorName, popularityItems]) => {
+          const totalStarCount = popularityItems.reduce((total, item) => {
+            return total + item.starCount;
+          }, 0);
+
+          return {
+            personId: params.id,
+            actorName,
+            totalPopularity: totalStarCount,
+          };
+        }
+      );
 
       await prisma.user.update({
         where: {
           id: currentUser?.id,
         },
         data: {
-          popularitySent: existingUserPopularitySent as any,
+          popularitySent: updatedPopularitySent as any,
+          totalPopularitySent: updatedTotalPopularitySent
         },
       });
     }
@@ -146,12 +171,25 @@ export async function PUT(
   }
 }
 
-
 let currentIndex = 0;
 export async function GET() {
   try {
-    // Fetch all people from the database
+    // Fetch all people from the database who have non-empty popularity and sentBy arrays
     const people = await prisma.person.findMany({
+      where: {
+        AND: [
+          {
+            popularity: {
+              isEmpty: false, // Ensure the popularity array is not empty
+            },
+          },
+          {
+            sentBy: {
+              isEmpty: false, // Ensure the sentBy array is not empty
+            },
+          },
+        ],
+      },
       orderBy: { id: 'asc' }, // Ensure ordering
     });
 
@@ -172,3 +210,4 @@ export async function GET() {
     return NextResponse.json({ message: 'Error fetching next item' }, { status: 500 });
   }
 }
+

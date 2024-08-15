@@ -50,7 +50,13 @@ const TrendingDrama = ({ heading }: any) => {
                 </Link>
                 <div className="flex items-center justify-between">
                   <p className="truncate">{result?.name || result?.title}</p>
-                  <p>{Math.round(result?.vote_average * 10)}%</p>
+                  <p>
+                    {result?.first_air_date !== "" ? (
+                      result?.first_air_date?.split("-")[0]
+                    ) : (
+                      <span className="text-[#2490da]">Upcoming</span>
+                    )}
+                  </p>
                 </div>
               </div>
             </div>

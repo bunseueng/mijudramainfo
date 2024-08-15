@@ -542,6 +542,28 @@ export const fetchPerson = async (tv_id: any) => {
   }
 }
 
+export const fetchPersonCombinedCredits = async (tv_id: any) => {
+  try {
+    const url = `https://api.themoviedb.org/3/person/${tv_id}/combined_credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&with_original_language=zh&region=CN`
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.log("Failed to fetch", error)
+    return null
+  }
+}
+
 export const fetchPersonTv = async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/person/${tv_id}/tv_credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
@@ -574,6 +596,28 @@ export const fetchPersonMovie = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
+}
+
+export const fetchPersonExternalID = async (tv_id: any) => {
+  try {
+    const url = `https://api.themoviedb.org/3/person/${tv_id}/external_ids?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.log("Failed to fetch", error)
+    return null
+  }
 }
 
 export const fetchYtThumbnail = async (key: any, api: any) => {

@@ -79,7 +79,10 @@ const ProfileSetting = ({ user }: any) => {
     }
   };
   return (
-    <div className="max-w-[1520px] flex flex-wrap justify-between mx-auto py-3 px-4 md:px-6">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="max-w-[1520px] flex flex-wrap justify-between mx-auto py-3 px-4 md:px-6"
+    >
       <div className="w-full h-auto bg-[#fff] dark:bg-[#242526] border-2 border-[#00000024] dark:border-[#272727] rounded-md">
         <h1 className="text-2xl text-black dark:text-white p-5 border-b-2 border-b-[#78828c21] dark:border-b-[#272727]">
           Settings
@@ -229,9 +232,6 @@ const ProfileSetting = ({ user }: any) => {
         <div className="border-t-2 border-t-[#78828c21] dark:border-t-[#272727] p-4">
           <button
             type="submit"
-            onClick={() => {
-              setLoading(!loading), handleSubmit(onSubmit);
-            }}
             className="text-white border-2 border-[#409eff] bg-[#409eff] rounded-md py-2 px-4 flex items-center"
           >
             <ClipLoader color="#272727" size={25} loading={loading} />
@@ -239,7 +239,7 @@ const ProfileSetting = ({ user }: any) => {
           </button>
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 

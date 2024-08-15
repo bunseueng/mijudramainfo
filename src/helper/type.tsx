@@ -67,6 +67,13 @@ export interface UserProps {
   biography: string | null;
   coverPhoto: string | null;
   profileAvatar: string | null;
+  coin: number;
+  popularitySent:
+    | Array<Array<{ itemId: string; starCount: number; actorName: string }>>
+    | any;
+  totalPopularitySent:
+    | Array<{ personId: string; actorName: string; totalPopularity: number }>
+    | any;
   followers: string[];
   following: string[];
   lastLogin: Date | null;
@@ -453,4 +460,52 @@ export interface PersonType {
   popularity: number;
   profile_path: string | null;
   poster_path: string | null;
+}
+
+export type PersonPopularity = {
+  itemId: string;
+  starCount: number;
+  actorName: string;
+};
+export interface PersonDBType {
+  id: string;
+  personId: string;
+  name: string | null;
+  love: number | null;
+  lovedBy: Prisma.JsonValue[];
+  popularity: PersonPopularity | any;
+  sentBy: Prisma.JsonValue[];
+  details: Prisma.JsonValue[];
+  cover: string | null;
+  cast: Prisma.JsonValue[];
+  crew: Prisma.JsonValue[];
+  external_links: Prisma.JsonValue[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PersonDetail {
+  nationality: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  native_name: string | null;
+  gender: string | null;
+  also_known_as: string | null;
+  biography: string | null;
+  birthday: string | null;
+  deathday: string | null;
+}
+
+export interface PersonExternalID {
+  facebook_id: string | null;
+  instagram_id: string | null;
+  tiktok_id: string | null;
+  douyin_id: string | null;
+  twitter_id: string | null;
+  weibo_id: string | null;
+  youtube_id: string | null;
+  imdb_id: string | null;
+  wikidata_id: string | null;
+  trakt_id: string | null;
+  mdl_id: string | null;
 }

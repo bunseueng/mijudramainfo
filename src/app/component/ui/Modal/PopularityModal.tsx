@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 interface PopularityType {
   persons: PersonType;
   setOpenModal: (open: boolean) => void;
-  currentUser: currentUserProps;
+  currentUser: currentUserProps | any;
   tv_id: number;
 }
 
@@ -189,10 +189,10 @@ const PopularityModal: React.FC<PopularityType> = ({
                 className="w-20 h-20 rounded-full bg-center bg-cover object-cover"
               />
             </div>
-            <h1 className="text-[#000000de] text-center text-lg font-semibold mb-2">
+            <h1 className="text-[#000000de] dark:text-white text-center text-lg font-semibold mb-2">
               Send Virtual Popularity to Support
             </h1>
-            <h2 className="text-center text-xl text-black font-bold">
+            <h2 className="text-center text-xl text-black dark:text-white font-bold">
               Person Name
             </h2>
             {personPopularity.map((item, outerIdx) => (
@@ -269,13 +269,19 @@ const PopularityModal: React.FC<PopularityType> = ({
               <h4>
                 Cost:
                 <span className="inline-block align-middle px-2">
-                  <FaBitcoin className="text-[#ffbf00]" size={23} />
+                  <Image
+                    src="/yuan.png"
+                    alt="coin image"
+                    width={100}
+                    height={100}
+                    className="w-5 h-5 bg-cover object-cover"
+                  />
                 </span>
-                <span>{calculateTotalCoins}</span>
+                <span className="align-middle">{calculateTotalCoins}</span>
               </h4>
             </div>
             <div className="flex flex-col items-center">
-              <p className="text-[#00000099] text-center text-sm py-3">
+              <p className="text-[#00000099] dark:text-white text-center text-sm py-3">
                 You need to obtain more coins in order to send 10 flowers.
               </p>
               <button
@@ -306,10 +312,12 @@ const PopularityModal: React.FC<PopularityType> = ({
               >
                 What are Coins?
               </Link>
-              <p className="text-[#000000de] text-sm font-semibold">Sent:</p>
-              <div className="flex items-center text-[#000000de] text-sm font-semibold">
+              <p className="text-[#000000de] dark:text-white text-sm font-semibold">
+                Sent:
+              </p>
+              <div className="flex items-center text-[#000000de] dark:text-white text-sm font-semibold">
                 Balance:
-                <span className="text-[#000000de] text-sm font-semibold pl-1">
+                <span className="text-[#000000de] dark:text-white text-sm font-semibold pl-1">
                   {currentUser?.coin || 0}
                 </span>
                 <Image
@@ -317,7 +325,7 @@ const PopularityModal: React.FC<PopularityType> = ({
                   alt="Coin Image"
                   width={100}
                   height={100}
-                  className="w-5 h-5"
+                  className="w-5 h-5 ml-1"
                 />
               </div>
             </div>

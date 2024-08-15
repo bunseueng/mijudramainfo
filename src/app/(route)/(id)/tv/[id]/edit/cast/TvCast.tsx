@@ -363,18 +363,18 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <thead>
             <tr>
               <th
-                className="w-[235px] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
+                className="w-[235px] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-[1px] border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
                 colSpan={2}
               >
                 Person
               </th>
-              <th className="w-[235px] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4">
+              <th className="w-[235px] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-[1px] border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4">
                 Role
               </th>
-              <th className="w-[235px] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4">
+              <th className="w-[235px] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-[1px] border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4">
                 Character
               </th>
-              <th className="w-[112px] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"></th>
+              <th className="w-[112px] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-[1px] border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"></th>
             </tr>
           </thead>
           <Reorder.Group
@@ -405,7 +405,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     className="relative w-full"
                     style={{ display: "table-row" }}
                   >
-                    <td className="w-3 border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-2 py-3">
+                    <td className="w-3 border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-2 py-3">
                       {!markedForDeletion[ind] && (
                         <span
                           className={`pr-3 inline-block ${
@@ -416,7 +416,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         </span>
                       )}
                     </td>
-                    <td className="border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top pr-2 py-3">
+                    <td className="border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] align-top pr-2 py-3">
                       <div className="flex items-start w-full">
                         <div className="flex-1">
                           <div className="float-left pr-4">
@@ -455,7 +455,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         </div>
                       </div>
                     </td>
-                    <td className="text-left border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
+                    <td className="text-left border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
                       <div className="relative">
                         <div className="relative">
                           <input
@@ -463,7 +463,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             name="cast_role"
                             readOnly
                             autoComplete="off"
-                            className="w-full text-[#606266] dark:text-white placeholder:text-black dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
+                            className="w-full text-[#606266] dark:text-white placeholder:text-black dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
                             placeholder={
                               cast?.cast_role?.length > 0
                                 ? castRoles[ind] || cast?.cast_role
@@ -488,7 +488,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               initial={{ opacity: 0, y: -10 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -10 }}
-                              className="w-full h-[250px] absolute bg-white dark:bg-[#242424] border-2 border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll"
+                              className="w-full h-[250px] absolute bg-white dark:bg-[#242424] border-[1px] border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll"
                             >
                               {castRole?.map((items, index) => {
                                 const isContentRating = cast?.cast_role
@@ -519,7 +519,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         )}
                       </div>
                     </td>
-                    <td className="text-left border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
+                    <td className="text-left border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
                       <div className="relative">
                         <div className="relative">
                           <input
@@ -536,12 +536,12 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               cast?.roles?.map((role: any) => role?.character)
                             }
                             onDragStart={(e) => e.stopPropagation()}
-                            className="w-full text-[#606266] dark:text-white placeholder:text-black dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-2 border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
+                            className="w-full text-[#606266] dark:text-white placeholder:text-black dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
                           />
                         </div>
                       </div>
                     </td>
-                    <td className="text-right border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-4 py-3">
+                    <td className="text-right border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-4 py-3">
                       <div className="relative">
                         <div className="relative">
                           {markedForDeletion[ind] ||
@@ -549,7 +549,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           isChanged ? (
                             <button
                               type="button"
-                              className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-2 border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3 mt-1"
+                              className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3 mt-1"
                               onClick={(e) => {
                                 e.preventDefault(); // Prevent form submission
                                 handleResetChanges(ind);
@@ -559,7 +559,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             </button>
                           ) : (
                             <button
-                              className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-2 border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3 mt-1"
+                              className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3 mt-1"
                               onClick={(e) => {
                                 setOpen(!open), e.preventDefault();
                                 setDeleteIndex(ind); // Set the index of the item to show delete button
@@ -597,8 +597,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <div className="block relative">
             <div className="relative w-full inline-block">
               <input
-                type="text"
-                className="w-full h-10 leading-10 placeholder:text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] hover:border-[#c0c4cc] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 px-4"
+                className="w-full h-10 leading-10 placeholder:text-sm text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#46494a] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 px-4"
                 placeholder="Search to add a cast member"
                 ref={inputRef}
                 onChange={onInput}
@@ -614,7 +613,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                     ref={searchResultRef}
-                    className={`w-full h-[300px] absolute bg-white dark:bg-[#242526] border-2 border-[#f3f3f3f3] dark:border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
+                    className={`w-full h-[300px] absolute bg-white dark:bg-[#242526] border-[1px] border-[#f3f3f3f3] dark:border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
                       openSearch === false ? "block" : "hidden"
                     }`}
                   >
@@ -679,7 +678,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       </div>
       <button
         onClick={handleSubmit(onSubmit)}
-        className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+        className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
           tvIds?.length > 0 ||
           castRoles?.some((role) => role !== undefined) ||
           character?.some((role) => role !== undefined) ||

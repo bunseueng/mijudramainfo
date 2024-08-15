@@ -63,6 +63,7 @@ model User {
   updatedAt                DateTime    @updatedAt
   lastLogin                DateTime?
   popularitySent           Json[]
+  totalPopularitySent      Json[]
   followers                String[]
   following                String[]
   friends                  Friend[]    @relation("UserFriends")
@@ -139,13 +140,22 @@ model Movie {
 }
 
 model Person {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  personId   String   @unique
-  name       String?
-  love       Int?
-  lovedBy    String[]
-  popularity Json[]
-  sentBy     Json[]
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  personId       String   @unique
+  userID         String?
+  name           String?
+  love           Int?
+  lovedBy        String[]
+  popularity     Json[]
+  sentBy         Json[]
+  public_id      String?
+  cover          String?
+  details        Json[]
+  cast           Json[]
+  crew           Json[]
+  external_links Json[]
+  changes        Json[]   @default([])
+  changeCount    Int      @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

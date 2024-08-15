@@ -44,6 +44,7 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const onSubmit = async (data: TCreateDetails) => {
     try {
+      setLoading(true);
       const res = await fetch(`/api/tv/${tv?.id}/cover`, {
         method: "POST",
         headers: {
@@ -66,6 +67,8 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     } catch (error: any) {
       console.log("Bad Request");
       throw new Error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,6 +124,9 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             }`}
             disabled={cover ? false : true}
           >
+            <span className="mr-1 pt-1">
+              <ClipLoader color="#fff" loading={loading} size={19} />
+            </span>
             Submit
           </button>
         </div>

@@ -27,7 +27,7 @@ const TvEdit: React.FC<tvId> = ({ tv_id }) => {
             width={200}
             height={200}
             quality={100}
-            className="w-[80px] h-[90px] bg-center object-center rounded-md"
+            className="w-[80px] h-[90px] bg-center bg-cover object-cover rounded-md"
           />
           <div className="flex flex-col pl-5 py-3">
             <h1 className="text-white text-2xl font-bold">

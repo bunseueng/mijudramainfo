@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { mergeAndRemoveDuplicates } from "@/app/actions/mergeAndRemove";
 
 const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv } = useQuery({
@@ -344,20 +345,6 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const handleDropdownToggle = (type: string) => {
     setOpenDropdown(openDropdown === type ? "" : type);
-  };
-
-  const mergeAndRemoveDuplicates = (
-    arr1: any[] = [],
-    arr2: any[] = [],
-    arr3: any[] = []
-  ) => {
-    // Ensure both arr1 and arr2 are arrays
-    if (!Array.isArray(arr1)) arr1 = [];
-    if (!Array.isArray(arr2)) arr2 = [];
-    if (!Array.isArray(arr3)) arr3 = [];
-    // Use Set to remove duplicates and merge arrays
-    const mergedArray = Array.from(new Set([...arr1, ...arr2, arr3]));
-    return mergedArray;
   };
 
   const onSubmit = async (data: TCreateDetails) => {

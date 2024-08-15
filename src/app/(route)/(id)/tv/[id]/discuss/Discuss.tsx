@@ -138,7 +138,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
 
   return (
     <div className="py-5">
-      <div className="min-h-[100px] relative bg-white dark:bg-[#242526] text-[#ffffffde] border-2 border-[#00000024] shadow-sm rounded-sm mb-2">
+      <div className="min-h-[100px] relative bg-white dark:bg-[#242526] text-[#ffffffde] border-[1px] border-[#00000024] shadow-sm rounded-sm mb-2">
         <div className="border-b-2 border-b-[#78828c21] px-3 py-2">
           <h3 className="text-black dark:text-white text-md font-bold">
             Comments
@@ -164,7 +164,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                     id="comment"
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
-                    className="w-full h-[53.6px] min-h-[53.6px] text-[#606266] dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-blue-500 focus:ring-blue-500  text-sm font-normal rounded-sm outline-none focus:transform focus:duration-300 py-2 px-4"
+                    className="w-full h-[53.6px] min-h-[53.6px] text-[#606266] dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] focus:border-blue-500 focus:ring-blue-500  text-sm font-normal rounded-sm outline-none focus:transform focus:duration-300 py-2 px-4"
                     placeholder="Post a comment..."
                   ></textarea>
                 </div>
@@ -178,7 +178,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                 </label>
                 <button
                   onClick={() => handlePostComment(null, tv_id)}
-                  className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-2 border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-3 px-5 outline-none ${
+                  className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-3 px-5 outline-none ${
                     loading.main ? "opacity-50 pointer-events-none" : ""
                   } ${!session ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
