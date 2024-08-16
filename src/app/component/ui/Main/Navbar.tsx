@@ -30,6 +30,7 @@ import {
   SearchParamsType,
   UserProps,
 } from "@/helper/type";
+import { useDebouncedCallback } from "use-debounce";
 
 interface Notification {
   users: UserProps[] | undefined;
@@ -70,13 +71,15 @@ const Navbar: React.FC<Notification> = ({
   const router = useRouter();
   const { data: session } = useSession();
 
-  const onInput = (e: any) => {
-    const { name, value } = e.target;
-    if (name === "navSearch") {
-      setNavSearch(value);
-    } else {
-      setNavSearch(value);
-    }
+  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setNavSearch(value); // Update state immediately
+
+    // Debounce the URL update
+    debouncedUpdateURL(value);
+  };
+
+  const debouncedUpdateURL = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
@@ -86,14 +89,24 @@ const Navbar: React.FC<Notification> = ({
     } else {
       params.delete("query");
     }
-    router.push(`${pathname}/?${params.toString()}`);
-  };
 
-  const onSearch = (e: any) => {
+    // Update the URL with the debounced value
+    router.replace(`${pathname}/?${params.toString()}`);
+  }, 300);
+
+  const onSearch = (e: React.ChangeEvent<EventTarget>) => {
     e.preventDefault();
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
+
+    if (navSearch) {
+      params.set("query", navSearch);
+    } else {
+      params.delete("query");
+    }
+
+    // Navigate to the search page with the query parameter
     router.push(`/search/?${params.toString()}`);
     setShowResults(false); // Hide search results when submitting
     setShowSearch(!showSearch);
@@ -537,27 +550,42 @@ const Navbar: React.FC<Notification> = ({
           )}
         </div>
       </div>
-      <form
-        className={`w-full fixed bg-white ${showSearch ? "block" : "hidden"}`}
-        onSubmit={onSearch}
-      >
-        <div className="border-b-2 border-b-slate-300">
-          <div className="max-w-[1520px] mx-auto relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pl-3 pointer-events-none">
-              <IoSearchSharp size={20} className="dark:text-black" />
+      <AnimatePresence>
+        {showSearch && (
+          <motion.form
+            key="search-form"
+            action="search"
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 50,
+              duration: 1,
+            }}
+            className="w-full fixed bg-white"
+            onSubmit={onSearch}
+          >
+            <div className="border-b-2 border-b-slate-300">
+              <div className="max-w-[1520px] mx-auto relative">
+                <div className="absolute inset-y-0 left-3 flex items-center pl-3 pointer-events-none">
+                  <IoSearchSharp size={20} className="dark:text-black" />
+                </div>
+                <input
+                  type="text"
+                  className="w-full bg-white text-[#acacac] placeholder:font-semibold font-semibold italic outline-none px-14 py-3"
+                  name="navSearch"
+                  placeholder="Search for a movie, tv show, person..."
+                  onChange={onInput}
+                  value={navSearch}
+                />
+              </div>
             </div>
-            <input
-              type="text"
-              className="w-full bg-white text-[#acacac] font-bold italic outline-none px-14 py-3"
-              name="navSearch"
-              placeholder="Search for a movie, tv show, person..."
-              onChange={onInput}
-              value={navSearch}
-            />
-          </div>
-        </div>
-        {query && showResults && <SearchResult />}
-      </form>
+            {query && showResults && <SearchResult />}
+          </motion.form>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

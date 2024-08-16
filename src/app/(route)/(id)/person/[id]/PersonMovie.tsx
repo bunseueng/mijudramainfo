@@ -19,6 +19,7 @@ const PersonMovie = ({ data, heading }: any) => {
     );
   }
 
+  console.log(filteredMovie);
   return (
     <div className="relative top-0 left-0 mt-5 overflow-hidden">
       <h1 className="text-3xl font-bold my-5">{heading}</h1>
@@ -26,8 +27,8 @@ const PersonMovie = ({ data, heading }: any) => {
         {filteredMovie
           ?.sort(
             (a: any, b: any) =>
-              new Date(b.first_air_date).getTime() -
-              new Date(a.first_air_date).getTime()
+              new Date(b.release_date).getTime() -
+              new Date(a.release_date).getTime()
           )
           ?.map((result: any, index: any) => (
             <div className="w-[200px] h-[280px] mr-8" key={index}>
@@ -61,8 +62,8 @@ const PersonMovie = ({ data, heading }: any) => {
                 <div className="flex items-center justify-between">
                   <p className="truncate">{result?.name || result?.title}</p>
                   <p>
-                    {result?.first_air_date !== "" ? (
-                      result?.first_air_date?.split("-")[0]
+                    {result?.release_date !== "" ? (
+                      result?.release_date?.split("-")[0]
                     ) : (
                       <span className="text-[#2490da]">Upcoming</span>
                     )}

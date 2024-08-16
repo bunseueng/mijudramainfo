@@ -3,6 +3,20 @@ import prisma from "@/lib/db";
 import PersonHeader from "../details/PersonHeader";
 import PersonEditList from "../details/PersonEditList";
 import PersonList from "../../PersonList";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: any): Promise<Metadata> {
+  const person_id = params.id;
+  const response = await fetch(
+    `https://api.themoviedb.org/3/person/${person_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&with_original_language=zh&region=CN`
+  );
+  const person = await response.json();
+
+  return {
+    title: `Edit ${person?.name}`,
+    description: person?.biography,
+  };
+}
 
 const PersonCrewPage = async ({ params }: { params: { id: string } }) => {
   const person_id = params.id;

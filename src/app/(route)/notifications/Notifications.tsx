@@ -56,16 +56,16 @@ const Notifications: React.FC<IFriend & currentUser & IFindSpecificUser> = ({
   };
   return (
     <div className="max-w-4xl mx-auto my-10 h-screen">
-      <div className="bg-[#242526] h-[500px] border-2 border-[#00000024] shadow-md border-sm">
+      <div className="bg-white dark:bg-[#242526] h-[500px] border-2 border-[#00000024] shadow-md border-sm">
         <div className="flex items-center justify-between px-5">
           <h1 className="text-xl font-bold">All Notifications</h1>
           <button
-            className="bg-[#3a3b3c] border-2 border-[#3e4042] my-4 mx-3 py-1 px-3 shadow-sm rounded-md"
+            className="bg-[#3a3b3c] border-2 border-[#3e4042] align-middle my-4 mx-3 py-1 px-3 shadow-sm rounded-md"
             onClick={handleMarkAsRead}
           >
-            <span className="inline-flex">
-              <FaCheck />
-              <span className="text-sm">Mark these as read</span>
+            <span className="inline-flex items-center align-middle text-white">
+              <FaCheck className="mr-1" />
+              <span className="text-sm text-white">Mark these as read</span>
             </span>
           </button>
         </div>

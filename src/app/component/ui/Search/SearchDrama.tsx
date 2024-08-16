@@ -6,41 +6,48 @@ import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 const SearchDrama = () => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const query = searchParams?.get("query") ?? "";
   const router = useRouter();
 
-  const updateQueryParams = useDebouncedCallback((value: string) => {
+  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setSearch(value); // Update state immediately
+
+    // Debounce the URL update
+    debouncedUpdateURL(value);
+  };
+
+  const debouncedUpdateURL = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
+
     if (value) {
       params.set("query", value);
     } else {
       params.delete("query");
     }
-    router.push(`${pathname}/?${params.toString()}`);
+
+    // Update the URL with the debounced value
+    router.replace(`${pathname}/?${params.toString()}`);
   }, 300);
 
-  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setSearch(value);
-    updateQueryParams(value);
-  };
-
-  const onSearch = (e: React.FormEvent) => {
+  const onSearch = (e: React.ChangeEvent<EventTarget>) => {
     e.preventDefault();
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
+
     if (search) {
       params.set("query", search);
     } else {
       params.delete("query");
     }
-    // Push the updated query parameters immediately
+
+    // Navigate to the search page with the query parameter
     router.push(`/search/?${params.toString()}`);
   };
 

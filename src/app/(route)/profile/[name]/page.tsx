@@ -95,7 +95,7 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
             <div className="flex items-center  relative left-0 mt-10">
               <IoMdMail size={25} className="mr-2" />
               <IoMdNotifications size={25} className="mr-2" />
-              <button className="bg-transparent text-white border-2 border-[rgb(83, 100, 113)] rounded-full px-8 py-2">
+              <button className="bg-transparent text-black dark:text-white border-2 border-[rgb(83, 100, 113)] rounded-full px-8 py-2">
                 Follow
               </button>
             </div>
@@ -105,17 +105,19 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
               {user?.displayName || user?.name}
             </h1>
             <h1 className="text-sm text-[#71767b] font-bold">@{user?.name}</h1>
-            <p className="text-white mt-3 break-words">{biography}</p>
+            <p className="text-black dark:text-white mt-3 break-words">
+              {biography}
+            </p>
             <h4 className="flex items-center mt-3 text-[#71767b]">
               <FaCalendarAlt />{" "}
               <span className="pl-2">Joined {formattedDate}</span>
             </h4>
             <div className="flex items-center text-[#71767b] mt-2">
               <p>
-                <span className="text-white">0</span> Following
+                <span className="text-black dark:text-white">0</span> Following
               </p>
               <p className="pl-4">
-                <span className="text-white">0</span> Follower
+                <span className="text-black dark:text-white">0</span> Follower
               </p>
             </div>
           </div>

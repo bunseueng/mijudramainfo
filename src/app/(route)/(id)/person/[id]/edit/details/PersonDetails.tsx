@@ -254,6 +254,7 @@ const PersonDetails: React.FC<PersonEditList> = ({ person_id, personDB }) => {
       setLoading(false);
     }
   };
+
   const handleReset = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {

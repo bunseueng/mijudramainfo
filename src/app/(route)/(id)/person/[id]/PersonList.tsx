@@ -43,7 +43,7 @@ const PersonList = ({ personId }: any) => {
             onMouseLeave={handleNavbarMouseLeave}
           >
             <ul className="py-2">
-              <li className="text-sm my-2 mx-6 cursor-pointer">
+              <li className="text-sm text-muted-foreground opacity-60 my-2 mx-6 cursor-text">
                 Edit Information
               </li>
               <li className="text-sm my-2 mx-6 cursor-pointer">
@@ -54,10 +54,23 @@ const PersonList = ({ personId }: any) => {
                   Primary Details
                 </Link>
               </li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">Cover Image</li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">Cast Credits</li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">Crew Credits</li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">Report</li>
+              <li className="text-sm my-2 mx-6 cursor-pointer">
+                <Link href={`/person/${personId}/edit/cover`}>Cover Image</Link>
+              </li>
+              <li className="text-sm my-2 mx-6 cursor-pointer">
+                <Link href={`/person/${personId}/edit/cast`}>Cast Credits</Link>
+              </li>
+              <li className="text-sm my-2 mx-6 cursor-pointer">
+                <Link href={`/person/${personId}/edit/crew`}>Crew Credits</Link>
+              </li>
+              <li className="text-sm my-2 mx-6 cursor-pointer">
+                <Link href={`/person/${personId}/edit/external_link`}>
+                  External_Links Credits
+                </Link>
+              </li>
+              <li className="text-sm my-2 mx-6 cursor-pointer">
+                <Link href={`/person/${personId}/edit/details`}>Report</Link>
+              </li>
             </ul>
           </div>
         )}

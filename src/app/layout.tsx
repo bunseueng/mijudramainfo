@@ -45,7 +45,7 @@ export default function RootLayout({
           content="ca-pub-3369705912051027"
         ></meta>
       </head>
-      <body className={`bg-slate-100 dark:bg-[#1e1e1e]  ${nunito.className}`}>
+      <body className={`bg-[#fff] dark:bg-[#1e1e1e]  ${nunito.className}`}>
         <PHProvider>
           <Provider>
             <TanstackProvider>

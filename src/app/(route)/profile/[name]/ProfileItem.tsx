@@ -442,7 +442,7 @@ const ProfileItem: React.FC<
                       This profile does not have biography yet
                     </p>
                   ) : (
-                    <div className="inline-block bg-[#242424] border border-[#272727] md:p-4">
+                    <div className="inline-block bg-white dark:bg-[#242424] border border-[#00000024] dark:border-[#272727] md:p-4">
                       <EditorContent editor={editor} />
                     </div>
                   )}
