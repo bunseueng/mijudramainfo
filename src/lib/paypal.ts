@@ -1,4 +1,5 @@
-const base = process.env.PAYPAL_API_URL || 'https://api-m.sandbox.paypal.com';
+const NODE_ENV = process.env.NODE_ENV
+const base = NODE_ENV === "development" ? process.env.PAYPAL_API_URL : "https://api.paypal.com";
 
 export const paypal = {
   createOrder: async function createOrder(price: number) {
