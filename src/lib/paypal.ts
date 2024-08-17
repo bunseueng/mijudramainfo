@@ -69,8 +69,8 @@ export const paypal = {
 
 async function generateAccessToken() {
   try {
-    const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-    const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64');
+    const { NEXT_PUBLIC_PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
+    const auth = Buffer.from(`${NEXT_PUBLIC_PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64');
     const url = `${base}/v1/oauth2/token`;
     console.log('Generating access token with URL:', url);
 
