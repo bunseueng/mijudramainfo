@@ -23,7 +23,10 @@ const CoinPage = async () => {
 
   return (
     <div className="mx-auto px-4">
-      <Coin getCoin={getCoin} paypalClientID={process.env.PAYPAL_CLIENT_ID} />
+      <Coin
+        getCoin={getCoin}
+        paypalClientID={process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}
+      />
     </div>
   );
 };
