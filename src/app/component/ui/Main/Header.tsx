@@ -9,11 +9,11 @@ const Header = () => {
       style={{
         backgroundPosition: "50%",
         backgroundImage: "url('/hero-section-image.jpg')",
-        height: "500px",
+        height: "300px",
       }}
     >
-      <div className="absolute top-0 right-0 bottom-0 left-0 h-full w-full overflow-hidden bg-[hsla(0,0%,0%,0.75)] bg-fixed">
-        <div className="flex h-full items-start justify-center py-20 px-5 md:px-0">
+      <div className="absolute top-0 right-0 bottom-0 left-0 h-full w-full overflow-hidden bg-[hsla(0,0%,0%,0.60)] bg-fixed">
+        <div className="flex h-full items-start p-10">
           <div className="text-left text-white">
             <h1 className="mt-2 mb-5 text-xl font-bold tracking-tight md:text-2xl xl:text-5xl">
               The best website for find your favorite drama. 😋

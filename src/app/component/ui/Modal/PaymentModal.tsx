@@ -208,7 +208,7 @@ const PaymentModal: React.FC<PaymentType> = ({
                 <div
                   className={`w-[40%] inline-block text-center h-20 border-[1px] rounded-md align-top py-3 m-3 cursor-pointer ${
                     paymentMethod === "Paypal" &&
-                    "bg-[#ecf5ff] border-[#06090c21]"
+                    "bg-[#ecf5ff] border-[#06090c21] dark:text-black"
                   }`}
                   onClick={() => setPaymentMethod("Paypal")}
                 >
@@ -226,7 +226,7 @@ const PaymentModal: React.FC<PaymentType> = ({
                 <div
                   className={`w-[40%] inline-block text-center h-20 border-[1px] rounded-md align-top py-3 m-3 cursor-pointer ${
                     paymentMethod === "Credit" &&
-                    "bg-[#ecf5ff] border-[#06090c21]"
+                    "bg-[#ecf5ff] border-[#06090c21] dark:text-black"
                   }`}
                   onClick={() => setPaymentMethod("Credit")}
                 >
@@ -242,35 +242,51 @@ const PaymentModal: React.FC<PaymentType> = ({
                   <div className="text-center">Credit Card</div>
                 </div>
               </div>
-              <div className="text-center text-[#00000099] font-semibold m-6">
+              <div className="text-center text-[#00000099] dark:text-white font-semibold m-6">
                 Total: <span>${price}</span>
               </div>
-              <div className="flex items-center justify-center ">
+              <div className="w-full mb-5">
                 {paymentMethod === "Paypal" && paypalClientID && (
                   <PayPalScriptProvider options={{ clientId: paypalClientID }}>
                     <PrintLoadingState />
-                    <PayPalButtons
-                      createOrder={async (data, actions) => {
-                        // Create the PayPal order and return the order ID
-                        const orderID = await handleCreatePayPalOrder();
-                        return orderID; // Return the order ID for PayPal to complete
+                    <div
+                      id="paypal-button-container"
+                      style={{
+                        backgroundColor: "white",
+                        padding: "5px",
+                        borderRadius: "5px",
                       }}
-                      onApprove={async (data, actions) => {
-                        // Handle the payment approval
-                        try {
-                          const { orderID } = data; // Extract the order ID from the response
-                          if (!orderID)
-                            throw new Error("Order ID is undefined");
-                          await handleApprovePayPalOrder(orderID); // Call the function to finalize the payment
-                        } catch (error) {
-                          console.error(
-                            "Error in approving PayPal order:",
-                            error
-                          );
-                          toast.error("Error in approving PayPal order");
-                        }
-                      }}
-                    />
+                    >
+                      <PayPalButtons
+                        style={{
+                          layout: "vertical", // options: "horizontal" or "vertical"
+                          color: "blue", // options: "gold", "blue", "silver", "white", or "black"
+                          shape: "rect", // options: "rect" or "pill"
+                          label: "paypal", // options: "paypal", "checkout", "buynow", or "pay"
+                          height: 40, // Adjust the height of the button
+                        }}
+                        createOrder={async (data, actions) => {
+                          // Create the PayPal order and return the order ID
+                          const orderID = await handleCreatePayPalOrder();
+                          return orderID; // Return the order ID for PayPal to complete
+                        }}
+                        onApprove={async (data, actions) => {
+                          // Handle the payment approval
+                          try {
+                            const { orderID } = data; // Extract the order ID from the response
+                            if (!orderID)
+                              throw new Error("Order ID is undefined");
+                            await handleApprovePayPalOrder(orderID); // Call the function to finalize the payment
+                          } catch (error) {
+                            console.error(
+                              "Error in approving PayPal order:",
+                              error
+                            );
+                            toast.error("Error in approving PayPal order");
+                          }
+                        }}
+                      />
+                    </div>
                   </PayPalScriptProvider>
                 )}
 

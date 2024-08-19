@@ -33,7 +33,7 @@ const Trailer = ({ heading }: any) => {
 
   return (
     <section>
-      <div className="mt-10 relative">
+      <div className="relative mt-10 mx-4 md:mx-6">
         {trailerVideo
           ?.filter((result) => result.videos.length > 0)
           ?.map((result: any, idx: any) => (
@@ -49,7 +49,7 @@ const Trailer = ({ heading }: any) => {
                         result.tvShow?.profile_path
                       })`,
                     }
-                  : undefined || !hoveredImageId
+                  : !hoveredImageId
                   ? {
                       backgroundImage: `url(https://image.tmdb.org/t/p/original/${
                         result?.tvShow?.backdrop_path ||

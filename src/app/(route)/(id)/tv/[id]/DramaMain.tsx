@@ -2,7 +2,6 @@
 
 import React from "react";
 import CircleRating from "@/app/component/ui/CircleRating/CircleRating";
-import Image from "next/image";
 import {
   MdBookmarkAdd,
   MdFormatListBulletedAdd,
@@ -31,6 +30,10 @@ import { IoIosAddCircle } from "react-icons/io";
 import Link from "next/link";
 import RatingModal from "@/app/component/ui/CircleRating/RatingModal";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { Image as AntImage } from "antd";
+import Image from "next/image";
+import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
+import { formatDate } from "@/app/actions/formatDate";
 
 export const getYearFromDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -38,6 +41,7 @@ export const getYearFromDate = (dateString: string) => {
 };
 
 const DramaMain = ({
+  getDrama,
   tv_id,
   existedWatchlist,
   existedFavorite,
@@ -121,14 +125,21 @@ const DramaMain = ({
   const rank = matchedIndex !== -1 ? matchedIndex + 1 : null;
   const keywords = keyword?.results;
   const formattedKeywords = keywords?.map((key: any, index: number) => {
-    // Capitalize the first letter of the keyword
     const capitalizedKeyword =
       key.name.charAt(0).toUpperCase() + key.name.slice(1);
-    // Add comma after each item except for the last one
     return index === keywords?.length - 1
       ? capitalizedKeyword
       : capitalizedKeyword + ", ";
   });
+  const formattedKeywordsDB = getDrama?.genres_tags[0]?.tag
+    ?.map((key: any, index: number) => {
+      const capitalizedKeyword =
+        key.name.charAt(0).toUpperCase() + key.name.slice(1);
+      return index === getDrama.genres_tags[0].tag.length - 1
+        ? capitalizedKeyword
+        : capitalizedKeyword + ", ";
+    })
+    .join("");
   const genres = tv?.genres;
   const tvRating = existingRatings?.map((item: any) => item?.rating);
   const sumRating = tvRating?.reduce(
@@ -137,9 +148,23 @@ const DramaMain = ({
   );
   const calculatedRating = sumRating / existingRatings?.length;
 
-  if (isLoading) {
-    return <SearchLoading />;
-  }
+  const [detail]: DramaDetails[] = (getDrama?.details ||
+    []) as unknown as DramaDetails[];
+  const [info]: DramaReleasedInfo[] = (getDrama?.released_information ||
+    []) as unknown as DramaReleasedInfo[];
+
+  const formattedFirstAirDate = tv?.first_air_date
+    ? formatDate(tv.first_air_date)
+    : "TBA";
+  const formattedLastAirDate = tv?.last_air_date
+    ? formatDate(tv.last_air_date)
+    : "";
+  const formattedFirstAirDateDB = info?.release_date
+    ? formatDate(info.release_date)
+    : "TBA";
+  const formattedLastAirDateDB = info?.end_date
+    ? formatDate(info.end_date)
+    : "";
 
   const onSubmit = async () => {
     try {
@@ -203,6 +228,7 @@ const DramaMain = ({
       throw new Error(error);
     }
   };
+
   const onDeleteFavorite = async () => {
     try {
       const res = await fetch(`/api/favorite/${tv?.id}`, {
@@ -223,7 +249,12 @@ const DramaMain = ({
       throw new Error(error);
     }
   };
+  console.log(getDrama, "db");
+  console.log(tv, "tv");
 
+  if (isLoading) {
+    return <SearchLoading />;
+  }
   return (
     <>
       <div className="w-full h-full">
@@ -245,21 +276,24 @@ const DramaMain = ({
           >
             <div className="px-3">
               <div className="flex flex-col md:flex-row content-center max-w-[97rem] mx-auto py-10 md:py-8 md:px-10">
-                <Image
-                  src={`https://image.tmdb.org/t/p/original/${
-                    tv?.poster_path || tv?.backdrop_path
-                  }`}
-                  priority
-                  alt="image"
+                <AntImage
+                  src={
+                    getDrama?.cover ||
+                    `https://image.tmdb.org/t/p/original/${
+                      tv?.poster_path || tv?.backdrop_path
+                    }`
+                  }
+                  alt={detail?.title || tv?.name}
                   width={500}
                   height={300}
-                  className="block align-middle w-[350px] h-[480px] rounded-lg md:pl-0"
+                  className="block align-middle !w-[350px] md:!min-w-[350px] !h-[480px] bg-cover object-cover rounded-lg md:pl-0"
                 />
+
                 <div className="md:px-8 py-5">
                   <div className="relative">
                     <h2 className="text-3xl font-bold text-white">
                       <span className="cursor-pointer hover:opacity-50 duration-300">
-                        {tv?.title || tv?.name}
+                        {detail?.title || tv?.title || tv?.name}
                       </span>{" "}
                       ({getYearFromDate(tv?.first_air_date || tv?.release_date)}
                       )
@@ -437,7 +471,9 @@ const DramaMain = ({
                     <span className="text-white font-bold">Overview:</span>
                   </p>
                   <p className="text-md text-white mb-3">
-                    {tv?.overview !== ""
+                    {detail?.synopsis !== ""
+                      ? detail?.synopsis
+                      : tv?.overview !== ""
                       ? tv?.overview
                       : `${tv?.name} has no overview yet!`}{" "}
                     <span>
@@ -453,7 +489,9 @@ const DramaMain = ({
                     <h1 className="text-white font-bold text-md">
                       Navtive Title:
                       <span className="text-sm pl-2 font-normal text-blue-300">
-                        {tv?.original_name?.length > 0
+                        {detail?.native_title !== ""
+                          ? detail?.native_title
+                          : tv?.original_name?.length > 0
                           ? tv?.original_name
                           : "Native title is not yet added!"}
                       </span>
@@ -463,7 +501,14 @@ const DramaMain = ({
                     <h1 className="text-white font-bold text-md">
                       Also Known As:
                       <span className="text-sm pl-2 font-normal text-blue-300">
-                        {title?.results?.length > 0
+                        {detail?.known_as?.length > 0
+                          ? detail?.known_as?.map((known, idx) => (
+                              <span key={idx}>
+                                {idx > 0 && ", "}
+                                {known}
+                              </span>
+                            ))
+                          : title?.results?.length > 0
                           ? title?.results?.map((title: any, index: number) => (
                               <span key={index}>
                                 {index > 0 && ", "}
@@ -478,7 +523,11 @@ const DramaMain = ({
                     <h1 className="text-white font-bold text-md">
                       Director:
                       <span className="text-sm pl-2 font-normal text-blue-300">
-                        {director?.name?.length > 0
+                        {getDrama?.crew?.length > 0
+                          ? getDrama?.crew?.find(
+                              (crew: any) => crew?.department === "Directing"
+                            )?.name
+                          : director?.name?.length > 0
                           ? director?.name
                           : "Director is not yet added!"}
                       </span>
@@ -488,7 +537,12 @@ const DramaMain = ({
                     <h1 className="text-white font-bold text-md">
                       Screenwriter:
                       <span className="text-sm pl-2 font-normal text-blue-300">
-                        {screenwriter?.name?.length > 0
+                        {getDrama?.crew?.length > 0
+                          ? getDrama?.crew?.find(
+                              (crew: any) =>
+                                crew?.jobs[0]?.job === "Screenstory"
+                            )?.name
+                          : screenwriter?.name?.length > 0
                           ? screenwriter?.name
                           : "Screenwirter is not yet added!"}
                       </span>
@@ -498,7 +552,16 @@ const DramaMain = ({
                     <h1 className="text-white font-bold text-md">
                       Genres:
                       <span className="text-sm pl-2 font-normal text-blue-300">
-                        {tv?.genres?.length > 0
+                        {getDrama?.genres_tags?.length > 0
+                          ? getDrama?.genres_tags
+                              ?.map(
+                                (tag: any) =>
+                                  tag?.genre
+                                    ?.map((gen: any, idx: number) => gen?.name)
+                                    .join(", ") // Join genres with commas
+                              )
+                              .join(", ")
+                          : tv?.genres?.length > 0
                           ? tv?.genres?.map((genre: any, index: number) => {
                               return index === genres.length - 1
                                 ? genre.name
@@ -512,7 +575,9 @@ const DramaMain = ({
                     <h1 className="text-white font-bold text-md">
                       Tags:
                       <span className="text-sm pl-2 font-normal text-blue-300">
-                        {formattedKeywords?.length > 0
+                        {getDrama?.genres_tags?.length > 0
+                          ? formattedKeywordsDB
+                          : formattedKeywords?.length > 0
                           ? formattedKeywords
                           : "Tags is not yet added!"}
                       </span>
@@ -523,7 +588,7 @@ const DramaMain = ({
                       <h1 className="text-white font-bold text-md">
                         Country:
                         <span className="text-sm pl-2 font-normal text-blue-300">
-                          {matchedLanguage?.english_name}
+                          {detail?.title || matchedLanguage?.english_name}
                         </span>
                       </h1>
                     </div>
@@ -531,7 +596,7 @@ const DramaMain = ({
                       <h1 className="text-white font-bold text-md">
                         Episode:
                         <span className="text-sm pl-2 font-normal text-blue-300">
-                          {tv?.number_of_episodes}
+                          {info?.number_of_episodes}
                         </span>
                       </h1>
                     </div>
@@ -539,11 +604,13 @@ const DramaMain = ({
                       <h1 className="text-white font-bold text-md">
                         Aired:
                         <span className="text-sm pl-2 font-normal text-blue-300">
-                          {tv?.first_air_date === ""
-                            ? "TBA"
-                            : tv?.first_air_date}{" "}
-                          {tv?.first_air_date === "" ? "" : "-"}{" "}
-                          {tv?.last_air_date === null ? "" : tv?.last_air_date}
+                          {getDrama?.released_information?.length > 0
+                            ? formattedLastAirDate
+                              ? `${formattedFirstAirDateDB} - ${formattedLastAirDateDB}`
+                              : formattedFirstAirDateDB
+                            : formattedLastAirDateDB
+                            ? `${formattedFirstAirDate} - ${formattedLastAirDate}`
+                            : formattedFirstAirDate}
                         </span>
                       </h1>
                     </div>
@@ -551,11 +618,9 @@ const DramaMain = ({
                       <h1 className="text-white font-bold text-md">
                         Original Network:{" "}
                         <span className="text-sm pl-2 font-normal text-blue-300">
-                          {tv?.networks?.map((network: any, index: number) => {
-                            return index === network.length - 1
-                              ? network.name
-                              : network.name + ", ";
-                          })}
+                          {tv?.networks
+                            ?.map((network: DramaReleasedInfo) => network?.name)
+                            ?.join(", ")}
                         </span>
                       </h1>
                     </div>
@@ -563,9 +628,10 @@ const DramaMain = ({
                       <h1 className="text-white font-bold text-md">
                         Duration:
                         <span className="text-sm pl-2 font-normal text-blue-300">
-                          {tv?.episode_run_time?.[0]}
-                          {tv?.episode_run_time?.length > 0
-                            ? "min."
+                          {getDrama?.details?.length > 0
+                            ? `${detail?.duration} min.`
+                            : tv?.episode_run_time?.length > 0
+                            ? `${tv?.episode_run_time[0]} min.`
                             : "Duration not yet added"}
                         </span>
                       </h1>
@@ -574,14 +640,20 @@ const DramaMain = ({
                       <h1 className="text-white font-bold text-md">
                         Content Rating:
                         <span className="text-sm pl-2 font-normal text-blue-300">
-                          {content?.results?.length === 0
-                            ? "Not Yet Rated"
-                            : content?.results[0]?.rating}
-                          {content?.results?.length !== 0 && (
-                            <span>
-                              + - Teens {content?.results[0]?.rating} or older
-                            </span>
-                          )}
+                          {getDrama?.details?.length > 0
+                            ? detail?.content_rating
+                            : `${
+                                content?.results?.length === 0
+                                  ? "Not Yet Rated"
+                                  : content?.results[0]?.rating
+                              }
+                          ${
+                            content?.results?.length !== 0 && (
+                              <span>
+                                + - Teens {content?.results[0]?.rating} or older
+                              </span>
+                            )
+                          }`}
                         </span>
                       </h1>
                     </div>
@@ -589,7 +661,9 @@ const DramaMain = ({
                       <h1 className="text-white font-bold text-md">
                         Status:
                         <span className="text-sm pl-2 font-normal text-blue-300">
-                          {tv?.status === "Returning Series"
+                          {getDrama?.details?.length > 0
+                            ? detail?.status
+                            : tv?.status === "Returning Series"
                             ? "Ongoing"
                             : tv?.status}
                         </span>
@@ -635,6 +709,7 @@ const DramaMain = ({
       </div>
       <div>
         <DramaCast
+          getDrama={getDrama}
           cast={cast}
           tv={tv}
           content={content}

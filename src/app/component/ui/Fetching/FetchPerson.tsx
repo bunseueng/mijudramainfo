@@ -397,34 +397,37 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                     {persons?.also_known_as?.join(" , ")}
                   </p>
                 </div>
-                <div className="px-3 mt-5">
+                <div className="inline-block px-3 mt-5">
                   <p className="text-xl font-bold">Biography: </p>
                   {/* Render biography paragraphs */}
                   {persons?.biography
                     ?.split("\n")
                     ?.map((paragraph: string, index: number) => (
-                      <div className="inline-block" key={index}>
+                      <span key={index}>
                         {persons?.biography === "" ? (
                           <div className="text-lg font-bold text-center py-5">
                             Sorry!! This person currently has no biography.
                           </div>
                         ) : (
-                          <div className="inline-block py-2 text-md">
-                            <p className="inline-block ">
-                              {paragraph}{" "}
-                              <span className=" ">
-                                <Link
-                                  href={`/person/${persons?.id}/edit`}
-                                  className="text-sm text-[#1675b6]"
-                                  onClick={() => setMore(!more)}
-                                >
-                                  Edit Translation
-                                </Link>
-                              </span>
-                            </p>
-                          </div>
+                          // Use a span for the last paragraph to keep it inline with the link
+                          <span>
+                            {paragraph}
+                            {/* Render the "Edit Translation" link inline with the last paragraph */}
+                            {index ===
+                              persons?.biography.split("\n").length - 1 && (
+                              <Link
+                                href={`/person/${persons?.id}/edit`}
+                                className="text-sm text-[#1675b6] ml-1"
+                                onClick={() => setMore(!more)}
+                              >
+                                Edit Translation
+                              </Link>
+                            )}
+                          </span>
                         )}
-                      </div>
+                        <br />{" "}
+                        {/* Add line breaks after each paragraph except the last one */}
+                      </span>
                     ))}
                 </div>
               </div>
@@ -588,65 +591,63 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   </div>
                 )}
               </div>
-              {sortedUsers?.map((user, idx: number) => (
-                <div key={idx}>
-                  <div className="border-y-[1px] border-y-[#06090c21] dark:border-y-[#3e4042] mt-4">
-                    <div className="mx-2 py-5">
-                      <h1 className="text-center lg:text-lg">
-                        Top Popularity Senders
-                      </h1>
-                      <div className="flex items-center mt-3">
+              <div className="border-y-[1px] border-y-[#06090c21] dark:border-y-[#3e4042] mt-4">
+                <div className="mx-2 py-5">
+                  <h1 className="text-center lg:text-lg">
+                    Top Popularity Senders
+                  </h1>
+                  {sortedUsers?.map((user, idx: number) => (
+                    <div className="flex items-center mt-3" key={idx}>
+                      <Image
+                        src={`/${
+                          idx === 0
+                            ? `gold-medal.svg`
+                            : idx === 1
+                            ? `silver-medal.svg`
+                            : "bronze-medal.svg"
+                        }`}
+                        alt="medal"
+                        width={100}
+                        height={100}
+                        className="w-10 h-10 bg-cover object-cover"
+                      />
+                      <div className="flex items-center my-2">
                         <Image
-                          src={`/${
-                            idx === 0
-                              ? `gold-medal.svg`
-                              : idx === 1
-                              ? `silver-medal.svg`
-                              : "bronze-medal.svg"
-                          }`}
-                          alt="medal"
+                          src={
+                            user?.profileAvatar ||
+                            user?.image ||
+                            "/empty-pf.jpg"
+                          }
+                          alt={`${user?.name}'s Avartar`}
                           width={100}
                           height={100}
-                          className="w-10 h-10 bg-cover object-cover"
+                          className="w-10 h-10 bg-cover object-cover rounded-full"
                         />
-                        <div className="flex items-center my-2">
-                          <Image
-                            src={
-                              user?.profileAvatar ||
-                              user?.image ||
-                              "/empty-pf.jpg"
-                            }
-                            alt={`${user?.name}'s Avartar`}
-                            width={100}
-                            height={100}
-                            className="w-10 h-10 bg-cover object-cover rounded-full"
-                          />
-                          <div className="inline-block ml-2">
-                            <p className="inline-block text-md text-[#2490da] font-semibold px-1">
-                              {user?.displayName || user?.name}
-                            </p>
-                            <p className="text-xs text-[#00000099] dark:text-[#ffffff99] font-semibold px-1">
-                              {user?.totalPopularitySent?.map(
-                                (sent: UserTotalPopularity) =>
-                                  sent?.totalPopularity
-                              )}{" "}
-                              <span>popularity</span>
-                            </p>
-                          </div>
+                        <div className="inline-block ml-2">
+                          <p className="inline-block text-md text-[#2490da] font-semibold px-1">
+                            {user?.displayName || user?.name}
+                          </p>
+                          <p className="text-xs text-[#00000099] dark:text-[#ffffff99] font-semibold px-1">
+                            {user?.totalPopularitySent?.map(
+                              (sent: UserTotalPopularity) =>
+                                sent?.totalPopularity
+                            )}{" "}
+                            <span>popularity</span>
+                          </p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="w-full text-center p-3">
-                    <Link href="" className="text-[#2196f3]">
-                      See all
-                    </Link>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <div className="w-full text-center p-3">
+                <Link href="" className="text-[#2196f3]">
+                  See all
+                </Link>
+              </div>
             </div>
           </div>
-          <div className="w-full min-[560px]:w-[60%] lg:w-[70%] min-[560px]:px-4 mt-4 min-[560px]:mt-0 ">
+          <div className="w-full min-[560px]:w-[60%] lg:w-[70%] min-[560px]:px-8 mt-4 min-[560px]:mt-0">
             <div className="w-full h-full">
               <div className="hidden min-[560px]:block">
                 <div className="flex items-center justify-between">
@@ -668,34 +669,39 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   </button>
                 </div>
 
-                <p className="text-2xl font-bold pt-5">Biography: </p>
-                {/* Render biography paragraphs */}
-                {persons?.biography
-                  ?.split("\n")
-                  ?.map((paragraph: string, index: number) => (
-                    <div className="inline-block" key={index}>
-                      {persons?.biography === "" ? (
-                        <div className="text-lg font-bold text-center py-5">
-                          Sorry!! This person currently has no biography.
-                        </div>
-                      ) : (
-                        <div className="inline-block py-2 text-md">
-                          <p className="inline-block ">
-                            {paragraph}{" "}
-                            <span className=" ">
+                <div className="inline-block mt-5">
+                  <p className="text-xl font-bold">Biography: </p>
+                  {/* Render biography paragraphs */}
+                  {persons?.biography
+                    ?.split("\n")
+                    ?.map((paragraph: string, index: number) => (
+                      <span key={index}>
+                        {persons?.biography === "" ? (
+                          <div className="text-lg font-bold text-center py-5">
+                            Sorry!! This person currently has no biography.
+                          </div>
+                        ) : (
+                          // Use a span for the last paragraph to keep it inline with the link
+                          <span>
+                            {paragraph}
+                            {/* Render the "Edit Translation" link inline with the last paragraph */}
+                            {index ===
+                              persons?.biography.split("\n").length - 1 && (
                               <Link
                                 href={`/person/${persons?.id}/edit`}
-                                className="text-sm text-[#1675b6]"
+                                className="text-sm text-[#1675b6] ml-1"
                                 onClick={() => setMore(!more)}
                               >
                                 Edit Translation
                               </Link>
-                            </span>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                            )}
+                          </span>
+                        )}
+                        <br />{" "}
+                        {/* Add line breaks after each paragraph except the last one */}
+                      </span>
+                    ))}
+                </div>
               </div>
               <div className="mt-5">
                 <div className="mb-10">

@@ -22,7 +22,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 
-const AllTvCast = ({ tv_id }: any) => {
+const AllTvCast = ({ tv_id, getDrama }: any) => {
   const { data: tv } = useQuery({
     queryKey: ["movie", tv_id],
     queryFn: () => fetchTv(tv_id),
@@ -44,10 +44,6 @@ const AllTvCast = ({ tv_id }: any) => {
     queryFn: fetchAllPopularTvShows,
   });
   const crew = cast?.crew?.map((item: any) => item);
-
-  if (!tv || !cast) {
-    return <div>Loading...</div>; // Add loading state if data is being fetched
-  }
 
   // Filter the crew array to find all directors
   const directors = crew?.filter(
@@ -85,6 +81,11 @@ const AllTvCast = ({ tv_id }: any) => {
   );
   // Calculate the rank by adding 1 to the index
   const rank = matchedIndex !== -1 ? matchedIndex + 1 : null;
+
+  console.log(getDrama);
+  if (!tv || !cast) {
+    return <div>Loading...</div>; // Add loading state if data is being fetched
+  }
   return (
     <div className="bg-slate-100 dark:bg-[#1e1e1e]">
       <div className=" bg-cyan-600 dark:bg-[#242424]">
@@ -95,7 +96,7 @@ const AllTvCast = ({ tv_id }: any) => {
                 src={`https://image.tmdb.org/t/p/original/${
                   tv?.poster_path || tv?.backdrop_path
                 }`}
-                alt="Drama image"
+                alt={`${tv?.name || tv?.title}'s Poster`}
                 width={200}
                 height={200}
                 quality={100}
@@ -201,7 +202,7 @@ const AllTvCast = ({ tv_id }: any) => {
                   <h1 className="text-xl text-sky-900 dark:text-white  font-bold p-5">
                     Main Role
                   </h1>
-                  <MainRole cast={cast} />
+                  <MainRole getDrama={getDrama} cast={cast} />
 
                   <h1 className="text-xl text-sky-900 dark:text-white  font-bold p-5">
                     Support Role
@@ -211,10 +212,10 @@ const AllTvCast = ({ tv_id }: any) => {
                       cast?.order > 2 && cast?.total_episode_count > 5
                   )?.length === 0 ? (
                     <p className="text-black dark:text-white pl-5">
-                      Support Role has not added to this {tv?.name}
+                      Support Role has not added to {tv?.name}
                     </p>
                   ) : (
-                    <SupportRole cast={cast} />
+                    <SupportRole cast={cast} getDrama={getDrama} />
                   )}
                   <h1 className="text-xl text-sky-900 dark:text-white  font-bold p-5">
                     Guest Role
@@ -227,7 +228,7 @@ const AllTvCast = ({ tv_id }: any) => {
                       Guest Role has not added to this {tv?.name}
                     </p>
                   ) : (
-                    <GuestRole cast={cast} />
+                    <GuestRole cast={cast} getDrama={getDrama} />
                   )}
                 </div>
               </div>

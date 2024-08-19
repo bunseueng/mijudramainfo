@@ -73,44 +73,49 @@ const Navbar: React.FC<Notification> = ({
 
   const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setNavSearch(value); // Update state immediately
-
-    // Debounce the URL update
-    debouncedUpdateURL(value);
+    setNavSearch(value); // Update the state with the input value
+    // Update the URL with the debounced value
+    updateURL(value);
   };
 
-  const debouncedUpdateURL = useDebouncedCallback((value: string) => {
+  // Debounced URL update function
+  const updateURL = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
-
     if (value) {
       params.set("query", value);
     } else {
       params.delete("query");
     }
-
-    // Update the URL with the debounced value
+    // Replace the current URL with the updated query parameter
     router.replace(`${pathname}/?${params.toString()}`);
   }, 300);
 
-  const onSearch = (e: React.ChangeEvent<EventTarget>) => {
+  const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
-
     if (navSearch) {
-      params.set("query", navSearch);
+      params.set("query", navSearch); // Use the current navSearch value
     } else {
       params.delete("query");
     }
-
-    // Navigate to the search page with the query parameter
+    // Immediately navigate to the search page with the final query parameter
     router.push(`/search/?${params.toString()}`);
     setShowResults(false); // Hide search results when submitting
-    setShowSearch(!showSearch);
+    setShowSearch(false); // Close the search bar
   };
+
+  useEffect(() => {
+    // Toggle the display of search results based on whether a query is present
+    if (navSearch) {
+      setShowResults(true);
+    } else {
+      setShowResults(false);
+    }
+  }, [navSearch]);
 
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -250,7 +255,7 @@ const Navbar: React.FC<Notification> = ({
 
   return (
     <nav className="bg-gradient-to-r from-sky-900 to-blue-800">
-      <div className="max-w-[1520px] relative flex flex-wrap items-center justify-between mx-auto px-4 md:px-6">
+      <div className="max-w-6xl relative flex flex-wrap items-center justify-between mx-auto px-4 md:px-6">
         <div className="flex items-center relative py-1">
           <Link
             className="no-underline hover:no-underline font-bold text-2xl lg:text-4xl flex items-center"
@@ -284,7 +289,7 @@ const Navbar: React.FC<Notification> = ({
                 >
                   <Link
                     href={item?.link}
-                    className="block py-2 px-2 xl:px-3 text-sm xl:text-lg text-white rounded lg:bg-transparent cursor-default"
+                    className="block py-2 px-2 xl:px-3 text-sm xl:text-md font-bold text-white rounded lg:bg-transparent cursor-default"
                   >
                     <span className="cursor-pointer">{item?.label}</span>
                   </Link>
@@ -482,7 +487,7 @@ const Navbar: React.FC<Notification> = ({
           {!session && (
             <div className="relative">
               <Link
-                className="text-sm md:text-lg text-white mx-2 md:mx-4 border border-cyan-400 bg-cyan-400 px-4 py-1"
+                className="text-sm md:text-lg text-white border-[1px] border-cyan-400 bg-cyan-400 px-4 py-1"
                 href={`/signin`}
               >
                 Login

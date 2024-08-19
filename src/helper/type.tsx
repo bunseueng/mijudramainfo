@@ -304,6 +304,54 @@ export interface DramaDetails {
   story: string;
 }
 
+export interface DramaReleasedInfo {
+  adult: boolean;
+  air_date: string | null;
+  all_episode: Prisma.JsonValue[];
+  backdrop_path: string | null;
+  broadcast: Prisma.JsonValue[];
+  created_by: Prisma.JsonValue[];
+  episode_end: number | null;
+  episode_run_time: Prisma.JsonValue[];
+  episode_start: number;
+  first_air_date: string | null;
+  genres: Prisma.JsonValue[];
+  homepage: string | null;
+  id: number;
+  in_production: boolean;
+  languages: string[];
+  last_air_date: string | null;
+  last_episode_to_air: Prisma.JsonValue;
+  name: string;
+  networks: Prisma.JsonValue[];
+  next_episode_to_air: string | null;
+  number_of_episodes: number;
+  number_of_seasons: number;
+  origin_country: string[];
+  original_language: string;
+  original_name: string;
+  popularity: number;
+  poster_path: string;
+  production_companies: Prisma.JsonValue[];
+  production_countries: Prisma.JsonValue[];
+  release_date: string;
+  end_date: string;
+  season: Prisma.JsonValue[];
+  seasons: Prisma.JsonValue[];
+  spoken_languages: Prisma.JsonValue[];
+  status: string;
+  tagline: string;
+  title: string;
+  type: string[];
+  vote_average: number;
+  vote_count: string;
+  service_name: string | null;
+  service_type: string | null;
+  service_url: string | null;
+  subtitles: string | null;
+  availability: string | null;
+}
+
 export interface EditDramaPage {
   availability: {
     label: string;

@@ -63,6 +63,8 @@
     "next-seo": "^6.5.0",
     "next-share": "^0.27.0",
     "next-themes": "^0.3.0",
+    "nextjs-progressbar": "^0.0.16",
+    "nextjs-toploader": "^1.6.12",
     "nodemailer": "^6.9.13",
     "npmlog": "^7.0.1",
     "posthog-js": "^1.139.1",

@@ -4,8 +4,10 @@ import React from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
 import AllSeason from "./AllSeason";
 import ReviewCard from "@/app/component/ui/Card/ReviewCard";
+import WatchProvider from "./WatchProvider";
 
 const DramaCast = ({
+  getDrama,
   cast,
   tv,
   content,
@@ -74,7 +76,15 @@ const DramaCast = ({
             </Link>
           </div>
           <div className="grid grid-cols-1 min-[649px]:grid-cols-2 min-[1350px]:grid-cols-3 ml-5 md:ml-0">
-            <CastCard cast={cast} />
+            <CastCard getDrama={getDrama} cast={cast} />
+          </div>
+
+          <div className="border-t-2 border-slate-400 mt-7 mx-2 md:mx-0">
+            <h1 className="text-lg text-black dark:text-white font-bold my-5">
+              <span className="border border-l-yellow-500 border-l-4 rounded-md mr-4"></span>
+              Where to watch {tv?.name}
+            </h1>
+            <WatchProvider getDrama={getDrama} />
           </div>
           <AllSeason
             displaySeason={displaySeason}

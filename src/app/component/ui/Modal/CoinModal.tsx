@@ -40,7 +40,7 @@ const CoinModal: React.FC<CoinType> = ({
           <p className="mono text-sm absolute -top-4 bg-red-400 text-zinc-100 py-0.5 px-2 font-bold tracking-wider rounded">
             POPULAR
           </p>
-          <div className="text-sm absolute right-4 top-4 cursor-pointer">
+          <div className="text-sm absolute right-4 top-4 cursor-pointer dark:text-black">
             <IoClose size={22} onClick={() => setOpenModal(false)} />
           </div>
           <div>
@@ -53,23 +53,29 @@ const CoinModal: React.FC<CoinType> = ({
                 className="w-12 h-12 bg-center object-cover"
               />
             </div>
-            <p className="text-center text-3xl font-bold pt-1">
+            <p className="text-center text-3xl font-bold pt-1 dark:text-black">
               {getCoin?.coin}
             </p>
             <p className="opacity-60 text-center"></p>
             <div className="flex gap-4 justify-center">
               <div className="flex flex-col items-center my-1">
-                <p className="font-extrabold text-md">Total Coins</p>
-                <p className="text-sm opacity-60">What are coins?</p>
+                <p className="font-extrabold text-md dark:text-black">
+                  Total Coins
+                </p>
+                <p className="text-sm opacity-60 dark:text-black dark:opacity-100">
+                  What are coins?
+                </p>
               </div>
             </div>
           </div>
           <div className="w-full mt-5">
-            <p className="text-start text-xl font-bold">Get Coin</p>
+            <p className="text-start text-xl font-bold dark:text-black">
+              Get Coin
+            </p>
             <div className="my-2 border-[1px] border-[#00000024] rounded-sm">
               <div className="py-4 px-2">
                 <div className="flex items-start justify-between">
-                  <h1 className="text-lg">500 Coins</h1>
+                  <h1 className="text-lg dark:text-black">500 Coins</h1>
                   <button
                     className="bg-[#1b92e4] text-white font-bold border-[1px] border-[#1675b6] rounded-md shadow-md px-4 py-2"
                     onClick={() => {
@@ -87,7 +93,7 @@ const CoinModal: React.FC<CoinType> = ({
               <div className="py-4 px-2">
                 <div className="flex items-start justify-between">
                   <div className="flex flex-col">
-                    <h1 className="text-lg">1,200 Coins</h1>
+                    <h1 className="text-lg dark:text-black">1,200 Coins</h1>
                     <div className="text-red-500 text-start">10% Bonus</div>
                   </div>
                   <button
@@ -107,7 +113,7 @@ const CoinModal: React.FC<CoinType> = ({
               <div className="py-4 px-2">
                 <div className="flex items-start justify-between">
                   <div className="flex flex-col">
-                    <h1 className="text-lg">2,000 Coins</h1>
+                    <h1 className="text-lg dark:text-black">2,000 Coins</h1>
                     <div className="text-red-500 text-start">20% Bonus</div>
                   </div>
                   <button
@@ -127,7 +133,7 @@ const CoinModal: React.FC<CoinType> = ({
               <div className="py-4 px-2">
                 <div className="flex items-start justify-between">
                   <div className="flex flex-col">
-                    <h1 className="text-lg">3,300 Coins</h1>
+                    <h1 className="text-lg dark:text-black">3,300 Coins</h1>
                     <div className="text-red-500 text-start">24% Bonus</div>
                   </div>
                   <button
@@ -147,7 +153,7 @@ const CoinModal: React.FC<CoinType> = ({
               <div className="py-4 px-2">
                 <div className="flex items-start justify-between">
                   <div className="flex flex-col">
-                    <h1 className="text-lg">7,000 Coins</h1>
+                    <h1 className="text-lg dark:text-black">7,000 Coins</h1>
                     <div className="text-red-500 text-start">32% Bonus</div>
                   </div>
                   <button
@@ -167,7 +173,7 @@ const CoinModal: React.FC<CoinType> = ({
               <div className="py-4 px-2">
                 <div className="flex items-start justify-between">
                   <div className="flex flex-col">
-                    <h1 className="text-lg">18,000 Coins</h1>
+                    <h1 className="text-lg dark:text-black">18,000 Coins</h1>
                     <div className="text-red-500 text-start">42% Bonus</div>
                   </div>
                   <button
@@ -187,7 +193,7 @@ const CoinModal: React.FC<CoinType> = ({
               <div className="py-4 px-2">
                 <div className="flex items-start justify-between">
                   <div className="flex flex-col">
-                    <h1 className="text-lg">38,000 Coins</h1>
+                    <h1 className="text-lg dark:text-black">38,000 Coins</h1>
                     <div className="text-red-500 text-start">50% Bonus</div>
                   </div>
                   <button

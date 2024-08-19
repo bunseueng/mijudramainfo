@@ -11,13 +11,13 @@ const Actor = ({ heading }: any) => {
   });
 
   return (
-    <div className="relative top-0 left-0 mt-5 overflow-hidden">
-      <h1 className="text-3xl font-bold my-5">{heading}</h1>
+    <div className="relative top-0 left-0 mt-5 mx-4 md:mx-6 overflow-hidden">
+      <h1 className="text-xl font-bold my-2">{heading}</h1>
       <div className="flex items-center w-full h-[300px] overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4">
         {data
           ?.filter((item: any) => item.profile_path !== "url(/empty.jpg)")
           ?.map((result: any, idx: any) => (
-            <div className="w-[200px] h-[280px] mr-8" key={idx}>
+            <div key={idx}>
               <ActorCard result={result} />
             </div>
           ))}

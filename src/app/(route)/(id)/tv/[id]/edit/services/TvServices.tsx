@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchTv } from "@/app/actions/fetchMovieApi";
+import { fetchTv, fetchTvWatchProvider } from "@/app/actions/fetchMovieApi";
 import TvAddModal from "@/app/component/ui/Modal/TvAddModal";
 import TvEditModal from "@/app/component/ui/Modal/TvEditModal";
 import {
@@ -27,6 +27,11 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
     staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+
+  const { data: watch } = useQuery({
+    queryKey: ["watch", tv_id],
+    queryFn: () => fetchTvWatchProvider(tv_id),
   });
 
   const extraData =
@@ -233,6 +238,9 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 const networkId = show?.networks
                   ?.filter((net: any) => net?.name !== show?.service_name)
                   ?.map((item: any) => item.id);
+                const youku =
+                  show?.service_name === "Youku" &&
+                  "https://img.alicdn.com/imgextra/i2/O1CN01BeAcgL1ywY0G5nSn8_!!6000000006643-2-tps-195-195.png";
                 return (
                   <Reorder.Item
                     as="tr"
@@ -253,7 +261,9 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             show?.service_logo
                               ? `/channel${show?.service_logo}`
                               : show?.service_url
-                              ? show?.service_url || "/default-image.jpg"
+                              ? youku ||
+                                show?.service_url ||
+                                "/default-image.jpg"
                               : `https://image.tmdb.org/t/p/original/${show?.logo_path}`
                           }
                           alt={

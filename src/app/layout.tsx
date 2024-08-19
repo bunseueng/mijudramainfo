@@ -12,6 +12,7 @@ import { PHProvider } from "@/provider/PostHogProvider";
 import { Suspense } from "react";
 import Adsense from "./component/ui/Adsense/Adsense";
 import AdBanner from "./component/ui/Adsense/AdBanner";
+import Loading from "./loading";
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],
@@ -55,6 +56,7 @@ export default function RootLayout({
                 enableSystem
                 disableTransitionOnChange
               >
+                <Loading />
                 <div className="flex flex-col top-0 sticky z-50">
                   <SessionAllPage />
                 </div>

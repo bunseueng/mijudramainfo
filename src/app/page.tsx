@@ -15,12 +15,12 @@ export default async function Home() {
 
   return (
     <>
-      <main className="leading-relaxed tracking-wide flex flex-col md:max-w-[1520px] mx-auto">
+      <main className="leading-relaxed tracking-wide flex flex-col max-w-6xl mx-auto ">
         <Suspense fallback={<div>Loading...</div>}>
           <Header />
         </Suspense>
       </main>
-      <section className="max-w-[90%] lg:max-w-[80%] mx-auto">
+      <section className="max-w-6xl mx-auto">
         <div className="mb-10">
           <Suspense fallback={<div>Loading...</div>}>
             <TrendingDrama heading={trending} />

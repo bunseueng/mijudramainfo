@@ -34,6 +34,8 @@ export default async function tvPage({ params }: any) {
     },
   });
 
+  const getDrama = await prisma.drama.findUnique({ where: { tv_id: tv_id } });
+
   return (
     <Suspense fallback={<SearchLoading />}>
       <DramaMain
@@ -45,6 +47,7 @@ export default async function tvPage({ params }: any) {
         existingRatings={existingRatings}
         userRating={userRating}
         getComment={getComment}
+        getDrama={getDrama}
       />
     </Suspense>
   );

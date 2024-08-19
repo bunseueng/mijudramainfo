@@ -145,7 +145,6 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       }
     }
   }, [isLoading, cast, storedData, tvDetails?.cast]);
-  const prevItemRef = useRef(item);
 
   useEffect(() => {
     refetchData();

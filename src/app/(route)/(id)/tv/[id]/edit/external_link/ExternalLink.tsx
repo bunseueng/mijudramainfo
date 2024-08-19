@@ -433,7 +433,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <input
                         {...register("id")}
                         type="text"
-                        className="h-10 leading-[40px] bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
+                        className="h-10 leading-[40px] text-black bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] text-[#ffffffcc] rounded-md outline-none focus:border-[#1675b6] px-4"
                         placeholder={
                           external_link.find(
                             (item) => item.label === selectedExternal

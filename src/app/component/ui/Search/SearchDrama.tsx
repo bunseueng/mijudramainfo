@@ -2,7 +2,7 @@
 
 import { SearchParamsType } from "@/helper/type";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 const SearchDrama = () => {
@@ -14,40 +14,36 @@ const SearchDrama = () => {
 
   const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setSearch(value); // Update state immediately
-
-    // Debounce the URL update
-    debouncedUpdateURL(value);
+    setSearch(value); // Update the state with the input value
+    // Update the URL with the debounced value
+    updateURL(value);
   };
 
-  const debouncedUpdateURL = useDebouncedCallback((value: string) => {
+  // Debounced URL update function
+  const updateURL = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
-
     if (value) {
       params.set("query", value);
     } else {
       params.delete("query");
     }
-
-    // Update the URL with the debounced value
+    // Replace the current URL with the updated query parameter
     router.replace(`${pathname}/?${params.toString()}`);
   }, 300);
 
-  const onSearch = (e: React.ChangeEvent<EventTarget>) => {
+  const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
-
     if (search) {
-      params.set("query", search);
+      params.set("query", search); // Use the current navSearch value
     } else {
       params.delete("query");
     }
-
-    // Navigate to the search page with the query parameter
+    // Immediately navigate to the search page with the final query parameter
     router.push(`/search/?${params.toString()}`);
   };
 

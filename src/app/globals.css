@@ -620,3 +620,12 @@ input[type="number"]::-webkit-outer-spin-button {
 .countries .react-select__menu .css-1tzef7t-menu {
   height: 100px !important;
 }
+
+.ant-image {
+  width: 350px !important;
+  height: 480px !important;
+}
+
+.ant-image-mask {
+  border-radius: 8px !important;
+}

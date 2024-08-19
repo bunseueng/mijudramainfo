@@ -1185,3 +1185,29 @@ export const fetchMovieRecommendation = async (movie_id: any) => {
     return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
   }
 }
+
+export const fetchTvWatchProvider = async (tv_id: string) => {
+  try {
+    // Step 1: Fetch watch provider data from TMDb
+    const res = await fetch(
+      `https://api.themoviedb.org/3/tv/${tv_id}/watch/providers?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+    );
+    const provider = await res.json();
+    return provider
+  } catch (error) {
+    return { message: "Failed to fetch data", status: 501 };
+  }
+};
+
+// Function to get user country code (Geolocation or IP-based)
+const getUserCountryCode = async () => {
+  try {
+    // Using a third-party API to get the country code
+    const response = await fetch("https://ipapi.co/json/");
+    const data = await response.json();
+    return data.country_code; // e.g., "US", "CA", etc.
+  } catch (error) {
+    console.error("Failed to fetch country code: ", error);
+    return "US"; // Default to "US" as a fallback
+  }
+};
