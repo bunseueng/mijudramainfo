@@ -249,8 +249,6 @@ const DramaMain = ({
       throw new Error(error);
     }
   };
-  console.log(getDrama, "db");
-  console.log(tv, "tv");
 
   if (isLoading) {
     return <SearchLoading />;
@@ -376,7 +374,7 @@ const DramaMain = ({
                           <div className="flex items-center text-white font-bold cursor-pointer transform">
                             <div className="flex items-center font-bold">
                               What&apos;s your{" "}
-                              <span className="border-b-2 border-b-cyan-500 ml-2 pt-1">
+                              <span className="border-b-[1px] border-b-cyan-500 ml-2 pt-1">
                                 Vibe
                               </span>
                               ?{" "}
@@ -399,8 +397,8 @@ const DramaMain = ({
                   <div className="flex items-center mt-2 mb-8">
                     <div className="tooltip p-2 mr-5 rounded-full bg-cyan-600">
                       <MdFormatListBulletedAdd
-                        size={25}
-                        className="cursor-pointer"
+                        size={20}
+                        className="text-white cursor-pointer"
                         onClick={() => setOpenList(!openList)}
                       />
                       {openList ? (
@@ -410,7 +408,10 @@ const DramaMain = ({
                               href="/lists/create"
                               className="flex items-center justify-center py-1"
                             >
-                              <IoIosAddCircle size={25} />
+                              <IoIosAddCircle
+                                size={25}
+                                className="text-white"
+                              />
                               <span className="pl-3">Create New List</span>
                             </Link>
                             <span className="pl-3 oveflow-hidden">
@@ -471,7 +472,7 @@ const DramaMain = ({
                     <span className="text-white font-bold">Overview:</span>
                   </p>
                   <p className="text-md text-white mb-3">
-                    {detail?.synopsis !== ""
+                    {detail?.synopsis
                       ? detail?.synopsis
                       : tv?.overview !== ""
                       ? tv?.overview
@@ -485,11 +486,11 @@ const DramaMain = ({
                       </Link>
                     </span>
                   </p>
-                  <div className="border-t-2 pt-4">
+                  <div className="border-t-[1px] pt-4">
                     <h1 className="text-white font-bold text-md">
                       Navtive Title:
                       <span className="text-sm pl-2 font-normal text-blue-300">
-                        {detail?.native_title !== ""
+                        {detail?.native_title
                           ? detail?.native_title
                           : tv?.original_name?.length > 0
                           ? tv?.original_name

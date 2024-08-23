@@ -1,40 +1,43 @@
 import { TCreateList } from "@/helper/zod";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoCamera } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { SlCloudUpload } from "react-icons/sl";
 import { ListThumbnailProps } from "@/helper/type";
+import { useQuery } from "@tanstack/react-query";
+import { fetchMovie, fetchTv } from "@/app/actions/fetchMovieApi";
 
 const ListThumbnail: React.FC<ListThumbnailProps> = ({
   list,
-  register,
+  tvId,
+  movieId,
   reset,
-  handleSubmit,
 }) => {
   const [thumbnail, setThumbnail] = useState<string>("");
+  const [hover, setHover] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const handleProductImage = (e: any) => {
-    const file = e.target.files[0];
 
-    transformFile(file);
-  };
+  const { data: tvAndMovieResult = [], refetch: refetchData } = useQuery({
+    queryKey: ["tvAndMovieResult"],
+    queryFn: async () => {
+      const tvDetails = await Promise.all(
+        tvId.map(async (id: any) => await fetchTv(id))
+      );
+      const movieDetails = await Promise.all(
+        movieId.map(async (id: any) => await fetchMovie(id))
+      );
+      return [...tvDetails, ...movieDetails];
+    },
+    enabled: true, // Ensures the query runs immediately
+  });
 
-  const transformFile = (file: any) => {
-    const reader = new FileReader();
+  useEffect(() => {
+    refetchData();
+  }, [movieId, tvId, refetchData]);
 
-    if (file) {
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        setThumbnail(reader.result as string);
-      };
-    } else {
-      setThumbnail("");
-    }
-  };
-
-  const onUpload = async (data: TCreateList) => {
+  const onUpload = async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/list/${list?.listId}`, {
@@ -56,61 +59,57 @@ const ListThumbnail: React.FC<ListThumbnailProps> = ({
       setLoading(false); // Set loading to false when the request is completed
     }
   };
-
   return (
     <div className="mt-5">
       <label htmlFor="type">List Thumbnail*</label>
-      <div className="flex flex-col md:flex-row md:items-center relative">
-        {thumbnail ? (
-          <>
-            {!loading ? (
-              <button
-                type="button"
-                className="w-[100px] md:w-auto flex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3 mt-4 md:my-5"
-                onClick={() => handleSubmit(onUpload)}
-              >
-                <SlCloudUpload />
-                <span className="pl-2 pt-[2px]">Submit</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="w-[100px] md:w-auto flex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3 mt-4 md:my-5"
-              >
-                <ClipLoader color="#272727" size={25} loading={loading} />
-                <span className="pl-2 pt-[2px]">Submitting...</span>
-              </button>
-            )}
-          </>
-        ) : (
-          <button
-            type="button"
-            className="w-[100px] md:w-auto flex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3 mt-4 md:my-5"
+      <div className="flex flex-col md:flex-row md:items-center mt-5"></div>
+      {tvAndMovieResult?.map((result, idx) => {
+        return (
+          <div
+            className="relative inline-block mr-5"
+            key={idx}
+            onMouseEnter={() => setHover(idx)}
+            onMouseLeave={() => setHover(null)}
+            onClick={() => {
+              const newThumbnail = result?.backdrop_path || result?.poster_path;
+              setThumbnail(newThumbnail);
+              console.log("Selected thumbnail:", newThumbnail); // Check the selected thumbnail
+              onUpload();
+            }}
           >
-            <IoCamera /> <span className="pl-2">Upload</span>
-          </button>
-        )}
-        {!thumbnail && (
-          <input
-            {...register("thumbnail")}
-            className="block w-[104px] h-[43px] absolute bottom-5 left-0 cursor-pointer opacity-0 rounded-md"
-            type="file"
-            name="thumbnail"
-            onChange={handleProductImage}
-          />
-        )}
-      </div>
-      <Image
-        src={
-          thumbnail
-            ? thumbnail || (list?.thumbnail as string)
-            : "/empty-img.jpg"
-        }
-        alt="List thumbnail"
-        width={200}
-        height={200}
-        quality={100}
-      />
+            {(result?.backdrop_path || result?.poster_path) && (
+              <Image
+                src={`${
+                  result?.backdrop_path || result?.poster_path === null
+                    ? `https://image.tmdb.org/t/p/original/${
+                        result?.backdrop_path || result?.poster_path
+                      }`
+                    : "/empty-img.jpg"
+                }`}
+                alt={`${result?.name || result?.title} image`}
+                width={400}
+                height={400}
+                quality={100}
+                className="w-[400px] h-[200px] bg-cover object-cover rounded-md hover:bg-black hover:bg-opacity-40 transform duration-300 cursor-pointer"
+              />
+            )}
+            <div
+              className={`absolute top-[40%] left-0 right-0 text-center text-white font-bold bg-cyan-400 uppercase py-2 cursor-pointer transition-opacity duration-300 ease-in-out ${
+                hover === idx ? "opacity-100 visible" : "opacity-0 invisible"
+              }`}
+            >
+              Select this image
+            </div>
+            {list?.thumbnail?.includes(
+              result?.backdrop_path || result?.poster_path
+            ) && (
+              <div className="absolute top-[40%] left-0 right-0 text-center text-white font-bold bg-cyan-400 uppercase py-2 cursor-pointer transition-opacity duration-300 ease-in-out">
+                Selected
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

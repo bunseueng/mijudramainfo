@@ -54,7 +54,7 @@ const Signin = () => {
   );
 
   return (
-    <section className="max-w-6xl mx-auto my-20">
+    <section className="max-w-6xl mx-auto my-20 h-screen">
       <div className="h-full">
         <div className="flex h-full flex-wrap items-center justify-center lg:justify-between">
           <div className="shrink-1 mb-12 grow-0 order-1 md:order-0 basis-auto md:mb-0 md:w-6/12 xl:w-6/12 px-4">
@@ -121,7 +121,7 @@ const Signin = () => {
 
                 <button
                   type="button"
-                  className="mx-1 inline-block h-9 w-9 rounded-full bg-primary fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
+                  className="mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
                   onClick={() => signIn("google")}
                 >
                   <FaGoogle className="pl-[1.5px]" size={17} />
@@ -129,7 +129,7 @@ const Signin = () => {
 
                 <button
                   type="button"
-                  className=" mx-1 inline-block h-9 w-9 rounded-full bg-primary fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
+                  className=" mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
                   onClick={() => signIn("github")}
                 >
                   <FaGithub className="pl-[1.2px]" size={19} />
@@ -137,7 +137,7 @@ const Signin = () => {
 
                 <button
                   type="button"
-                  className=" mx-1 inline-block h-9 w-9 rounded-full bg-primary fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
+                  className=" mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
                 >
                   <FaFacebookF className="pl-1" />
                 </button>

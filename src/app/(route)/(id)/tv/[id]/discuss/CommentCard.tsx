@@ -109,7 +109,7 @@ const CommentCard = ({
           </div>
           {/* Reply Section */}
           {replyingTo && (
-            <div className="border-t-2 border-t-[#3e4042] pt-4 mt-4">
+            <div className="border-t-[1px] border-t-[#3e4042] pt-4 mt-4">
               <div className="w-[36px] h-[36px] relative inline-block float-left bg-[#242526] border-full whitespace-nowrap mr-3">
                 <Image
                   src={user?.profileAvatar || user?.image}

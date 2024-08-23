@@ -9,36 +9,41 @@ const GuestRole = ({ cast, getDrama }: any) => {
         ? getDrama?.cast
             ?.filter(
               (cast: any) =>
-                !cast?.order ||
+                cast?.cast_role === "Guest Role" ||
                 (cast?.order > 2 && cast?.total_episode_count < 5)
             )
-            .map((item: any) => (
+            .map((item: any, idx: number) => (
               <div
-                className="flex flex-col justify-between lg:flow-row items-start mt-8"
-                key={item?.id}
+                className="flex flex-col justify-between lg:flow-row items-start mt-3"
+                key={idx}
               >
                 <div className="w-full h-full flex flex-row">
-                  <Link href={`/person/${item?.id}`} className="cursor-pointer">
-                    {item.profile_path === null ? (
-                      <Image
-                        src="/empty-pf.jpg"
-                        alt="guest role profile"
-                        width={200}
-                        height={200}
-                        quality={100}
-                        className="w-[110px] h-[130px] bg-center rounded-md border-2"
-                      />
-                    ) : (
-                      <Image
-                        src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                        alt="guest role profile"
-                        width={200}
-                        height={200}
-                        quality={100}
-                        className="w-[110px] h-[130px] bg-center rounded-md"
-                      />
-                    )}
-                  </Link>
+                  <div className="box-content w-[90px]">
+                    <Link
+                      href={`/person/${item?.id}`}
+                      className="block outline-none box-content w-[110px] h-full"
+                    >
+                      {item.profile_path === null ? (
+                        <Image
+                          src="/empty-pf.jpg"
+                          alt={`${item?.name}'s Profile`}
+                          width={200}
+                          height={200}
+                          quality={100}
+                          className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
+                        />
+                      ) : (
+                        <Image
+                          src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
+                          alt={`${item?.name}'s Profile`}
+                          width={200}
+                          height={200}
+                          quality={100}
+                          className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
+                        />
+                      )}
+                    </Link>
+                  </div>
                   <div className="flex flex-col items-start ml-2">
                     <Link
                       href={`/person/${item?.id}`}
@@ -47,15 +52,15 @@ const GuestRole = ({ cast, getDrama }: any) => {
                       {item?.name}
                     </Link>
                     <h4 className="text-sm text-semibold text-black dark:text-white">
-                      {item?.roles?.map((role: any) => role?.character)}
+                      {item?.roles?.map((role: any) => role?.character)} (
+                      <span className="text-sm text-black dark:text-white opacity-80">
+                        {item?.total_episode_count} Episodes
+                      </span>
+                      )
                     </h4>
 
-                    <p className="text-xs text-[#818a91]">
-                      {item?.cast_role ||
-                        (item?.total_episode_count < 5 && "Guest Role")}
-                    </p>
-                    <p className="text-black dark:text-white">
-                      {item?.total_episode_count} Episodes
+                    <p className="text-xs text-black dark:text-[#818a91]">
+                      {item?.total_episode_count < 5 && "Guest Role"}
                     </p>
                   </div>
                 </div>
@@ -65,33 +70,38 @@ const GuestRole = ({ cast, getDrama }: any) => {
             ?.filter(
               (cast: any) => cast?.order > 2 && cast?.total_episode_count < 5
             )
-            .map((item: any) => (
+            .map((item: any, idx: number) => (
               <div
-                className="flex flex-col justify-between lg:flow-row items-start mt-8"
-                key={item?.id}
+                className="flex flex-col justify-between lg:flow-row items-start mt-3"
+                key={idx}
               >
                 <div className="w-full h-full flex flex-row">
-                  <Link href={`/person/${item?.id}`} className="cursor-pointer">
-                    {item.profile_path === null ? (
-                      <Image
-                        src="/empty-pf.jpg"
-                        alt="guest role profile"
-                        width={200}
-                        height={200}
-                        quality={100}
-                        className="w-[110px] h-[130px] bg-center rounded-md border-2"
-                      />
-                    ) : (
-                      <Image
-                        src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                        alt="guest role profile"
-                        width={200}
-                        height={200}
-                        quality={100}
-                        className="w-[110px] h-[130px] bg-center rounded-md"
-                      />
-                    )}
-                  </Link>
+                  <div className="box-content w-[90px]">
+                    <Link
+                      href={`/person/${item?.id}`}
+                      className="block outline-none box-content w-[110px] h-full"
+                    >
+                      {item.profile_path === null ? (
+                        <Image
+                          src="/empty-pf.jpg"
+                          alt={`${item?.name}'s Profile`}
+                          width={200}
+                          height={200}
+                          quality={100}
+                          className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
+                        />
+                      ) : (
+                        <Image
+                          src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
+                          alt={`${item?.name}'s Profile`}
+                          width={200}
+                          height={200}
+                          quality={100}
+                          className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
+                        />
+                      )}
+                    </Link>
+                  </div>
                   <div className="flex flex-col items-start ml-2">
                     <Link
                       href={`/person/${item?.id}`}
@@ -99,15 +109,16 @@ const GuestRole = ({ cast, getDrama }: any) => {
                     >
                       {item?.name}
                     </Link>
-                    <h4 className="text-semibold text-black dark:text-white">
-                      {item?.roles?.map((role: any) => role?.character)}
+                    <h4 className="text-sm text-semibold text-black dark:text-white">
+                      {item?.roles?.map((role: any) => role?.character)} (
+                      <span className="text-sm text-black dark:text-white opacity-80">
+                        {item?.total_episode_count} Episodes
+                      </span>
+                      )
                     </h4>
 
-                    <p className="text-black dark:text-[#818a91]">
+                    <p className="text-xs text-black dark:text-[#818a91]">
                       {item?.total_episode_count < 5 && "Guest Role"}
-                    </p>
-                    <p className="text-black dark:text-white">
-                      {item?.total_episode_count} Episodes
                     </p>
                   </div>
                 </div>

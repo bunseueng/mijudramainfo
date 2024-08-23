@@ -224,6 +224,24 @@ export const fetchTrailer = async (tv_id: any) => {
   const json = await res.json();
   return json;
 }
+
+// fetch movie trailer
+export const fetchMovieTrailer = async (movie_id: any) => {
+  const url = `https://api.themoviedb.org/3/movie/${movie_id}/videos?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+  const options = {
+    method: 'GET',
+    headers,
+  };
+  
+  const res = await fetch(url, options);
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch movies');
+  }
+
+  const json = await res.json();
+  return json;
+}
 // fetch cast credit
 export const fetchCastCredit = async (tv_id: any) => {
     const url = `https://api.themoviedb.org/3/tv/${tv_id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
@@ -1021,24 +1039,6 @@ export const fetchMovie = async (movie_id: any) => {
 
   if (!res.ok) {
     console.log('Failed to fetch movies');
-  }
-
-  const json = await res.json();
-  return json;
-}
-
-// fetch movie trailer
-export const fetchMovieTrailer = async (movie_id: any) => {
-  const url = `https://api.themoviedb.org/3/movie/${movie_id}/videos?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
-  const options = {
-    method: 'GET',
-    headers,
-  };
-  
-  const res = await fetch(url, options);
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch movies');
   }
 
   const json = await res.json();

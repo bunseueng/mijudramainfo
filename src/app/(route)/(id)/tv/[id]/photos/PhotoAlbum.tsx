@@ -9,7 +9,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getYearFromDate } from "../DramaMain";
 import { FaArrowLeft } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import ColorThief from "colorthief";
 
 const PhotoAlbum = () => {
   const searchParams = useSearchParams();
@@ -26,6 +27,8 @@ const PhotoAlbum = () => {
     queryFn: () => fetchTv(tv_id),
   });
 
+  const [dominantColor, setDominantColor] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
   const [page, setPage] = useState(1);
   const currentBackdrops = getImage?.backdrops?.map((item: any) => item);
   const currentPosters = getImage?.posters?.map((item: any) => item);
@@ -42,33 +45,57 @@ const PhotoAlbum = () => {
   const totalItems = combinedItems?.length;
   const currentItems = combinedItems?.slice(start, end) || combinedItems;
 
+  const extractColor = () => {
+    if (imgRef.current) {
+      const colorThief = new ColorThief();
+      const color = colorThief.getColor(imgRef.current);
+      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
+    }
+  };
+
+  useEffect(() => {
+    if (imgRef.current) {
+      const imgElement = imgRef.current; // Store the current value in a local variable
+      imgElement.addEventListener("load", extractColor);
+
+      // Cleanup function
+      return () => {
+        imgElement.removeEventListener("load", extractColor);
+      };
+    }
+  }, [getTv]);
+
   if (isLoading) {
     return <PhotoLoading />;
   }
 
   return (
     <div>
-      <div className="bg-cyan-600 dark:bg-[#242424]">
-        <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
-          <div className="flex items-center lg:items-start">
+      <div
+        className="bg-cyan-600 dark:bg-[#242424]"
+        style={{ backgroundColor: dominantColor as string | undefined }}
+      >
+        <div className="max-w-6xl mx-auto flex items-center mt-0 px-4 py-2">
+          <div className="flex items-center lg:items-start px-2 cursor-default">
             <Image
+              ref={imgRef} // Set the reference to the image
               src={`https://image.tmdb.org/t/p/original/${
                 getTv?.poster_path || getTv?.backdrop_path
               }`}
-              alt="Drama Image"
-              width={50}
-              height={50}
+              alt={`${getTv?.name || getTv?.title}'s Poster`}
+              width={200}
+              height={200}
               quality={100}
-              className="w-[90px] h-[130px] bg-center object-center rounded-md"
+              className="w-[60px] h-[90px] bg-center object-center rounded-md"
             />
-            <div className="flex flex-col pl-5 py-5">
+            <div className="flex flex-col pl-5 py-2">
               <h1 className="text-white text-xl font-bold">
                 {getTv?.name} (
                 {getYearFromDate(getTv?.first_air_date || getTv?.release_date)})
               </h1>
               <Link
                 href={`/tv/${tv_id}`}
-                className="flex items-center my-5 opacity-75 cursor-pointer hover:opacity-90"
+                className="flex items-center text-sm my-1 opacity-75 hover:opacity-90"
               >
                 <FaArrowLeft className="text-white" size={20} />
                 <p className="text-white font-bold pl-2">Back to main</p>
@@ -77,9 +104,9 @@ const PhotoAlbum = () => {
           </div>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto md:py-8 md:px-10 mt-5 relative overflow-hidden">
-        <div className="border-2 rounded-lg bg-white dark:bg-[#242424] dark:border-[#272727] px-2">
-          <h1 className="w-full text-2xl font-bold p-5 border-b-2 border-b-slate-200 dark:text-[#2196f3] dark:border-[#2f2f2f]">
+      <div className="relative max-w-6xl mx-auto md:py-8 mt-5 px-4 overflow-hidden">
+        <div className="border-[1px] rounded-lg bg-white dark:bg-[#242424] dark:border-[#272727] px-2">
+          <h1 className="w-full text-2xl font-bold p-5 border-b-[1px] border-b-slate-200 dark:text-[#2196f3] dark:border-[#2f2f2f]">
             {getTv?.name}
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-2 w-full h-full">

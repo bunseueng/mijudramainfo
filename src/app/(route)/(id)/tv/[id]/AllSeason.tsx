@@ -10,7 +10,7 @@ const AllSeason = ({
   tv,
 }: any) => {
   return (
-    <div className="border-t-2 border-slate-400 mt-7 mx-2 md:mx-0">
+    <div className="border-t-[1px] border-slate-400 mt-7 mx-2 md:mx-0">
       <h1 className="text-2xl text-black dark:text-white font-bold my-5">
         <span className="border border-l-yellow-500 border-l-4 rounded-md mr-4"></span>
         {displaySeason?.name || firstSeason?.name}

@@ -107,7 +107,7 @@ const MovieResult: React.FC<MovieResultProps> = ({
   return (
     <>
       {tvAndMovieResult.length > 0 && (
-        <div className="w-full border-t-2 border-t-[#78828c] pt-10 relative">
+        <div className="w-full border-t-[1px] border-t-[#78828c] pt-10 relative">
           {tvAndMovieResult &&
             tvAndMovieResult.length > 0 &&
             tvAndMovieResult.map((item: any, idx: number) => (
@@ -122,7 +122,10 @@ const MovieResult: React.FC<MovieResultProps> = ({
               >
                 <div className="flex items-start mx-4 mb-3">
                   <div className="flex flex-col items-center pr-5">
-                    <GiHamburgerMenu size={20} />
+                    <GiHamburgerMenu
+                      size={20}
+                      className="text-black dark:text-[#ffffffde]"
+                    />
                     <p className="text-md">{idx + 1}</p>
                   </div>
                   {(item?.poster_path || item?.backdrop_path) && (
@@ -163,7 +166,7 @@ const MovieResult: React.FC<MovieResultProps> = ({
                   <p className="text-[#606266] mr-5">#{idx + 1}</p>
                   <div className="flex-flex-col">
                     <span
-                      className="flex items-center text-sm bg-[#3a3b3c] border-2 border-[#3a3b3c] rounded-md px-2 py-1 cursor-pointer"
+                      className="flex items-center text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#3a3b3c] rounded-md px-2 py-1 cursor-pointer"
                       onClick={() => {
                         setActiveItemId(item.id), setModal(!modal);
                       }}
@@ -196,7 +199,7 @@ const MovieResult: React.FC<MovieResultProps> = ({
                       </>
                     )}
                     <button
-                      className="flex items-center text-sm bg-[#3a3b3c] border-2 border-[#3a3b3c] rounded-md px-2 py-1 mt-3"
+                      className="flex items-center text-sm bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#3a3b3c] rounded-md px-2 py-1 mt-3"
                       onClick={() => handleSubmit(onDeleteMovie(item.id))}
                       disabled={isDeleting}
                     >

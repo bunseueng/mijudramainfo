@@ -246,9 +246,9 @@ export interface MovieResultProps {
 
 export interface ListThumbnailProps {
   list: List | null;
-  register: UseFormRegister<TCreateList>;
+  tvId: Prisma.JsonValue[];
+  movieId: Prisma.JsonValue[];
   reset: UseFormReset<TCreateList>;
-  handleSubmit: (data: any) => void;
 }
 
 export interface CommentProps {
@@ -288,6 +288,44 @@ export interface Drama {
     createdAt: Date;
     updatedAt: Date;
   } | null;
+}
+
+export interface DramaDB {
+  id: string;
+  userId: string;
+  details: Prisma.JsonValue[];
+  cover: string | null;
+  related_title: Prisma.JsonValue[];
+  cast: Prisma.JsonValue[];
+  crew: Prisma.JsonValue[];
+  services: Prisma.JsonValue[];
+  external_links: Prisma.JsonValue[];
+  released_information: Prisma.JsonValue[];
+  production_information: Prisma.JsonValue[];
+  genres_tags: Prisma.JsonValue[];
+  changes: Prisma.JsonValue[];
+  changeCount: Number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MovieDB {
+  id: string;
+  userId: string;
+  details: Prisma.JsonValue[];
+  cover: string | null;
+  related_title: Prisma.JsonValue[];
+  cast: Prisma.JsonValue[];
+  crew: Prisma.JsonValue[];
+  services: Prisma.JsonValue[];
+  external_links: Prisma.JsonValue[];
+  released_information: Prisma.JsonValue[];
+  production_information: Prisma.JsonValue[];
+  genres_tags: Prisma.JsonValue[];
+  changes: Prisma.JsonValue[];
+  changeCount: Number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface DramaDetails {

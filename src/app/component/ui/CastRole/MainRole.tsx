@@ -8,15 +8,15 @@ const MainRole = ({ cast, getDrama }: any) => {
       {getDrama?.cast?.length > 0
         ? getDrama?.cast
             ?.filter(
-              (cast: any) => cast?.order < 2 || !cast?.order.includes("fromDB")
+              (cast: any) => cast?.order < 2 || cast?.cast_role === "Main Role"
             )
-            .map((item: any) => (
+            .map((item: any, idx: number) => (
               <div
-                className="flex flex-col justify-between lg:flow-row items-start mt-8"
-                key={item?.id}
+                className="flex flex-col justify-between lg:flow-row items-start mt-3"
+                key={idx}
               >
                 <div className="w-full h-full flex flex-row">
-                  <div className="box-content w-[110px]">
+                  <div className="box-content w-[90px]">
                     <Link
                       href={`/person/${item?.id}`}
                       className="block outline-none box-content w-[110px] h-full"
@@ -24,20 +24,20 @@ const MainRole = ({ cast, getDrama }: any) => {
                       {item.profile_path === null ? (
                         <Image
                           src="/empty-pf.jpg"
-                          alt="Main role profile"
-                          width={50}
-                          height={50}
+                          alt={`${item?.name}'s Profile`}
+                          width={200}
+                          height={200}
                           quality={100}
-                          className="w-[110px] h-[130px] bg-center rounded-md border-2"
+                          className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
                         />
                       ) : (
                         <Image
                           src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                          alt="Main role profile"
+                          alt={`${item?.name}'s Profile`}
                           width={200}
                           height={200}
                           quality={100}
-                          className="w-[110px] h-[130px] bg-center rounded-md"
+                          className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
                         />
                       )}
                     </Link>
@@ -54,7 +54,7 @@ const MainRole = ({ cast, getDrama }: any) => {
                         item?.character}
                     </h4>
 
-                    <p className="text-xs text-[#818a91]">
+                    <p className="text-xs dark:text-[#818a91]">
                       {item?.cast_role || item?.order < 2
                         ? "Main Role"
                         : "Support Role"}
@@ -65,13 +65,13 @@ const MainRole = ({ cast, getDrama }: any) => {
             ))
         : cast?.cast
             ?.filter((cast: any) => cast?.order < 2)
-            .map((item: any) => (
+            .map((item: any, idx: number) => (
               <div
-                className="flex flex-col justify-between lg:flow-row items-start mt-8"
-                key={item?.id}
+                className="flex flex-col justify-between lg:flow-row items-start mt-3"
+                key={idx}
               >
                 <div className="w-full h-full flex flex-row">
-                  <div className="box-content w-[110px]">
+                  <div className="box-content w-[90px]">
                     <Link
                       href={`/person/${item?.id}`}
                       className="block outline-none box-content w-[110px] h-full"
@@ -79,20 +79,20 @@ const MainRole = ({ cast, getDrama }: any) => {
                       {item.profile_path === null ? (
                         <Image
                           src="/empty-pf.jpg"
-                          alt="Main role profile"
-                          width={50}
-                          height={50}
+                          alt={`${item?.name}'s Profile`}
+                          width={200}
+                          height={200}
                           quality={100}
-                          className="w-[110px] h-[130px] bg-center rounded-md border-2"
+                          className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
                         />
                       ) : (
                         <Image
                           src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                          alt="Main role profile"
+                          alt={`${item?.name}'s Profile`}
                           width={200}
                           height={200}
                           quality={100}
-                          className="w-[110px] h-[130px] bg-center rounded-md"
+                          className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
                         />
                       )}
                     </Link>
@@ -109,8 +109,10 @@ const MainRole = ({ cast, getDrama }: any) => {
                         item?.character}
                     </h4>
 
-                    <p className="text-xs text-[#818a91]">
-                      {item?.order < 2 ? "Main Role" : "Support Role"}
+                    <p className="text-xs dark:text-[#818a91]">
+                      {item?.cast_role || item?.order < 2
+                        ? "Main Role"
+                        : "Support Role"}
                     </p>
                   </div>
                 </div>

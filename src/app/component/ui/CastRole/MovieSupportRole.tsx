@@ -7,13 +7,13 @@ const MovieSupportRole = ({ cast }: any) => {
     <div className="md:grid grid-cols-1 md:grid-cols-2 px-5">
       {cast?.cast
         ?.filter((cast: any) => cast?.order > 2)
-        .map((item: any) => (
+        .map((item: any, idx: number) => (
           <div
-            className="flex flex-col justify-between lg:flow-row items-start mt-8"
-            key={item?.id}
+            className="flex flex-col justify-between lg:flow-row items-start mt-3"
+            key={idx}
           >
             <div className="w-full h-full flex flex-row">
-              <div className="box-content w-[110px]">
+              <div className="box-content w-[90px]">
                 <Link
                   href={`/person/${item?.id}`}
                   className="block outline-none box-content w-[110px] h-full"
@@ -21,20 +21,20 @@ const MovieSupportRole = ({ cast }: any) => {
                   {item.profile_path === null ? (
                     <Image
                       src="/empty-pf.jpg"
-                      alt="Support role profile"
+                      alt={`${item?.name}'s Profile`}
                       width={200}
                       height={200}
                       quality={100}
-                      className="w-[110px] h-[130px] bg-center rounded-md border-2"
+                      className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
                     />
                   ) : (
                     <Image
                       src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                      alt="Support role profile"
+                      alt={`${item?.name}'s Profile`}
                       width={200}
                       height={200}
                       quality={100}
-                      className="w-[110px] h-[130px] bg-center rounded-md"
+                      className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
                     />
                   )}
                 </Link>

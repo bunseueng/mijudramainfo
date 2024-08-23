@@ -79,7 +79,7 @@ const DramaCast = ({
             <CastCard getDrama={getDrama} cast={cast} />
           </div>
 
-          <div className="border-t-2 border-slate-400 mt-7 mx-2 md:mx-0">
+          <div className="border-t-[1px] border-slate-400 mt-7 mx-2 md:mx-0">
             <h1 className="text-lg text-black dark:text-white font-bold my-5">
               <span className="border border-l-yellow-500 border-l-4 rounded-md mr-4"></span>
               Where to watch {tv?.name}
@@ -92,7 +92,7 @@ const DramaCast = ({
             tv={tv}
             getYearFromDate={getYearFromDate}
           />
-          <div className="border-b-2 border-b-slate-500 pb-5 mt-5 mx-2 md:mx-0">
+          <div className="border-b-[1px] border-b-slate-400 pb-5 mt-5 mx-2 md:mx-0">
             <Link href={`/tv/${tv_id}/seasons`} className="text-lg font-bold">
               View all seasons
             </Link>
@@ -113,7 +113,7 @@ const DramaCast = ({
         </div>
         <div className="hidden  md:block px-2 md:w-[30%] my-5 md:my-0 lg:ml-5">
           <div className="border border-slate-400 dark:border-[#272727] dark:bg-[#242424] h-full rounded-md">
-            <h1 className="text-white text-2xl font-bold bg-cyan-600 p-4 rounded-t-md">
+            <h1 className="text-white text-md font-bold bg-cyan-600 p-4 rounded-t-md">
               Details:
             </h1>
             <div className="flex flex-col p-4 pb-1">
@@ -198,7 +198,7 @@ const DramaCast = ({
             </div>
           </div>
           <div className="border border-slate-400 dark:border-[#272727] dark:bg-[#242424] h-full mt-5 rounded-md">
-            <h1 className="text-white text-2xl font-bold bg-cyan-600 rounded-t-md p-4">
+            <h1 className="text-white text-md font-bold bg-cyan-600 rounded-t-md p-4">
               Statistics:
             </h1>
             <div className="flex flex-col p-4 pb-1">

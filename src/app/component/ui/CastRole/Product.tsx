@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const Product = ({ production }: any) => {
+const Product = ({ production, productionDB }: any) => {
   // Create a set to store unique director names
   const uniqueProducerNames = new Set();
 
   // Filter out producer with duplicate names
-  const filteredProducer = production.filter((producer: any) => {
+  const filteredProducer = production?.filter((producer: any) => {
     // Check if the producer's name is already in the set
     if (uniqueProducerNames.has(producer.name)) {
       // If it is, return false to filter out the producer
@@ -20,48 +20,101 @@ const Product = ({ production }: any) => {
   });
   return (
     <div className="md:grid grid-cols-1 md:grid-cols-2 px-5">
-      {filteredProducer?.map((item: any) => (
-        <div
-          className="flex flex-col justify-between lg:flow-row items-start mt-8"
-          key={item?.id}
-        >
-          <div className="w-full h-full flex flex-row">
-            <Link href={`/person/${item?.id}`} className="cursor-pointer">
-              {item.profile_path === null ? (
-                <Image
-                  src="/empty-pf.jpg"
-                  alt="Producer profile"
-                  width={200}
-                  height={200}
-                  quality={100}
-                  className="w-[110px] h-[130px] bg-center rounded-md border-2"
-                />
-              ) : (
-                <Image
-                  src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                  alt="Producer profile"
-                  width={200}
-                  height={200}
-                  quality={100}
-                  className="w-[110px] h-[130px] bg-center rounded-md"
-                />
-              )}
-            </Link>
+      {productionDB?.length > 0
+        ? productionDB?.map((item: any, idx: number) => (
+            <div
+              className="flex flex-col justify-between lg:flow-row items-start mt-3"
+              key={idx}
+            >
+              <div className="w-full h-full flex flex-row">
+                <div className="box-content w-[90px]">
+                  <Link
+                    href={`/person/${item?.id}`}
+                    className="block outline-none box-content w-[110px] h-full"
+                  >
+                    {item.profile_path === null ? (
+                      <Image
+                        src="/empty-pf.jpg"
+                        alt={`${item?.name}'s Profile`}
+                        width={200}
+                        height={200}
+                        quality={100}
+                        className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
+                      />
+                    ) : (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
+                        alt={`${item?.name}'s Profile`}
+                        width={200}
+                        height={200}
+                        quality={100}
+                        className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
+                      />
+                    )}
+                  </Link>
+                </div>
 
-            <div className="pl-2">
-              <Link
-                href={`/person/${item?.id}`}
-                className="text-lg font-bold truncate text-sky-700 dark:text-[#2196f3]"
-              >
-                {item?.name}
-              </Link>
-              <h4 className="">
-                {item?.job || item?.jobs?.map((crew: any) => crew?.job)}
-              </h4>
+                <div className="pl-2">
+                  <Link
+                    href={`/person/${item?.id}`}
+                    className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
+                  >
+                    {item?.name}
+                  </Link>
+                  <h4 className="text-sm text-[#818a91]">
+                    {item?.job || item?.jobs?.map((crew: any) => crew?.job)}
+                  </h4>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      ))}
+          ))
+        : filteredProducer?.map((item: any, idx: number) => (
+            <div
+              className="flex flex-col justify-between lg:flow-row items-start mt-3"
+              key={idx}
+            >
+              <div className="w-full h-full flex flex-row">
+                <div className="box-content w-[90px]">
+                  <Link
+                    href={`/person/${item?.id}`}
+                    className="block outline-none box-content w-[110px] h-full"
+                  >
+                    {item.profile_path === null ? (
+                      <Image
+                        src="/empty-pf.jpg"
+                        alt={`${item?.name}'s Profile`}
+                        width={200}
+                        height={200}
+                        quality={100}
+                        className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
+                      />
+                    ) : (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
+                        alt={`${item?.name}'s Profile`}
+                        width={200}
+                        height={200}
+                        quality={100}
+                        className="w-[90px] h-[120px] bg-cover object-cover rounded-md"
+                      />
+                    )}
+                  </Link>
+                </div>
+
+                <div className="pl-2">
+                  <Link
+                    href={`/person/${item?.id}`}
+                    className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
+                  >
+                    {item?.name}
+                  </Link>
+                  <h4 className="text-sm text-[#818a91]">
+                    {item?.job || item?.jobs?.map((crew: any) => crew?.job)}
+                  </h4>
+                </div>
+              </div>
+            </div>
+          ))}
     </div>
   );
 };

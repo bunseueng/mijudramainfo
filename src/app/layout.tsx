@@ -60,8 +60,8 @@ export default function RootLayout({
                 <div className="flex flex-col top-0 sticky z-50">
                   <SessionAllPage />
                 </div>
-                <div className="flex-grow h-auto">{children}</div>
-                <div className="flex flex-col items-end justify-end relative w-full h-auto">
+                <div className="parent-container min-h-screen flex flex-col">
+                  <div className="content-container flex-grow">{children}</div>
                   <Footer />
                 </div>
                 <ToastContainer position="top-right" />

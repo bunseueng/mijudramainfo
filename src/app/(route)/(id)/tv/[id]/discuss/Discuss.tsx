@@ -194,7 +194,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
               ?.filter((item: any) => !item.parentId)
               .map((comment: any, idx: number) => (
                 <li
-                  className="relative border-t-2 border-t-[#78828c21] dark:border-t-[#36383a] -mx-[12px] pt-4 px-4"
+                  className="relative border-t-[1px] border-t-[#78828c21] dark:border-t-[#36383a] -mx-[12px] pt-4 px-4"
                   key={idx}
                 >
                   <CommentCard

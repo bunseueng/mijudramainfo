@@ -26,19 +26,6 @@ export async function PUT(request: Request, { params }: { params: { listId: stri
 
     const { movieId, tvId, type, listTitle, privacy, description, thumbnail, love } = await request.json();
 
-    let uploadRes;
-    if (thumbnail) {
-      // If there is an existing thumbnail, delete it from Cloudinary
-      if (findList.thumbnail) {
-        await cloudinary.uploader.destroy(findList.public_id as any);
-      }
-
-      // Upload the new thumbnail to Cloudinary
-      uploadRes = await cloudinary.uploader.upload(thumbnail, {
-        upload_preset: "mijudrama_thumbnail"
-      });
-    }
-
     const updatedLovedBy = findList.lovedBy?.includes(currentUser.id)
       ? findList.lovedBy?.filter((id) => id !== currentUser.id)
       : [...(findList.lovedBy || []), currentUser.id];
@@ -57,8 +44,7 @@ export async function PUT(request: Request, { params }: { params: { listId: stri
         description,
         movieId: movieId,
         tvId: tvId,
-        thumbnail: thumbnail ? uploadRes?.secure_url : findList.thumbnail,
-        public_id: thumbnail ? uploadRes?.public_id : findList.public_id,
+        thumbnail: thumbnail,
         love: findList.love ? updatedLove - 1 : updatedLove + 1,
         lovedBy: updatedLovedBy
       },

@@ -3,6 +3,7 @@ import DramaMain from "./DramaMain";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import TvList from "./TvList";
 
 export default async function tvPage({ params }: any) {
   const tv_id = params.id;
@@ -37,18 +38,21 @@ export default async function tvPage({ params }: any) {
   const getDrama = await prisma.drama.findUnique({ where: { tv_id: tv_id } });
 
   return (
-    <Suspense fallback={<SearchLoading />}>
-      <DramaMain
-        tv_id={tv_id}
-        existedWatchlist={existedWatchlist}
-        existedFavorite={existedFavorite}
-        user={user}
-        users={users}
-        existingRatings={existingRatings}
-        userRating={userRating}
-        getComment={getComment}
-        getDrama={getDrama}
-      />
-    </Suspense>
+    <>
+      <TvList tv_id={tv_id} />
+      <Suspense fallback={<SearchLoading />}>
+        <DramaMain
+          tv_id={tv_id}
+          existedWatchlist={existedWatchlist}
+          existedFavorite={existedFavorite}
+          user={user}
+          users={users}
+          existingRatings={existingRatings}
+          userRating={userRating}
+          getComment={getComment}
+          getDrama={getDrama}
+        />
+      </Suspense>
+    </>
   );
 }

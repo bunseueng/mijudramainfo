@@ -4,14 +4,20 @@ import { createList, TCreateList } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { FaLock, FaRegEye } from "react-icons/fa6";
+import { FaLock, FaRegEye, FaUser } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { IoTvSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 import EditList from "../[listId]/edit/EditList";
+import { currentUserProps, ICurrentUser, UserProps } from "@/helper/type";
 
-const CreateList = () => {
+interface CurrentUser {
+  currentUser: currentUserProps | null;
+}
+
+const CreateList: React.FC<CurrentUser> = ({ currentUser }) => {
   const [selectType, setSelectType] = useState<string>("");
+  const [titleValue, setTitleValue] = useState<string>("");
   const [selectPrivacy, setSelectPrivacy] = useState<string>("");
   const [submittedData, setSubmittedData] = useState<TCreateList | null>(null);
   const {
@@ -59,7 +65,7 @@ const CreateList = () => {
         <div className="max-w-2xl mx-auto py-3 px-4 md:px-6 my-10">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="bg-[#272727] border-2 border-[#272727] rounded-md"
+            className="bg-white dark:bg-[#272727] border-2 border-[#78828c21] dark:border-[#272727] rounded-md"
           >
             <div className="py-2 px-5">
               <div className="flex items-center justify-between">
@@ -72,18 +78,18 @@ const CreateList = () => {
                 <h1 className="text-md md:text-lg font-bold">
                   What&apos;s your list for?
                 </h1>
-                <div className="flex items-center">
+                <div className="block">
                   <div
-                    className={`bg-white rounded-md mt-2 mb-5 ${
-                      selectType
+                    className={`float-left w-full md:w-[48%] bg-white rounded-md mr-2 mt-2 mb-5 ${
+                      selectType === "shows"
                         ? "border-2 border-[#00619d] bg-white text-[#00619d]"
                         : "border-2 border-slate-100 "
                     }`}
                   >
                     <div
                       {...register("type")}
-                      className={`${
-                        selectType
+                      className={`cursor-pointer ${
+                        selectType === "shows"
                           ? "text-[#00619d] flex flex-col items-center p-8"
                           : "flex flex-col items-center p-8"
                       }`}
@@ -92,17 +98,54 @@ const CreateList = () => {
                       <IoTvSharp
                         size={25}
                         className={`${
-                          selectType ? "text-[#00619d]" : "text-[#616f79]"
+                          selectType === "shows"
+                            ? "text-[#00619d]"
+                            : "text-[#616f79]"
                         }`}
                       />
                       <h1
                         className={`${
-                          selectType
+                          selectType === "shows"
                             ? "text-[#00619d] text-xl"
                             : "text-[#616f79] text-xl"
                         }`}
                       >
                         Shows
+                      </h1>
+                    </div>
+                  </div>
+                  <div
+                    className={`float-left w-full md:w-[49.2%] bg-white rounded-md ml-2 mt-2 mb-5 ${
+                      selectType === "people"
+                        ? "border-2 border-[#00619d] bg-white text-[#00619d]"
+                        : "border-2 border-slate-100 "
+                    }`}
+                  >
+                    <div
+                      {...register("type")}
+                      className={`cursor-pointer ${
+                        selectType === "people"
+                          ? "text-[#00619d] flex flex-col items-center p-8"
+                          : "flex flex-col items-center p-8"
+                      }`}
+                      onClick={() => setSelectType("people")}
+                    >
+                      <FaUser
+                        size={25}
+                        className={`${
+                          selectType === "people"
+                            ? "text-[#00619d]"
+                            : "text-[#616f79]"
+                        }`}
+                      />
+                      <h1
+                        className={`${
+                          selectType === "people"
+                            ? "text-[#00619d] text-xl"
+                            : "text-[#616f79] text-xl"
+                        }`}
+                      >
+                        People
                       </h1>
                     </div>
                   </div>
@@ -113,23 +156,28 @@ const CreateList = () => {
                     {...register("listTitle")}
                     name="listTitle"
                     type="text"
-                    className="w-full bg-[#272727] border-2 border-[#3b3b3b] rounded-md p-3 outline-none focus:ring-blue-500 focus:border-blue-500 mt-2"
+                    className="w-full bg-white dark:bg-[#272727] border-2 border-[#78828c21] dark:border-[#3b3b3b] rounded-md p-3 outline-none focus:ring-blue-500 focus:border-blue-500 mt-2"
+                    placeholder="Input list title"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setTitleValue(e.target.value)
+                    }
+                    value={titleValue}
                   />
                 </div>
                 <h1 className="text-md md:text-lg font-bold">
                   What type of list are you creating?
                 </h1>
-                <div className="flex items-center">
+                <div className="block">
                   <div
-                    className={`bg-white rounded-md mt-2 mb-5 ${
+                    className={`float-left w-full md:w-[48%] bg-white rounded-md ${
                       selectPrivacy === "Public list"
-                        ? "border-2 border-[#00619d] bg-white text-[#00619d] mr-2 md:mr-5"
-                        : "border-2 border-slate-100 mr-2 md:mr-5"
+                        ? "border-2 border-[#00619d] bg-white text-[#00619d] mr-2 mt-2 mb-5 "
+                        : "border-2 border-slate-100 mr-2 mt-2 mb-5 "
                     }`}
                   >
                     <div
                       {...register("privacy")}
-                      className={`${
+                      className={`cursor-pointer ${
                         selectPrivacy === "Public list"
                           ? "text-[#00619d] flex flex-col items-center p-8"
                           : "flex flex-col items-center p-8"
@@ -138,7 +186,7 @@ const CreateList = () => {
                     >
                       <FaRegEye
                         size={25}
-                        className={`${
+                        className={`cursor-pointer ${
                           selectPrivacy === "Public list"
                             ? "text-[#00619d]"
                             : "text-[#616f79]"
@@ -156,10 +204,10 @@ const CreateList = () => {
                     </div>
                   </div>
                   <div
-                    className={`bg-white rounded-md mt-2 mb-5 ${
+                    className={`float-left w-full md:w-[49.2%] bg-white rounded-md ${
                       selectPrivacy === "Private list"
-                        ? "border-2 border-[#00619d] bg-white text-[#00619d] mr:2 md:mr-5"
-                        : "border-2 border-slate-100 mr:2 md:mr-5"
+                        ? "border-2 border-[#00619d] bg-white text-[#00619d] ml-2 mt-2 mb-5 "
+                        : "border-2 border-slate-100 ml-2 mt-2 mb-5 "
                     }`}
                   >
                     <div
@@ -194,8 +242,23 @@ const CreateList = () => {
               </div>
               <div className="w-full text-center mb-4">
                 <button
-                  className=" bg-[#a0cfff4d] border-2 border-[#a0cfff4d] rounded-md px-4 py-2"
+                  className={`text-white border-2 border-[#a0cfff4d] rounded-md px-4 py-2 ${
+                    selectType &&
+                    selectPrivacy &&
+                    titleValue !== "" &&
+                    currentUser
+                      ? "cursor-pointer bg-[#409eff]"
+                      : "cursor-not-allowed bg-[#a0cfff4d]"
+                  } `}
                   type="submit"
+                  disabled={
+                    selectType &&
+                    selectPrivacy &&
+                    titleValue !== "" &&
+                    currentUser
+                      ? false
+                      : true
+                  }
                 >
                   Create list
                 </button>

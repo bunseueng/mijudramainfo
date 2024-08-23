@@ -13,6 +13,7 @@ import { IoMdAdd, IoMdHeart } from "react-icons/io";
 import { RiComputerLine } from "react-icons/ri";
 import { toast } from "react-toastify";
 import { Lists } from "./Lists";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 interface listResultProps {
   listResult: any[] | undefined;
@@ -80,9 +81,10 @@ const ListCard: React.FC<Lists & listResultProps> = ({
     (rate: any) => rate?.rating?.userId === currentUser?.id?.toString()
   );
 
+  console.log(ratings);
   return (
-    <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-3 px-4 md:px-6">
-      <div className="w-full h-full bg-white dark:bg-[#272727] border-2 border-slate-200 dark:border-[#272727] rounded-md my-5">
+    <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto py-3 px-4 md:px-6">
+      <div className="w-full h-full bg-white dark:bg-[#272727] border-[1px] border-slate-200 dark:border-[#272727] rounded-md my-5">
         <div className="p-3 mt-5">
           <div className="px-3">
             <div className="mb-5">
@@ -108,35 +110,35 @@ const ListCard: React.FC<Lists & listResultProps> = ({
         </div>
         <div className="p-4">
           <div className="flex items-center p-2 mb-5">
-            <div className="flex items-center text-[#ffffff99] mr-3   ">
+            <div className="flex items-center text-[#00000099] dark:text-[#ffffff99] mr-3">
               <span>
-                <RiComputerLine size={23} />
+                <RiComputerLine size={18} />
               </span>
-              <h1 className="pt-[2px] pl-1">
+              <h1 className="text-sm pt-[2px] pl-1">
                 {list?.tvId?.length || list?.movieId?.length} Titles
               </h1>
             </div>
             <div
-              className="flex items-center text-[#ffffff99] mr-3 cursor-pointer"
+              className="flex items-center text-[#00000099] dark:text-[#ffffff99] mr-3 cursor-pointer"
               onClick={handleSubmit(onSubmit)}
             >
               <span {...register("love")}>
                 {list?.love ? (
-                  <IoMdHeart size={23} className="text-red-600" />
+                  <AiFillHeart size={18} className="text-red-600" />
                 ) : (
-                  <CiHeart size={23} className="text-red-600" />
+                  <AiOutlineHeart size={18} className="text-[#00000099]" />
                 )}
               </span>
-              <h1 className="pt-[2px] pl-1">{list?.love} Loves</h1>
+              <h1 className="text-sm pt-[2px] pl-1">{list?.love} Loves</h1>
             </div>
             <Link
               href={`/lists/${list?.listId}/edit`}
-              className="flex items-center text-[#ffffff99] mr-3   "
+              className="flex items-center text-[#00000099] dark:text-[#ffffff99] mr-3   "
             >
               <span>
-                <CiEdit size={23} />
+                <CiEdit size={18} />
               </span>
-              <h1 className="pt-[2px] pl-1">Edit</h1>
+              <h1 className="text-sm pt-[2px] pl-1">Edit</h1>
             </Link>
           </div>
 
@@ -167,7 +169,7 @@ const ListCard: React.FC<Lists & listResultProps> = ({
             <div className="float-left w-full">
               {ratings?.map((rate: any, idx: number) => (
                 <div
-                  className="border-t-2 border-t-slate-300 dark:border-t-[#303030] py-3"
+                  className="border-t-[1px] border-t-slate-300 dark:border-t-[#303030] py-3"
                   key={idx}
                 >
                   <div className="flex flex-col -mx-3">
@@ -206,13 +208,13 @@ const ListCard: React.FC<Lists & listResultProps> = ({
                                   setModal(!modal),
                                     setSelectedItemId(rate.item.id);
                                 }}
-                                className="inline-block min-w-[32px] bg-[#242424] border-[#292929] px-2 py-[2px] ml-2 -mb-1 leading-3 rounded-md"
+                                className="inline-block min-w-[32px] bg-white dark:bg-[#242424] border-[1px] border-[#00000011] dark:border-[#292929] hover:bg-[#9e9e9e33] px-2 py-[2px] ml-2 -mb-1 leading-3 rounded-md cursor-pointer"
                               >
                                 <span>
                                   {rate?.rating?.rating === 0 ? (
-                                    <IoMdAdd className="hover:opacity-70 hover:backdrop-brightness-75 transform duration-300 cursor-pointer" />
+                                    <IoMdAdd className="hover:text-opacity-70 dark:hover:backdrop-brightness-75 transform duration-300" />
                                   ) : (
-                                    <CiEdit className="hover:opacity-70 hover:backdrop-brightness-75 transform duration-300 cursor-pointer" />
+                                    <CiEdit className="hover:text-opacity-70 dark:hover:backdrop-brightness-75 transform duration-300" />
                                   )}
                                 </span>
                               </div>
@@ -231,7 +233,7 @@ const ListCard: React.FC<Lists & listResultProps> = ({
                                 />
                               )}
 
-                            <p className="text-[#818a91] opacity-60 mb-5">
+                            <p className="text-sm text-[#818a91] opacity-60 mb-5">
                               {rate.item?.first_air_date},{" "}
                               <span>
                                 {rate.item?.number_of_episodes} Episodes

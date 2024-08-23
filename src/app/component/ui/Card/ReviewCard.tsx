@@ -22,21 +22,26 @@ const ReviewCard = ({
   users,
   getComment,
 }: any) => {
-  const [active, setActive] = useState<string>("discuss");
   const [mediaActive, setMediaActive] = useState<string>("videos");
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
-  const reviews = review?.results?.map((review: any) => review?.created_at);
-  const dateObject = new Date(reviews);
-
-  // Format the date as "Month DD, YYYY"
-  const formattedDate = dateObject.toLocaleDateString("en-US", {
-    month: "long", // Display full month name
-    day: "2-digit", // Display two-digit day
-    year: "numeric", // Display full year
-  });
-
+  const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
+    new Set()
+  );
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
+
+  const toggleExpand = (index: number) => {
+    setExpandedReviews((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
   useEffect(() => {
     try {
       const fetchThumbnails = async () => {
@@ -65,6 +70,7 @@ const ReviewCard = ({
       console.error("Error fetching thumbnails:", error);
     }
   }, [video]);
+
   return (
     <div>
       <Suspense fallback={<div>Loading...</div>}>
@@ -135,97 +141,94 @@ const ReviewCard = ({
         )}
       </div>
 
-      <div className="border-t-2 border-t-[#242526] pt-10 mt-10">
-        <div className="flex items-center ">
-          <h1 className="text-xl font-bold">Social</h1>
-          <h1
-            className={`text-md font-bold ml-10 hover:opacity-70 transform duration-300 cursor-pointer ${
-              active === "discuss"
-                ? "border-b-4 border-b-black dark:border-b-[#2196f3]"
-                : ""
-            }`}
-            onClick={() => setActive("discuss")}
-          >
-            Discussions
-          </h1>
-          <h1
-            className={`text-md font-bold ml-10 hover:opacity-70 transform duration-300 cursor-pointer ${
-              active === "reviews"
-                ? "border-b-4 border-b-black dark:border-b-[#2196f3]"
-                : ""
-            }`}
-            onClick={() => setActive("reviews")}
-          >
-            Reviews
-          </h1>
-        </div>
-        {active === "discuss" ? (
-          <Discuss
-            user={user}
-            users={users}
-            getComment={getComment}
-            tv_id={tv_id}
-          />
+      <div className="border-t-[1px] border-t-slate-400 pt-3 mt-10">
+        {review?.results?.length === 0 ? (
+          <p className="py-5 font-semibold">
+            We dont have any reviews for In Blossom. Would you like to write
+            one?
+          </p>
         ) : (
-          <>
-            {review?.results?.length === 0 ? (
-              <p className="py-5 font-semibold">
-                We dont have any reviews for In Blossom. Would you like to write
-                one?
-              </p>
-            ) : (
-              <div className="border border-slate-500 rounded-md mt-8">
-                {review?.results?.map((review: any, idx: number) => (
-                  <div className="flex flex-col" key={idx}>
-                    <div className="flex p-2 md:p-5">
-                      {review.author_details?.avatar_path === null ? (
-                        <Image
-                          src="/default-pf.jpg"
-                          alt="profile image"
-                          width={100}
-                          height={100}
-                          className="size-[50px] object-cover rounded-full border-2 border-slate-500"
-                        />
-                      ) : (
-                        <Image
-                          src={`https://image.tmdb.org/t/p/original/${review.author_details?.avatar_path}`}
-                          alt="profile image"
-                          width={100}
-                          height={100}
-                          className="size-[50px] object-cover rounded-full"
-                        />
-                      )}
+          <div className="border-[1px] border-[#00000024] rounded-md mt-8">
+            <div className="flex items-center justify-between text-[#176093] bg-[#a5dafa] px-5 py-2">
+              <h1 className="text-md font-bold">Reviews</h1>
+              <Link href="" className="text-md">
+                Write Review
+              </Link>
+            </div>
+            {review?.results?.slice(0, 2)?.map((review: any, idx: number) => {
+              const dateObject = new Date(review?.updated_at);
+              const formattedDate = dateObject.toLocaleDateString("en-US", {
+                month: "long", // Display full month name
+                day: "2-digit", // Display two-digit day
+                year: "numeric", // Display full year
+              });
+              return (
+                <div className="flex flex-col" key={idx}>
+                  <div className="flex bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
+                    {review.author_details?.avatar_path === null ? (
+                      <Image
+                        src="/default-pf.jpg"
+                        alt="profile image"
+                        width={100}
+                        height={100}
+                        className="size-[50px] object-cover rounded-full border-2 border-slate-500"
+                      />
+                    ) : (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/original/${review.author_details?.avatar_path}`}
+                        alt="profile image"
+                        width={100}
+                        height={100}
+                        className="size-[50px] object-cover rounded-full"
+                      />
+                    )}
 
-                      <div className="flex flex-col text-black pl-5">
-                        <h1 className="text-sm md:text-md">
-                          Review by {review?.author_details?.username}
-                        </h1>
-                        <div className="flex flex-col md:flex-row md:items-center md:pt-2">
-                          <h1 className="w-[60px] bg-black p-1 rounded-full flex flex-row items-center mr-2 my-2 md:my-0">
+                    <div className="flex flex-col text-black pl-5">
+                      <h1 className="text-black dark:text-white text-sm md:text-md">
+                        Review by {review?.author_details?.username}
+                      </h1>
+                      <div className="flex flex-col md:flex-row md:items-center md:pt-2">
+                        {review?.author_details.rating && (
+                          <h1 className="w-[60px] text-black dark:text-white bg-black p-1 rounded-full flex flex-row items-center mr-2 my-2 md:my-0">
                             <BsStars className="text-white" size={15} />
                             <span className="text-white text-xs px-2">
                               {review?.author_details.rating?.toFixed(1)}
                             </span>
                           </h1>
-                          <p className="text-sm font-semibold">
-                            Written by {review?.author_details?.username} on{" "}
-                            {formattedDate}
-                          </p>
-                        </div>
+                        )}
+
+                        <p className="text-black dark:text-white text-sm font-semibold">
+                          Written by {review?.author_details?.username} on{" "}
+                          {formattedDate}
+                        </p>
                       </div>
                     </div>
-                    <p className="p-5">
-                      {review?.content?.slice(0, 500)}...
-                      <Link href="" className="pl-1 font-bold text-cyan-800">
-                        Read More
-                      </Link>
-                    </p>
                   </div>
-                ))}
-              </div>
-            )}
-          </>
+                  <p className="bg- dark:bg-[#242526] p-5">
+                    {expandedReviews.has(idx)
+                      ? review?.content
+                      : `${review?.content?.slice(0, 500)}...`}
+                    <button
+                      onClick={() => toggleExpand(idx)}
+                      className="pl-1 font-bold text-[#0275d8]"
+                    >
+                      {expandedReviews.has(idx) ? "Show Less" : "Read More"}
+                    </button>
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         )}
+      </div>
+      <div className="border-t-[1px] border-t-slate-400 pt-10 mt-10">
+        <h1 className="text-xl font-bold">Social</h1>
+        <Discuss
+          user={user}
+          users={users}
+          getComment={getComment}
+          tv_id={tv_id}
+        />
       </div>
     </div>
   );

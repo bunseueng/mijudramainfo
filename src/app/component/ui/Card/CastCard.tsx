@@ -43,9 +43,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                     {item?.name}
                   </Link>
                   <h4 className="text-semibold text-sm md:text-md">
-                    {item?.roles[0]?.character || item?.character?.length > 30
-                      ? `${item?.character?.substring(0, 25)}...`
-                      : item?.character}
+                    {item?.roles[0]?.character}
                   </h4>
 
                   <p className="text-xs text-[#818a91]">

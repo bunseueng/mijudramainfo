@@ -57,22 +57,24 @@ const Lists: React.FC<Lists> = ({
   }
 
   return (
-    <div className="w-full h-full">
-      <div
-        className="relative overflow-hidden bg-cover bg-center bg-no-repeat w-auto h-auto"
-        style={{
-          backgroundImage: `url(${list?.thumbnail})`,
-        }}
-      >
+    <div className=" w-full h-full">
+      <div className="relative z-20 h-full flex flex-wrap content-between justify-center">
         <div
-          className="w-full h-full"
+          className="relative overflow-hidden bg-cover object-center bg-no-repeat w-full h-auto"
           style={{
-            backgroundImage:
-              "linear-gradient(to right, rgba(24, 40, 72, 1) calc((50vw - 170px) - 340px), rgba(24, 40, 72, 0.65) 50%, rgba(24, 40, 72, 0.65) 100%)",
+            backgroundImage: `url(https://image.tmdb.org/t/p/original${list?.thumbnail})`,
+            backgroundPosition: "center",
+            backgroundSize: "cover", // Ensure the image covers the area
           }}
         >
-          <div className="relative z-20 h-full flex flex-wrap content-between justify-center">
-            <div className="w-full md:max-w-[1400px] flex flex-col justify-center p-5 md:px-10">
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, rgba(24, 40, 72, 0.65) calc((50vw - 170px) - 340px), rgba(24, 40, 72, 0.65) 50%, rgba(24, 40, 72, 0.65) 100%)",
+            }}
+          >
+            <div className="w-full max-w-6xl mx-auto flex flex-col justify-center p-5">
               <div className="flex flex-col justify-start lg:flex-row lg:items-end gap-x-5">
                 <Link href="">
                   <h2 className="text-3xl font-bold text-white p-0">
@@ -105,8 +107,8 @@ const Lists: React.FC<Lists> = ({
                 </div>
               </div>
             </div>
-            <div className="w-full flex justify-center bg-black/50 py-2">
-              <div className="w-full md:max-w-[1400px] flex px-5 md:px-10 gap-3">
+            <div className="w-full flex justify-center bg-black/40 py-2">
+              <div className="w-full max-w-6xl mx-auto flex px-5 gap-3">
                 <button className="flex items-center text-md text-white/50">
                   <Link
                     href={`/lists/${list?.listId}/edit`}
@@ -124,7 +126,7 @@ const Lists: React.FC<Lists> = ({
               </div>
             </div>
             <div className="w-full flex justify-center bg-black/70">
-              <div className="w-full md:max-w-[1400px] flex px-5 md:px-10 gap-3">
+              <div className="w-full max-w-6xl max-auto flex px-5 gap-3">
                 <div className="flex flex-wrap items-center justify-start md:gap-8 text-white font-bold md:w-full md:max-w-[1400px] py-4">
                   <div className="w-1/2 md:w-fit flex flex-col pb-3 md:pb-0">
                     <h3 className="text-2xl md:text-4xl/8 leading-5 p-0">

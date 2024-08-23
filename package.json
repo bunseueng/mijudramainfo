@@ -46,6 +46,7 @@
     "cloudinary-core": "^2.13.1",
     "cloudinary-react": "^1.8.1",
     "clsx": "^2.1.0",
+    "colorthief": "^2.4.0",
     "crypto-random-string": "^5.0.0",
     "cryptr": "^6.3.0",
     "dayjs": "^1.11.11",

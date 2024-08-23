@@ -159,6 +159,7 @@ export const authOptions: NextAuthOptions = {
         console.error("Error signing in:", error);
         return false; // Return false if there's an error
       }
-    }
+    },
+    async redirect({ baseUrl }) { return baseUrl },
   }
 }

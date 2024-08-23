@@ -537,6 +537,77 @@ export const editPageList = [
   },
 ];
 
+export const tvVideoList = [
+  {
+    label: "Trailers",
+    link: "/trailers",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Teasers",
+    link: "/teasers",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Clips",
+    link: "/clips",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Behind the Scenes",
+    link: "/behind_the_scenes",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Bloopers",
+    link: "/bloopers",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Featurettes",
+    link: "/featurettes",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Opening Credits",
+    link: "/opening_credits",
+    icon: <TiArrowForward />,
+  },
+];
+
+export const movieVideoList = [
+  {
+    label: "Trailers",
+    link: "/trailers",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Teasers",
+    link: "/teasers",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Clips",
+    link: "/clips",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Behind the Scenes",
+    link: "/behind_the_scenes",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Bloopers",
+    link: "/bloopers",
+    icon: <TiArrowForward />,
+  },
+  {
+    label: "Featurettes",
+    link: "/featurettes",
+    icon: <TiArrowForward />,
+  },
+];
+
 export const personEditList = [
   {
     label: "Primary Details",

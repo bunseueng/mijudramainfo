@@ -19,6 +19,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { useDebouncedCallback } from "use-debounce";
 import ListThumbnail from "./ListThumbnail";
 import { EditListProps } from "@/helper/type";
+import { AnimatePresence, Reorder, motion } from "framer-motion";
 
 const EditList: React.FC<EditListProps> = ({
   list,
@@ -78,36 +79,26 @@ const EditList: React.FC<EditListProps> = ({
   });
 
   // Use useEffect to refetch the data when sortby parameter changes
-  React.useEffect(() => {
-    refetch();
+  useEffect(() => {
+    if (query) {
+      refetch();
+    }
   }, [query, refetch]);
 
   const onInput = useDebouncedCallback((e: any) => {
     setLoading(true);
-    const { name, value } = e.target;
-    if (name === "listSearch") {
-      setListSearch(value);
-    } else {
-      setListSearch(value);
-    }
-    const params = new URLSearchParams(
-      searchQuery as
-        | string
-        | URLSearchParams
-        | Record<string, string>
-        | string[][]
-        | undefined
-    );
+    setListSearch(e.target.value);
 
-    if (value) {
-      params.set("query", value);
+    const params = new URLSearchParams(searchQuery.toString());
+    if (e.target.value) {
+      params.set("query", e.target.value);
     } else {
       params.delete("query");
     }
     router.push(`${pathname}/?${params.toString()}`, {
       scroll: false,
     });
-  }, 300);
+  }, 300); // 300ms debounce
 
   const onClickAddMovie = (id: string, mediaType: string) => {
     let isDuplicate = false;
@@ -157,9 +148,13 @@ const EditList: React.FC<EditListProps> = ({
     }
   };
 
+  useEffect(() => {
+    console.log("MultiSearch Results:", multiSearch);
+  }, [multiSearch]);
+
   return (
     <div className="max-w-5xl mx-auto py-3 px-4 md:px-6 my-10">
-      <form className="bg-[#272727] border-2 border-[#272727] rounded-md">
+      <form className="bg-white dark:bg-[#272727] border-[1px] border-[#78828c21] dark:border-[#272727] rounded-md">
         <div className="py-2 px-5">
           <div className="flex items-center justify-between">
             <h1 className="text-black dark:text-white text-xl py-5">
@@ -167,11 +162,11 @@ const EditList: React.FC<EditListProps> = ({
             </h1>
             <div className="flex items-center">
               <FaRegEyeSlash size={25} className="mr-3" />
-              <button className="bg-[#3a3b3c] border-2 border-[#282828] py-3 px-5 mx-2 rounded-md">
+              <button className="text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#282828] py-3 px-5 mx-2 rounded-md">
                 Cancel
               </button>
               <button
-                className="bg-[#409effcc] border-2 border-[#409effcc] py-3 px-5 rounded-md mx-2"
+                className="text-white bg-[#409effcc] border-[1px] border-[#409effcc] py-3 px-5 rounded-md mx-2"
                 onClick={handleSubmit(onSubmit)}
               >
                 Save
@@ -183,16 +178,17 @@ const EditList: React.FC<EditListProps> = ({
             <input
               {...register("listTitle")}
               type="text"
-              className="w-full bg-[#3a3b3c] border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2"
+              className="w-full bg-white dark:bg-[#3a3b3c] border-[1px] border-[#78828c21] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2"
               name="listTitle"
               defaultValue={list?.listTitle || submittedData?.listTitle}
+              placeholder="Input Title"
             />
           </div>
           <div className="mt-5">
             <label htmlFor="description">Description*</label>
             <textarea
               {...register("description")}
-              className="w-full bg-[#3a3b3c] border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2"
+              className="w-full bg-white dark:bg-[#3a3b3c] border-[1px] border-[#78828c21] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2"
               name="description"
               defaultValue={list?.description as string}
               placeholder="Type something..."
@@ -210,18 +206,18 @@ const EditList: React.FC<EditListProps> = ({
                     readOnly
                     autoComplete="off"
                     placeholder={listType || list?.privacy}
-                    className="w-full bg-[#3a3b3c] border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-pointer"
+                    className="w-full bg-white dark:bg-[#3a3b3c] border-[1px] border-[#78828c21] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-pointer"
                     onClick={() => setOpenListType(!openListType)}
                   />
                   <IoIosArrowDown className="absolute bottom-3 right-2" />
                 </div>
                 <ul
-                  className={`w-full absolute bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md z-10 ${
+                  className={`w-full absolute bg-white dark:bg-[#242424] border-[1px] border-[#78828c21] dark:border-[#242424] py-3 mt-2 rounded-md z-10 ${
                     openListType ? "block" : "hidden"
                   }`}
                 >
                   <li
-                    className="hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
+                    className="hover:bg-[#00000011] dark:hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
                     onClick={() => {
                       setOpenListType(!openListType);
                       setListType("Public list");
@@ -230,7 +226,7 @@ const EditList: React.FC<EditListProps> = ({
                     Public list
                   </li>
                   <li
-                    className="hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
+                    className="hover:bg-[#00000011] dark:hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
                     onClick={() => {
                       setOpenListType(!openListType);
                       setListType("Private list");
@@ -250,7 +246,7 @@ const EditList: React.FC<EditListProps> = ({
                   autoComplete="off"
                   placeholder="Titles"
                   disabled
-                  className="w-full bg-[#3a3b3c] border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-not-allowed"
+                  className="w-full bg-white dark:bg-[#3a3b3c] border-[1px] border-[#78828c21] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-not-allowed"
                 />
                 <IoIosArrowDown className="absolute bottom-3 right-2 cursor-not-allowed" />
               </div>
@@ -266,36 +262,36 @@ const EditList: React.FC<EditListProps> = ({
                     readOnly
                     autoComplete="off"
                     placeholder={list?.sortBy}
-                    className="w-full bg-[#3a3b3c] border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-pointer"
+                    className="w-full bg-white dark:bg-[#3a3b3c] border-[1px] border-[#78828c21] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-2 cursor-pointer"
                     onClick={() => setOpenSort(!openSort)}
                   />
                   <IoIosArrowDown className="absolute bottom-3 right-2" />
                 </div>
                 <ul
-                  className={`w-full absolute z-20 bg-[#242424] border-2 border-[#242424] py-3 mt-2 rounded-md ${
+                  className={`w-full absolute bg-white dark:bg-[#242424] border-[1px] border-[#78828c21] dark:border-[#242424] py-3 mt-2 rounded-md z-10 ${
                     openSort ? "block" : "hidden"
                   }`}
                 >
                   <li
-                    className="hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
+                    className="hover:bg-[#00000011] dark:hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
                     onClick={() => setSort("asc")}
                   >
                     Release Date Ascending
                   </li>
                   <li
-                    className="hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
+                    className="hover:bg-[#00000011] dark:hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
                     onClick={() => setSort("desc")}
                   >
                     Release Date Descending
                   </li>
                   <li
-                    className="hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
+                    className="hover:bg-[#00000011] dark:hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
                     onClick={() => setSort("az")}
                   >
                     Title (A-Z)
                   </li>
                   <li
-                    className="hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
+                    className="hover:bg-[#00000011] dark:hover:bg-[#3a3b3c] px-5 py-3 cursor-pointer"
                     onClick={() => setSort("za")}
                   >
                     Title (Z-A)
@@ -306,69 +302,74 @@ const EditList: React.FC<EditListProps> = ({
           </div>
           <ListThumbnail
             list={list}
-            register={register}
             reset={reset}
-            handleSubmit={handleSubmit}
+            tvId={tvId}
+            movieId={movieId}
           />
           <div className={`relative mt-3 ${listSearch && "searchTooltip"}`}>
             <input
               type="text"
               placeholder="Search to add a new title"
-              className="w-full bg-[#3a3b3c] border-2 border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 my-5"
+              className="w-full bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 my-5"
               name="listSearch"
               ref={inputRef}
               onChange={onInput}
             />
             <CiSearch className="absolute top-8 right-3" />
             {listSearch && (
-              <div
-                ref={searchResultRef}
-                className={`w-full h-[300px] absolute bg-[#242526] border-2 border-[#3e4042] z-20 custom-scroll rounded-md shadow-lg mt-2 ${
-                  openSearch === false ? "block" : "hidden"
-                }`}
-              >
-                {isFetching ? (
-                  <div className="absolute top-[45%] left-[50%]">
-                    <ClipLoader color="#fff" size={25} loading={loading} />
-                  </div>
-                ) : (
-                  <>
-                    {multiSearch?.map((item: any, idx: number) => (
-                      <div
-                        className={`flex items-center hover:bg-[#3a3b3c] cursor-pointer ${
-                          listSearch && "force-overflow"
-                        }`}
-                        key={idx}
-                        onClick={() =>
-                          onClickAddMovie(item?.id, item?.media_type)
-                        }
-                      >
-                        <Image
-                          src={`https://image.tmdb.org/t/p/original/${
-                            item?.poster_path || item?.backdrop_path
+              <AnimatePresence>
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  ref={searchResultRef}
+                  className={`w-full h-[250px] absolute bg-white dark:bg-[#242424] border-[1px] border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll ${
+                    openSearch === false ? "block" : "hidden"
+                  }`}
+                >
+                  {isFetching ? (
+                    <div className="absolute top-[45%] left-[50%]">
+                      <ClipLoader color="#fff" size={25} loading={loading} />
+                    </div>
+                  ) : (
+                    <>
+                      {multiSearch?.map((item: any, idx: number) => (
+                        <div
+                          className={`flex items-center text-sm hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer w-full ${
+                            listSearch && "force-overflow"
                           }`}
-                          alt="drama image"
-                          width={50}
-                          height={50}
-                          quality={100}
-                          className="bg-cover bg-center mx-4 my-3"
-                        />
-
-                        <div className="flex flex-col items-start">
-                          <p className="text-[#2490da]">
-                            {item?.name || item?.title}
-                          </p>
-                          <h4>
-                            <DramaRegion item={item} />
-                          </h4>
+                          key={idx}
+                          onClick={() =>
+                            onClickAddMovie(item.id, item.media_type)
+                          }
+                        >
+                          <Image
+                            src={`https://image.tmdb.org/t/p/original/${
+                              item.poster_path || item.backdrop_path
+                            }`}
+                            alt="drama image"
+                            width={50}
+                            height={50}
+                            quality={100}
+                            className="bg-cover bg-center mx-4 my-3"
+                          />
+                          <div className="flex flex-col items-start w-full">
+                            <p className="text-[#2490da]">
+                              {item.name || item.title}
+                            </p>
+                            <h4>
+                              <DramaRegion item={item} />
+                            </h4>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
+                      ))}
+                    </>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             )}
-            <div className="searchTooltipText"></div>
+            <div className="searchTooltipText dark:searchTooltipTextDarkMode"></div>
           </div>
         </div>
         <MovieResult
@@ -384,9 +385,9 @@ const EditList: React.FC<EditListProps> = ({
           yourRating={yourRating}
           findSpecificRating={findSpecificRating}
         />
-        <div className="w-full border-t-2 border-t-[#78828c] pt-10">
+        <div className="w-full border-t-[1px] border-t-[#78828c] pt-10">
           <div className="flex items-center justify-between px-4 py-2">
-            <button className="flex items-center bg-[#f56c6c4d] text-[#f56c6c] border-2 border-[#f56c6c4d] py-3 px-5 mx-2 rounded-md">
+            <button className="flex items-center bg-[#f56c6c4d] text-[#f56c6c] border-[1px] border-[#f56c6c4d] py-3 px-5 mx-2 rounded-md">
               <span>
                 <FiTrash />
               </span>
@@ -395,12 +396,12 @@ const EditList: React.FC<EditListProps> = ({
 
             <div className="flex items-center">
               <FaRegEyeSlash size={25} className="mr-3" />
-              <button className="bg-[#3a3b3c] border-2 border-[#282828] py-3 px-5 mx-2 rounded-md">
+              <button className="text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#282828] py-3 px-5 mx-2 rounded-md">
                 Cancel
               </button>
               <div onClick={() => setSubmitLoading(!submitLoading)}>
                 <button
-                  className="bg-[#409effcc] border-2 border-[#409effcc] py-3 px-5 rounded-md mx-2"
+                  className="text-white bg-[#409effcc] border-[1px] border-[#409effcc] py-3 px-5 rounded-md mx-2"
                   onClick={handleSubmit(onSubmit)}
                 >
                   <span className="flex items-center">

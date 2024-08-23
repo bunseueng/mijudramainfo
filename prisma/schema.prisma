@@ -126,14 +126,22 @@ model Drama {
 }
 
 model Movie {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  title         String?
-  name          String?
-  original_name String?
-  overview      String?
-  poster        String?
-  vote_average  Float?
-  last_air_date DateTime?
+  id                     String  @id @default(auto()) @map("_id") @db.ObjectId
+  movie_id               String  @unique
+  userId                 String
+  public_id              String?
+  details                Json[]
+  cover                  String?
+  related_title          Json[]
+  cast                   Json[]
+  crew                   Json[]
+  services               Json[]
+  external_links         Json[]
+  released_information   Json[]
+  production_information Json[]
+  genres_tags            Json[]
+  changes                Json[]  @default([])
+  changeCount            Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
