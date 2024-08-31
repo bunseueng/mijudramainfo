@@ -4,8 +4,8 @@ import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTv } from "@/app/actions/fetchMovieApi";
-import { getYearFromDate } from "../../DramaMain";
 import ColorThief from "colorthief";
+import { getYearFromDate } from "@/app/actions/getYearFromDate";
 
 interface tvId {
   tv_id: string;

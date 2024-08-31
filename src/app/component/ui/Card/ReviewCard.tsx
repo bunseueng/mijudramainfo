@@ -10,6 +10,7 @@ import { FaBookmark } from "react-icons/fa";
 import { IoHeartSharp } from "react-icons/io5";
 import { LuCalendarClock } from "react-icons/lu";
 import { TiStar } from "react-icons/ti";
+import ReviewDBCard from "./ReviewDBCard";
 
 const ReviewCard = ({
   review,
@@ -21,6 +22,7 @@ const ReviewCard = ({
   user,
   users,
   getComment,
+  getReview,
 }: any) => {
   const [mediaActive, setMediaActive] = useState<string>("videos");
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
@@ -29,7 +31,6 @@ const ReviewCard = ({
   );
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
-
   const toggleExpand = (index: number) => {
     setExpandedReviews((prev) => {
       const newSet = new Set(prev);
@@ -87,74 +88,88 @@ const ReviewCard = ({
         />
       </Suspense>
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
-        <h1 className="text-2xl font-bold py-4">Recommendations</h1>
-        {recommend?.results?.length === 0 ? (
-          <p className="text-xl font-bold py-5">
-            There no recommendations for {tv?.name} yet !
-          </p>
-        ) : (
-          <div
-            className={`flex items-center overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4 ${
-              recommend?.results?.length === 0 ? "hidden" : "flex"
-            }`}
-          >
-            {recommend?.results?.map((item: any, index: number) => (
-              <div className="w-[270px] h-[180px] mr-4" key={index}>
-                <div className="w-[270px] h-[180px] bg-cover">
-                  <Link
-                    href={`/tv/${item?.id}`}
-                    className="hover:relative transform duration-100 group"
-                  >
-                    <Image
-                      src={`https://image.tmdb.org/t/p/original/${item?.backdrop_path}`}
-                      alt="tv image"
-                      width={600}
-                      height={600}
-                      className="rounded-lg"
-                    />
+        <div className="border-t-[1px] border-t-slate-400 pt-3">
+          <h1 className="text-2xl font-bold py-4">Recommendations</h1>
+          {recommend?.results?.length === 0 ? (
+            <p className="text-xl font-bold py-5">
+              There no recommendations for {tv?.name} yet !
+            </p>
+          ) : (
+            <div
+              className={`flex items-center overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4 ${
+                recommend?.results?.length === 0 ? "hidden" : "flex"
+              }`}
+            >
+              {recommend?.results?.map((item: any, index: number) => (
+                <div className="w-[270px] h-[180px] mr-4" key={index}>
+                  <div className="w-[270px] h-[180px] bg-cover">
+                    <Link
+                      href={`/tv/${item?.id}`}
+                      className="hover:relative transform duration-100 group"
+                    >
+                      <Image
+                        src={`https://image.tmdb.org/t/p/original/${
+                          item?.backdrop_path || item?.poster_path
+                        }`}
+                        alt={`${item?.name || item?.title}'s Poster`}
+                        width={600}
+                        height={600}
+                        priority
+                        className="w-[270px] h-[150px] bg-cover object-cover rounded-lg"
+                      />
 
-                    <div className="absolute bg-slate-100 opacity-80 w-full bottom-0 px-2 py-2 invisible group-hover:visible">
-                      <div className="flex items-center justify-between">
-                        <p className="flex items-center dark:text-black">
-                          <LuCalendarClock className="mr-2" />
-                          <span>{item?.first_air_date}</span>
-                        </p>
-                        <div className="flex items-center">
-                          <IoHeartSharp className="dark:text-black" />
-                          <FaBookmark
-                            size={15}
-                            className="mx-2 dark:text-black"
-                          />
-                          <TiStar size={25} className="dark:text-black" />
+                      <div className="absolute bg-slate-100 opacity-80 w-full bottom-0 px-2 py-2 invisible group-hover:visible">
+                        <div className="flex items-center justify-between">
+                          <p className="flex items-center dark:text-black">
+                            <LuCalendarClock className="mr-2" />
+                            <span>{item?.first_air_date}</span>
+                          </p>
+                          <div className="flex items-center">
+                            <IoHeartSharp className="dark:text-black" />
+                            <FaBookmark
+                              size={15}
+                              className="mx-2 dark:text-black"
+                            />
+                            <TiStar size={25} className="dark:text-black" />
+                          </div>
                         </div>
                       </div>
+                    </Link>
+                    <div className="flex items-center justify-between">
+                      <p className="truncate">{item?.name}</p>
+                      <p>{Math.round(item?.vote_average * 10)}%</p>
                     </div>
-                  </Link>
-                  <div className="flex items-center justify-between">
-                    <p className="truncate">{item?.name}</p>
-                    <p>{Math.round(item?.vote_average * 10)}%</p>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="border-t-[1px] border-t-slate-400 pt-3 mt-10">
-        {review?.results?.length === 0 ? (
-          <p className="py-5 font-semibold">
-            We dont have any reviews for In Blossom. Would you like to write
-            one?
-          </p>
+        {review?.results?.length === 0 && getReview?.length === 0 ? (
+          <div className="border-[1px] border-[#00000024] rounded-md mt-8">
+            <div className="flex items-center justify-between text-[#176093] bg-[#a5dafa] px-5 py-2">
+              <h1 className="text-md font-bold">Reviews</h1>
+              <Link href={`/tv/${tv_id}/write_reviews`} className="text-md">
+                Write Review
+              </Link>
+            </div>
+            <p className="p-5 font-semibold">
+              We don&#39;t have any reviews for In Blossom. Would you like to
+              write one?
+            </p>
+          </div>
         ) : (
           <div className="border-[1px] border-[#00000024] rounded-md mt-8">
             <div className="flex items-center justify-between text-[#176093] bg-[#a5dafa] px-5 py-2">
               <h1 className="text-md font-bold">Reviews</h1>
-              <Link href="" className="text-md">
+              <Link href={`/tv/${tv_id}/write_reviews`} className="text-md">
                 Write Review
               </Link>
             </div>
+            <ReviewDBCard getReview={getReview} tv_id={tv_id} user={user} />
             {review?.results?.slice(0, 2)?.map((review: any, idx: number) => {
               const dateObject = new Date(review?.updated_at);
               const formattedDate = dateObject.toLocaleDateString("en-US", {
@@ -165,7 +180,7 @@ const ReviewCard = ({
               return (
                 <div className="flex flex-col" key={idx}>
                   <div className="flex bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
-                    {review.author_details?.avatar_path === null ? (
+                    {review?.author_details?.avatar_path === null ? (
                       <Image
                         src="/default-pf.jpg"
                         alt="profile image"
@@ -188,11 +203,11 @@ const ReviewCard = ({
                         Review by {review?.author_details?.username}
                       </h1>
                       <div className="flex flex-col md:flex-row md:items-center md:pt-2">
-                        {review?.author_details.rating && (
+                        {review?.author_details?.rating && (
                           <h1 className="w-[60px] text-black dark:text-white bg-black p-1 rounded-full flex flex-row items-center mr-2 my-2 md:my-0">
                             <BsStars className="text-white" size={15} />
                             <span className="text-white text-xs px-2">
-                              {review?.author_details.rating?.toFixed(1)}
+                              {review?.author_details?.rating?.toFixed(1)}
                             </span>
                           </h1>
                         )}

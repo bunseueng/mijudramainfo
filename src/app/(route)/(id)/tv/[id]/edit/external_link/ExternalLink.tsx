@@ -478,12 +478,13 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           </div>
         )}
       </div>
-      {tvDetails?.external_links?.length !== 0 ||
+      {(tvDetails?.external_links?.length || 0) > 0 ||
         (!openExternal && (
           <button
             type="button"
             className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
             onClick={() => setOpenExternal(!openExternal)}
+            name="Add External Link"
           >
             Add External Link
           </button>
@@ -493,6 +494,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           type="button"
           className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-5 py-2 mb-4 ml-3"
           onClick={() => setOpenExternal(!openExternal)}
+          name="Add External Link"
         >
           Add External Link
         </button>

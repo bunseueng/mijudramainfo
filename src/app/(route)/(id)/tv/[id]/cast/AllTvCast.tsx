@@ -24,6 +24,8 @@ import { useEffect, useRef, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import ColorThief from "colorthief";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { getYearFromDate } from "@/app/actions/getYearFromDate";
+import TvInfo from "../TvInfo";
 
 const AllTvCast = ({ tv_id, getDrama }: any) => {
   const [dominantColor, setDominantColor] = useState<string | null>(null);
@@ -84,25 +86,6 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
     (item: any) => item?.known_for_department === "Art"
   );
 
-  const getYearFromDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.getFullYear();
-  };
-  const original_country = tv?.origin_country[0];
-
-  const matchedLanguage = language?.find(
-    (lang: any) => lang?.iso_3166_1 === original_country
-  );
-
-  const allTvShowsArray = Array.isArray(allTvShows) ? allTvShows : [];
-
-  // Find the index of the matched TV show in allTvShows array
-  const matchedIndex = allTvShowsArray.findIndex(
-    (show: any) => show.id === tv.id
-  );
-  // Calculate the rank by adding 1 to the index
-  const rank = matchedIndex !== -1 ? matchedIndex + 1 : null;
-
   const extractColor = () => {
     if (imgRef.current) {
       const colorThief = new ColorThief();
@@ -133,11 +116,12 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
         className="bg-cyan-600 dark:bg-[#242424]"
         style={{ backgroundColor: dominantColor as string | undefined }}
       >
-        <div className="max-w-6xl mx-auto flex items-center mt-0 px-2 py-2">
-          <div className="flex items-center lg:items-start px-2 cursor-default">
+        <div className="max-w-6xl mx-auto flex items-center mt-0 py-2">
+          <div className="flex items-center lg:items-start px-4 md:px-6 cursor-default">
             {tv?.poster_path || tv?.backdrop_path !== null ? (
               <Image
-                ref={imgRef} // Set the reference to the image
+                ref={imgRef}
+                onLoad={extractColor}
                 src={`https://image.tmdb.org/t/p/original/${
                   tv?.poster_path || tv?.backdrop_path
                 }`}
@@ -173,88 +157,106 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
           </div>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto mt-0 px-2 py-2 lg:py-6 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto mt-0 py-2 lg:py-6 relative overflow-hidden">
         <div className="flex flex-col lg:flex-row items-start px-2">
-          <div className="w-full h-full md:w-[66.66667%] border rounded-md bg-white mr-2 dark:bg-[#242424]">
-            <div className="p-5 border-b-2 boder-b-bg-slate-200 dark:border-b-[#272727] bg-sky-300 dark:bg-[#242424] rounded-md">
-              <h1 className="text-xl text-sky-900 dark:text-[#2196f3] font-bold">
-                {tv?.name}
-              </h1>
-            </div>
-            <div className="flex flex-col xl:flex-row mb-5">
-              <div className="w-full">
-                {(directors?.length !== 0 || directorsDB?.length > 0) && (
-                  <>
-                    <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                      Director
-                    </h1>
-                    <Director directors={directors} directorsDB={directorsDB} />
-                  </>
-                )}
-                {(production?.length !== 0 || productionDB?.length > 0) && (
-                  <>
-                    <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                      Production
-                    </h1>
-                    <Product
-                      production={production}
-                      productionDB={productionDB}
-                    />
-                  </>
-                )}
-                {writer?.length !== 0 ||
-                  (writerDB?.length > 0 && (
+          <div className="w-full h-full md:w-[66.66667%] px-3">
+            <div className=" bg-white dark:bg-[#242424] border rounded-md ">
+              <div className="w-full bg-sky-300 dark:bg-[#242424] border-b boder-b-bg-slate-200 dark:border-b-[#272727] rounded-md p-5">
+                <h1 className="text-xl text-sky-900 dark:text-[#2196f3] font-bold">
+                  {tv?.name}
+                </h1>
+              </div>
+              <div className="flex flex-col xl:flex-row mb-5">
+                <div className="w-full">
+                  {(directors?.length !== 0 || directorsDB?.length > 0) && (
                     <>
                       <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                        Writer
+                        Director
                       </h1>
-                      <Screenwriter writer={writer} writerDB={writerDB} />
+                      <Director
+                        directors={directors}
+                        directorsDB={directorsDB}
+                      />
                     </>
-                  ))}
-                {(sound?.length !== 0 || soundDB?.length > 0) && (
-                  <>
+                  )}
+                  {(production?.length !== 0 || productionDB?.length > 0) && (
+                    <>
+                      <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
+                        Production
+                      </h1>
+                      <Product
+                        production={production}
+                        productionDB={productionDB}
+                      />
+                    </>
+                  )}
+                  {writer?.length !== 0 ||
+                    (writerDB?.length > 0 && (
+                      <>
+                        <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
+                          Writer
+                        </h1>
+                        <Screenwriter writer={writer} writerDB={writerDB} />
+                      </>
+                    ))}
+                  {(sound?.length !== 0 || soundDB?.length > 0) && (
+                    <>
+                      <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
+                        Sound
+                      </h1>
+                      <Sound sound={sound} soundDB={soundDB} />
+                    </>
+                  )}
+                  {(art?.length !== 0 || artDB?.length > 0) && (
+                    <>
+                      <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
+                        Art
+                      </h1>
+                      <MovieArt art={art} artDB={artDB} />
+                    </>
+                  )}
+                  {(camera?.length !== 0 || cameraDB?.length > 0) && (
+                    <>
+                      <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
+                        Camera
+                      </h1>
+                      <MovieCamera camera={camera} cameraDB={cameraDB} />
+                    </>
+                  )}
+                  <div className="w-full">
                     <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                      Sound
+                      Main Role
                     </h1>
-                    <Sound sound={sound} soundDB={soundDB} />
-                  </>
-                )}
-                {(art?.length !== 0 || artDB?.length > 0) && (
-                  <>
-                    <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                      Art
-                    </h1>
-                    <MovieArt art={art} artDB={artDB} />
-                  </>
-                )}
-                {(camera?.length !== 0 || cameraDB?.length > 0) && (
-                  <>
-                    <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                      Camera
-                    </h1>
-                    <MovieCamera camera={camera} cameraDB={cameraDB} />
-                  </>
-                )}
-                <div className="w-full">
-                  <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                    Main Role
-                  </h1>
-                  <MainRole getDrama={getDrama} cast={cast} />
+                    <MainRole getDrama={getDrama} cast={cast} />
 
-                  <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                    Support Role
-                  </h1>
-                  <SupportRole cast={cast} getDrama={getDrama} />
-                  <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
-                    Guest Role
-                  </h1>
-                  <GuestRole cast={cast} getDrama={getDrama} />
+                    <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
+                      Support Role
+                    </h1>
+                    <SupportRole cast={cast} getDrama={getDrama} />
+                    {getDrama?.cast?.length > 0
+                      ? getDrama?.cast?.filter(
+                          (cast: any) =>
+                            cast?.cast_role === "Guest Role" ||
+                            (cast?.order > 2 && cast?.total_episode_count < 5)
+                        )?.length > 0
+                      : cast?.cast?.filter(
+                          (cast: any) =>
+                            cast?.order > 2 && cast?.total_episode_count < 5
+                        )?.length > 0 && (
+                          <>
+                            <h1 className="text-xl text-sky-900 dark:text-white font-bold mx-5 pt-5 border-b-[1px] border-b-[#78828c21]">
+                              Guest Role
+                            </h1>
+                            <GuestRole cast={cast} getDrama={getDrama} />
+                          </>
+                        )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="w-full h-full md:w-[33.33333%]">
-            <div className="flex flex-col items-center content-center max-w-[97rem] mx-auto py-10 md:p-5 border rounded-md bg-white p-2 dark:bg-[#242424]">
+          <div className="w-full h-full md:w-[33.33333%] px-3">
+            <div className="flex flex-col items-center content-center max-w-[97rem] mx-auto py-10 md:p-4 border rounded-md bg-white p-2 dark:bg-[#242424]">
               <Image
                 src={`https://image.tmdb.org/t/p/original/${
                   tv?.poster_path || tv?.backdrop_path
@@ -262,7 +264,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
                 alt="image"
                 width={500}
                 height={300}
-                className="block align-middle w-[350px] h-[480px] rounded-lg"
+                className="block align-middle w-[350px] h-[480px]"
               />
               <div className="mt-2 flex items-center justify-between">
                 <ShareButton
@@ -272,86 +274,14 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
                 />
               </div>
             </div>
-            <div className="border border-slate-300 dark:border-[#272727] dark:bg-[#242424] h-full rounded-md mt-5">
-              <h1 className="text-white text-md font-bold bg-cyan-600 p-4 rounded-t-md">
-                Details:
-              </h1>
-              <div className="flex flex-col p-4 pb-1">
-                <h1 className="text-md font-semibold pr-2">
-                  Drama:{" "}
-                  <span className="text-sm">{tv?.title || tv?.name}</span>
-                </h1>
-                <h1 className="text-md font-semibold pr-2">
-                  Country:{" "}
-                  <span className="text-sm">
-                    {matchedLanguage?.english_name}
-                  </span>
-                </h1>
-                <h1 className="text-md font-semibold pr-2">
-                  Episode:{" "}
-                  <span className="text-sm">{tv?.number_of_episodes}</span>
-                </h1>
-                <h1 className="text-md font-semibold pr-2">
-                  Aired:{" "}
-                  <span className="text-sm">
-                    {tv?.first_air_date === "" ? "TBA" : tv?.first_air_date}{" "}
-                    {tv?.first_air_date === "" ? "" : "-"}{" "}
-                    {tv?.last_air_date === null ? "" : tv?.last_air_date}
-                  </span>
-                </h1>
-                <h1 className="text-md font-semibold pr-2">
-                  Original Network:{" "}
-                  <span className="text-sm">
-                    {tv?.networks?.map((network: any) => network?.name)}
-                  </span>
-                </h1>
-                <h1 className="text-md font-semibold pr-2">
-                  Duration:{" "}
-                  <span className="text-sm">
-                    {tv?.episode_run_time[0]} min.
-                  </span>
-                </h1>
-                <h1 className="text-md font-semibold pr-2">
-                  Content Rating:{" "}
-                  <span className="text-sm">
-                    {content?.results?.length === 0
-                      ? "Not Yet Rated"
-                      : content?.results?.map((rating: any) => rating.rating)}
-                  </span>
-                </h1>
-                <h1 className="text-md font-semibold pr-2">
-                  Status:{" "}
-                  <span className="text-sm">
-                    {tv?.status === "Returning Series" ? "Ongoing" : tv?.status}
-                  </span>
-                </h1>
-              </div>
-            </div>
-            <div className="border border-slate-300 dark:border-[#272727] dark:bg-[#242424] h-full rounded-md mt-5">
-              <h1 className="text-white text-md font-bold bg-cyan-600 p-4 rounded-t-md">
-                Statistics:
-              </h1>
-              <div className="flex flex-col p-4 pb-1">
-                <div className="flex items-center pb-1">
-                  <h1 className="text-md font-semibold pr-2">Score:</h1>
-                  <p className="text-sm">
-                    {tv?.vote_average.toFixed(2)}{" "}
-                    {tv?.vote_average === 0
-                      ? ""
-                      : `(scored by ${tv?.vote_count} ${
-                          tv?.vote_count < 2 ? " user" : " users"
-                        })`}
-                  </p>
-                </div>
-                <div className="flex items-center pb-1">
-                  <h1 className="text-md font-semibold pr-2">Ranked:</h1>
-                  <p className="text-sm">#{!rank ? "10000+" : rank}</p>
-                </div>
-                <div className="flex items-center pb-1">
-                  <h1 className="text-md font-semibold pr-2">Popularity:</h1>
-                  <p className="text-sm">#{tv?.popularity}</p>
-                </div>
-              </div>
+            <div className="mt-5">
+              <TvInfo
+                getDrama={getDrama}
+                language={language}
+                tv={tv}
+                content={content}
+                allTvShows={allTvShows}
+              />
             </div>
           </div>
         </div>

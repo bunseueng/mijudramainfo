@@ -11,13 +11,13 @@ import { VscQuestion } from "react-icons/vsc";
 import { movieVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
 import { DramaDB } from "@/helper/type";
-import { getYearFromDate } from "../../../tv/[id]/DramaMain";
 import MovieTrailers from "./trailers/MovieTrailers";
 import MovieTeasers from "./teasers/MovieTeasers";
 import MovieClips from "./clips/Clips";
 import MovieBehindTheScenes from "./behind_the_scenes/BehindTheScenes";
 import MovieBloopers from "./bloopers/Bloopers";
 import MovieFeaturettes from "./featurettes/Featurettes";
+import { getYearFromDate } from "../MovieMain";
 
 interface TvTrailerType {
   movie_id: string;

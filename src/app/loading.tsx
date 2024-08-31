@@ -14,6 +14,7 @@ export default function Loading() {
       showSpinner={false}
       easing="ease"
       speed={200}
+      zIndex={99991}
     />
   );
 }

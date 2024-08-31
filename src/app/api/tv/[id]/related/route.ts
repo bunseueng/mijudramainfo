@@ -71,6 +71,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         },
       });
 
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: {
+          points: { increment: 3 }, // Increment by a certain number of points
+        },
+      });
       return NextResponse.json({ updateDetails, message: "Success" }, { status: 200 });
     } else {
       const createDetails = await prisma.drama.create({
@@ -99,6 +105,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         },
       });
 
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: {
+          points: { increment: 3 }, // Increment by a certain number of points
+        },
+      });
       return NextResponse.json({ createDetails, message: "Success" }, { status: 200 });
     }
   } catch (error) {

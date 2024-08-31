@@ -1,6 +1,5 @@
 "use client";
 
-import { getYearFromDate } from "@/app/(route)/(id)/tv/[id]/DramaMain";
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -15,6 +14,7 @@ import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import SearchLoading from "../Loading/SearchLoading";
 import AdBanner from "../Adsense/AdBanner";
+import { getYearFromDate } from "@/app/actions/getYearFromDate";
 
 const ExploreCard = ({ title, topDramas, total_results }: any) => {
   const searchParams = useSearchParams();

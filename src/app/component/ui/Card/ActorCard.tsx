@@ -21,37 +21,35 @@ const ActorCard = ({ result }: any) => {
   const person = backgroundImage ? backgroundImage.id : null;
 
   return backgroundImage ? (
-    <div className="w-[150px] h-[200px] mr-4">
-      <div className="w-[150px] h-[200px] bg-cover">
-        <Link
-          href={`/person/${person}`}
-          className="block hover:relative transform duration-100 group"
-        >
-          {result?.profile_path !== null ? (
-            <Image
-              src={`https://image.tmdb.org/t/p/original/${backgroundImage.profile_path}`}
-              alt={`${actorName}'s avatar`}
-              width={600}
-              height={600}
-              quality={100}
-              className="rounded-xl w-[150px] h-[200px] object-cover"
-            />
-          ) : (
-            <Image
-              src="/empty-img.jpg"
-              alt={`${actorName}'s avatar`}
-              width={600}
-              height={600}
-              quality={100}
-              className="rounded-xl w-[150px] h-[200px] object-cover"
-            />
-          )}
+    <div className="w-[150px] h-[200px] bg-cover">
+      <Link
+        href={`/person/${person}`}
+        className="block hover:relative transform duration-100 group"
+      >
+        {result?.profile_path !== null ? (
+          <Image
+            src={`https://image.tmdb.org/t/p/original/${backgroundImage.profile_path}`}
+            alt={`${actorName}'s avatar`}
+            width={600}
+            height={600}
+            quality={100}
+            className="rounded-xl w-[150px] h-[200px] object-cover"
+          />
+        ) : (
+          <Image
+            src="/empty-img.jpg"
+            alt={`${actorName}'s avatar`}
+            width={600}
+            height={600}
+            quality={100}
+            className="rounded-xl w-[150px] h-[200px] object-cover"
+          />
+        )}
+      </Link>
+      <div className="flex items-center justify-between">
+        <Link href={`/person/${person}`} className="truncate">
+          {actorName}
         </Link>
-        <div className="flex items-center justify-between">
-          <Link href={`/person/${person}`} className="truncate">
-            {actorName}
-          </Link>
-        </div>
       </div>
     </div>
   ) : null;

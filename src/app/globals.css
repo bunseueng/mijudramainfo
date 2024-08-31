@@ -109,7 +109,7 @@
 .overflow-x::-webkit-scrollbar-thumb {
    border-radius: 10px;
    background-color: rgb(223, 217, 217);
-   cursor: pointer;
+   cursor: grabbing
 }
 .overflow-y {
   overflow-x: scroll;
@@ -651,4 +651,17 @@ input[type="number"]::-webkit-outer-spin-button {
 
 footer {
   margin-top: auto; /* Push the footer to the bottom */
+}
+
+.MuiRating-icon {
+  transition: none !important;
+}
+
+.review-content {
+    line-height: 1.4; /* Controls the line spacing */
+    white-space: pre-line; /* Preserves spaces and line breaks */
+}
+
+.review-content br {
+    display: block; /* Ensures each <br> starts a new line */
 }

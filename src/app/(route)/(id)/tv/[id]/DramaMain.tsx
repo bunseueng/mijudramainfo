@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import CircleRating from "@/app/component/ui/CircleRating/CircleRating";
 import {
   MdBookmarkAdd,
@@ -34,14 +34,13 @@ import { Image as AntImage } from "antd";
 import Image from "next/image";
 import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
 import { formatDate } from "@/app/actions/formatDate";
-
-export const getYearFromDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.getFullYear();
-};
+import ColorThief from "colorthief";
+import { getTextColor } from "@/app/actions/getTextColor";
+import { getYearFromDate } from "@/app/actions/getYearFromDate";
 
 const DramaMain = ({
   getDrama,
+  getReview,
   tv_id,
   existedWatchlist,
   existedFavorite,
@@ -54,6 +53,9 @@ const DramaMain = ({
   const router = useRouter();
   const [openList, setOpenList] = useState(false);
   const [modal, setModal] = useState<boolean>(false);
+  const [dominantColor, setDominantColor] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
+  const [textColor, setTextColor] = useState("#FFFFFF"); // Default to white text
 
   const { data: tv, isLoading } = useQuery({
     queryKey: ["tv"],
@@ -250,6 +252,34 @@ const DramaMain = ({
     }
   };
 
+  const extractColor = () => {
+    if (imgRef.current) {
+      const colorThief = new ColorThief();
+      const color = colorThief?.getColor(imgRef.current);
+      const rgbaColor = `rgba(${color.join(",")}, 1)`; // Convert to RGBA with full opacity
+      const gradientBackground = `linear-gradient(to right, ${rgbaColor} calc((50vw - 170px) - 340px), ${rgbaColor.replace(
+        "1)",
+        "0.84)"
+      )} 50%, ${rgbaColor.replace("1)", "0.84)")} 100%)`;
+
+      setDominantColor(gradientBackground);
+      const textColor = getTextColor(...color);
+      setTextColor(textColor);
+    }
+  };
+
+  useEffect(() => {
+    if (imgRef.current) {
+      const imgElement = imgRef.current; // Store the current value in a local variable
+      imgElement.addEventListener("load", extractColor);
+
+      // Cleanup function
+      return () => {
+        imgElement.removeEventListener("load", extractColor);
+      };
+    }
+  }, [tv]);
+
   if (isLoading) {
     return <SearchLoading />;
   }
@@ -268,13 +298,16 @@ const DramaMain = ({
           <div
             className="w-full flex flex-wrap items-center justify-center h-full"
             style={{
-              backgroundImage:
-                "linear-gradient(to right, rgba(24, 40, 72, 1) calc((50vw - 170px) - 340px), rgba(24, 40, 72, 0.84) 50%, rgba(24, 40, 72, 0.84) 100%)",
+              backgroundImage: dominantColor
+                ? (dominantColor as string | undefined)
+                : "linear-gradient(to right, rgba(24, 40, 72, 1) calc((50vw - 170px) - 340px), rgba(24, 40, 72, 0.84) 50%, rgba(24, 40, 72, 0.84) 100%)",
             }}
           >
             <div className="px-3">
-              <div className="flex flex-col md:flex-row content-center max-w-[97rem] mx-auto py-10 md:py-8 md:px-10">
-                <AntImage
+              <div className="flex flex-col md:flex-row content-center max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5">
+                <Image
+                  ref={imgRef}
+                  onLoad={extractColor}
                   src={
                     getDrama?.cover ||
                     `https://image.tmdb.org/t/p/original/${
@@ -287,9 +320,12 @@ const DramaMain = ({
                   className="block align-middle !w-[350px] md:!min-w-[350px] !h-[480px] bg-cover object-cover rounded-lg md:pl-0"
                 />
 
-                <div className="md:px-8 py-5">
+                <div className="md:pl-4 lg:pl-8 py-5">
                   <div className="relative">
-                    <h2 className="text-3xl font-bold text-white">
+                    <h2
+                      className="text-3xl font-bold text-white"
+                      style={{ color: textColor }}
+                    >
                       <span className="cursor-pointer hover:opacity-50 duration-300">
                         {detail?.title || tv?.title || tv?.name}
                       </span>{" "}
@@ -298,7 +334,10 @@ const DramaMain = ({
                     </h2>
                   </div>
                   <div className="mb-2 text-1xl font-bold text-white">
-                    <span className="cursor-pointer hover:opacity-50 duration-300">
+                    <span
+                      className="cursor-pointer hover:opacity-50 duration-300"
+                      style={{ color: textColor }}
+                    >
                       {tv?.genres?.map((genre: any, index: number) => {
                         return index === genres.length - 1
                           ? genre.name
@@ -323,7 +362,14 @@ const DramaMain = ({
                       }
                     />
 
-                    <p className="text-white text-1xl font-bold uppercase my-3 md:pl-5">
+                    <p
+                      className="inline-block text-white text-1xl md:text-md lg:text-1xl font-bold uppercase my-3 md:pl-2 lg:pl-5"
+                      style={{
+                        color: textColor,
+                        width: "auto",
+                        overflow: "hidden",
+                      }}
+                    >
                       From {tv?.vote_count + existingRatings?.length}
                       {tv?.vote_count < 2 ? " user" : " users"}
                     </p>
@@ -372,9 +418,9 @@ const DramaMain = ({
                       >
                         <div className="flex items-center justify-center">
                           <div className="flex items-center text-white font-bold cursor-pointer transform">
-                            <div className="flex items-center font-bold">
+                            <div className="flex items-center font-bold text-xs lg:text-md">
                               What&apos;s your{" "}
-                              <span className="border-b-[1px] border-b-cyan-500 ml-2 pt-1">
+                              <span className="border-b-[1px] border-b-cyan-500 ml-2 md:ml-0 lg:ml-2 pt-1">
                                 Vibe
                               </span>
                               ?{" "}
@@ -466,12 +512,18 @@ const DramaMain = ({
                       </div>
                     )}
                     {/* Play Trailer Button  */}
-                    <PlayTrailerBtn trailer={trailer} />
+                    <PlayTrailerBtn trailer={trailer} textColor={textColor} />
                   </div>
-                  <p className="mb-3 text-2xl mt-3">
-                    <span className="text-white font-bold">Overview:</span>
+                  <p
+                    className="font-bold mb-3 text-2xl mt-3"
+                    style={{ color: textColor }}
+                  >
+                    Overview:
                   </p>
-                  <p className="text-md text-white mb-3">
+                  <p
+                    className="text-md text-white mb-3"
+                    style={{ color: textColor }}
+                  >
                     {detail?.synopsis
                       ? detail?.synopsis
                       : tv?.overview !== ""
@@ -487,9 +539,15 @@ const DramaMain = ({
                     </span>
                   </p>
                   <div className="border-t-[1px] pt-4">
-                    <h1 className="text-white font-bold text-md">
+                    <h1
+                      className="text-white font-bold text-md"
+                      style={{ color: textColor }}
+                    >
                       Navtive Title:
-                      <span className="text-sm pl-2 font-normal text-blue-300">
+                      <span
+                        className="text-sm pl-2 font-semibold text-[#1675b6]"
+                        style={{ color: textColor }}
+                      >
                         {detail?.native_title
                           ? detail?.native_title
                           : tv?.original_name?.length > 0
@@ -499,9 +557,15 @@ const DramaMain = ({
                     </h1>
                   </div>
                   <div className="mt-4">
-                    <h1 className="text-white font-bold text-md">
+                    <h1
+                      className="text-white font-bold text-md"
+                      style={{ color: textColor }}
+                    >
                       Also Known As:
-                      <span className="text-sm pl-2 font-normal text-blue-300">
+                      <span
+                        className="text-sm pl-2 font-semibold text-[#1675b6]"
+                        style={{ color: textColor }}
+                      >
                         {detail?.known_as?.length > 0
                           ? detail?.known_as?.map((known, idx) => (
                               <span key={idx}>
@@ -521,9 +585,15 @@ const DramaMain = ({
                     </h1>
                   </div>
                   <div className="mt-4">
-                    <h1 className="text-white font-bold text-md">
+                    <h1
+                      className="text-white font-bold text-md"
+                      style={{ color: textColor }}
+                    >
                       Director:
-                      <span className="text-sm pl-2 font-normal text-blue-300">
+                      <span
+                        className="text-sm pl-2 font-semibold text-[#1675b6]"
+                        style={{ color: textColor }}
+                      >
                         {getDrama?.crew?.length > 0
                           ? getDrama?.crew?.find(
                               (crew: any) => crew?.department === "Directing"
@@ -535,12 +605,19 @@ const DramaMain = ({
                     </h1>
                   </div>
                   <div className="mt-4">
-                    <h1 className="text-white font-bold text-md">
+                    <h1
+                      className="text-white font-bold text-md"
+                      style={{ color: textColor }}
+                    >
                       Screenwriter:
-                      <span className="text-sm pl-2 font-normal text-blue-300">
+                      <span
+                        className="text-sm pl-2 font-semibold text-[#1675b6]"
+                        style={{ color: textColor }}
+                      >
                         {getDrama?.crew?.length > 0
                           ? getDrama?.crew?.find(
                               (crew: any) =>
+                                crew?.jobs &&
                                 crew?.jobs[0]?.job === "Screenstory"
                             )?.name
                           : screenwriter?.name?.length > 0
@@ -550,9 +627,15 @@ const DramaMain = ({
                     </h1>
                   </div>
                   <div className="mt-4">
-                    <h1 className="text-white font-bold text-md">
+                    <h1
+                      className="text-white font-bold text-md"
+                      style={{ color: textColor }}
+                    >
                       Genres:
-                      <span className="text-sm pl-2 font-normal text-blue-300">
+                      <span
+                        className="text-sm pl-2 font-semibold text-[#1675b6]"
+                        style={{ color: textColor }}
+                      >
                         {getDrama?.genres_tags?.length > 0
                           ? getDrama?.genres_tags
                               ?.map(
@@ -573,9 +656,15 @@ const DramaMain = ({
                     </h1>
                   </div>
                   <div className="mt-4">
-                    <h1 className="text-white font-bold text-md">
+                    <h1
+                      className="text-white font-bold text-md"
+                      style={{ color: textColor }}
+                    >
                       Tags:
-                      <span className="text-sm pl-2 font-normal text-blue-300">
+                      <span
+                        className="text-sm pl-2 font-semibold text-[#1675b6]"
+                        style={{ color: textColor }}
+                      >
                         {getDrama?.genres_tags?.length > 0
                           ? formattedKeywordsDB
                           : formattedKeywords?.length > 0
@@ -586,25 +675,45 @@ const DramaMain = ({
                   </div>
                   <div className="md:hidden">
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Country:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           {detail?.title || matchedLanguage?.english_name}
                         </span>
                       </h1>
                     </div>
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Episode:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
-                          {info?.number_of_episodes}
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
+                          {info?.number_of_episodes
+                            ? info?.number_of_episodes
+                            : tv?.number_of_episodes}
                         </span>
                       </h1>
                     </div>
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Aired:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           {getDrama?.released_information?.length > 0
                             ? formattedLastAirDate
                               ? `${formattedFirstAirDateDB} - ${formattedLastAirDateDB}`
@@ -616,9 +725,31 @@ const DramaMain = ({
                       </h1>
                     </div>
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
+                        Airs On:
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
+                          {info?.broadcast
+                            ?.map((broad) => broad?.day)
+                            ?.join(", ")}
+                        </span>
+                      </h1>
+                    </div>
+                    <div className="mt-4">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Original Network:{" "}
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           {tv?.networks
                             ?.map((network: DramaReleasedInfo) => network?.name)
                             ?.join(", ")}
@@ -626,9 +757,15 @@ const DramaMain = ({
                       </h1>
                     </div>
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Duration:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           {getDrama?.details?.length > 0
                             ? `${detail?.duration} min.`
                             : tv?.episode_run_time?.length > 0
@@ -638,9 +775,15 @@ const DramaMain = ({
                       </h1>
                     </div>
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Content Rating:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           {getDrama?.details?.length > 0
                             ? detail?.content_rating
                             : `${
@@ -659,9 +802,15 @@ const DramaMain = ({
                       </h1>
                     </div>
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Status:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           {getDrama?.details?.length > 0
                             ? detail?.status
                             : tv?.status === "Returning Series"
@@ -672,9 +821,15 @@ const DramaMain = ({
                     </div>
 
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Score:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           {tv?.vote_average?.toFixed(1)}{" "}
                           {tv?.vote_average === 0
                             ? ""
@@ -685,17 +840,29 @@ const DramaMain = ({
                       </h1>
                     </div>
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Ranked:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           #{!rank ? "10000+" : rank}
                         </span>
                       </h1>
                     </div>
                     <div className="mt-4">
-                      <h1 className="text-white font-bold text-md">
+                      <h1
+                        className="text-white font-bold text-md"
+                        style={{ color: textColor }}
+                      >
                         Popularity:
-                        <span className="text-sm pl-2 font-normal text-blue-300">
+                        <span
+                          className="text-sm pl-2 font-semibold text-[#1675b6]"
+                          style={{ color: textColor }}
+                        >
                           #{tv?.popularity}
                         </span>
                       </h1>
@@ -724,6 +891,7 @@ const DramaMain = ({
           user={user}
           users={users}
           getComment={getComment}
+          getReview={getReview}
         />
       </div>
     </>

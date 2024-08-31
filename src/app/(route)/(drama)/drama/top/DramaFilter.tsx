@@ -48,7 +48,9 @@ const DramaFilter = () => {
     } else if (name === "searchQueryKeyword") {
       setSearchQueryKeyword(value);
     }
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
     // Update the query parameter based on the input's name
     if (value) {
       params.set("query", value);
@@ -62,7 +64,9 @@ const DramaFilter = () => {
   };
   const onSearch = (e: any) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
     if (type === "movie") {
       router.push(`/search/type/movie?${params.toString()}`);
     } else if (type === "tv") {
@@ -85,7 +89,9 @@ const DramaFilter = () => {
   };
 
   const inputCheckbox = (key: any, value: any) => {
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
     const query = Object.fromEntries(params);
     let values = query[key] ? query[key].split(",") : [];
 
@@ -108,7 +114,9 @@ const DramaFilter = () => {
   };
 
   const selectBox = (key: any, value: any) => {
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
     const query = Object.fromEntries(params);
     let values = query[key] ? query[key].split(",") : [];
 
@@ -140,7 +148,9 @@ const DramaFilter = () => {
     const from = newYearRange[0];
     const to = newYearRange[1];
 
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
     // Add "from" and "to" parameters
     params.set("date", from.toString());
     params.set("to", to.toString());
@@ -159,7 +169,9 @@ const DramaFilter = () => {
     const from = newRatingRange[0];
     const rto = newRatingRange[1];
 
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
     // Add "from" and "to" parameters
     params.set("rating", from.toString());
     params.set("rto", rto.toString());

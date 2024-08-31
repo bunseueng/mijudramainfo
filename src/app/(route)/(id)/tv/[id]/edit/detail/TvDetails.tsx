@@ -322,7 +322,6 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       setIsCounterClicked(true);
     }
   };
-
   const handleEpIncrement = () => {
     setEpCounter((prevCounter) => {
       const newCounter = prevCounter + 1;
@@ -812,14 +811,25 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             <div className="absolute right-0 top-0">
               <button
                 type="button"
-                className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b-2 border-b-[#dcdfe6] dark:border-b-[#46494a] border-l-2 border-l-[#dcdfe6] dark:border-l-[#46494a] border-t-2 dark:border-t-0 border-t-[#dcdfe6] dark:border-t-[#46494a] border-r-2 dark:border-r-0 border-r-[#dcdfe6] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group"
+                className={`block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b border-b-[#dcdfe6] dark:border-b-[#46494a] border-l border-l-[#dcdfe6] dark:border-l-[#46494a] border-t dark:border-t-0 border-t-[#dcdfe6] dark:border-t-[#46494a] border-r dark:border-r-0 border-r-[#dcdfe6] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
+                  currentDuration ===
+                  (detail?.duration ?? tv?.episode_run_time[0])
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
                 onClick={handleDurationIncrement}
+                disabled={
+                  currentDuration ===
+                  (detail?.duration ?? tv?.episode_run_time[0])
+                    ? true
+                    : false
+                }
               >
                 <IoMdArrowDropup className="" />
               </button>
               <button
                 type="button"
-                className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l-2 border-l-[#dcdfe6] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
+                className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l border-l-[#dcdfe6] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
                 onClick={handleDurationDecrement}
               >
                 <IoMdArrowDropdown />
@@ -857,14 +867,24 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <div className="absolute right-0 top-0">
             <button
               type="button"
-              className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b-2 border-b-[#dcdfe6] dark:border-b-[#46494a] border-l-2 border-l-[#dcdfe6] dark:border-l-[#46494a] border-t-2 dark:border-t-0 border-t-[#dcdfe6] dark:border-t-[#46494a] border-r-2 dark:border-r-0 border-r-[#dcdfe6] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group"
+              className={`block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-b border-b-[#dcdfe6] dark:border-b-[#46494a] border-l border-l-[#dcdfe6] dark:border-l-[#46494a] border-t dark:border-t-0 border-t-[#dcdfe6] dark:border-t-[#46494a] border-r dark:border-r-0 border-r-[#dcdfe6] dark:border-r-[#46494a] px-3 pb-1 rounded-tr-md hover:text-[#2490da] transform duration-300 group ${
+                currentEpisode === (detail?.episode ?? tv?.number_of_episodes)
+                  ? "cursor-not-allowed"
+                  : "cursor-pointer"
+              }`}
               onClick={handleEpIncrement}
+              disabled={
+                currentEpisode === (detail?.episode ?? tv?.number_of_episodes)
+                  ? true
+                  : false
+              }
             >
               <IoMdArrowDropup className="" />
             </button>
+
             <button
               type="button"
-              className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l-2 border-l-[#dcdfe6] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
+              className="block text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-l border-l-[#dcdfe6] dark:border-l-[#46494a] px-3 rounded-r-md pt-[2px] hover:text-[#2490da] transform duration-300 group"
               onClick={handleEpDecrement}
             >
               <IoMdArrowDropdown />

@@ -7,10 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { getYearFromDate } from "../DramaMain";
 import { FaArrowLeft } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
+import { getYearFromDate } from "@/app/actions/getYearFromDate";
 
 const PhotoAlbum = () => {
   const searchParams = useSearchParams();
@@ -48,7 +48,7 @@ const PhotoAlbum = () => {
   const extractColor = () => {
     if (imgRef.current) {
       const colorThief = new ColorThief();
-      const color = colorThief.getColor(imgRef.current);
+      const color = colorThief?.getColor(imgRef.current);
       setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
     }
   };

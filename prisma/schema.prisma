@@ -55,6 +55,7 @@ model User {
   coverPhoto               String?
   profileAvatar            String?
   coin                     Int         @default(0)
+  points                   Int         @default(0)
   signature                String?     @unique
   token                    String?     @unique
   role                     UserRole    @default(USER)
@@ -126,8 +127,8 @@ model Drama {
 }
 
 model Movie {
-  id                     String  @id @default(auto()) @map("_id") @db.ObjectId
-  movie_id               String  @unique
+  id                     String        @id @default(auto()) @map("_id") @db.ObjectId
+  movie_id               String        @unique
   userId                 String
   public_id              String?
   details                Json[]
@@ -140,8 +141,9 @@ model Movie {
   released_information   Json[]
   production_information Json[]
   genres_tags            Json[]
-  changes                Json[]  @default([])
-  changeCount            Int     @default(0)
+  changes                Json[]        @default([])
+  changeCount            Int           @default(0)
+  Review                 MovieReview[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -180,9 +182,9 @@ model Watchlist {
 }
 
 model DramaList {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String   @db.ObjectId
-  listId       String   @unique
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String     @db.ObjectId
+  listId       String     @unique
   type         String
   listTitle    String
   privacy      String
@@ -196,9 +198,10 @@ model DramaList {
   dramaComment Json[]
   movieId      Int[]
   tvId         Int[]
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  Review       TvReview[]
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Comment {
@@ -230,6 +233,52 @@ model Rating {
   episode   String
   notes     String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TvReview {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  tv_id            String    @unique
+  userId           String    @unique @db.ObjectId
+  userInfo         Json?
+  rating_score     Json?
+  overall_score    String?
+  spoiler          Boolean?
+  finishedWatching Boolean?
+  dropping         Boolean?
+  episode          Int?
+  review_language  String?
+  headline         String?
+  review           String?
+  reviewHelpful    Int       @default(0)
+  reviewNotHelpful Int       @default(0)
+  reviewBy         Json[]
+  drama_list       DramaList @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MovieReview {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  movie_id         String   @unique
+  userId           String   @unique @db.ObjectId
+  userInfo         Json?
+  rating_score     Json?
+  overall_score    String?
+  spoiler          Boolean?
+  finishedWatching Boolean?
+  dropping         Boolean?
+  episode          Int?
+  review_language  String?
+  headline         String?
+  review           String?
+  reviewHelpful    Int      @default(0)
+  reviewNotHelpful Int      @default(0)
+  reviewBy         Json[]
+  movie_list       Movie    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

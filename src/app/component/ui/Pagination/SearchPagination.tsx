@@ -10,32 +10,31 @@ import {
   PaginationPrevious,
 } from "./pagination";
 
-export function SearchPagination({ totalItems, setPage }: any) {
+export function SearchPagination({
+  totalItems,
+  setPage,
+  per_page,
+}: {
+  totalItems: number;
+  setPage: (page: number) => void;
+  per_page: string;
+}) {
   const path = usePathname();
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams?.get("page") || "1");
-  const perPage = parseInt(searchParams?.get("per_page") || "20");
-  const nextPage =
-    currentPage === totalItems ? totalItems : parseInt(currentPage as any) + 1;
-  const nextPageParams = new URLSearchParams(searchParams?.toString());
-  nextPageParams.set("page", nextPage.toString());
-  const queryString = nextPageParams.toString();
-  const prevPage = currentPage === 1 ? 1 : parseInt(currentPage as any) - 1;
-  const prevPageParams = new URLSearchParams(searchParams?.toString());
-  prevPageParams.set("page", prevPage.toString());
-  const prevQueryString = prevPageParams.toString();
+  const perPage = parseInt(searchParams?.get("per_page") || per_page);
 
   const totalPages = Math.ceil(totalItems / perPage);
   const currentPageGroup = Math.ceil(currentPage / 6);
   const startPageIndex = (currentPageGroup - 1) * 6 + 1;
   let endPageIndex = Math.min(startPageIndex + 5, totalPages);
-  const searchParamsEntries = searchParams?.entries() ?? [];
+
   // Adjust endPageIndex to show next 3 pages when currentPage is a multiple of 6
   if (currentPage % 6 === 0 && currentPage !== totalPages) {
     endPageIndex = Math.min(startPageIndex + 8, totalPages);
   }
 
-  const pageNumbers: any[] = [];
+  const pageNumbers: number[] = [];
   for (let i = startPageIndex; i <= endPageIndex; i++) {
     pageNumbers.push(i);
   }
@@ -44,20 +43,31 @@ export function SearchPagination({ totalItems, setPage }: any) {
     setPage(pageIndex);
   };
 
+  const showPrevious = currentPage > 1;
+  const showNext = currentPage < totalPages;
+
   return (
     <Pagination className="flex flex-wrap items-start justify-start px-1 md:px-4">
       <PaginationContent className="flex-wrap">
-        <PaginationItem>
-          <PaginationPrevious
-            className="border border-slate-200 rounded-md bg-white dark:bg-[#242424] dark:border-[#272727]"
-            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-            href={`${path}?${prevQueryString}`}
-          />
-        </PaginationItem>
-        {pageNumbers.map((pageIndex: number) => (
+        {showPrevious && (
+          <PaginationItem>
+            <PaginationPrevious
+              className="border border-slate-200 rounded-md bg-white dark:bg-[#242424] dark:border-[#272727]"
+              onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+              href={`${path}?${new URLSearchParams({
+                ...Object.fromEntries(searchParams.entries()),
+                page: String(Math.max(currentPage - 1, 1)),
+              }).toString()}`}
+            />
+          </PaginationItem>
+        )}
+        {pageNumbers.map((pageIndex) => (
           <PaginationItem key={pageIndex}>
             <PaginationLink
-              href={`${path}?${queryString}`}
+              href={`${path}?${new URLSearchParams({
+                ...Object.fromEntries(searchParams.entries()),
+                page: String(pageIndex),
+              }).toString()}`}
               onClick={() => handlePageChange(pageIndex)}
               className={`bg-white border border-slate-200 px-4 py-2 rounded-sm cursor-pointer dark:bg-[#242424] dark:border-[#272727] ${
                 pageIndex === currentPage
@@ -69,15 +79,20 @@ export function SearchPagination({ totalItems, setPage }: any) {
             </PaginationLink>
           </PaginationItem>
         ))}
-        <PaginationItem>
-          <PaginationNext
-            className="border border-slate-200 rounded-md bg-white dark:bg-[#242424] dark:border-[#272727]"
-            onClick={() => {
-              handlePageChange(Math.min(currentPage + 1, totalPages));
-            }}
-            href={`${path}?${queryString}`}
-          />
-        </PaginationItem>
+        {showNext && (
+          <PaginationItem>
+            <PaginationNext
+              className="border border-slate-200 rounded-md bg-white dark:bg-[#242424] dark:border-[#272727]"
+              onClick={() =>
+                handlePageChange(Math.min(currentPage + 1, totalPages))
+              }
+              href={`${path}?${new URLSearchParams({
+                ...Object.fromEntries(searchParams.entries()),
+                page: String(Math.min(currentPage + 1, totalPages)),
+              }).toString()}`}
+            />
+          </PaginationItem>
+        )}
       </PaginationContent>
     </Pagination>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchTv, fetchTvWatchProvider } from "@/app/actions/fetchMovieApi";
+import { getNetworkLogo } from "@/app/actions/getNetworkLogo";
 import TvAddModal from "@/app/component/ui/Modal/TvAddModal";
 import TvEditModal from "@/app/component/ui/Modal/TvEditModal";
 import {
@@ -27,11 +28,6 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
     staleTime: 1000 * 60 * 10, // 10 minutes
-  });
-
-  const { data: watch } = useQuery({
-    queryKey: ["watch", tv_id],
-    queryFn: () => fetchTvWatchProvider(tv_id),
   });
 
   const extraData =
@@ -238,9 +234,22 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 const networkId = show?.networks
                   ?.filter((net: any) => net?.name !== show?.service_name)
                   ?.map((item: any) => item.id);
-                const youku =
-                  show?.service_name === "Youku" &&
-                  "https://img.alicdn.com/imgextra/i2/O1CN01BeAcgL1ywY0G5nSn8_!!6000000006643-2-tps-195-195.png";
+
+                const serviceImage = show?.service_logo
+                  ? `/channel${show?.service_logo}`
+                  : getNetworkLogo[show?.service_name] ||
+                    show?.service_url ||
+                    (show?.networks?.find(
+                      (net: any) => getNetworkLogo[net?.name]
+                    )?.name
+                      ? getNetworkLogo[
+                          show?.networks.find(
+                            (net: any) => getNetworkLogo[net?.name]
+                          )?.name
+                        ]
+                      : `/channel${show?.service_logo}`) ||
+                    `https://image.tmdb.org/t/p/original/${show?.logo_path}`;
+                const tencent = show?.homepage;
                 return (
                   <Reorder.Item
                     as="tr"
@@ -257,15 +266,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     <td className="border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
                       <div className="flex items-start">
                         <Image
-                          src={
-                            show?.service_logo
-                              ? `/channel${show?.service_logo}`
-                              : show?.service_url
-                              ? youku ||
-                                show?.service_url ||
-                                "/default-image.jpg"
-                              : `https://image.tmdb.org/t/p/original/${show?.logo_path}`
-                          }
+                          src={serviceImage}
                           alt={
                             show?.service_name ? show?.service_name : show?.name
                           }
@@ -307,7 +308,13 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               : show?.homepage}
                           </span>
                         ) : (
-                          <span>{show?.link}</span>
+                          <span>
+                            {show?.networks?.map(
+                              (net: any) =>
+                                show?.link?.includes(net?.name) ||
+                                (net?.name === "Tencent Video" && tencent)
+                            )}
+                          </span>
                         )}
                       </p>
                     </td>

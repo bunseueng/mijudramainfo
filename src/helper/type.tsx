@@ -347,7 +347,13 @@ export interface DramaReleasedInfo {
   air_date: string | null;
   all_episode: Prisma.JsonValue[];
   backdrop_path: string | null;
-  broadcast: Prisma.JsonValue[];
+  broadcast: [
+    {
+      day: string;
+      time: string;
+      episode: string;
+    }
+  ];
   created_by: Prisma.JsonValue[];
   episode_end: number | null;
   episode_run_time: Prisma.JsonValue[];
@@ -594,4 +600,41 @@ export interface PersonExternalID {
   wikidata_id: string | null;
   trakt_id: string | null;
   mdl_id: string | null;
+}
+
+export interface ITvReview {
+  id: string;
+  tv_id: string;
+  userId: string;
+  rating_score: {
+    acting: number;
+    music: number;
+    overall: number;
+    rewatchValue: number;
+    story: number;
+  };
+  userInfo: {
+    name: string;
+    displayName: string;
+    profileAvatar: string | null;
+    image: string | null;
+  };
+  spoiler: boolean | null;
+  finishedWatching: boolean | null;
+  dropping: boolean | null;
+  episode: number | null;
+  review_language: string | null;
+  headline: string | null;
+  review: string;
+  overall_score: number;
+  reviewHelpful: number;
+  reviewNotHelpful: number;
+  reviewBy: [
+    {
+      userId: string;
+      action: string;
+    }
+  ];
+  updatedAt: string;
+  createdAt: Date;
 }

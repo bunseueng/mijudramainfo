@@ -2,7 +2,6 @@
 
 import ColorThief from "colorthief";
 import React, { useEffect, useRef, useState } from "react";
-import { getYearFromDate } from "../DramaMain";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa6";
 import Image from "next/image";
@@ -19,6 +18,7 @@ import Featurettes from "./featurettes/Featurettes";
 import OpeningCredits from "./opening_credits/OpeningCredits";
 import Bloopers from "./bloopers/Bloopers";
 import TvTeasers from "./teasers/TvTeasers";
+import { getYearFromDate } from "@/app/actions/getYearFromDate";
 
 interface TvTrailerType {
   tv_id: string;

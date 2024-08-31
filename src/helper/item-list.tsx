@@ -264,72 +264,36 @@ export const starLabels = [
     label: "1",
   },
   {
-    value: 1.5,
-    label: "1.5",
-  },
-  {
     value: 2,
     label: "2",
-  },
-  {
-    value: 2.5,
-    label: "2.5",
   },
   {
     value: 3,
     label: "3",
   },
   {
-    value: 3.5,
-    label: "3.5",
-  },
-  {
     value: 4,
     label: "4",
-  },
-  {
-    value: 4.5,
-    label: "4.5",
   },
   {
     value: 5,
     label: "5",
   },
   {
-    value: 5.5,
-    label: "5.5",
-  },
-  {
     value: 6,
     label: "6",
-  },
-  {
-    value: 6.5,
-    label: "6.5",
   },
   {
     value: 7,
     label: "7",
   },
   {
-    value: 7.5,
-    label: "7.5",
-  },
-  {
     value: 8,
     label: "8",
   },
   {
-    value: 8.5,
-    label: "8.5",
-  },
-  {
     value: 9,
     label: "9",
-  },
-  {
-    value: 9.5,
-    label: "9.5",
   },
   {
     value: 10,
@@ -4476,4 +4440,138 @@ export const person_id_link = [
   { network: "wikidata", link: "https://www.wikidata.org/wiki/" },
   { network: "trakt", link: "https://trakt.tv/shows/" },
   { network: "mydramalist", link: "https://mydramalist.com/people/" },
+];
+
+export const reviewLanguage = [
+  {
+    value: "English",
+  },
+  {
+    value: "Korean",
+  },
+  {
+    value: "Khmer",
+  },
+  {
+    value: "Japanese",
+  },
+  {
+    value: "Thai",
+  },
+  {
+    value: "Chinese (Sim.)",
+  },
+  {
+    value: "Chinese (Trad.)",
+  },
+  {
+    value: "Spanish",
+  },
+  {
+    value: "Portuguese (Brasil)",
+  },
+  {
+    value: "Portuguese (Portugal)",
+  },
+  {
+    value: "Arabic",
+  },
+  {
+    value: "Bosnian",
+  },
+  {
+    value: "Croatian",
+  },
+  {
+    value: "Czech",
+  },
+  {
+    value: "Danish",
+  },
+  {
+    value: "Dutch",
+  },
+  {
+    value: "Filipino",
+  },
+  {
+    value: "Finnish",
+  },
+  {
+    value: "French",
+  },
+  {
+    value: "German",
+  },
+  {
+    value: "Greek",
+  },
+  {
+    value: "Hebrew",
+  },
+  {
+    value: "Hungarian",
+  },
+  {
+    value: "Indonesian",
+  },
+  {
+    value: "Italian",
+  },
+  {
+    value: "Myanmar",
+  },
+  {
+    value: "Norwegian",
+  },
+  {
+    value: "Polish",
+  },
+  {
+    value: "Romanian",
+  },
+  {
+    value: "Russian",
+  },
+  {
+    value: "Serbian",
+  },
+  {
+    value: "Slovak",
+  },
+  {
+    value: "Swedish",
+  },
+  {
+    value: "Turkish",
+  },
+  {
+    value: "Ukrainian",
+  },
+  {
+    value: "Vietnamese",
+  },
+];
+
+export const reviewStatus = [
+  {
+    label: "All Status",
+    value: "all_status",
+  },
+  {
+    label: "Completed",
+    value: "completed",
+  },
+  {
+    label: "Ongoing",
+    value: "ongoing",
+  },
+  {
+    label: "Dropped",
+    value: "dropped",
+  },
+  {
+    label: "Hide Spoiler",
+    value: "spoiler",
+  },
 ];

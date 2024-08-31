@@ -119,7 +119,11 @@ const FilterQuery = ({ BASE_URL }: any) => {
             BASE_URL={BASE_URL}
           />
           <div className="flex flex-col items-start justify-start max-w-[1520px] mx-auto pb-10">
-            <SearchPagination setPage={setPage} totalItems={items} />
+            <SearchPagination
+              setPage={setPage}
+              totalItems={items}
+              per_page="20"
+            />
           </div>
         </Suspense>
       )}

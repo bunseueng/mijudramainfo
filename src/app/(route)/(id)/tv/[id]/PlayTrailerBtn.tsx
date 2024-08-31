@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { FaPlay } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
-const PlayTrailerBtn = ({ trailer }: any) => {
+
+const PlayTrailerBtn = ({ trailer, textColor }: any) => {
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
 
   return (
@@ -11,6 +12,7 @@ const PlayTrailerBtn = ({ trailer }: any) => {
       <div
         className="flex items-center text-white hover:opacity-70 transition duration-300 cursor-pointer"
         onClick={() => setOpenTrailer(!openTrailer)}
+        style={{ color: textColor }}
       >
         <FaPlay size={25} />
         <p className="pl-3 text-lg font-bold">Play Trailer</p>
@@ -19,7 +21,7 @@ const PlayTrailerBtn = ({ trailer }: any) => {
         {trailer?.results?.map((item: any) => (
           <div key={item?.id} className="relative">
             <div
-              className={`fixed top-0 left-0 right-0 bottom-0 max-w-6xl m-auto w-[95%] h-[50%] lg:h-[80%] ${
+              className={`fixed top-10 left-0 right-0 bottom-0 max-w-6xl m-auto w-[95%] h-[50%] lg:h-[80%] ${
                 openTrailer ? "z-0 hidden" : "z-50"
               }`}
             >

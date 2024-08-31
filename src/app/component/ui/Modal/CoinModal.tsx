@@ -80,7 +80,7 @@ const CoinModal: React.FC<CoinType> = ({
                     className="bg-[#1b92e4] text-white font-bold border-[1px] border-[#1675b6] rounded-md shadow-md px-4 py-2"
                     onClick={() => {
                       setValue(500),
-                        setPrice(1.99),
+                        setPrice(0.01),
                         setOpenPayment(!openPayment);
                     }}
                   >

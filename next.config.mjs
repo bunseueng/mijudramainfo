@@ -7,6 +7,12 @@ const nextConfig = {
       "avatars.githubusercontent.com",
       "res.cloudinary.com",
       "img.alicdn.com",
+      "v.qq.com",
+      "static.hitv.com",
+      "encrypted-tbn0.gstatic.com",
+      "www.iq.com",
+      "upload.wikimedia.org",
+      "static.wikia.nocookie.net",
     ],
   },
 };

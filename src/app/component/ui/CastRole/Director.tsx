@@ -63,7 +63,7 @@ const Director = ({ directors, directorsDB }: any) => {
               </div>
             </div>
           ))
-        : filteredDirectors.map((item: any) => (
+        : filteredDirectors?.map((item: any) => (
             <div
               className="flex flex-col justify-between lg:flow-row items-start mt-3"
               key={item?.id}

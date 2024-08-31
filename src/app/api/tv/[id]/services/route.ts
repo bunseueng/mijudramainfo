@@ -117,6 +117,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         },
       });
 
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: {
+          points: { increment: 3 }, // Increment by a certain number of points
+        },
+      });
+
       return NextResponse.json({ updateDetails, message: "Success" }, { status: 200 });
     } else {
       // Handle creation of new drama
@@ -142,6 +149,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             }
           ],
           changeCount: 1,
+        },
+      });
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: {
+          points: { increment: 3 }, // Increment by a certain number of points
         },
       });
 
@@ -223,6 +236,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
           },
         },
       });
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: {
+          points: { increment: 3 }, // Increment by a certain number of points
+        },
+      });
 
       return NextResponse.json({ updateDetails, message: "Success" }, { status: 200 });
     } else {
@@ -252,6 +271,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         },
       });
 
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: {
+          points: { increment: 3 }, // Increment by a certain number of points
+        },
+      });
       return NextResponse.json({ createDetails, message: "Success" }, { status: 200 });
     }
   } catch (error: any) {
