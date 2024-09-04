@@ -29,13 +29,15 @@ import {
   UserProps,
 } from "@/helper/type";
 import FollowButton from "@/app/component/ui/Button/FollowButton";
+import { ReviewType } from "../../(id)/tv/[id]/reviews/Reviews";
+import ProfileReviews from "./reviews/ProfileReviews";
 
 export interface User {
   user: UserProps | null;
 }
 
 const ProfileItem: React.FC<
-  ProfilePageProps & IFriend & User & IFindSpecificUser
+  ProfilePageProps & IFriend & User & IFindSpecificUser & ReviewType
 > = ({
   user,
   currentUser,
@@ -49,6 +51,8 @@ const ProfileItem: React.FC<
   findFriendId,
   friend,
   yourFriend,
+  getDrama,
+  getReview,
 }) => {
   const [editable, setEditable] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -448,6 +452,7 @@ const ProfileItem: React.FC<
                   )}
                 </div>
               )}
+
               {pathname === `/profile/${user?.name}/watchlist` && (
                 <Watchlist
                   tv_id={tv_id}
@@ -458,7 +463,15 @@ const ProfileItem: React.FC<
               {pathname === `/profile/${user?.name}/lists` && (
                 <ProfileList list={list} movieId={movieId} tvId={tvid} />
               )}
-            </div>
+            </div>{" "}
+            {pathname === `/profile/${user?.name}/reviews` && (
+              <ProfileReviews
+                getDrama={getDrama}
+                getReview={getReview}
+                currentUser={currentUser}
+                tv_id=""
+              />
+            )}
           </div>
         </div>
       </div>

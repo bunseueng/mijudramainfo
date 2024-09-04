@@ -60,7 +60,7 @@ const ExploreMovieCard = ({ title, movie }: any) => {
                           ) : (
                             <Image
                               src="/empty-img.jpg"
-                              alt="drama image"
+                              alt={movie?.name || movie?.title}
                               width={200}
                               height={200}
                               style={{ width: "100%", height: "100%" }}

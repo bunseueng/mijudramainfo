@@ -18,14 +18,14 @@ export default function Results({
 }: any) {
   const path = BASE_URL.split("/").pop();
   return (
-    <div className="flex flex-col items-start justify-start max-w-[1520px] mx-auto py-4 overflow-hidden">
+    <div className="max-w-6xl relative flex flex-wrap items-center justify-between mx-auto px-4 my-7">
       <div className="w-full h-full flex flex-col md:flex-row justify-between">
-        <div className="w-full md:w-[77.7777%] float-left px-1 md:px-4">
+        <div className="w-full md:w-[77.7777%] float-left px-1 md:px-2">
           <div className="flex items-center justify-between mb-5">
             <h1 className="text-2xl font-bold">Search</h1>
             <p>{items} results</p>
           </div>
-          <div className="h-full w-full p-2 overflow-hidden">
+          <div className="h-full w-full py-2 overflow-hidden">
             {results?.map((result: any, idx: number) => (
               <div
                 className="grid grid-cols-1 bg-white dark:bg-[#242424] border-2 dark:border-[#272727] rounded-lg mb-4"
@@ -55,7 +55,7 @@ export default function Results({
             ))}
           </div>
         </div>
-        <div className="w-full md:w-[33.3333%] float-right">
+        <div className="w-full md:w-[33.3333%] float-right px-1 md:px-2">
           <div className="border rounded-lg border-slate-400 dark:border-[#272727]">
             <div className="px-10 py-5 bg-cyan-400 dark:bg-[#272727] rounded-t-lg">
               <h2 className="text-center font-bold uppercase text-white">

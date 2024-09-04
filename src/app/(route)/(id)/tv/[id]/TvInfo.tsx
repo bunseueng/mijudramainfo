@@ -17,15 +17,11 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
   const formattedLastAirDateDB = info?.end_date
     ? formatDate(info.end_date)
     : "";
-
-  const original_country = tv?.origin_country[0];
-
+  const original_country = tv?.origin_country && tv?.origin_country[0];
   const matchedLanguage = language?.find(
     (lang: any) => lang?.iso_3166_1 === original_country
   );
-
   const allTvShowsArray = Array.isArray(allTvShows) ? allTvShows : [];
-
   // Find the index of the matched TV show in allTvShows array
   const matchedIndex = allTvShowsArray.findIndex(
     (show: any) => show.id === tv.id

@@ -7,6 +7,7 @@ import { IoMdMail, IoMdNotifications } from "react-icons/io";
 import { FaCalendarAlt } from "react-icons/fa";
 import ProfileItem from "./ProfileItem";
 import moment from "moment";
+import { DramaDB, ITvReview } from "@/helper/type";
 
 const ProfilePage = async ({ params }: { params: { name: string } }) => {
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
@@ -18,7 +19,6 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
     /<\/?([a-z][a-z0-9]*)\b[^>]*>?/gi,
     ""
   );
-
   const lists = await prisma.dramaList.findMany({
     where: {
       userId: user?.id,
@@ -70,6 +70,20 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
     friends?.map((friend: any) => friend?.friendRespondId).includes(user?.id)
   );
 
+  const getDrama = await prisma.drama.findMany({});
+  const getReview = await prisma.tvReview.findMany({
+    where: { userId: user?.id },
+  });
+  const formattedReviews: ITvReview[] = getReview.map((review) => ({
+    ...review,
+    review: review?.review as ITvReview["review"],
+    rating_score: review.rating_score as ITvReview["rating_score"], // Assuming this JSON is structured correctly
+    userInfo: review.userInfo as ITvReview["userInfo"], // Assuming this JSON is structured correctly
+    overall_score: review.overall_score ? Number(review.overall_score) : 0, // Ensure it's a number
+    reviewBy: review.reviewBy as ITvReview["reviewBy"], // Assuming this JSON is structured correctly
+    updatedAt: review.updatedAt.toISOString(), // Convert Date to string if needed
+    createdAt: review.createdAt, // Keep as Date
+  }));
   return (
     <main className="overflow-hidden">
       <div className="relative">
@@ -125,7 +139,7 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
         <ProfileItem
           user={user}
           currentUser={currentUser}
-          tv_id={tv_id}
+          tv_id={tv_id as any}
           existedFavorite={existedFavorite}
           list={formattedLists}
           movieId={movieId}
@@ -136,6 +150,8 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
           friend={friends}
           yourFriend={yourFriend}
           findSpecificUser={[]}
+          getDrama={getDrama as any}
+          getReview={formattedReviews}
         />
       </div>
     </main>

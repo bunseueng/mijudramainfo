@@ -90,120 +90,163 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
         const isCurrentUserReviewdAction = review?.reviewBy?.find((data) =>
           user?.id?.includes(data?.userId)
         );
+        const isLongReview = review?.review?.length > 500;
         return (
           <div id={review?.id} className="flex flex-col" key={idx}>
-            <div className="flex justify-between bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
-              <div className="flex items-center">
-                <Image
-                  src={`${
-                    review?.userInfo?.profileAvatar || review?.userInfo?.image
-                  }`}
-                  alt={`${
-                    review?.userInfo?.displayName || review?.userInfo?.name
-                  }`}
-                  width={100}
-                  height={100}
-                  className="size-[50px] object-cover rounded-full"
-                />
+            <div className=" bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
+              <div className="flex justify-between">
+                <div className="flex items-center">
+                  <Image
+                    src={`${
+                      review?.userInfo?.profileAvatar || review?.userInfo?.image
+                    }`}
+                    alt={`${
+                      review?.userInfo?.displayName || review?.userInfo?.name
+                    }`}
+                    width={100}
+                    height={100}
+                    className="size-[50px] object-cover rounded-full"
+                  />
 
-                <div className="flex flex-col text-black pl-2">
-                  <Link
-                    href={`/person/${review?.userId}`}
-                    className="text-[#2490da] text-sm md:text-md"
-                  >
-                    {review?.userInfo?.displayName || review?.userInfo?.name}
-                  </Link>
-
-                  <p className="text-black dark:text-white text-sm font-semibold">
-                    {review?.reviewHelpful} people found this review helpful
-                  </p>
-                  <Link href="" className="text-[#2490da] text-sm md:text-md">
-                    Other reviews by this user
-                  </Link>
+                  <div className="flex flex-col text-black pl-2">
+                    <Link
+                      href={`/person/${review?.userId}`}
+                      className="text-[#2490da] text-sm md:text-md"
+                    >
+                      {review?.userInfo?.displayName || review?.userInfo?.name}
+                    </Link>
+                    <Link href="" className="text-[#2490da] text-sm md:text-md">
+                      Other reviews by this user
+                    </Link>{" "}
+                  </div>
                 </div>
-              </div>
-              <div className="">
-                <p className="text-xs text-right text-[#999] pb-1">
-                  {formatDate(review?.updatedAt)}
-                </p>
-                {review?.finishedWatching === false ? (
-                  <p className="text-xs text-right text-[#818a91] pb-1">
-                    {review?.episode} of {tv?.number_of_episodes} episodes seen
+                <div className="block">
+                  <label
+                    htmlFor="review_date"
+                    className="text-sm font-semibold"
+                  >
+                    Review Date:
+                  </label>
+                  <p className="text-xs text-right text-[#999] pb-1">
+                    {formatDate(review?.updatedAt)}
                   </p>
-                ) : (
-                  <p className="text-xs text-right text-[#818a91] pb-1">
-                    {review?.episode} of {tv?.number_of_episodes} episodes seen
-                  </p>
-                )}
-                <div className="flex items-center text-end justify-end">
-                  {review?.finishedWatching === false ? (
-                    <p className="text-xs text-[#3a8ee6] border border-[#3a8ee6] rounded-md px-2 mr-2">
-                      Ongoing
-                    </p>
-                  ) : (
-                    <p className="text-xs text-[#5cb85c] border border-[#5cb85c] rounded-md px-2 mr-2">
-                      Completed
-                    </p>
-                  )}
-                  <IoLogoWechat />
                 </div>
               </div>
             </div>
-            <div className="px-4 py-2.5">
-              <div className="-mx-3">
+            <div className="px-4">
+              <div className="-mx-4">
                 <div className="relative float-left w-full overflow-hidden break-words">
-                  <div className="relative float-right border border-[#00000024] rounded-sm m-2">
-                    <div className="bg-[#e9f4fb] dark:bg-[#1b1c1d] text-[#1675b6] border-b border-b-[#06090c21] dark:border-b-[#3e4042] px-4 py-1">
-                      <b className="font-normal">Overall</b>{" "}
-                      <span className="float-right text-[#1675b6]">
-                        {review?.overall_score}
-                      </span>
+                  <div className="flex items-center justify-center border-b border-b-slate-400  border-t border-t-slate-400 py-1">
+                    <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                      <label htmlFor="story" className="text-sm font-bold">
+                        Story
+                      </label>
+                      <p>{review?.rating_score?.story}</p>
                     </div>
-                    <div className="text-sm bg-white dark:bg-[#1b1c1d] py-2 px-4">
-                      <div>
-                        Story{" "}
-                        <span className="float-right pl-4">
-                          {review?.rating_score?.story}
-                        </span>
-                      </div>
-                      <div>
-                        Acting/Cast{" "}
-                        <span className="float-right pl-4">
-                          {review?.rating_score?.acting}
-                        </span>
-                      </div>
-                      <div>
-                        Music{" "}
-                        <span className="float-right pl-4">
-                          {review?.rating_score?.music}
-                        </span>
-                      </div>{" "}
-                      <div>
-                        Rewatch Value{" "}
-                        <span className="float-right pl-4">
-                          {review?.rating_score?.rewatchValue}
-                        </span>
+                    <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                      <label
+                        htmlFor="acting_cast"
+                        className="text-sm font-bold"
+                      >
+                        Acting/Cast
+                      </label>
+                      <p>{review?.rating_score?.acting}</p>
+                    </div>
+                    <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                      <label htmlFor="music" className="text-sm font-bold">
+                        Music
+                      </label>
+                      <p>{review?.rating_score?.music}</p>
+                    </div>
+                    <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                      <label
+                        htmlFor="rewatch_value"
+                        className="text-sm font-bold"
+                      >
+                        Rewatch Value
+                      </label>
+                      <p>{review?.rating_score?.rewatchValue}</p>
+                    </div>
+                    <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                      <label htmlFor="overall" className="text-sm font-bold">
+                        Overall
+                      </label>
+                      <p>{review?.overall_score}</p>
+                    </div>
+
+                    <div className="flex flex-col items-center px-5">
+                      {" "}
+                      {review?.finishedWatching === false ? (
+                        <p className="text-xs text-right text-[#818a91] pb-1">
+                          {review?.episode} of {tv?.number_of_episodes} episodes
+                          seen
+                        </p>
+                      ) : (
+                        <p className="text-xs text-right text-[#818a91] pb-1">
+                          {review?.episode} of {tv?.number_of_episodes} episodes
+                          seen
+                        </p>
+                      )}
+                      <div className="flex items-center text-end justify-end">
+                        {review?.finishedWatching === false ? (
+                          <>
+                            {review?.dropping === true ? (
+                              <p className="text-xs text-red-600 border border-red-600 rounded-md px-2 mr-2">
+                                Dropped
+                              </p>
+                            ) : (
+                              <p className="text-xs text-[#3a8ee6] border border-[#3a8ee6] rounded-md px-2 mr-2">
+                                Ongoing
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <p className="text-xs text-[#5cb85c] border border-[#5cb85c] rounded-md px-2 mr-2">
+                            Completed
+                          </p>
+                        )}
+
+                        <IoLogoWechat />
                       </div>
                     </div>
                   </div>
-                  {review?.spoiler === true && (
-                    <p className="text-sm text-[#cc3737] font-bold px-3 py-1">
-                      This review may contain spoilers
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <p className="text-black dark:text-white text-sm font-semibold">
+                      {review?.reviewHelpful} people found this review helpful
                     </p>
-                  )}
+                    {review?.spoiler === true && (
+                      <p className="text-sm text-[#cc3737] font-bold pb-1">
+                        This review may contain spoilers
+                      </p>
+                    )}
+                  </div>
+                  <div className="relative float-right border border-[#00000024] rounded-sm m-2">
+                    <Image
+                      src={`https://image.tmdb.org/t/p/original/${
+                        tv.poster_path || tv.backdrop_path
+                      }`}
+                      alt={`${tv?.name || tv?.title}`}
+                      width={100}
+                      height={100}
+                      className="w-[100px] h-[150px] object-cover rounded-md"
+                    />
+                  </div>
+
                   <p className="text-sm font-bold p-3">{review?.headline}</p>
                   <p className="review-content text-[#333] dark:text-white text-sm px-3">
-                    {expandedReviews?.has(idx)
-                      ? review?.review
-                      : `${review?.review?.slice(0, 500)}...`}
-                    <button
-                      onClick={() => toggleExpand(idx)}
-                      className="text-md font-semibold text-[#0275d8]"
-                    >
-                      {expandedReviews?.has(idx) ? "Show Less" : "Read More"}
-                    </button>
+                    {review?.review?.length > 500 && !expandedReviews?.has(idx)
+                      ? `${review?.review.slice(0, 500)}...`
+                      : review?.review}
+                    {review?.review?.length > 500 && (
+                      <button
+                        onClick={() => toggleExpand(idx)}
+                        className="text-md font-semibold text-[#0275d8] pl-1"
+                      >
+                        {expandedReviews?.has(idx) ? "Show Less" : "Read More"}
+                      </button>
+                    )}
                   </p>
-                  {expandedReviews?.has(idx) && (
+                  {(!isLongReview || expandedReviews?.has(idx)) && (
                     <div className="text-sm px-3">
                       Was this review helpful to you?{" "}
                       <button

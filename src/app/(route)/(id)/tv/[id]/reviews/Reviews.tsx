@@ -8,12 +8,17 @@ import {
 } from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
-import { currentUserProps, DramaDB, ITvReview } from "@/helper/type";
+import {
+  currentUserProps,
+  DramaDB,
+  ITvReview,
+  SearchParamsType,
+} from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import ColorThief from "colorthief";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa6";
 import TvInfo from "../TvInfo";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
@@ -23,12 +28,11 @@ import { reviewLanguage, reviewStatus } from "@/helper/item-list";
 import ClipLoader from "react-spinners/ClipLoader";
 import { IoLogoWechat } from "react-icons/io5";
 import { formatDate } from "@/app/actions/formatDate";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
-import { Pagination } from "@/app/component/ui/Pagination/pagination";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 
-type ReviewType = {
+export type ReviewType = {
   tv_id: string;
   getDrama: DramaDB | null;
   getReview: ITvReview[];
@@ -42,7 +46,7 @@ const Reviews: React.FC<ReviewType> = ({
   currentUser,
 }) => {
   const { data: tv, isLoading } = useQuery({
-    queryKey: ["movie", tv_id],
+    queryKey: ["drama", tv_id],
     queryFn: () => fetchTv(tv_id),
   });
   const { data: language } = useQuery({
@@ -57,9 +61,10 @@ const Reviews: React.FC<ReviewType> = ({
     queryKey: ["tvCast", tv_id],
     queryFn: fetchAllPopularTvShows,
   });
+  const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>("");
   const [reviewType, setReviewType] = useState<string>("Most Helpful");
-  const [languages, setLanguages] = useState<string>("All Languages");
+  const [languages, setLanguages] = useState<string>();
   const [status, setStatus] = useState<string>("all_status");
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
@@ -68,6 +73,7 @@ const Reviews: React.FC<ReviewType> = ({
   const [loadingStates, setLoadingStates] = useState<{
     [key: string]: boolean;
   }>({});
+  const pathname = usePathname();
   const router = useRouter();
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
   const searchParams = useSearchParams(); // Assuming you have this declared somewhere
@@ -76,8 +82,49 @@ const Reviews: React.FC<ReviewType> = ({
   const [page, setPage] = useState(initialPage);
   const start = (page - 1) * Number(per_page);
   const end = start + Number(per_page);
-  const totalItems = getReview?.length;
-  const currentItems = getReview?.slice(start, end);
+  const sortby = searchParams?.get("sortby") ?? "";
+  const lang = searchParams?.get("xlang") ?? "";
+  const statusQ = searchParams?.get("status") ?? "";
+  const sortedItems = useMemo(() => {
+    setLoading(true);
+    let sortedReviews = [...getReview];
+    // Sorting by most recent
+    if (sortby === "most_recent") {
+      sortedReviews?.sort(
+        (a, b) =>
+          new Date(b?.createdAt).getTime() - new Date(a?.createdAt).getTime()
+      );
+    }
+    // Sorting by most helpful
+    else if (sortby === "most_helpful") {
+      sortedReviews?.sort((a, b) => b?.reviewHelpful - a?.reviewHelpful);
+    }
+    // Filtering by status
+    if (statusQ === status) {
+      sortedReviews = sortedReviews.filter((stat) => {
+        if (status === "completed") return stat?.finishedWatching === true;
+        if (status === "ongoing")
+          return stat?.finishedWatching === false && stat?.dropping !== true;
+        if (status === "dropped") return stat?.dropping === true;
+        if (status === "spoiler") return stat?.spoiler !== true;
+        return true;
+      });
+    }
+    // Filtering by language
+    if (lang === languages) {
+      sortedReviews = sortedReviews.filter(
+        (review) => review?.review_language === languages
+      );
+    } else {
+      // Default language filter
+      sortedReviews = sortedReviews.filter((review) => review?.review_language);
+    }
+    setLoading(false);
+    return sortedReviews;
+  }, [sortby, getReview, lang, languages, status, statusQ]);
+
+  const totalItems = sortedItems?.length;
+  const currentItems = sortedItems?.slice(start, end) as ITvReview[];
 
   const handleDropdownToggle = (type: string) => {
     setOpenDropdown(openDropdown === type ? "" : type);
@@ -103,6 +150,34 @@ const Reviews: React.FC<ReviewType> = ({
         newSet.add(index);
       }
       return newSet;
+    });
+  };
+
+  const selectBox = (key: string, value: string) => {
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
+    const query = Object.fromEntries(params);
+    let values = query[key] ? query[key].split(",") : [];
+
+    values = [value];
+
+    if (values.length === 0) {
+      delete query[key];
+    } else {
+      query[key] = values.join(",");
+    }
+    // Set the specific query parameter to the selected value
+    query[key] = value;
+    // If the value is empty, remove the key from the query parameters
+    if (!value) {
+      delete query[key];
+    }
+
+    const queryString = new URLSearchParams(query).toString();
+
+    router.push(`${pathname}/?${queryString}`, {
+      scroll: false,
     });
   };
 
@@ -155,8 +230,11 @@ const Reviews: React.FC<ReviewType> = ({
     }
   }, [tv]);
 
+  if (loading) {
+    return <SearchLoading />;
+  }
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <SearchLoading />;
   }
 
   if (!tv) {
@@ -250,9 +328,10 @@ const Reviews: React.FC<ReviewType> = ({
                             onClick={() => {
                               handleDropdownToggle("review_type");
                               setReviewType("Most Helpful");
+                              selectBox("sortby", "most_helpful");
                             }}
                           >
-                            {reviewType}
+                            Most Helpful
                           </li>
                           <li
                             className={`text-sm hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer ${
@@ -263,9 +342,10 @@ const Reviews: React.FC<ReviewType> = ({
                             onClick={() => {
                               handleDropdownToggle("review_type");
                               setReviewType("Most Recent");
+                              selectBox("sortby", "most_recent");
                             }}
                           >
-                            {reviewType}
+                            Most Recent
                           </li>
                         </motion.ul>
                       </AnimatePresence>
@@ -275,7 +355,7 @@ const Reviews: React.FC<ReviewType> = ({
                     <button
                       type="button"
                       name="most_helpful"
-                      className="relative text-sm bg-white dark:bg-[#3a3b3c] px-5 py-3"
+                      className="relative text-sm px-5 py-3"
                       onClick={() => handleDropdownToggle("language")}
                     >
                       All Languages
@@ -299,28 +379,74 @@ const Reviews: React.FC<ReviewType> = ({
                             >
                               Languages
                             </label>
-                            {reviewLanguage?.map((lang, idx) => {
-                              return (
-                                <div key={idx} className="px-5 py-1">
-                                  <label
-                                    className={`mr-4 text-sm hover:text-[#409eff] transform duration-300 cursor-pointer ${
-                                      languages === lang?.value
-                                        ? "text-[#409eff] font-bold"
-                                        : ""
-                                    }`}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name="languages"
-                                      className="align-middle transform duration-300 cursor-pointer mr-1 px-2 mb-1"
-                                      checked={lang?.value === languages}
-                                      onClick={() => setLanguages(lang?.value)}
-                                    />
-                                    <span className="px-1">{lang?.value}</span>
-                                  </label>
-                                </div>
-                              );
-                            })}
+                            <div className="px-5 py-1">
+                              <label
+                                className={`mr-4 text-sm hover:text-[#409eff] transform duration-300 cursor-pointer ${
+                                  "all_language" === languages
+                                    ? "text-[#409eff] font-bold"
+                                    : ""
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="languages"
+                                  className="align-middle transform duration-300 cursor-pointer mr-1 px-2 mb-1"
+                                  checked={"all_language" as any}
+                                  onClick={() => {
+                                    setLanguages("");
+                                    selectBox("xlang", "all_language");
+                                  }}
+                                />
+                                <span className="px-1">All Languages</span>
+                              </label>
+                            </div>
+                            {reviewLanguage
+                              ?.filter((langDB) =>
+                                getReview?.some((item) =>
+                                  item?.review_language
+                                    ?.split(",")
+                                    .map((lang) => lang.trim().toLowerCase())
+                                    .includes(
+                                      langDB?.value.trim().toLowerCase()
+                                    )
+                                )
+                              )
+                              ?.map((lang, idx) => {
+                                return (
+                                  <div key={idx} className="px-5 py-1">
+                                    <label
+                                      className={`mr-4 text-sm hover:text-[#409eff] transform duration-300 cursor-pointer ${
+                                        languages === lang?.value
+                                          ? "text-[#409eff] font-bold"
+                                          : ""
+                                      }`}
+                                    >
+                                      <input
+                                        type="radio"
+                                        name="languages"
+                                        className="align-middle transform duration-300 cursor-pointer mr-1 px-2 mb-1"
+                                        checked={lang?.value === languages}
+                                        onClick={() => {
+                                          setLanguages(lang?.value);
+                                          selectBox("xlang", lang?.value);
+                                        }}
+                                        defaultValue="en"
+                                      />
+                                      <span className="px-1">
+                                        {lang?.label} (
+                                        {
+                                          getReview?.filter((review) =>
+                                            review?.review_language?.includes(
+                                              lang?.value
+                                            )
+                                          )?.length
+                                        }
+                                        )
+                                      </span>
+                                    </label>
+                                  </div>
+                                );
+                              })}
                           </li>
 
                           <li className="w-[50%] relative float-left flex flex-col">
@@ -345,7 +471,10 @@ const Reviews: React.FC<ReviewType> = ({
                                       name="status"
                                       className="align-middle transform duration-300 cursor-pointer mr-1 px-2 mb-1"
                                       checked={stat?.value === status}
-                                      onClick={() => setStatus(stat?.value)}
+                                      onClick={() => {
+                                        setStatus(stat?.value);
+                                        selectBox("status", stat?.value);
+                                      }}
                                     />
                                     <span className="px-1">{stat?.label}</span>
                                   </label>
@@ -366,264 +495,320 @@ const Reviews: React.FC<ReviewType> = ({
                   </Link>
                 </div>
               </div>
-              {currentItems?.map((review: ITvReview, idx: number) => {
-                const isCurrentUserReviewd = review?.reviewBy?.some((data) =>
-                  currentUser?.id?.includes(data?.userId)
-                );
-                const isCurrentUserReviewdAction = review?.reviewBy?.find(
-                  (data) => currentUser?.id?.includes(data?.userId)
-                );
-                const isLongReview = review?.review?.length > 500;
-                return (
-                  <div id={review?.id} className="flex flex-col" key={idx}>
-                    <div className="flex justify-between bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
-                      <div className="flex items-center">
-                        <Image
-                          src={`${
-                            review?.userInfo?.profileAvatar ||
-                            review?.userInfo?.image
-                          }`}
-                          alt={`${
-                            review?.userInfo?.displayName ||
-                            review?.userInfo?.name
-                          }`}
-                          width={100}
-                          height={100}
-                          className="size-[50px] object-cover rounded-full"
-                        />
+              {currentItems?.length > 0 ? (
+                currentItems?.map((review: ITvReview, idx: number) => {
+                  const isCurrentUserReviewd = review?.reviewBy?.some((data) =>
+                    currentUser?.id?.includes(data?.userId)
+                  );
+                  const isCurrentUserReviewdAction = review?.reviewBy?.find(
+                    (data) => currentUser?.id?.includes(data?.userId)
+                  );
+                  const isLongReview = review?.review?.length > 500;
+                  return (
+                    <div id={review?.id} className="flex flex-col" key={idx}>
+                      <div className=" bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
+                        <div className="flex justify-between">
+                          <div className="flex items-center">
+                            <Image
+                              src={`${
+                                review?.userInfo?.profileAvatar ||
+                                review?.userInfo?.image
+                              }`}
+                              alt={`${
+                                review?.userInfo?.displayName ||
+                                review?.userInfo?.name
+                              }`}
+                              width={100}
+                              height={100}
+                              className="size-[50px] object-cover rounded-full"
+                            />
 
-                        <div className="flex flex-col text-black pl-2">
-                          <Link
-                            href={`/person/${review?.userId}`}
-                            className="text-[#2490da] text-sm md:text-md"
-                          >
-                            {review?.userInfo?.displayName ||
-                              review?.userInfo?.name}
-                          </Link>
-
-                          <p className="text-black dark:text-white text-sm font-semibold">
-                            {review?.reviewHelpful} people found this review
-                            helpful
-                          </p>
-                          <Link
-                            href=""
-                            className="text-[#2490da] text-sm md:text-md"
-                          >
-                            Other reviews by this user
-                          </Link>
-                        </div>
-                      </div>
-                      <div className="">
-                        <p className="text-xs text-right text-[#999] pb-1">
-                          {formatDate(review?.updatedAt)}
-                        </p>
-                        {review?.finishedWatching === false ? (
-                          <p className="text-xs text-right text-[#818a91] pb-1">
-                            {review?.episode} of {tv?.number_of_episodes}{" "}
-                            episodes seen
-                          </p>
-                        ) : (
-                          <p className="text-xs text-right text-[#818a91] pb-1">
-                            {review?.episode} of {tv?.number_of_episodes}{" "}
-                            episodes seen
-                          </p>
-                        )}
-                        <div className="flex items-center text-end justify-end">
-                          {review?.finishedWatching === false ? (
-                            <p className="text-xs text-[#3a8ee6] border border-[#3a8ee6] rounded-md px-2 mr-2">
-                              Ongoing
-                            </p>
-                          ) : (
-                            <p className="text-xs text-[#5cb85c] border border-[#5cb85c] rounded-md px-2 mr-2">
-                              Completed
-                            </p>
-                          )}
-                          <IoLogoWechat />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="px-4 py-2.5">
-                      <div className="-mx-3">
-                        <div className="relative float-left w-full overflow-hidden break-words">
-                          <div className="relative float-right border border-[#00000024] rounded-sm m-2">
-                            <div className="bg-[#e9f4fb] dark:bg-[#1b1c1d] text-[#1675b6] border-b border-b-[#06090c21] dark:border-b-[#3e4042] px-4 py-1">
-                              <b className="font-normal">Overall</b>{" "}
-                              <span className="float-right text-[#1675b6]">
-                                {review?.overall_score}
-                              </span>
-                            </div>
-                            <div className="text-sm bg-white dark:bg-[#1b1c1d] py-2 px-4">
-                              <div>
-                                Story{" "}
-                                <span className="float-right pl-4">
-                                  {review?.rating_score?.story}
+                            <div className="flex flex-col text-black pl-2">
+                              <Link
+                                href={`/person/${review?.userId}`}
+                                className="w-auto text-[#2490da] text-sm md:text-md pb-1 cursor-default"
+                              >
+                                <span className="cursor-pointer">
+                                  {review?.userInfo?.displayName ||
+                                    review?.userInfo?.name}
                                 </span>
-                              </div>
-                              <div>
-                                Acting/Cast{" "}
-                                <span className="float-right pl-4">
-                                  {review?.rating_score?.acting}
-                                </span>
-                              </div>
-                              <div>
-                                Music{" "}
-                                <span className="float-right pl-4">
-                                  {review?.rating_score?.music}
-                                </span>
-                              </div>{" "}
-                              <div>
-                                Rewatch Value{" "}
-                                <span className="float-right pl-4">
-                                  {review?.rating_score?.rewatchValue}
-                                </span>
-                              </div>
+                              </Link>
+                              <Link
+                                href={`/profile/${review?.userInfo?.name}/reviews`}
+                                className="text-[#2490da] text-sm md:text-md pb-1"
+                              >
+                                Other reviews by this user
+                              </Link>{" "}
                             </div>
                           </div>
-                          {review?.spoiler === true && (
-                            <p className="text-sm text-[#cc3737] font-bold px-3 py-1">
-                              This review may contain spoilers
+                          <div className="block">
+                            <label
+                              htmlFor="review_date"
+                              className="text-sm font-semibold"
+                            >
+                              Review Date:
+                            </label>
+                            <p className="text-xs text-right text-[#999] pb-1">
+                              {formatDate(review?.updatedAt)}
                             </p>
-                          )}
-                          <p className="text-sm font-bold p-3">
-                            {review?.headline}
-                          </p>
-                          <p className="review-content text-[#333] dark:text-white text-sm px-3">
-                            {review?.review?.length > 500 &&
-                            !expandedReviews?.has(idx)
-                              ? `${review?.review.slice(0, 500)}...`
-                              : review?.review}
-                            {review?.review?.length > 500 && (
-                              <button
-                                onClick={() => toggleExpand(idx)}
-                                className="text-md font-semibold text-[#0275d8]"
-                              >
-                                {expandedReviews?.has(idx)
-                                  ? "Show Less"
-                                  : "Read More"}
-                              </button>
-                            )}
-                          </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="px-4">
+                        <div className="-mx-4">
+                          <div className="relative float-left w-full overflow-hidden break-words">
+                            <div className="flex items-start justify-center border-b border-b-slate-400  border-t border-t-slate-400 py-1">
+                              <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                                <label
+                                  htmlFor="story"
+                                  className="text-sm font-bold"
+                                >
+                                  Story
+                                </label>
+                                <p>{review?.rating_score?.story}</p>
+                              </div>
+                              <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                                <label
+                                  htmlFor="acting_cast"
+                                  className="text-sm font-bold"
+                                >
+                                  Acting/Cast
+                                </label>
+                                <p>{review?.rating_score?.acting}</p>
+                              </div>
+                              <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                                <label
+                                  htmlFor="music"
+                                  className="text-sm font-bold"
+                                >
+                                  Music
+                                </label>
+                                <p>{review?.rating_score?.music}</p>
+                              </div>
+                              <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                                <label
+                                  htmlFor="rewatch_value"
+                                  className="text-sm font-bold"
+                                >
+                                  Rewatch Value
+                                </label>
+                                <p>{review?.rating_score?.rewatchValue}</p>
+                              </div>
+                              <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
+                                <label
+                                  htmlFor="overall"
+                                  className="text-sm font-bold"
+                                >
+                                  Overall
+                                </label>
+                                <p>{review?.overall_score}</p>
+                              </div>
 
-                          {(!isLongReview || expandedReviews?.has(idx)) && (
-                            <div className="text-sm px-3">
-                              Was this review helpful to you?{" "}
-                              <button
-                                type="button"
-                                name="Yes"
-                                className={`bg-white dark:bg-[#3a3b3c] border rounded hover:opacity-50 mt-4 ml-1 py-0.5 px-1 ${
-                                  isCurrentUserReviewdAction?.action === "Yes"
-                                    ? "text-[#71c151] border-[#92d07a]"
-                                    : "text-[#848484] border-[#cdcdcd] dark:border-[#3e4042]"
-                                } ${
-                                  loadingStates[`${review.id}-Yes`] ||
-                                  isCurrentUserReviewdAction?.action === "Yes"
-                                    ? "cursor-not-allowed"
-                                    : "cursor-pointer"
-                                }`}
-                                onClick={() =>
-                                  submitReviewHelpful("Yes", review?.id)
-                                }
-                                disabled={
-                                  loadingStates[`${review.id}-Yes`] ||
-                                  isCurrentUserReviewdAction?.action === "Yes"
-                                    ? true
-                                    : false
-                                }
-                              >
-                                {loadingStates[`${review.id}-Yes`] ? (
-                                  <ClipLoader
-                                    color="#c0c4cc"
-                                    loading={loadingStates[`${review.id}-Yes`]}
-                                    size={10}
-                                    className="mx-1"
-                                  />
+                              <div className="flex flex-col items-center px-5">
+                                {" "}
+                                {review?.finishedWatching === false ? (
+                                  <p className="text-xs text-right text-[#818a91] pb-1">
+                                    {review?.episode} of{" "}
+                                    {tv?.number_of_episodes} episodes seen
+                                  </p>
                                 ) : (
-                                  "Yes"
+                                  <p className="text-xs text-right text-[#818a91] pb-1">
+                                    {review?.episode} of{" "}
+                                    {tv?.number_of_episodes} episodes seen
+                                  </p>
                                 )}
-                              </button>
-                              <button
-                                type="button"
-                                name="No"
-                                className={`bg-white dark:bg-[#3a3b3c] border rounded hover:opacity-50 mt-4 ml-1 py-0.5 px-1 ${
-                                  isCurrentUserReviewdAction?.action === "No"
-                                    ? "text-[#71c151] border-[#92d07a]"
-                                    : "text-[#848484] border-[#cdcdcd] dark:border-[#3e4042]"
-                                } ${
-                                  loadingStates[`${review.id}-No`] ||
-                                  isCurrentUserReviewdAction?.action === "No"
-                                    ? "cursor-not-allowed"
-                                    : "cursor-pointer"
+                                <div className="flex items-center text-end justify-end">
+                                  {review?.finishedWatching === false ? (
+                                    <>
+                                      {review?.dropping === true ? (
+                                        <p className="text-xs text-red-600 border border-red-600 rounded-md px-2 mr-2">
+                                          Dropped
+                                        </p>
+                                      ) : (
+                                        <p className="text-xs text-[#3a8ee6] border border-[#3a8ee6] rounded-md px-2 mr-2">
+                                          Ongoing
+                                        </p>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <p className="text-xs text-[#5cb85c] border border-[#5cb85c] rounded-md px-2 mr-2">
+                                      Completed
+                                    </p>
+                                  )}
+
+                                  <IoLogoWechat />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between px-3 py-2">
+                              <p className="text-black dark:text-white text-sm font-semibold">
+                                {review?.reviewHelpful} people found this review
+                                helpful
+                              </p>
+                              {review?.spoiler === true && (
+                                <p className="text-sm text-[#cc3737] font-bold pb-1">
+                                  This review may contain spoilers
+                                </p>
+                              )}
+                            </div>
+                            <div className="relative float-right border border-[#00000024] rounded-sm m-2">
+                              <Image
+                                src={`https://image.tmdb.org/t/p/original/${
+                                  tv.poster_path || tv.backdrop_path
                                 }`}
-                                onClick={() =>
-                                  submitReviewHelpful("No", review?.id)
-                                }
-                                disabled={
-                                  loadingStates[`${review.id}-No`] ||
-                                  isCurrentUserReviewdAction?.action === "No"
-                                    ? true
-                                    : false
-                                }
-                              >
-                                {loadingStates[`${review.id}-No`] ? (
-                                  <ClipLoader
-                                    color="#c0c4cc"
-                                    loading={loadingStates[`${review.id}-No`]}
-                                    size={10}
-                                    className="mx-1"
-                                  />
-                                ) : (
-                                  "No"
-                                )}
-                              </button>
-                              {isCurrentUserReviewd === true && (
+                                alt={`${tv?.name || tv?.title}`}
+                                width={100}
+                                height={100}
+                                className="w-[100px] h-[150px] object-cover rounded-md"
+                              />
+                            </div>
+
+                            <p className="text-sm font-bold p-3">
+                              {review?.headline}
+                            </p>
+                            <p className="review-content text-[#333] dark:text-white text-sm px-3">
+                              {review?.review?.length > 500 &&
+                              !expandedReviews?.has(idx)
+                                ? `${review?.review.slice(0, 500)}...`
+                                : review?.review}
+                              {review?.review?.length > 500 && (
+                                <button
+                                  onClick={() => toggleExpand(idx)}
+                                  className="text-md font-semibold text-[#0275d8] pl-1"
+                                >
+                                  {expandedReviews?.has(idx)
+                                    ? "Show Less"
+                                    : "Read More"}
+                                </button>
+                              )}
+                            </p>
+                            {(!isLongReview || expandedReviews?.has(idx)) && (
+                              <div className="text-sm px-3">
+                                Was this review helpful to you?{" "}
                                 <button
                                   type="button"
-                                  name="Cancel"
-                                  className={`text-[#848484] bg-white dark:bg-[#3a3b3c] border border-[#cdcdcd] dark:border-[#3e4042] rounded hover:opacity-50 mt-4 ml-1 py-0.5 px-1 ${
-                                    loadingStates[`${review.id}-Cancel`] ||
-                                    isCurrentUserReviewdAction?.action ===
-                                      "Cancel"
+                                  name="Yes"
+                                  className={`bg-white dark:bg-[#3a3b3c] border rounded hover:opacity-50 mt-4 ml-1 py-0.5 px-1 ${
+                                    isCurrentUserReviewdAction?.action === "Yes"
+                                      ? "text-[#71c151] border-[#92d07a]"
+                                      : "text-[#848484] border-[#cdcdcd] dark:border-[#3e4042]"
+                                  } ${
+                                    loadingStates[`${review.id}-Yes`] ||
+                                    isCurrentUserReviewdAction?.action === "Yes"
                                       ? "cursor-not-allowed"
                                       : "cursor-pointer"
                                   }`}
                                   onClick={() =>
-                                    submitReviewHelpful("Cancel", review?.id)
+                                    submitReviewHelpful("Yes", review?.id)
                                   }
                                   disabled={
-                                    loadingStates[`${review.id}-Cancel`] ||
-                                    isCurrentUserReviewdAction?.action ===
-                                      "Cancel"
+                                    loadingStates[`${review.id}-Yes`] ||
+                                    isCurrentUserReviewdAction?.action === "Yes"
                                       ? true
                                       : false
                                   }
                                 >
-                                  {loadingStates[`${review.id}-Cancel`] ? (
+                                  {loadingStates[`${review.id}-Yes`] ? (
                                     <ClipLoader
                                       color="#c0c4cc"
                                       loading={
-                                        loadingStates[`${review.id}-Cancel`]
+                                        loadingStates[`${review.id}-Yes`]
                                       }
                                       size={10}
                                       className="mx-1"
                                     />
                                   ) : (
-                                    "Cancel"
+                                    "Yes"
                                   )}
                                 </button>
-                              )}
-                            </div>
-                          )}
+                                <button
+                                  type="button"
+                                  name="No"
+                                  className={`bg-white dark:bg-[#3a3b3c] border rounded hover:opacity-50 mt-4 ml-1 py-0.5 px-1 ${
+                                    isCurrentUserReviewdAction?.action === "No"
+                                      ? "text-[#71c151] border-[#92d07a]"
+                                      : "text-[#848484] border-[#cdcdcd] dark:border-[#3e4042]"
+                                  } ${
+                                    loadingStates[`${review.id}-No`] ||
+                                    isCurrentUserReviewdAction?.action === "No"
+                                      ? "cursor-not-allowed"
+                                      : "cursor-pointer"
+                                  }`}
+                                  onClick={() =>
+                                    submitReviewHelpful("No", review?.id)
+                                  }
+                                  disabled={
+                                    loadingStates[`${review.id}-No`] ||
+                                    isCurrentUserReviewdAction?.action === "No"
+                                      ? true
+                                      : false
+                                  }
+                                >
+                                  {loadingStates[`${review.id}-No`] ? (
+                                    <ClipLoader
+                                      color="#c0c4cc"
+                                      loading={loadingStates[`${review.id}-No`]}
+                                      size={10}
+                                      className="mx-1"
+                                    />
+                                  ) : (
+                                    "No"
+                                  )}
+                                </button>
+                                {isCurrentUserReviewd === true && (
+                                  <button
+                                    type="button"
+                                    name="Cancel"
+                                    className={`text-[#848484] bg-white dark:bg-[#3a3b3c] border border-[#cdcdcd] dark:border-[#3e4042] rounded hover:opacity-50 mt-4 ml-1 py-0.5 px-1 ${
+                                      loadingStates[`${review.id}-Cancel`] ||
+                                      isCurrentUserReviewdAction?.action ===
+                                        "Cancel"
+                                        ? "cursor-not-allowed"
+                                        : "cursor-pointer"
+                                    }`}
+                                    onClick={() =>
+                                      submitReviewHelpful("Cancel", review?.id)
+                                    }
+                                    disabled={
+                                      loadingStates[`${review.id}-Cancel`] ||
+                                      isCurrentUserReviewdAction?.action ===
+                                        "Cancel"
+                                        ? true
+                                        : false
+                                    }
+                                  >
+                                    {loadingStates[`${review.id}-Cancel`] ? (
+                                      <ClipLoader
+                                        color="#c0c4cc"
+                                        loading={
+                                          loadingStates[`${review.id}-Cancel`]
+                                        }
+                                        size={10}
+                                        className="mx-1"
+                                      />
+                                    ) : (
+                                      "Cancel"
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="px-4 py-2">
+                  There is no Review for {tv?.name || tv?.title} yet!
+                </div>
+              )}
               <div className="border-b border-b-[#78828c21]"></div>
               <div className="py-5">
                 <SearchPagination
                   setPage={setPage}
-                  totalItems={totalItems}
+                  totalItems={totalItems as number}
                   per_page={per_page as string}
                 />
               </div>

@@ -70,6 +70,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -90,46 +91,50 @@
 }
 
 .CircularProgressbar-text {
-    font-size: 34px;
-    font-weight: 700;
-    fill: var(--black);
+  font-size: 34px;
+  font-weight: 700;
+  fill: var(--black);
 }
+
 .CircularProgressbar-trail {
-    stroke: transparent;
+  stroke: transparent;
 }
 
 .overflow-x {
   overflow-x: scroll;
 }
+
 .overflow-x::-webkit-scrollbar {
-   width: 12px;
-   height: 10px;
+  width: 12px;
+  height: 10px;
 }
 
 .overflow-x::-webkit-scrollbar-thumb {
-   border-radius: 10px;
-   background-color: rgb(223, 217, 217);
-   cursor: grabbing
+  border-radius: 10px;
+  background-color: rgb(223, 217, 217);
+  cursor: grabbing
 }
+
 .overflow-y {
   overflow-x: scroll;
 }
+
 .overflow-y::-webkit-scrollbar {
-   width: 12px;
-   height: 10px;
+  width: 12px;
+  height: 10px;
 }
 
 .overflow-y::-webkit-scrollbar-thumb {
-   border-radius: 10px;
-   background-color: rgb(223, 217, 217);
-   cursor: pointer;
+  border-radius: 10px;
+  background-color: rgb(223, 217, 217);
+  cursor: pointer;
 }
 
 .list .nav {
   width: 100%;
 }
 
-.list .nav .item{
+.list .nav .item {
   position: relative;
   display: block;
   height: 50px;
@@ -141,15 +146,19 @@
 .list .nav:nth-child(1) .item {
   border-left: 10px solid red;
 }
+
 .list .nav:nth-child(2) .item {
   border-left: 10px solid yellow;
 }
+
 .list .nav:nth-child(3) .item {
   border-left: 10px solid green;
 }
+
 .list .nav:nth-child(4) .item {
   border-left: 10px solid cadetblue;
 }
+
 .list .nav:nth-child(5) .item {
   border-left: 10px solid orange;
 }
@@ -170,19 +179,23 @@
 }
 
 .list .nav:nth-child(1) .item::after {
-  background-color:  red;
+  background-color: red;
 }
+
 .list .nav:nth-child(2) .item::after {
-  background-color:  yellow;
+  background-color: yellow;
 }
+
 .list .nav:nth-child(3) .item::after {
-  background-color:  green;
+  background-color: green;
 }
+
 .list .nav:nth-child(4) .item::after {
-  background-color:  cadetblue;
+  background-color: cadetblue;
 }
+
 .list .nav:nth-child(5) .item::after {
-  background-color:  orange;
+  background-color: orange;
 }
 
 .container {
@@ -219,12 +232,12 @@
 }
 
 /* On mouse-over, add a grey background color */
-.container:hover input ~ .checkmark {
+.container:hover input~.checkmark {
   background-color: #ccc;
 }
 
 /* When the radio button is checked, add a blue background */
-.container input:checked ~ .checkmark {
+.container input:checked~.checkmark {
   background-color: #2196F3;
 }
 
@@ -236,7 +249,7 @@
 }
 
 /* Show the indicator (dot/circle) when checked */
-.container input:checked ~ .checkmark:after {
+.container input:checked~.checkmark:after {
   display: block;
 }
 
@@ -295,19 +308,19 @@
   top: 0;
 }
 
-.ul .li:nth-child(1) .link:before{
+.ul .li:nth-child(1) .link:before {
   background: #3b5999;
 }
 
-.ul .li:nth-child(2) .link:before{
+.ul .li:nth-child(2) .link:before {
   background: #55acee;
 }
 
-.ul .darkMode:nth-child(1) .link:before{
+.ul .darkMode:nth-child(1) .link:before {
   background: #55acee;
 }
 
-.ul .darkMode:nth-child(2) .link:before{
+.ul .darkMode:nth-child(2) .link:before {
   background: #d8ea88;
 }
 
@@ -316,23 +329,25 @@
 }
 
 .ul .li:nth-child(4) .link:before {
-  background: #cd486b ;
+  background: #cd486b;
 }
 
 .ProseMirror {
   display: block;
   min-height: 250px;
 }
+
 .ProseMirror-selectednode {
   position: relative !important;
 }
 
-.tiptap p img{
+.tiptap p img {
   position: relative;
   height: 100% !important;
 }
+
 .ProseMirror img {
-  display:unset;
+  display: unset;
   width: 100%;
   height: 100%;
   background-position: center;
@@ -372,7 +387,7 @@
   text-align: center;
   padding: 5px 0;
   border-radius: 6px;
- 
+
   /* Position the tooltip text - see examples below! */
   position: absolute;
   right: -101px;
@@ -388,7 +403,8 @@
 .tooltip .tooltiptext::after {
   content: " ";
   position: absolute;
-  bottom: 100%;  /* At the top of the tooltip */
+  bottom: 100%;
+  /* At the top of the tooltip */
   left: 50%;
   margin-left: -5px;
   border-width: 5px;
@@ -408,24 +424,27 @@
   content: "";
   position: absolute;
   top: 73px;
-  left: 25px;  /* At the top of the tooltip */
+  left: 25px;
+  /* At the top of the tooltip */
   margin-left: -5px;
   border-width: 10px;
   border-style: solid;
   border-color: transparent transparent #00000011 transparent;
 }
+
 .searchTooltip .searchTooltipTextDarkMode::after {
   content: "";
   position: absolute;
   top: 73px;
-  left: 25px;  /* At the top of the tooltip */
+  left: 25px;
+  /* At the top of the tooltip */
   margin-left: -5px;
   border-width: 10px;
   border-style: solid;
   border-color: transparent transparent #242526 transparent;
 }
 
-.custom-scroll{
+.custom-scroll {
   float: left;
   height: 300px;
   overflow-y: scroll;
@@ -436,6 +455,7 @@
 .custom-scroll::-webkit-scrollbar {
   width: 6px;
 }
+
 .custom-scroll::-webkit-scrollbar-thumb {
   background-color: rgba(144, 147, 153, 0.4);
   opacity: 0.40;
@@ -456,7 +476,7 @@
 .vertical_scroller_wrap.should_fade.is_fading_before::before {
   opacity: 1;
   transition-duration: 300ms;
-  transition-timing-function: cubic-bezier(.4,0,1,1);
+  transition-timing-function: cubic-bezier(.4, 0, 1, 1);
 }
 
 .before\:rounded-3xl::before {
@@ -482,17 +502,19 @@
 .vertical_scroller_wrap.should_fade.hide_after::after {
   opacity: 0;
   transition-duration: 300ms;
-  transition-timing-function: cubic-bezier(0,0,.2,1);
+  transition-timing-function: cubic-bezier(0, 0, .2, 1);
 }
 
 .after\:rounded-3xl::after {
   content: "";
   border-radius: 1.5rem;
 }
+
 .vertical_scroller_wrap::after {
   bottom: 0;
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(244, 244, 245, 1));
 }
+
 .vertical_scroller_wrap::after {
   content: "";
   pointer-events: none;
@@ -600,7 +622,7 @@ input[type="number"]::-webkit-outer-spin-button {
   font-size: 13px;
 }
 
-.css-10o2lyd-MuiStack-root{
+.css-10o2lyd-MuiStack-root {
   width: 100%;
   overflow: hidden !important;
   padding-top: 0px !important;
@@ -615,7 +637,7 @@ input[type="number"]::-webkit-outer-spin-button {
   min-width: 0px !important;
 }
 
-.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root  input {
+.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root input {
   width: 50%;
   flex: 1;
   padding-block: 8px;
@@ -642,7 +664,8 @@ input[type="number"]::-webkit-outer-spin-button {
 .parent-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Full viewport height */
+  min-height: 100vh;
+  /* Full viewport height */
 }
 
 .content-container {
@@ -650,7 +673,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 footer {
-  margin-top: auto; /* Push the footer to the bottom */
+  margin-top: auto;
+  /* Push the footer to the bottom */
 }
 
 .MuiRating-icon {
@@ -658,10 +682,105 @@ footer {
 }
 
 .review-content {
-    line-height: 1.4; /* Controls the line spacing */
-    white-space: pre-line; /* Preserves spaces and line breaks */
+  line-height: 1.4;
+  /* Controls the line spacing */
+  white-space: pre-line;
+  /* Preserves spaces and line breaks */
 }
 
 .review-content br {
-    display: block; /* Ensures each <br> starts a new line */
+  display: block;
+  /* Ensures each <br> starts a new line */
+}
+
+.sliderContainer {
+  position: relative;
+  height: 70vh;
+  overflow: hidden;
+}
+
+.slider {
+  position: absolute;
+  top: -20vh;
+  width: 100vw;
+  height: 100vh;
+  perspective: 175px;
+  perspective-origin: 50% 100%;
+  overflow: hidden;
+}
+
+.card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate3d(-50%, -50%, 0px);
+  width: 35%;
+  height: 500px;
+  background-color: #000;
+  border-right: 1px solid #303030;
+  border-radius: 7px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #303030;
+  border-radius: 8px;
+  z-index: 2;
+}
+
+.card-info {
+  width: 100%;
+  padding: 0.5em 0.75em;
+  display: flex;
+  align-items: center;
+  background-color: #000;
+  z-index: 2;
+}
+
+.card-item {
+  flex: 1;
+}
+
+.card-item p {
+  font-size: 7px;
+  color: #6a6a6a;
+}
+
+.card-item:nth-child(2) {
+  text-align: center;
+}
+
+.card-item:nth-child(2) p {
+  font-size: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.card-item:nth-child(3) {
+  text-align: right;
+}
+
+.video-player {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.video-player>div {
+  position: relative;
+  transform: scale(1.5);
+}
+
+@media(max-width: 900px) {
+  .video-player>div {
+    transform: scale(3);
+  }
 }

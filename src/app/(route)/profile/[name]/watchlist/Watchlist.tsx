@@ -70,7 +70,9 @@ const Watchlist: React.FC<WatchListProps> = ({
   });
 
   const selectBox = (key: any, value: any) => {
-    const params = new URLSearchParams(searchParams as SearchParamsType);
+    const params = new URLSearchParams(
+      searchParams as unknown as SearchParamsType
+    );
     const query = Object.fromEntries(params);
     let values = query[key] ? query[key].split(",") : [];
 
@@ -111,7 +113,7 @@ const Watchlist: React.FC<WatchListProps> = ({
             <div className="flex items-center flex-nowrap">
               <div className="p-4">
                 <select
-                  className="bg-transparent text-white bg-gray-700 border-b-2 border-b-[#959595] rounded-t-sm relative top-0 left-0 z-2 pl-2 cursor-pointer"
+                  className="bg-transparent text-black dark:text-white bg-gray-700 border-b-2 border-b-[#959595] rounded-t-sm relative top-0 left-0 z-2 pl-2 cursor-pointer"
                   name="sort"
                   id="sort"
                   onChange={(e) => selectBox("sortby", e.target.value)}
@@ -206,7 +208,7 @@ const Watchlist: React.FC<WatchListProps> = ({
                   </li>
                   <li className="text-[#959595] flex items-center mr-3 mb-2 md:mb-0 md:mr-5">
                     <span className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-transparent border-2 border-[#959595] rounded-full">
-                      <CiCircleList className="text-white text-md" />
+                      <CiCircleList className="text-[#c0c0c0] dark:text-white text-md" />
                     </span>
                     <span className="text-[#c0c0c0] dark:text-[#959595] ml-2">
                       Add to list
@@ -214,7 +216,7 @@ const Watchlist: React.FC<WatchListProps> = ({
                   </li>
                   <li className="text-[#959595] flex items-center mr-3 md:mr-5">
                     <span className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-transparent border-2 border-[#959595] rounded-full">
-                      <IoMdClose className="text-white text-md" />
+                      <IoMdClose className="text-[#c0c0c0] dark:text-white text-md" />
                     </span>
                     <span className="text-[#c0c0c0] dark:text-[#959595] ml-2">
                       Remove

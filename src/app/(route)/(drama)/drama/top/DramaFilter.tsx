@@ -19,6 +19,7 @@ import TagResult from "./TagResult";
 import { Slider } from "@mui/material";
 import { FaCheck } from "react-icons/fa";
 import { SearchParamsType } from "@/helper/type";
+import NetworkFilter from "@/app/component/ui/Search/NetworkFilter";
 
 const DramaFilter = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,7 +33,7 @@ const DramaFilter = () => {
   const country = searchParams?.get("country") ?? "";
   const genre = searchParams?.get("genre") ?? "";
   const type = searchParams?.get("type") ?? "";
-  const network = searchParams?.get("networks") ?? "";
+  const network = searchParams?.get("with_companies") ?? "";
   const date = searchParams?.get("date") ?? "";
   const rating = searchParams?.get("rating") ?? "";
   const status = searchParams?.get("status") ?? "";
@@ -78,7 +79,7 @@ const DramaFilter = () => {
     } else if (genre) {
       router.push(`/search/genre?${params.toString()}`);
     } else if (network) {
-      router.push(`/search/network?${params.toString()}`);
+      router.push(`/search/?${params.toString()}`);
     } else if (date) {
       router.push(`/search/date?${params.toString()}`);
     } else if (rating) {
@@ -425,7 +426,20 @@ const DramaFilter = () => {
             openDrop === "network" ? "block" : "hidden"
           }`}
         >
-          <div className="grid grid-cols-2">
+          <div className="my-2 relative">
+            <Suspense fallback={<div>Loading...</div>}>
+              <NetworkFilter
+                searchParams={searchParams}
+                setSearchQueryKeyword={setSearchQueryKeyword}
+                searchQueryKeyword={searchQueryKeyword}
+                router={router}
+                pathname={pathname}
+                showResult={showResult}
+                setShowResult={setShowResult}
+              />
+            </Suspense>
+          </div>
+          {/* <div className="grid grid-cols-2">
             <ul className="pb-3 space-y-3 text-sm text-[#2196f3] dark:text-gray-200 ">
               {networkCheckbox?.map((item: any, idx: number) => (
                 <li key={idx}>
@@ -470,7 +484,7 @@ const DramaFilter = () => {
                 </li>
               ))}
             </ul>
-          </div>
+          </div> */}
         </div>
       </div>
 

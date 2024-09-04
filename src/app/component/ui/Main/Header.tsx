@@ -2,8 +2,10 @@ import Image from "next/image";
 import React, { Suspense } from "react";
 import SearchDrama from "../Search/SearchDrama";
 
-const Header = () => {
+const Header = async () => {
+  // const video = await getYoutubeVideo();
   return (
+    // <HeaderSlider video={video} />
     <div
       className="relative overflow-hidden bg-cover bg-no-repeat"
       style={{

@@ -17,6 +17,7 @@ const WatchProvider = ({ getDrama, tv }: any) => {
     return normalizedHomepage.includes(normalizedNetworkName);
   };
 
+  console.log(tv);
   return (
     <div className="grid grid-cols-1 min-[649px]:grid-cols-2 min-[1350px]:grid-cols-3 ml-5 md:ml-0">
       {getDrama?.services?.length > 0
@@ -28,7 +29,7 @@ const WatchProvider = ({ getDrama, tv }: any) => {
               show?.name === "Tencent Video" && "https://v.qq.com/favicon.ico";
             const hunan =
               show?.name === "Hunan Television" &&
-              "https://v.qq.com/favicon.ico";
+              "https://static.wikia.nocookie.net/drama/images/7/7b/Hunan_TV.jpg/revision/latest?cb=20170925221028&path-prefix=es";
             const mangotv =
               show?.name === "Mango TV" &&
               "https://static.hitv.com/pc/icons/icon_64x64.1b7ca7.png";
@@ -93,12 +94,13 @@ const WatchProvider = ({ getDrama, tv }: any) => {
             );
           })
         : tv?.networks
-            ?.filter(
-              (net: any) =>
-                isNetworkNameInHomepage(tv?.homepage, net?.name) ||
-                (net?.name === "Tencent Video" && tv?.homepage)
-            )
+            // ?.filter(
+            //   (net: any) =>
+            //     isNetworkNameInHomepage(tv?.homepage, net?.name) ||
+            //     (net?.name === "Tencent Video" && tv?.homepage)
+            // )
             ?.map((show: any) => {
+              console.log(isNetworkNameInHomepage(tv?.homepage, show?.name));
               const youku =
                 show?.name === "Youku" &&
                 "https://img.alicdn.com/imgextra/i2/O1CN01BeAcgL1ywY0G5nSn8_!!6000000006643-2-tps-195-195.png";
@@ -107,7 +109,7 @@ const WatchProvider = ({ getDrama, tv }: any) => {
                 "https://v.qq.com/favicon.ico";
               const hunan =
                 show?.name === "Hunan Television" &&
-                "https://v.qq.com/favicon.ico";
+                "https://static.wikia.nocookie.net/drama/images/7/7b/Hunan_TV.jpg/revision/latest?cb=20170925221028&path-prefix=es";
               const mangotv =
                 show?.name === "Mango TV" &&
                 "https://static.hitv.com/pc/icons/icon_64x64.1b7ca7.png";

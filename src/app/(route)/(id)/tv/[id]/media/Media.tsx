@@ -67,7 +67,7 @@ const MediaPhoto = ({
                 {video?.results?.map((item: any, index: number) => (
                   <div className="w-[533px] h-[300px]" key={index}>
                     <div
-                      className="w-[533px] h-[300px] bg-cover border-2 rounded-lg"
+                      className="w-[533px] h-[300px] bg-cover bg-center border-2 rounded-lg"
                       style={{
                         backgroundImage: `url(${thumbnails[index]})`,
                         position: "relative",

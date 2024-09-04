@@ -39,6 +39,7 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
     title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
     )})`,
+    description: `All information of ${tvDetails?.name}`,
   };
 }
 
@@ -49,6 +50,7 @@ export default async function tvPage({ params }: { params: { id: string } }) {
   const watchlist = await prisma.watchlist.findMany({
     where: { userId: user?.id },
   });
+  const lists = await prisma.dramaList.findMany({});
 
   const existedWatchlist = watchlist.find((item: any) =>
     item.movieId.some((movie: any) => movie.id === parseInt(tv_id))
@@ -93,6 +95,7 @@ export default async function tvPage({ params }: { params: { id: string } }) {
           getComment={getComment}
           getDrama={getDrama}
           getReview={getReview}
+          lists={lists}
         />
       </Suspense>
     </>

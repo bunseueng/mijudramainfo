@@ -3,7 +3,6 @@ import Reviews from "./Reviews";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { ITvReview } from "@/helper/type";
-import { useSearchParams } from "next/navigation";
 
 const ReviewsPage = async ({ params }: { params: { id: string } }) => {
   const tv_id = params?.id;

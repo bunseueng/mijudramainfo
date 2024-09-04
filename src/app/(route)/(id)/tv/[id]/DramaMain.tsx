@@ -49,6 +49,7 @@ const DramaMain = ({
   userRating,
   getComment,
   users,
+  lists,
 }: any) => {
   const router = useRouter();
   const [openList, setOpenList] = useState(false);
@@ -892,6 +893,7 @@ const DramaMain = ({
           users={users}
           getComment={getComment}
           getReview={getReview}
+          lists={lists}
         />
       </div>
     </>

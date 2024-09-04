@@ -127,7 +127,7 @@ export default function Card({ result, BASE_URL }: any) {
                 src={`https://image.tmdb.org/t/p/original/${
                   result.poster_path || result.backdrop_path
                 }`}
-                alt="drama image"
+                alt={result?.name || result?.title}
                 width={200}
                 height={200}
                 style={{ width: "100%", height: "100%" }}
@@ -137,7 +137,7 @@ export default function Card({ result, BASE_URL }: any) {
             ) : (
               <Image
                 src="/empty-img.jpg"
-                alt="drama image"
+                alt={result?.name || result?.title}
                 width={200}
                 height={200}
                 style={{ width: "100%", height: "100%" }}
@@ -209,7 +209,8 @@ export default function Card({ result, BASE_URL }: any) {
           {type === "movie" && country === "JP" ? "Japanese Movie" : ""}
           {type === "movie" && country === "KR" ? "Korean Movie" : ""}
           {type === "movie" && country === "TW" ? "Taiwan Movie" : ""}
-          {type === "movie" && country === "HK" ? "Hongkong Movie" : ""}
+          {type === "movie" && country === "HK" ? "Hong Kong Movie" : ""}
+          {type === "movie" && country === "TH" ? "Thai Movie" : ""}
           {pathname === "/search/movie" &&
           result.original_language === "zh" &&
           !genreIds.includes(16)
@@ -228,12 +229,12 @@ export default function Card({ result, BASE_URL }: any) {
           {pathname === "/search/movie" &&
           result.original_language === "zh-TW" &&
           !genreIds.includes(16)
-            ? "Taiwan Movie"
+            ? "Taiwanese Movie"
             : ""}
           {pathname === "/search/movie" &&
           result.original_language === "yue" &&
           !genreIds.includes(16)
-            ? "Hongkong Movie"
+            ? "Hong Kong Movie"
             : ""}
           {pathname === "/search/movie" &&
           result.original_language !== "ja" &&
@@ -276,9 +277,52 @@ export default function Card({ result, BASE_URL }: any) {
           !genreIds?.includes(10764) &&
           !genreIds?.includes(16) &&
           !genreIds?.includes(10767)
-            ? "Hongkong Drama"
+            ? "Hong Kong Drama"
+            : ""}
+          {pathname === "/search/tv" &&
+          originCountries[0] === "TH" &&
+          !genreIds?.includes(10764) &&
+          !genreIds?.includes(16) &&
+          !genreIds?.includes(10767)
+            ? "Thai Drama"
             : ""}
           {genreIds.includes(16) && "Anime"}
+          {pathname === "/search" &&
+            (originCountries[0] === "CN" ||
+              result?.original_language === "zh") &&
+            !genreIds.includes(16) &&
+            !genreIds.includes(10764) &&
+            "Chinese Drama"}
+          {pathname === "/search" &&
+            (originCountries[0] === "HK" ||
+              result?.original_language === "cn") &&
+            !genreIds.includes(16) &&
+            !genreIds.includes(10764) &&
+            "Hong Kong Drama"}
+          {pathname === "/search" &&
+            (originCountries[0] === "KR" ||
+              result?.original_language === "ko") &&
+            !genreIds.includes(16) &&
+            !genreIds.includes(10764) &&
+            "Korean Drama"}
+          {pathname === "/search" &&
+            (originCountries[0] === "JP" ||
+              result?.original_language === "ja") &&
+            !genreIds.includes(16) &&
+            !genreIds.includes(10764) &&
+            "Japanese Drama"}
+          {pathname === "/search" &&
+            (originCountries[0] === "TW" ||
+              result?.original_language === "TW") &&
+            !genreIds.includes(16) &&
+            !genreIds.includes(10764) &&
+            "Taiwanese Drama"}
+          {pathname === "/search" &&
+            (originCountries[0] === "TH" ||
+              result?.original_language === "th") &&
+            !genreIds.includes(16) &&
+            !genreIds.includes(10764) &&
+            "Thai Drama"}
           <span
             className={`px-2 opacity-70 ${
               result?.first_air_date === "" || result?.release_date === ""

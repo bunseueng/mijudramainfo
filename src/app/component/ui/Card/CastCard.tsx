@@ -16,7 +16,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                   <Link href={`/person/${item?.id}`}>
                     <Image
                       src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                      alt="profile image"
+                      alt={`${item?.name || item?.title}'s Profile`}
                       width={200}
                       height={200}
                       quality={100}
@@ -27,7 +27,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                   <Link href={`/person/${item?.id}`}>
                     <Image
                       src="/empty-pf.jpg"
-                      alt="profile image"
+                      alt={`${item?.name || item?.title}'s Profile`}
                       width={200}
                       height={200}
                       quality={100}
@@ -63,7 +63,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                   <Link href={`/person/${item?.id}`}>
                     <Image
                       src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                      alt="profile image"
+                      alt={`${item?.name || item?.title}'s Profile`}
                       width={200}
                       height={200}
                       quality={100}
@@ -74,7 +74,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                   <Link href={`/person/${item?.id}`}>
                     <Image
                       src="/empty-pf.jpg"
-                      alt="profile image"
+                      alt={`${item?.name || item?.title}'s Profile`}
                       width={200}
                       height={200}
                       quality={100}
@@ -89,11 +89,9 @@ const CastCard = ({ getDrama, cast }: any) => {
                   >
                     {item?.name}
                   </Link>
-                  <h4 className="text-semibold text-sm md:text-md">
-                    {item?.character.length > 30
-                      ? `${item?.character.substring(0, 25)}...`
-                      : item?.character}
-                  </h4>
+                  <p className="md:inline-block md:max-w-[145px] text-semibold text-sm md:text-md md:overflow-hidden md:whitespace-nowrap md:text-ellipsis">
+                    {item?.character}
+                  </p>
 
                   <p className="text-xs text-[#818a91]">
                     {item?.order < 2 ? "Main Role" : "Support Role"}

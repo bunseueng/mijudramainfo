@@ -6,6 +6,9 @@ import AllSeason from "./AllSeason";
 import ReviewCard from "@/app/component/ui/Card/ReviewCard";
 import WatchProvider from "./WatchProvider";
 import TvInfo from "./TvInfo";
+import Image from "next/image";
+import { DramaDB, UserProps } from "@/helper/type";
+import TvListCard from "@/app/component/ui/Card/TvListCard";
 
 const DramaCast = ({
   getDrama,
@@ -23,6 +26,7 @@ const DramaCast = ({
   users,
   getReview,
   content,
+  lists,
 }: any) => {
   const seasons = tv?.seasons?.map((drama: any) => drama);
 
@@ -41,11 +45,34 @@ const DramaCast = ({
     const date = new Date(dateString);
     return date.getFullYear();
   };
+  const uniqueChanges = Array.from(
+    new Map(
+      getDrama?.changes.map((change: DramaDB) => [change.userId, change])
+    ).values()
+  );
 
+  const userContributions = getDrama?.changes?.reduce(
+    (acc: number[], change: any) => {
+      // Increment the count of changes for each userId
+      acc[change.userId] = (acc[change.userId] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
+
+  // Step 2: Sort the uniqueChanges based on the number of contributions for each userId
+  const sortedChanges = uniqueChanges?.sort((a: any, b: any) => {
+    // Get the count of contributions for userId in `a` and `b`
+    const countA = userContributions[a.userId] || 0;
+    const countB = userContributions[b.userId] || 0;
+
+    // Sort in descending order, i.e., users with more contributions come first
+    return countB - countA;
+  });
   return (
     <div className="max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5 relative overflow-hidden">
       <div className="flex flex-col md:flex-row items-start">
-        <div className="relative float-left w-full md:w-2/3">
+        <div className="relative float-left w-full md:w-2/3 md:px-5 lg:px-0">
           <div className="lg:w-[92%] flex items-center justify-between content-center px-2 lg:px-0">
             <div className="flex items-center">
               <h1 className="text-lg md:text-2xl font-bold">
@@ -108,6 +135,78 @@ const DramaCast = ({
             content={content}
             allTvShows={allTvShows}
           />
+          {tv?.networks?.length > 0 && (
+            <div className="my-5">
+              <h1 className="font-bold text-lg">Networks</h1>
+              {tv?.networks?.map(
+                (net: {
+                  id: number;
+                  name: string;
+                  logo_path: string;
+                  origin_country: string;
+                }) => (
+                  <div className="block mt-5" id={`${net?.id}`} key={net?.id}>
+                    <Link href={`/network/${net?.id}`} className="inline-block">
+                      <Image
+                        src={`https://image.tmdb.org/t/p/original/${net?.logo_path}`}
+                        alt={net?.name}
+                        width={200}
+                        height={200}
+                        quality={100}
+                        className="w-[200px] object-cover bg-center text-white"
+                      />
+                    </Link>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+          {sortedChanges?.length > 0 && (
+            <div className="my-5">
+              <h1 className="font-bold text-lg">Top Contributors</h1>
+              {sortedChanges?.slice(0, 4)?.map((drama: any) => {
+                const getUser = users?.find((users: UserProps) =>
+                  users?.id?.includes(drama?.userId)
+                );
+                const userContributions = getDrama?.changes?.reduce(
+                  (acc: number[], change: any) => {
+                    // If userId exists in the accumulator, increment the count, otherwise set it to 1
+                    acc[change.userId] = (acc[change.userId] || 0) + 1;
+                    return acc;
+                  },
+                  {}
+                );
+                const userContributeCount =
+                  userContributions[drama.userId] || 0;
+
+                return (
+                  <div className="flex items-center py-2" key={drama?.id}>
+                    <div className="block">
+                      <Image
+                        src={getUser?.profileAvatar || getUser?.image}
+                        alt={getUser?.displayName || getUser?.name}
+                        width={100}
+                        height={100}
+                        className="size-[40px] object-cover rounded-full"
+                      />
+                    </div>
+                    <div className="flex flex-col pl-2">
+                      <p className="text-[#2196f3]">
+                        {getUser?.displayName || getUser?.name}
+                      </p>
+                      <p className="text-sm">{userContributeCount} edits</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div className="my-5">
+            <h1 className="font-bold text-lg">Popular Lists</h1>
+            <div className="mt-5">
+              <TvListCard list={lists} movieId={[]} tvId={tv_id} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

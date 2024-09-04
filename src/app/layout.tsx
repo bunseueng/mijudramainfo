@@ -9,7 +9,6 @@ import "react-toastify/dist/ReactToastify.css";
 import SessionAllPage from "./component/ui/Main/SessionAllPage";
 import Footer from "./component/ui/Main/Footer";
 import { PHProvider } from "@/provider/PostHogProvider";
-import { Suspense } from "react";
 import Adsense from "./component/ui/Adsense/Adsense";
 import AdBanner from "./component/ui/Adsense/AdBanner";
 import Loading from "./loading";
@@ -20,15 +19,27 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mijudramainfo.vercel.app/"),
   title: {
     default: "MijuDramaInfo (MDI)",
     template: "%s - MijuDramaInfo (MDI)",
   },
-  description: "Best website to find your favorite movie/drama/actor",
+  description:
+    "Discover, Discuss, and Organize the Best Asian Dramas, Movies, and Actors",
   icons: {
     icon: ["/favicon.ico?v=4"],
     apple: ["/apple-touch-icon.png?v=4"],
     shortcut: ["/apple-touch-icon.png"],
+  },
+  openGraph: {
+    title:
+      "Discover, Discuss, and Organize the Best Asian Dramas, Movies, and Actors | MijuDramaInfo",
+    description:
+      "Discover, Discuss, and Organize the Best Asian Dramas, Movies, and Actors",
+    type: "website",
+    locale: "en_US",
+    url: "https://mijudramainfo.vercel.app/",
+    siteName: "MijuDramaInfo",
   },
 };
 

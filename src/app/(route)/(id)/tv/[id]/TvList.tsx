@@ -19,9 +19,6 @@ const TvList = ({ tv_id }: any) => {
   });
   const [hovered, setHovered] = useState<string | null>(null);
   const [currentItem, setCurrentItem] = useState<string>("Overview");
-  const [dominantColor, setDominantColor] = useState<string | null>(null);
-  const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
-
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleNavbarMouseEnter = (label: string) => {
@@ -34,36 +31,13 @@ const TvList = ({ tv_id }: any) => {
     }, 200);
   };
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief?.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
-    }
-  };
-
-  useEffect(() => {
-    if (imgRef.current) {
-      const imgElement = imgRef.current; // Store the current value in a local variable
-      imgElement.addEventListener("load", extractColor);
-
-      // Cleanup function
-      return () => {
-        imgElement.removeEventListener("load", extractColor);
-      };
-    }
-  }, [tv]);
-
-  console.log(tv);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div
-      className="border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0"
-      style={{ backgroundColor: dominantColor as string | undefined }}
-    >
+    <div className="border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
       <Image
-        ref={imgRef}
-        onLoad={extractColor}
         src={`https://image.tmdb.org/t/p/original/${
           tv?.poster_path || tv?.backdrop_path
         }`}

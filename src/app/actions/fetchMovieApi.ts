@@ -779,6 +779,50 @@ export const fetchPersonSearch = async (searchQuery: any) => {
   return json;
 }
 
+export const fetchCompany = async (searchQuery: string, page = 1) => {
+  try {
+    const url = `https://api.themoviedb.org/3/search/company?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&page=${page}&language=en-US`;
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch people');
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error: any) {
+    console.error(error)
+    throw new Error(error)
+  }
+}
+
+export const fetchTvNetworks = async (network_id:string) => {
+  try {
+    const url = `https://api.themoviedb.org/3/network/${network_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch people');
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error: any) {
+    console.error(error)
+    throw new Error(error)
+  }
+}
+
 export const fetchTopPeople = async (pages = 1) => {
   try {
     const url = `https://api.themoviedb.org/3/person/popular?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&page=${pages}`;
@@ -1006,6 +1050,24 @@ export const fetchNewestMovie = async (pages  = 1) => {
 }
 
 // fetch upcoming movie
+export const fetchTvByNetwork = async (pages  = 1, network_id: string, sortby: string | undefined, genre: string | undefined, without_genre: string | undefined) => {
+  const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&language=en-US&page=${pages}&sort_by=primary_release_date.desc&with_networks=${network_id}&with_genres=${genre}&without_genres=${without_genre}&sort_by=${sortby}`;
+  
+  const options = {
+    method: 'GET',
+    headers,
+  };
+  
+  const res = await fetch(url, options);
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch movies');
+  }
+
+  const json = await res.json();
+  return json;
+}
+
 export const fetchUpcomingMovie = async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character

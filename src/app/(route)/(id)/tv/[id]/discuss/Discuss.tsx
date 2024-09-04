@@ -188,7 +188,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
             </div>
           </div>
         </div>
-        <div className="border-b-2 border-b-[#78828c21] px-3 pt-2">
+        <div className="border-b border-b-[#78828c21] px-3 pt-2">
           <ul>
             {getComment
               ?.filter((item: any) => !item.parentId)

@@ -420,6 +420,12 @@ export const profileList = [
     page: "/feeds",
   },
   {
+    id: "#reviews",
+    label: "Reviews",
+    link: "/profile",
+    page: "/reviews",
+  },
+  {
     id: "#lists",
     label: "Lists",
     link: "/profile",
@@ -4444,112 +4450,152 @@ export const person_id_link = [
 
 export const reviewLanguage = [
   {
-    value: "English",
+    label: "All Languages",
+    value: "all_language",
   },
   {
-    value: "Korean",
+    label: "English",
+    value: "en",
   },
   {
-    value: "Khmer",
+    label: "Korean",
+    value: "ko",
   },
   {
-    value: "Japanese",
+    label: "Khmer",
+    value: "km",
   },
   {
-    value: "Thai",
+    label: "Japanese",
+    value: "ja",
   },
   {
-    value: "Chinese (Sim.)",
+    label: "Thai",
+    value: "th",
   },
   {
-    value: "Chinese (Trad.)",
+    label: "Chinese (Sim.)",
+    value: "zh-CN",
   },
   {
-    value: "Spanish",
+    label: "Chinese (Trad.)",
+    value: "zh-TW",
   },
   {
-    value: "Portuguese (Brasil)",
+    label: "Spanish",
+    value: "es",
   },
   {
-    value: "Portuguese (Portugal)",
+    label: "Portuguese (Brasil)",
+    value: "pt-BR",
   },
   {
-    value: "Arabic",
+    label: "Portuguese (Portugal)",
+    value: "pt-PT",
   },
   {
-    value: "Bosnian",
+    label: "Arabic",
+    value: "ar",
   },
   {
-    value: "Croatian",
+    label: "Bosnian",
+    value: "bs",
   },
   {
-    value: "Czech",
+    label: "Croatian",
+    value: "hr",
   },
   {
-    value: "Danish",
+    label: "Czech",
+    value: "cs",
   },
   {
-    value: "Dutch",
+    label: "Danish",
+    value: "da",
   },
   {
-    value: "Filipino",
+    label: "Dutch",
+    value: "nl",
   },
   {
-    value: "Finnish",
+    label: "Filipino",
+    value: "fil",
   },
   {
-    value: "French",
+    label: "Finnish",
+    value: "fi",
   },
   {
-    value: "German",
+    label: "French",
+    value: "fr",
   },
   {
-    value: "Greek",
+    label: "German",
+    value: "de",
   },
   {
-    value: "Hebrew",
+    label: "Greek",
+    value: "el",
   },
   {
-    value: "Hungarian",
+    label: "Hebrew",
+    value: "he",
   },
   {
-    value: "Indonesian",
+    label: "Hungarian",
+    value: "hu",
   },
   {
-    value: "Italian",
+    label: "Indonesian",
+    value: "id",
   },
   {
-    value: "Myanmar",
+    label: "Italian",
+    value: "it",
   },
   {
-    value: "Norwegian",
+    label: "Myanmar",
+    value: "my",
   },
   {
-    value: "Polish",
+    label: "Norwegian",
+    value: "no",
   },
   {
-    value: "Romanian",
+    label: "Polish",
+    value: "pl",
   },
   {
-    value: "Russian",
+    label: "Romanian",
+    value: "ro",
   },
   {
-    value: "Serbian",
+    label: "Russian",
+    value: "ru",
   },
   {
-    value: "Slovak",
+    label: "Serbian",
+    value: "sr",
   },
   {
-    value: "Swedish",
+    label: "Slovak",
+    value: "sk",
   },
   {
-    value: "Turkish",
+    label: "Swedish",
+    value: "sv",
   },
   {
-    value: "Ukrainian",
+    label: "Turkish",
+    value: "tr",
   },
   {
-    value: "Vietnamese",
+    label: "Ukrainian",
+    value: "uk",
+  },
+  {
+    label: "Vietnamese",
+    value: "vi",
   },
 ];
 

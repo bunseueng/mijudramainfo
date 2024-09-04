@@ -13,7 +13,6 @@ import { useQuery } from "@tanstack/react-query";
 import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import SearchLoading from "../Loading/SearchLoading";
-import AdBanner from "../Adsense/AdBanner";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 
 const ExploreCard = ({ title, topDramas, total_results }: any) => {
@@ -112,8 +111,12 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
     queryKey: ["episodes", result_id],
     queryFn: () => fetchEpisodeCount(result_id || []),
   });
+
+  if (isError) {
+    return null;
+  }
   return (
-    <div className="max-w-[1134px] mx-auto py-4">
+    <div className="max-w-6xl mx-auto py-4">
       {/* <div className="py-5">
         <AdBanner dataAdFormat="auto" dataAdSlot="8077904488" />
       </div> */}
@@ -153,7 +156,7 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                           ) : (
                             <Image
                               src="/empty-img.jpg"
-                              alt="drama image"
+                              alt={drama?.name || drama?.title}
                               width={200}
                               height={200}
                               style={{ width: "100%", height: "100%" }}

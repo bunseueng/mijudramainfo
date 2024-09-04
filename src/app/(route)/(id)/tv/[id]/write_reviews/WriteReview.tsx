@@ -66,9 +66,9 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
     null
   );
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
-  const [dominantColor, setDominantColor] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [language, setLanguage] = useState<string>("");
+  const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const router = useRouter();
 
@@ -606,7 +606,11 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
                       autoComplete="off"
                       className="text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white placeholder:text-sm bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
                       placeholder={
-                        language ? language : "Select a review language"
+                        language
+                          ? reviewLanguage?.find((lang) =>
+                              lang?.value?.includes(language)
+                            )?.label
+                          : "Select a review language"
                       }
                       onClick={() => handleDropdownToggle("language")}
                     />
@@ -661,7 +665,7 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
                               }}
                               key={index}
                             >
-                              {items?.value}
+                              {items?.label}
                             </li>
                           );
                         })}
