@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 
 const TvList = ({ tv_id }: any) => {
-  const { data: tv, isLoading } = useQuery({
+  const { data: tv } = useQuery({
     queryKey: ["tv"],
     queryFn: () => fetchTv(tv_id),
   });
@@ -30,11 +30,6 @@ const TvList = ({ tv_id }: any) => {
       setHovered(null);
     }, 200);
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
       <Image

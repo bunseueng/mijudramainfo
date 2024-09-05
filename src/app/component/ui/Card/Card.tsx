@@ -287,37 +287,37 @@ export default function Card({ result, BASE_URL }: any) {
             ? "Thai Drama"
             : ""}
           {genreIds.includes(16) && "Anime"}
-          {pathname === "/search" &&
+          {pathname === "/search/network" &&
             (originCountries[0] === "CN" ||
               result?.original_language === "zh") &&
             !genreIds.includes(16) &&
             !genreIds.includes(10764) &&
             "Chinese Drama"}
-          {pathname === "/search" &&
+          {pathname === "/search/network" &&
             (originCountries[0] === "HK" ||
               result?.original_language === "cn") &&
             !genreIds.includes(16) &&
             !genreIds.includes(10764) &&
             "Hong Kong Drama"}
-          {pathname === "/search" &&
+          {pathname === "/search/network" &&
             (originCountries[0] === "KR" ||
               result?.original_language === "ko") &&
             !genreIds.includes(16) &&
             !genreIds.includes(10764) &&
             "Korean Drama"}
-          {pathname === "/search" &&
+          {pathname === "/search/network" &&
             (originCountries[0] === "JP" ||
               result?.original_language === "ja") &&
             !genreIds.includes(16) &&
             !genreIds.includes(10764) &&
             "Japanese Drama"}
-          {pathname === "/search" &&
+          {pathname === "/search/network" &&
             (originCountries[0] === "TW" ||
               result?.original_language === "TW") &&
             !genreIds.includes(16) &&
             !genreIds.includes(10764) &&
             "Taiwanese Drama"}
-          {pathname === "/search" &&
+          {pathname === "/search/network" &&
             (originCountries[0] === "TH" ||
               result?.original_language === "th") &&
             !genreIds.includes(16) &&

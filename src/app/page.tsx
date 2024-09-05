@@ -15,9 +15,7 @@ export default async function Home() {
 
   return (
     <>
-      <header className="max-w-6xl mx-auto">
-        <Header />
-      </header>
+      <Header />
       <section className="max-w-6xl mx-auto">
         <div className="mb-10">
           <Suspense fallback={<div>Loading...</div>}>
