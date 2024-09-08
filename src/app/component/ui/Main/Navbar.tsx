@@ -260,10 +260,11 @@ const Navbar: React.FC<Notification> = ({
             <p className="text-lg md:text-2xl text-cyan-400">MijuDramaInfo</p>
             <Image
               src="/Untitled.svg"
-              alt="Website logo"
+              alt="MijuDramaInfo"
               width={200}
               height={200}
               quality={100}
+              priority
               className="w-[25px] h-[50px] md:w-[50px]"
             />
           </Link>
@@ -304,7 +305,7 @@ const Navbar: React.FC<Notification> = ({
                     damping: 30,
                     duration: 1,
                   }}
-                  className="w-[325px] h-screen bg-[#e9eaed] border-[#06090c21] p-5 lg:hidden dark:bg-[#242424] z-10"
+                  className="fixed bottom-0 right-0 w-[325px] h-screen bg-[#e9eaed] border-[#06090c21] p-5 lg:hidden dark:bg-[#242424] z-10"
                 >
                   <IoCloseCircle
                     onClick={handleNavClick}
@@ -317,7 +318,7 @@ const Navbar: React.FC<Notification> = ({
                       key={idx}
                       className="text-black dark:text-white pl-4 py-2"
                     >
-                      <p>{item.label}</p>
+                      <Link href={`${item?.link}`}>{item.label}</Link>
                     </div>
                   ))}
                   <h1 className="text-2xl font-bold py-4">Movies</h1>
@@ -326,7 +327,7 @@ const Navbar: React.FC<Notification> = ({
                       key={idx}
                       className="text-black dark:text-white pl-4 py-2"
                     >
-                      <p>{item.label}</p>
+                      <Link href={`${item?.link}`}>{item.label}</Link>
                     </div>
                   ))}
                   <h1 className="text-2xl font-bold py-4">People</h1>
@@ -335,7 +336,7 @@ const Navbar: React.FC<Notification> = ({
                       key={idx}
                       className="text-black dark:text-white pl-4 py-2"
                     >
-                      <p>{item.label}</p>
+                      <Link href={`${item?.link}`}>{item.label}</Link>
                     </div>
                   ))}
                 </motion.div>
@@ -404,7 +405,8 @@ const Navbar: React.FC<Notification> = ({
         </motion.div>
         <div className="flex items-center lg:order-2">
           <button
-            className="mx-1 md:mx-2 relative"
+            name="Notification Icon"
+            className="mx-2 relative"
             onClick={handleNotiDropClick}
           >
             <span className="relative">
@@ -461,6 +463,7 @@ const Navbar: React.FC<Notification> = ({
           )}
           <button
             type="button"
+            name="Search Icon"
             className={`text-white rounded-lg text-sm mx-1 md:mx-2 ${
               showSearch ? "hidden" : "block"
             }`}
@@ -470,6 +473,7 @@ const Navbar: React.FC<Notification> = ({
           </button>
           <button
             type="button"
+            name="Close Search Icon"
             className={`text-white rounded-lg text-sm mx-1 md:mx-4 ${
               showSearch ? "block" : "hidden"
             }`}
@@ -477,8 +481,13 @@ const Navbar: React.FC<Notification> = ({
           >
             <IoMdClose className="text-lg md:text-2xl" />
           </button>
-          <button onClick={handleNavClick} className="mx-1 md:mx-2 lg:hidden">
-            <IoMenu className="text-white text-lg md:text-2xl mr-2" />
+          <button
+            type="button"
+            name="Hamburgur Menu"
+            onClick={handleNavClick}
+            className="mx-1 md:mx-2 lg:hidden"
+          >
+            <IoMenu className="text-white text-xl md:text-2xl mr-2" />
           </button>
           {!session && (
             <div className="relative">
@@ -526,6 +535,8 @@ const Navbar: React.FC<Notification> = ({
                           <Link
                             href={`${
                               item.link === "/profile"
+                                ? `${item?.link}/${session?.user?.name}`
+                                : item?.link === "/friends"
                                 ? `${item?.link}/${session?.user?.name}`
                                 : item?.link
                             }`}

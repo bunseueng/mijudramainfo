@@ -14,6 +14,11 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
   const [commentText, setCommentText] = useState<string>("");
   const [replyText, setReplyText] = useState<string>("");
   const [replyingTo, setReplyingTo] = useState<Record<string, boolean>>({});
+  const [spoilerComment, setSpoilerComment] = useState<boolean>(false);
+  const [spoilerReply, setSpoilerReply] = useState<boolean>(false);
+  const [revealSpoiler, setRevealSpoiler] = useState<{
+    [key: string]: boolean;
+  }>({});
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -32,16 +37,18 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
           userId: user.id,
           repliedUserId: user.id || null,
           postId: postId,
+          spoiler: parentId ? spoilerReply : spoilerComment,
         }),
       });
 
       if (response.status === 200) {
         const updatedComments = await response.json();
+        router.refresh();
+        toast.success("Comment Posted");
         getComment(updatedComments);
         setReplyText("");
         setCommentText("");
         setReplyingTo({});
-        router.refresh();
       } else if (response.status === 400) {
         toast.error("Invalid User");
       } else if (response.status === 404) {
@@ -139,7 +146,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
   return (
     <div className="py-5">
       <div className="min-h-[100px] relative bg-white dark:bg-[#242526] text-[#ffffffde] border-[1px] border-[#00000024] shadow-sm rounded-sm mb-2">
-        <div className="border-b-2 border-b-[#78828c21] px-3 py-2">
+        <div className="border-b border-b-[#78828c21] px-3 py-2">
           <h3 className="text-black dark:text-white text-md font-bold">
             Comments
           </h3>
@@ -153,6 +160,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                 width={200}
                 height={200}
                 quality={100}
+                priority
                 className="w-[48px] h-[48px] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
               />
             </div>
@@ -171,6 +179,23 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
               </div>
               <div className="text-right block mb-1">
                 <label
+                  className={`text-sm transform duration-300 cursor-pointer ${
+                    spoilerComment === true
+                      ? "text-[#409eff] font-bold"
+                      : "text-black dark:text-[#ffffffde]"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    name="spoiler"
+                    value="spoiler"
+                    checked={spoilerComment === true}
+                    onChange={() => setSpoilerComment(!spoilerComment)}
+                    className="transform duration-300 cursor-pointer mr-1 px-2"
+                  />
+                  <span className="pl-1 text-sm mb-1">Spoiler</span>
+                </label>
+                <label
                   htmlFor="comment"
                   className="text-[#606266] font-semibold whitespace-nowrap cursor-pointer"
                 >
@@ -178,6 +203,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                 </label>
                 <button
                   onClick={() => handlePostComment(null, tv_id)}
+                  name="Posting Button"
                   className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-3 px-5 outline-none ${
                     loading.main ? "opacity-50 pointer-events-none" : ""
                   } ${!session ? "cursor-not-allowed" : "cursor-pointer"}`}
@@ -218,6 +244,13 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                     loadingLove={loadingLove[comment.id] || false}
                     setLoadingLove={setLoadingLove}
                     handleDelete={() => handleDelete(comment.id, comment.id)}
+                    setSpoilerComment={setSpoilerComment}
+                    spoilerComment={spoilerComment}
+                    setSpoilerReply={setSpoilerReply}
+                    spoilerReply={spoilerReply}
+                    setRevealSpoiler={setRevealSpoiler}
+                    revealSpoiler={revealSpoiler}
+                    session={session}
                   />
 
                   <NestedComment
@@ -238,6 +271,13 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                     loadingLove={loadingLove}
                     setLoadingLove={setLoadingLove}
                     handleDelete={handleDelete}
+                    setSpoilerComment={setSpoilerComment}
+                    spoilerComment={spoilerComment}
+                    setSpoilerReply={setSpoilerReply}
+                    spoilerReply={spoilerReply}
+                    setRevealSpoiler={setRevealSpoiler}
+                    revealSpoiler={revealSpoiler}
+                    session={session}
                   />
                 </li>
               ))}

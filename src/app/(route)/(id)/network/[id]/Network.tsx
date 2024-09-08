@@ -18,6 +18,7 @@ import { RxLink1 } from "react-icons/rx";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { BiSort } from "react-icons/bi";
+import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 
 interface Network {
   network_id: string;
@@ -39,17 +40,22 @@ const Network: React.FC<Network> = ({ network_id }) => {
   const currentPage = parseInt(searchParams.get("page") || "1");
   const per_page = searchParams?.get("per_page") || (20 as any);
   const { data: networks } = useQuery({
-    queryKey: ["networks", page, network_id, sortby, genre, withoutGenre],
+    queryKey: [
+      "networks",
+      currentPage,
+      network_id,
+      sortby,
+      genre,
+      withoutGenre,
+    ],
     queryFn: () =>
-      fetchTvByNetwork(page, network_id, sortby, genre, withoutGenre),
+      fetchTvByNetwork(currentPage, network_id, sortby, genre, withoutGenre),
   });
 
   const start = (page - 1) * per_page;
   const end = start + per_page;
   const items = networks?.total_results;
   const totalItems = networks?.results?.slice(start, end) || []; // Use slice on results
-
-  console.log(networks);
 
   const extractColor = () => {
     if (imgRef.current) {
@@ -152,7 +158,6 @@ const Network: React.FC<Network> = ({ network_id }) => {
     return null;
   }
 
-  console.log(networks);
   return (
     <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10 px-2 md:px-5">
       <div
@@ -204,168 +209,165 @@ const Network: React.FC<Network> = ({ network_id }) => {
             <div className="flex items-center justify-between mb-5">
               <p>{networks?.total_results} results</p>
             </div>
-            {totalItems
-              ?.filter((genre: any) => genre?.genre_ids.length > 0)
-              ?.map((drama: any, idx: number) => {
-                const startCal = (currentPage - 1) * per_page;
-                const overallIndex = startCal + idx + 1;
-                return (
-                  <div
-                    className="flex border-2 bg-white dark:bg-[#242424] dark:border-[#272727] rounded-lg p-4 mb-10"
-                    key={drama?.id}
-                  >
-                    <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
-                      <div className="relative">
-                        <Link href={`/tv/${drama?.id}`}>
-                          {drama?.poster_path ||
-                          drama?.backdrop_path !== null ? (
-                            <Image
-                              src={`https://image.tmdb.org/t/p/original/${
-                                drama.poster_path || drama.backdrop_path
-                              }`}
-                              alt={drama?.name || drama?.title}
-                              width={200}
-                              height={200}
-                              style={{ width: "100%", height: "100%" }}
-                              priority
-                              className="w-full object-cover align-middle overflow-clip"
-                            />
-                          ) : (
-                            <Image
-                              src="/empty-img.jpg"
-                              alt={drama?.name || drama?.title}
-                              width={200}
-                              height={200}
-                              style={{ width: "100%", height: "100%" }}
-                              priority
-                              className="w-full h-full align-middle overflow-clip"
-                            />
-                          )}
-                        </Link>
-                      </div>
+            {totalItems?.map((drama: any, idx: number) => {
+              const startCal = (currentPage - 1) * per_page;
+              const overallIndex = startCal + idx + 1;
+              return (
+                <div
+                  className="flex border-2 bg-white dark:bg-[#242424] dark:border-[#272727] rounded-lg p-4 mb-10"
+                  key={drama?.id}
+                >
+                  <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
+                    <div className="relative">
+                      <Link href={`/tv/${drama?.id}`}>
+                        {drama?.poster_path || drama?.backdrop_path !== null ? (
+                          <Image
+                            src={`https://image.tmdb.org/t/p/original/${
+                              drama.poster_path || drama.backdrop_path
+                            }`}
+                            alt={drama?.name || drama?.title}
+                            width={200}
+                            height={200}
+                            style={{ width: "100%", height: "100%" }}
+                            priority
+                            className="w-full object-cover align-middle overflow-clip"
+                          />
+                        ) : (
+                          <Image
+                            src="/empty-img.jpg"
+                            alt={drama?.name || drama?.title}
+                            width={200}
+                            height={200}
+                            style={{ width: "100%", height: "100%" }}
+                            priority
+                            className="w-full h-full align-middle overflow-clip"
+                          />
+                        )}
+                      </Link>
                     </div>
-                    <div className="pl-2 md:pl-3 w-[80%]">
-                      <div className="flex items-center justify-between">
-                        <Link
-                          href={`/tv/${drama?.id}`}
-                          className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
-                        >
-                          {drama?.name || drama?.title}
-                        </Link>
-                        <p>#{overallIndex}</p>
-                      </div>
-                      <p className="text-slate-400 py-1">
-                        {(drama?.origin_country?.[0] === "CN" &&
+                  </div>
+                  <div className="pl-2 md:pl-3 w-[80%]">
+                    <div className="flex items-center justify-between">
+                      <Link
+                        href={`/tv/${drama?.id}`}
+                        className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
+                      >
+                        {drama?.name || drama?.title}
+                      </Link>
+                      <p>#{overallIndex}</p>
+                    </div>
+                    <p className="text-slate-400 py-1">
+                      {(drama?.origin_country?.[0] === "CN" &&
+                        !drama?.genre_ids?.includes(10764) &&
+                        !drama?.genre_ids?.includes(10767) &&
+                        !drama?.genre_ids?.includes(16) &&
+                        (drama?.genre_ids?.includes(18) ||
+                          drama?.genre_ids?.includes(10765) ||
+                          drama?.genre_ids?.includes(35)) &&
+                        "Chinese Drama") ||
+                        (drama?.origin_country?.[0] === "JP" &&
                           !drama?.genre_ids?.includes(10764) &&
                           !drama?.genre_ids?.includes(10767) &&
                           !drama?.genre_ids?.includes(16) &&
                           (drama?.genre_ids?.includes(18) ||
                             drama?.genre_ids?.includes(10765) ||
                             drama?.genre_ids?.includes(35)) &&
-                          "Chinese Drama") ||
-                          (drama?.origin_country?.[0] === "JP" &&
-                            !drama?.genre_ids?.includes(10764) &&
-                            !drama?.genre_ids?.includes(10767) &&
-                            !drama?.genre_ids?.includes(16) &&
-                            (drama?.genre_ids?.includes(18) ||
-                              drama?.genre_ids?.includes(10765) ||
-                              drama?.genre_ids?.includes(35)) &&
-                            "Japanese Drama") ||
-                          (drama?.origin_country?.[0] === "KR" &&
-                            !drama?.genre_ids?.includes(10764) &&
-                            !drama?.genre_ids?.includes(10767) &&
-                            !drama?.genre_ids?.includes(16) &&
-                            (drama?.genre_ids?.includes(18) ||
-                              drama?.genre_ids?.includes(10765) ||
-                              drama?.genre_ids?.includes(35)) &&
-                            "Korean Drama")}
-
-                        {drama?.origin_country?.[0] === "CN" &&
-                          (drama?.genre_ids.includes(10764) ||
-                            drama?.genre_ids.includes(10767)) &&
-                          !drama?.genre_ids?.includes(18) &&
-                          !drama?.genre_ids?.includes(16) &&
-                          !drama?.genre_ids?.includes(10765) &&
-                          "Chinese TV Show"}
-
-                        {drama?.origin_country?.[0] === "JP" &&
-                          (drama?.genre_ids.includes(10764) ||
-                            drama?.genre_ids.includes(10767)) &&
-                          !drama?.genre_ids?.includes(18) &&
-                          !drama?.genre_ids?.includes(16) &&
-                          !drama?.genre_ids?.includes(10765) &&
-                          "Japanese TV Show"}
-
-                        {drama?.origin_country?.[0] === "KR" &&
-                          (drama?.genre_ids.includes(10764) ||
-                            drama?.genre_ids.includes(10767)) &&
-                          !drama?.genre_ids?.includes(18) &&
-                          !drama?.genre_ids?.includes(16) &&
-                          !drama?.genre_ids?.includes(10765) &&
-                          "Korean TV Show"}
-                        {drama?.genre_ids?.includes(16) &&
+                          "Japanese Drama") ||
+                        (drama?.origin_country?.[0] === "KR" &&
                           !drama?.genre_ids?.includes(10764) &&
                           !drama?.genre_ids?.includes(10767) &&
-                          "Anime"}
-                        <span>
-                          {" "}
-                          -{" "}
-                          {getYearFromDate(
-                            drama?.first_air_date || drama?.release_date
-                          )}
-                          {episodes && !episodes[drama.id] ? "" : ","}{" "}
-                          {episodes && episodes[drama.id]}{" "}
-                          {episodes && !episodes[drama.id] ? "" : "Episodes"}
-                        </span>
+                          !drama?.genre_ids?.includes(16) &&
+                          (drama?.genre_ids?.includes(18) ||
+                            drama?.genre_ids?.includes(10765) ||
+                            drama?.genre_ids?.includes(35)) &&
+                          "Korean Drama")}
+
+                      {drama?.origin_country?.[0] === "CN" &&
+                        (drama?.genre_ids.includes(10764) ||
+                          drama?.genre_ids.includes(10767)) &&
+                        !drama?.genre_ids?.includes(18) &&
+                        !drama?.genre_ids?.includes(16) &&
+                        !drama?.genre_ids?.includes(10765) &&
+                        "Chinese TV Show"}
+
+                      {drama?.origin_country?.[0] === "JP" &&
+                        (drama?.genre_ids.includes(10764) ||
+                          drama?.genre_ids.includes(10767)) &&
+                        !drama?.genre_ids?.includes(18) &&
+                        !drama?.genre_ids?.includes(16) &&
+                        !drama?.genre_ids?.includes(10765) &&
+                        "Japanese TV Show"}
+
+                      {drama?.origin_country?.[0] === "KR" &&
+                        (drama?.genre_ids.includes(10764) ||
+                          drama?.genre_ids.includes(10767)) &&
+                        !drama?.genre_ids?.includes(18) &&
+                        !drama?.genre_ids?.includes(16) &&
+                        !drama?.genre_ids?.includes(10765) &&
+                        "Korean TV Show"}
+                      {drama?.genre_ids?.includes(16) &&
+                        !drama?.genre_ids?.includes(10764) &&
+                        !drama?.genre_ids?.includes(10767) &&
+                        "Anime"}
+                      <span>
+                        {" "}
+                        -{" "}
+                        {getYearFromDate(
+                          drama?.first_air_date || drama?.release_date
+                        )}
+                        {episodes && !episodes[drama.id] ? "" : ","}{" "}
+                        {episodes && episodes[drama.id]}{" "}
+                        {episodes && !episodes[drama.id] ? "" : "Episodes"}
+                      </span>
+                    </p>
+                    <div className="flex items-center">
+                      <StyledRating
+                        name="customized-color"
+                        value={convertToFiveStars(
+                          drama &&
+                            drama.vote_average &&
+                            tvRating &&
+                            tvRating[idx]
+                            ? (drama.vote_average + tvRating[idx]) / 2
+                            : tvRating && tvRating[idx]
+                            ? tvRating[idx] / 2
+                            : drama && drama.vote_average,
+                          10
+                        )}
+                        readOnly
+                        icon={<FavoriteIcon fontSize="inherit" />}
+                        emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
+                        precision={0.5}
+                      />
+                      <p className="pl-2 pt-1">
+                        {drama &&
+                        drama.vote_average &&
+                        tvRating &&
+                        tvRating[drama.id]
+                          ? (
+                              (drama.vote_average * (drama.vote_count || 0) +
+                                (tvRating[drama.id] || 0) * 10) /
+                              ((drama.vote_count || 0) + 10)
+                            ).toFixed(1)
+                          : tvRating && tvRating[drama.id]
+                          ? tvRating[drama.id].toFixed(1)
+                          : drama && drama.vote_average
+                          ? drama.vote_average.toFixed(1)
+                          : "0.0"}
                       </p>
-                      <div className="flex items-center">
-                        <StyledRating
-                          name="customized-color"
-                          value={convertToFiveStars(
-                            drama &&
-                              drama.vote_average &&
-                              tvRating &&
-                              tvRating[idx]
-                              ? (drama.vote_average + tvRating[idx]) / 2
-                              : tvRating && tvRating[idx]
-                              ? tvRating[idx] / 2
-                              : drama && drama.vote_average,
-                            10
-                          )}
-                          readOnly
-                          icon={<FavoriteIcon fontSize="inherit" />}
-                          emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
-                          precision={0.5}
-                        />
-                        <p className="pl-2 pt-1">
-                          {drama &&
-                          drama.vote_average &&
-                          tvRating &&
-                          tvRating[drama.id]
-                            ? (
-                                (drama.vote_average * (drama.vote_count || 0) +
-                                  (tvRating[drama.id] || 0) * 10) /
-                                ((drama.vote_count || 0) + 10)
-                              ).toFixed(1)
-                            : tvRating && tvRating[drama.id]
-                            ? tvRating[drama.id].toFixed(1)
-                            : drama && drama.vote_average
-                            ? drama.vote_average.toFixed(1)
-                            : "0.0"}
-                        </p>
-                      </div>
-                      <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
-                        {drama?.overview}
-                      </p>
-                      <div className="flex items-center">
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <PlayTrailer tv_id={drama?.id} />
-                        </Suspense>
-                      </div>
+                    </div>
+                    <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
+                      {drama?.overview}
+                    </p>
+                    <div className="flex items-center">
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <PlayTrailer tv_id={drama?.id} />
+                      </Suspense>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
           </div>
 
           <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3">
@@ -578,6 +580,10 @@ const Network: React.FC<Network> = ({ network_id }) => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between px-1: md:px-2 mt-3">
+        <SearchPagination setPage={setPage} totalItems={items} per_page="20" />
       </div>
     </div>
   );

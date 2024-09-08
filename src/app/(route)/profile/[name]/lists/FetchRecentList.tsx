@@ -55,6 +55,7 @@ const FetchRecentList: React.FC<FetchRecentListProps> = ({
             height={200}
             quality={100}
             className="block rounded-md w-[72px] h-[108px] shadow-[0_3px_10px_rgb(0,0,0,0.2)] hover:scale-110 transform duration-300 cursor-pointer"
+            priority
           />
         )}
       </div>

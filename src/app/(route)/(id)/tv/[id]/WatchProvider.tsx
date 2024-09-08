@@ -17,7 +17,6 @@ const WatchProvider = ({ getDrama, tv }: any) => {
     return normalizedHomepage.includes(normalizedNetworkName);
   };
 
-  console.log(tv);
   return (
     <div className="grid grid-cols-1 min-[649px]:grid-cols-2 min-[1350px]:grid-cols-3 ml-5 md:ml-0">
       {getDrama?.services?.length > 0
@@ -64,6 +63,7 @@ const WatchProvider = ({ getDrama, tv }: any) => {
                         width={200}
                         height={200}
                         quality={100}
+                        priority
                         className="inline-block size-[60px] object-cover rounded-full hover:opacity-75 transform duration-300 cursor-pointer"
                       />
                     </Link>
@@ -75,6 +75,7 @@ const WatchProvider = ({ getDrama, tv }: any) => {
                         width={200}
                         height={200}
                         quality={100}
+                        priority
                         className="inline-block size-[60px] object-cover rounded-full hover:opacity-75 transform duration-300 cursor-pointer"
                       />
                     </Link>
@@ -94,11 +95,12 @@ const WatchProvider = ({ getDrama, tv }: any) => {
             );
           })
         : tv?.networks
-            // ?.filter(
-            //   (net: any) =>
-            //     isNetworkNameInHomepage(tv?.homepage, net?.name) ||
-            //     (net?.name === "Tencent Video" && tv?.homepage)
-            // )
+            ?.filter(
+              (net: any) =>
+                isNetworkNameInHomepage(tv?.homepage, net?.name) ||
+                (net?.name === "Tencent Video" && tv?.homepage) ||
+                (net?.name === "Mango TV" && tv?.homepage)
+            )
             ?.map((show: any) => {
               console.log(isNetworkNameInHomepage(tv?.homepage, show?.name));
               const youku =

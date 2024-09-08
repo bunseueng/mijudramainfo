@@ -19,6 +19,13 @@ const NestedComment = ({
   loadingLove,
   setLoadingLove,
   handleDelete,
+  setSpoilerComment,
+  setSpoilerReply,
+  spoilerComment,
+  spoilerReply,
+  setRevealSpoiler,
+  revealSpoiler,
+  session,
 }: any) => {
   const nestedComments = comments?.filter(
     (comment: any) => comment.parentId === parentId
@@ -58,6 +65,13 @@ const NestedComment = ({
               loadingLove={loadingLove[comment.id] || false}
               setLoadingLove={setLoadingLove}
               handleDelete={() => handleDelete(comment.id, comment.id)}
+              setSpoilerComment={setSpoilerComment}
+              setSpoilerReply={setSpoilerReply}
+              spoilerComment={spoilerComment}
+              spoilerReply={spoilerReply}
+              revealSpoiler={revealSpoiler}
+              setRevealSpoiler={setRevealSpoiler}
+              session={session}
             />
             <NestedComment
               comments={comments}
@@ -79,6 +93,13 @@ const NestedComment = ({
               loadingLove={loadingLove}
               setLoadingLove={setLoadingLove}
               handleDelete={handleDelete}
+              setSpoilerComment={setSpoilerComment}
+              setSpoilerReply={setSpoilerReply}
+              spoilerComment={spoilerComment}
+              spoilerReply={spoilerReply}
+              setRevealSpoiler={setRevealSpoiler}
+              revealSpoiler={revealSpoiler}
+              session={session}
             />
           </div>
         </li>

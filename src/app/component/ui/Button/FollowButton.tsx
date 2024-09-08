@@ -12,7 +12,11 @@ interface ICurrentUser {
   currentUser: currentUserProps | null;
 }
 
-const FollowButton: React.FC<User & ICurrentUser> = ({ user, currentUser }) => {
+const FollowButton: React.FC<User & ICurrentUser> = ({
+  user,
+  users,
+  currentUser,
+}) => {
   const [followLoading, setFollowLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
   const router = useRouter();
@@ -71,7 +75,8 @@ const FollowButton: React.FC<User & ICurrentUser> = ({ user, currentUser }) => {
   return (
     <>
       <button
-        className="bg-[#3a3b3c] text-[#ffffffde] text-sm border-2 border-[#3e4042] rounded-md -mr-2 p-1 md:p-2 cursor-pointer"
+        name="follow btn"
+        className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
         onClick={handleFollow}
         disabled={followLoading}
       >

@@ -65,11 +65,11 @@ const TvListCard: React.FC<IList> = ({ list }) => {
                 </h1>
                 <div className="flex items-center text-sm">
                   <RiComputerLine />
-                  <span className="text-[#ffffff99] pl-2 pt-[1px]">
+                  <span className="text-black dark:text-[#ffffff99] pl-2 pt-[1px]">
                     {listItem?.tvId?.length} titles
                   </span>
                   <CiHeart className="ml-3" size={20} />
-                  <span className="text-[#ffffff99] pl-1 pt-[1px]">
+                  <span className="text-black dark:text-[#ffffff99] pl-1 pt-[1px]">
                     {listItem?.love} loves
                   </span>
                 </div>

@@ -16,6 +16,8 @@ import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import ClipLoader from "react-spinners/ClipLoader";
 
 interface Notification {
   users: UserProps[] | undefined;
@@ -34,6 +36,7 @@ const NotificationModal: React.FC<Notification> = ({
   findSpecificUser,
   comment,
 }) => {
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   const yourFriends = yourFriend?.filter(
@@ -82,6 +85,7 @@ const NotificationModal: React.FC<Notification> = ({
     commentIds: string,
     parentIds: string | null
   ) => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/tv/${tv_id}/notification`, {
         method: "PUT",
@@ -103,10 +107,13 @@ const NotificationModal: React.FC<Notification> = ({
     } catch (error: any) {
       console.error("Error:", error);
       toast.error("Failed to mark as read");
+    } finally {
+      setLoading(false);
     }
   };
 
   const readFriendNoti = async (friendRequestId: string) => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/friend/notification`, {
         method: "PUT",
@@ -127,6 +134,8 @@ const NotificationModal: React.FC<Notification> = ({
     } catch (error: any) {
       console.error("Error:", error);
       toast.error("Failed to mark as read");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -163,7 +172,7 @@ const NotificationModal: React.FC<Notification> = ({
           damping: 50,
           duration: 1,
         }}
-        className="w-full md:w-[440px] bg-white dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#3e4042] absolute left-0 md:left-auto md:right-[133px] top-[74px] shadow-md"
+        className="w-full md:w-[440px] bg-white dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#3e4042] absolute left-0 md:left-auto md:right-[133px] top-[74px] shadow-md"
       >
         <div className="max-h-[660px] overflow-hidden overflow-y-auto">
           <div className="flex items-center justify-between">
@@ -174,11 +183,20 @@ const NotificationModal: React.FC<Notification> = ({
               See All Notifications
             </Link>
             <button
-              className="bg-white dark:bg-[#3a3b3c] border-2 border-[#d3d3d38c] dark:border-[#3e4042] hover:bg-neutral-400 hover:bg-opacity-40 dark:hover:bg-opacity-50 my-4 mx-3 py-1 px-3 shadow-sm rounded-md"
+              className="bg-white dark:bg-[#3a3b3c] border border-[#d3d3d38c] dark:border-[#3e4042] hover:bg-neutral-400 hover:bg-opacity-40 dark:hover:bg-opacity-50 my-4 mx-3 py-1 px-3 shadow-sm rounded-md"
               onClick={handleMarkAsRead}
             >
               <span className="inline-flex">
-                <FaCheck />
+                {loading ? (
+                  <ClipLoader
+                    color="#c3c3c3"
+                    loading={loading}
+                    size={16}
+                    className="mr-1"
+                  />
+                ) : (
+                  <FaCheck className="mr-1" />
+                )}
                 <span className="text-sm">Mark these as read</span>
               </span>
             </button>
@@ -189,35 +207,79 @@ const NotificationModal: React.FC<Notification> = ({
               {hasUnreadFriends && (
                 <>
                   {status.map((req, idx) => {
-                    const user =
-                      req.friendRespondId !== currentUser?.id
-                        ? yourFriend.find(
-                            (friend) => friend?.id === req.friendRespondId
-                          )
-                        : findSpecificUser.find(
-                            (friend) => friend?.id === req.friendRequestId
-                          );
+                    const isRequester = req.friendRequestId === currentUser?.id;
+                    const isResponder = req.friendRespondId === currentUser?.id;
+
+                    // Find the corresponding user
+                    const user = isRequester
+                      ? yourFriend.find(
+                          (friend) => friend?.id === req.friendRespondId
+                        )
+                      : findSpecificUser.find(
+                          (friend) => friend?.id === req.friendRequestId
+                        );
+
                     if (!user) return null;
 
+                    // Determine the type of request
                     const isPending = pendingRequests.find(
-                      (req) =>
-                        req.friendRequestId === user?.id ||
-                        req.friendRespondId === user?.id
+                      (request) =>
+                        request.friendRequestId === user?.id ||
+                        request.friendRespondId === user?.id
                     );
                     const isAccepted = acceptedRequests.find(
-                      (req) =>
-                        req.friendRequestId === user?.id ||
-                        req.friendRespondId === user?.id
+                      (request) =>
+                        request.friendRequestId === user?.id ||
+                        request.friendRespondId === user?.id
                     );
                     const isRejected = rejectedRequests.find(
-                      (req) =>
-                        req.friendRequestId === user?.id ||
-                        req.friendRespondId === user?.id
+                      (request) =>
+                        request.friendRequestId === user?.id ||
+                        request.friendRespondId === user?.id
                     );
+
+                    // Adjust message based on whether the currentUser is the requester or responder
+                    let notificationMessage = null;
+                    if (isRequester) {
+                      notificationMessage = isAccepted ? (
+                        <>
+                          <span className="text-[#1675b6]">{user?.name}</span>{" "}
+                          has accepted your friend request
+                        </>
+                      ) : isPending ? (
+                        <>
+                          You have sent a friend request to{" "}
+                          <span className="text-[#1675b6]">{user?.name}</span>
+                        </>
+                      ) : isRejected ? (
+                        <>
+                          <span className="text-[#1675b6]">{user?.name}</span>{" "}
+                          has rejected your friend request
+                        </>
+                      ) : null;
+                    } else if (isResponder) {
+                      notificationMessage = isAccepted ? (
+                        <>
+                          You have accepted a friend request from{" "}
+                          <span className="text-[#1675b6]">{user?.name}</span>
+                        </>
+                      ) : isPending ? (
+                        <>
+                          <span className="text-[#1675b6]">{user?.name}</span>{" "}
+                          has sent you a friend request
+                        </>
+                      ) : isRejected ? (
+                        <>
+                          You have rejected a friend request from{" "}
+                          <span className="text-[#1675b6]">{user?.name}</span>
+                        </>
+                      ) : null;
+                    }
+
                     return (
                       <Link
                         href="#"
-                        className="flex border-t-2 border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-200 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
+                        className="flex border-t border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-200 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
                         key={idx}
                       >
                         <Image
@@ -229,24 +291,7 @@ const NotificationModal: React.FC<Notification> = ({
                           className="w-[40px] h-[40px] bg-center bg-cover object-cover rounded-full"
                         />
                         <div className="pl-3">
-                          <h1>
-                            <span className="text-[#1675b6]">
-                              {user?.name}{" "}
-                            </span>
-                            {yourFriends.includes(user)
-                              ? isAccepted
-                                ? "has accepted your friend request"
-                                : isPending
-                                ? "has sent you a friend request"
-                                : isRejected
-                                ? "has rejected your friend request"
-                                : ""
-                              : isAccepted || isPending
-                              ? "has sending you a friend request"
-                              : isRejected
-                              ? "has rejected your friend request"
-                              : ""}
-                          </h1>
+                          <h1>{notificationMessage}</h1>
                           <p>{moment(req?.actionDatetime).fromNow()}</p>
                         </div>
                       </Link>
@@ -273,7 +318,7 @@ const NotificationModal: React.FC<Notification> = ({
                         return (
                           <Link
                             href="#"
-                            className="flex border-t-2 border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-100 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
+                            className="flex border-t border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-100 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
                             key={idx}
                           >
                             <Image
@@ -307,13 +352,13 @@ const NotificationModal: React.FC<Notification> = ({
               )}
             </div>
           ) : (
-            <div className="text-center border-t-2 border-t-[#3e4042] py-10 px-4">
-              <h1 className="text-[#ffffffde] font-bold mb-6">
+            <div className="text-center border-t border-t-[#3e4042] py-10 px-4">
+              <h1 className="text-black dark:text-[#ffffffde] font-bold mb-6">
                 No Unread Notifications
               </h1>
               <Link
                 href="/notifications"
-                className="text-[#ffffffde] font-bold bg-[#1675b6] border-2 border-[#1f6fa7] rounded-sm py-3 px-5 hover:bg-opacity-80"
+                className="text-[#ffffffde] font-bold bg-[#1675b6] border border-[#1f6fa7] rounded-sm py-3 px-5 hover:bg-opacity-80"
               >
                 See Past Notifications
               </Link>

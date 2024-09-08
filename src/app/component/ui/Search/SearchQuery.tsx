@@ -128,7 +128,7 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
             searchParams={searchParams}
             currentUser={currentUser}
           />
-          <div className="flex flex-wrap items-start justify-start max-w-[1520px] mx-auto pb-10">
+          <div className="flex flex-wrap items-start justify-start max-w-6xl mx-auto px-1 md:px-2 pb-10">
             <SearchPagination
               setPage={setPage}
               totalItems={items}

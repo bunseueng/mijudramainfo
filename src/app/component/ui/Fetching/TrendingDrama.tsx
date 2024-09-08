@@ -44,6 +44,7 @@ const TrendingDrama = ({ heading }: any) => {
                           width={600}
                           height={600}
                           quality={100}
+                          priority
                           className="rounded-xl w-[150px] h-[200px] object-cover"
                         />
                       ) : (
@@ -53,6 +54,7 @@ const TrendingDrama = ({ heading }: any) => {
                           width={600}
                           height={600}
                           quality={100}
+                          priority
                           className="rounded-xl w-[150px] h-[200px] object-cover"
                         />
                       )}

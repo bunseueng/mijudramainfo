@@ -153,6 +153,7 @@ const DramaCast = ({
                         width={200}
                         height={200}
                         quality={100}
+                        priority
                         className="w-[200px] object-cover bg-center text-white"
                       />
                     </Link>

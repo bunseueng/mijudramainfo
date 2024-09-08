@@ -229,7 +229,7 @@ const ProfileReviews: React.FC<ReviewType> = ({
       <div className="w-full relative overflow-hidden">
         <div className="w-full h-full">
           <div className="bg-white dark:bg-[#242424]">
-            <div className="block bg-[#242526] px-2 py-4">
+            <div className="block bg-white dark:bg-[#242526] px-2 py-4">
               <div className="relative inline-block">
                 <button
                   type="button"
@@ -446,6 +446,7 @@ const ProfileReviews: React.FC<ReviewType> = ({
                             width={100}
                             height={100}
                             className="size-[50px] object-cover rounded-full"
+                            priority
                           />
 
                           <div className="flex flex-col text-black pl-2">
@@ -589,6 +590,7 @@ const ProfileReviews: React.FC<ReviewType> = ({
                               width={100}
                               height={100}
                               className="w-[100px] h-[150px] object-cover rounded-md"
+                              priority
                             />
                           </div>
 

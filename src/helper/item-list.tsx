@@ -446,11 +446,11 @@ export const friendItems = [
   },
   {
     label: "Friend Request",
-    link: "/friends/request",
+    link: "/friends",
   },
   {
     label: "User Search",
-    link: "/friends/search",
+    link: "/friends",
   },
 ];
 

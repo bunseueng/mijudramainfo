@@ -284,6 +284,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   height={600}
                   quality={100}
                   className="rounded-md bg-center bg-cover object-cover w-full h-[500px] md:w-full min-[560px]:h-[300px] lg:w-full min-[900px]:h-[500px]"
+                  priority
                 />
               </div>
               <div className="flex flex-col">
@@ -330,7 +331,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                     {persons?.name}
                   </h1>
 
-                  <button onClick={handleSubmit(handleLove)}>
+                  <button name="Love icon" onClick={handleSubmit(handleLove)}>
                     {isCurrentUserLoved ? (
                       <span className="flex items-center text-red-600">
                         <GoHeart {...register("love")} className="text-2xl" />
@@ -497,6 +498,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   height={600}
                   quality={100}
                   className="w-20 h-20 rounded-full bg-center bg-cover object-cover"
+                  priority
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -508,6 +510,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                       width={100}
                       height={100}
                       className="w-12 h-12 bg-cover bg-center object-cover mx-2"
+                      priority
                     />
                     <div>
                       <div className="font-bold text-md text-black dark:text-white">
@@ -528,6 +531,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
               </p>
               <div className="relative mx-2 pb-8">
                 <button
+                  name="Popularity Button"
                   className="block w-full text-white font-bold bg-[#1675b6] border-[1px] border-[#1675b6] hover:bg-[#115889] hover:border-[#0f527f] rounded-md py-2 my-2 mx-auto max-w-xs transform duration-300"
                   onClick={() => setOpenModal(!openModal)}
                 >
@@ -568,6 +572,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                               width={100}
                               height={100}
                               className="w-6 h-6 bg-center object-cover rounded-full"
+                              priority
                             />
                             <div className="flex items-center ml-2">
                               <p className="text-xs text-[#2490da] font-semibold px-1">
@@ -610,6 +615,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                         width={100}
                         height={100}
                         className="w-10 h-10 bg-cover object-cover"
+                        priority
                       />
                       <div className="flex items-center my-2">
                         <Image
@@ -622,6 +628,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                           width={100}
                           height={100}
                           className="w-10 h-10 bg-cover object-cover rounded-full"
+                          priority
                         />
                         <div className="inline-block ml-2">
                           <p className="inline-block text-md text-[#2490da] font-semibold px-1">
@@ -654,7 +661,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   <h1 className="text-3xl text-[#2490da] font-bold">
                     {persons?.displayName || persons?.name}
                   </h1>
-                  <button onClick={handleSubmit(handleLove)}>
+                  <button name="Love icon" onClick={handleSubmit(handleLove)}>
                     {isCurrentUserLoved ? (
                       <span className="flex items-center text-red-600">
                         <GoHeart {...register("love")} className="text-2xl" />

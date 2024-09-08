@@ -273,6 +273,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           width={200}
                           height={200}
                           quality={100}
+                          priority
                           className="w-10 h-10 bg-cover bg-center object-cover rounded-full pointer-events-none"
                         />
                         <p

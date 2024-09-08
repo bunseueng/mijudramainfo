@@ -123,7 +123,7 @@ export default function Person({ result, currentUser }: any) {
             >
               {result.title || result.name}
             </Link>
-            <button onClick={handleSubmit(handleLove)}>
+            <button name="Love icon" onClick={handleSubmit(handleLove)}>
               {isCurrentUserLoved ? (
                 <span className="flex items-center text-red-600">
                   <GoHeart {...register("love")} />

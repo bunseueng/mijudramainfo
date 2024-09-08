@@ -8,10 +8,10 @@ import Link from "next/link";
 import DramaFilter from "@/app/(route)/(drama)/drama/top/DramaFilter";
 import SearchLoading from "../Loading/SearchLoading";
 import AdBanner from "../Adsense/AdBanner";
-import { keepPreviousData, useQueries, useQuery } from "@tanstack/react-query";
-import { fetchActor, fetchPerson } from "@/app/actions/fetchMovieApi";
+import { useQueries } from "@tanstack/react-query";
+import { fetchPerson } from "@/app/actions/fetchMovieApi";
 import { PersonDb } from "../Fetching/Person";
-import { currentUserProps, ICurrentUser } from "@/helper/type";
+import { currentUserProps } from "@/helper/type";
 import { personLove, TPersonLove } from "@/helper/zod";
 import { toast } from "react-toastify";
 import { GoHeart } from "react-icons/go";
@@ -114,9 +114,7 @@ const TopActorCard: React.FC<ITopActor> = ({
     }
   };
 
-  console.log(personDB);
-
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <SearchLoading />;
   if (isError) return <div>Error loading data</div>;
 
   return (

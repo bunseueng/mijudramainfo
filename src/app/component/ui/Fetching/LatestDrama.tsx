@@ -46,6 +46,7 @@ const LatestDrama = ({ heading }: any) => {
                           height={600}
                           quality={100}
                           className="rounded-xl w-[150px] h-[200px] object-cover"
+                          priority
                         />
                       ) : (
                         <Image
@@ -55,6 +56,7 @@ const LatestDrama = ({ heading }: any) => {
                           height={600}
                           quality={100}
                           className="rounded-xl w-[150px] h-[200px] object-cover"
+                          priority
                         />
                       )}
                     </Link>

@@ -67,6 +67,8 @@ model User {
   totalPopularitySent      Json[]
   followers                String[]
   following                String[]
+  sentRequests             Friend[]    @relation("FriendRequestRelation")
+  receivedRequests         Friend[]    @relation("FriendRespondRelation")
   friends                  Friend[]    @relation("UserFriends")
   friendsAsFriend          Friend[]    @relation("UserFriendsAsFriend")
   accounts                 Account[]
@@ -79,8 +81,8 @@ model User {
 
 model Friend {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  friendRespondId String   @unique @db.ObjectId
-  friendRequestId String   @unique @db.ObjectId
+  friendRespondId String   @db.ObjectId
+  friendRequestId String   @db.ObjectId
   status          String // 'pending', 'accepted', 'rejected'
   actionDatetime  DateTime
   profileAvatar   String?
@@ -88,12 +90,12 @@ model Friend {
   name            String
   country         String?
   notification    String   @default("unread")
+  friendRequest   User     @relation("FriendRequestRelation", fields: [friendRequestId], references: [id])
+  friendRespond   User     @relation("FriendRespondRelation", fields: [friendRespondId], references: [id])
   user            User     @relation("UserFriends", fields: [friendRequestId], references: [id])
   friend          User     @relation("UserFriendsAsFriend", fields: [friendRespondId], references: [id])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
-  @@unique([friendRequestId, friendRespondId])
 }
 
 model VerificationToken {
@@ -213,6 +215,7 @@ model Comment {
   parent        Comment?  @relation("ParentChild", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children      Comment[] @relation("ParentChild")
   replies       Json[]
+  spoiler       Boolean   @default(false)
   parentId      String?   @db.ObjectId
   repliedUserId String?   @db.ObjectId
   love          Int       @default(0)

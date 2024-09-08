@@ -9,7 +9,7 @@ import TextStyle from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ImageResize from "tiptap-extension-resize-image";
 import Links from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -34,12 +34,14 @@ import ProfileReviews from "./reviews/ProfileReviews";
 
 export interface User {
   user: UserProps | null;
+  users: UserProps[] | null;
 }
 
 const ProfileItem: React.FC<
   ProfilePageProps & IFriend & User & IFindSpecificUser & ReviewType
 > = ({
   user,
+  users,
   currentUser,
   tv_id,
   existedFavorite,
@@ -55,6 +57,7 @@ const ProfileItem: React.FC<
   getReview,
 }) => {
   const [editable, setEditable] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
   const pathname = usePathname();
@@ -165,30 +168,55 @@ const ProfileItem: React.FC<
 
   const combinedFriend = [...friends, ...yourFriends];
 
+  const getAllCurrentUserFriend = friend?.filter((fri) =>
+    user?.id?.includes(fri?.friendRespondId)
+  );
+
+  const getCurrentUserRespondFri = users?.filter((userFri) =>
+    friend
+      ?.filter((stat) => stat?.status !== "pending")
+      ?.find((fri) => fri?.friendRespondId?.includes(userFri?.id))
+  );
+  // Manage component mount state to ensure hooks run only on the client
+  useEffect(() => {
+    setIsMounted(true);
+
+    // Cleanup editor on component unmount
+    return () => {
+      if (editor) {
+        editor.destroy();
+      }
+    };
+  }, [editor]);
+
+  // Prevent rendering until the component has mounted on the client side
+  if (!isMounted || !editor) return null;
+
   if (!editor) {
     return null;
   }
 
   return (
-    <div className="max-w-7xl w-full mx-auto py-3 md:px-6">
+    <div className="max-w-6xl w-full mx-auto py-3 md:px-6">
       <div className="flex flex-col md:block md:-mx-3">
         <div className="order-2 float-left w-full md:w-[33.33333%] relative px-3">
           <div className="block">
-            <div className="relative bg-[#fff] dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
+            <div className="relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
               <div className="text-center px-3 py-2">
                 <div className="text-center mb-4">
                   <Image
-                    src={user?.profileAvatar || (user?.image as any)}
-                    alt="Profile avatar"
+                    src={user?.profileAvatar || (user?.image as string)}
+                    alt={`${user?.displayName || user?.name}'s Profile`}
                     width={980}
                     height={980}
                     quality={100}
                     className="w-full align-middle"
+                    priority
                   />
                 </div>
                 <Links
-                  href={`/lists/${list?.map((item) => item?.listId)}`}
-                  className="block w-full text-black dark:text-[#ffffffde] text-md bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#d3d3d38c] dark:border-[#3e4042] px-5 py-3 shadow-sm"
+                  href={`/profile/${user?.name}/lists`}
+                  className="block w-full text-black dark:text-[#ffffffde] text-md bg-[#fff] dark:bg-[#3a3b3c] border border-[#d3d3d38c] dark:border-[#3e4042] px-5 py-3 shadow-sm"
                 >
                   <span className="flex items-center justify-center">
                     <FaList className="mr-2" />{" "}
@@ -216,7 +244,16 @@ const ProfileItem: React.FC<
                   </div>
                   <div className="min-[56px]">
                     <Links href="" className="block ">
-                      <span>{combinedFriend?.length}</span>
+                      <span>
+                        {" "}
+                        {friend?.filter((fri) =>
+                          fri?.friendRespondId?.includes(user?.id as string)
+                        )?.length > 0
+                          ? getAllCurrentUserFriend?.filter(
+                              (stat) => stat?.status !== "pending"
+                            )?.length
+                          : getCurrentUserRespondFri?.length}
+                      </span>
                       <span className="block text-[#818a91] md:text-sm lg:text-md">
                         Friends
                       </span>
@@ -225,7 +262,7 @@ const ProfileItem: React.FC<
                 </div>
               </div>
             </div>
-            <div className="block relative bg-[#fff] dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
+            <div className="block relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
               <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
                 <h3>Details</h3>
               </div>
@@ -264,43 +301,87 @@ const ProfileItem: React.FC<
               </div>
             </div>
 
-            <div className="block relative bg-[#fff] dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
+            <div className="block relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
               <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
                 <h3>Recent Lists</h3>
               </div>
               <div className="bg-white dark:bg-[#1b1c1d] px-3 py-2">
-                <RecentLists list={list} movieId={movieId} tvId={tvid} />
+                {list?.length !== 0 ? (
+                  <RecentLists list={list} movieId={movieId} tvId={tvid} />
+                ) : (
+                  <div>
+                    {user?.displayName || user?.name} does not have any lists
+                    yet.
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="block relative bg-[#fff] dark:bg-[#242526] border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
-              <div className="relative px-3 py-2">
+            <div className="block relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
+              <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
                 <h3>Friends</h3>
               </div>
               <div className="absolute top-2 right-4">
-                <Links href="">View all</Links>
+                <Links href={`/friends/${user?.name}`} className="text-white">
+                  View all
+                </Links>
               </div>
-              <div className="border-b-2 border-b-[#78828c21] m-0"></div>
+              <div className="border-b border-b-[#78828c21] m-0"></div>
               <div className="text-center px-3 py-2">
                 <Links
                   href=""
-                  className="inline-block relative w-[45px] h-[45px] leading-9 rounded-full whitespace-nowrap"
+                  className="flex flex-wrap items-center relative leading-9 rounded-full whitespace-nowrap"
                 >
-                  <Image
-                    src={user?.profileAvatar || (user?.image as string)}
-                    alt="Friend Profile avatar"
-                    width={200}
-                    height={200}
-                    quality={100}
-                    className="w-full h-full bg-center bg-cover object-cover align-middle rounded-full"
-                  />
+                  {friend?.filter((fri) =>
+                    fri?.friendRespondId?.includes(user?.id as string)
+                  )?.length > 0 ? (
+                    getAllCurrentUserFriend?.filter(
+                      (stat) => stat?.status !== "pending"
+                    )?.length > 0 ? (
+                      getAllCurrentUserFriend
+                        ?.filter((stat) => stat?.status !== "pending")
+                        ?.map((fri) => (
+                          <Image
+                            key={fri?.id}
+                            src={fri?.profileAvatar || fri?.image}
+                            alt={`${fri?.name}`}
+                            width={200}
+                            height={200}
+                            quality={100}
+                            className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
+                          />
+                        ))
+                    ) : (
+                      <div>
+                        {user?.displayName || user?.name} does not have any
+                        friends yet.
+                      </div>
+                    )
+                  ) : getCurrentUserRespondFri?.length !== 0 ? (
+                    getCurrentUserRespondFri?.map((fri) => (
+                      <Image
+                        key={fri?.id}
+                        src={fri?.profileAvatar || (fri?.image as string)}
+                        alt={`${fri?.name}`}
+                        width={200}
+                        height={200}
+                        quality={100}
+                        className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
+                      />
+                    ))
+                  ) : (
+                    <div>
+                      {user?.displayName || user?.name} does not have any
+                      friends yet.
+                    </div>
+                  )}
                 </Links>
               </div>
             </div>
           </div>
         </div>
         <div className="order-1 float-left w-full md:w-[66.66667%] relative px-3">
-          <div className="inline-block w-full h-full bg-[#fff] dark:bg-[#242526] relative border-2 border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
+          <div className="inline-block w-full h-full bg-[#fff] dark:bg-[#242526] relative border border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
             <div className="inline-block w-full h-full relative mt-5 md:mt-2">
               <div className="float-left relative px-3 mb-2">
                 <div className="md:hidden">
@@ -308,7 +389,7 @@ const ProfileItem: React.FC<
                     <div className="w-[64px] h-[64px] inline-block relative whitespace-nowrap rounded-full mb-3">
                       <Image
                         src={user?.profileAvatar || user?.image || ""}
-                        alt={`${user?.displayName || user?.name} Avatar`}
+                        alt={`${user?.displayName || user?.name} Profile`}
                         width={200}
                         height={200}
                         quality={100}
@@ -338,7 +419,7 @@ const ProfileItem: React.FC<
                     (currentUserFriends.friendRespondId === user?.id ||
                       currentUserFriends.friendRequestId === user?.id) && (
                       <button
-                        className="bg-[#3a3b3c] text-[#ffffffde] text-sm border-2 border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
+                        className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
                         onClick={() => setModal(!modal)}
                       >
                         <span className="relative flex items-center">
@@ -362,7 +443,10 @@ const ProfileItem: React.FC<
                     )}
 
                   {isPendingOrRejected && (
-                    <button className="bg-[#3a3b3c] text-[#ffffffde] text-sm border-2 border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer">
+                    <button
+                      name="friend button"
+                      className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
+                    >
                       <span className="flex items-center">
                         {findFriendId ? (
                           <FaUserCheck className="mr-2" />
@@ -384,47 +468,49 @@ const ProfileItem: React.FC<
                       </span>
                     </button>
                   )}
-                  {!isPendingOrRejected &&
-                    currentUserFriends &&
-                    currentUserFriends.friendRespondId !== user?.id &&
-                    currentUserFriends.friendRequestId !== user?.id && (
-                      <button
-                        className="bg-[#3a3b3c] text-[#ffffffde] text-sm border-2 border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
-                        onClick={sendFriendRequest}
-                      >
-                        <span className="flex items-center">
-                          {findFriendId ? (
-                            <FaUserCheck className="mr-2" />
-                          ) : (
-                            <>
-                              {loading ? (
-                                <ClipLoader
-                                  color="#fff"
-                                  size={20}
-                                  loading={loading}
-                                  className="mr-1"
-                                />
-                              ) : (
-                                <IoPersonAddSharp className="mr-2" />
-                              )}
-                            </>
-                          )}
-                          <span className="pt-[2px]">Add Friend</span>
-                        </span>
-                      </button>
-                    )}
+                  {!isPendingOrRejected && !findFriendId && (
+                    <button
+                      name="Add friend button"
+                      className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
+                      onClick={sendFriendRequest}
+                    >
+                      <span className="flex items-center">
+                        {findFriendId ? (
+                          <FaUserCheck className="mr-2" />
+                        ) : (
+                          <>
+                            {loading ? (
+                              <ClipLoader
+                                color="#fff"
+                                size={20}
+                                loading={loading}
+                                className="mr-1"
+                              />
+                            ) : (
+                              <IoPersonAddSharp className="mr-2" />
+                            )}
+                          </>
+                        )}
+                        <span className="pt-[2px]">Add Friend</span>
+                      </span>
+                    </button>
+                  )}
 
-                  <FollowButton user={user} currentUser={currentUser} />
+                  <FollowButton
+                    user={user}
+                    users={users}
+                    currentUser={currentUser}
+                  />
                 </div>
               )}
-              <ul className="inline-block w-full h-full border-b-2 border-b-[#78828c21] -my-4 pb-1 mt-4">
+              <ul className="inline-block w-full h-full border-b border-b-[#78828c21] -my-4 pb-1 mt-4">
                 {profileList?.map((list: any, idx: number) => (
                   <li
                     key={idx}
                     id={list.id}
                     className={`float-left -mb-1 cursor-pointer hover:border-b-[1px] hover:border-b-[#3f3f3f] hover:pb-[5px] ${
                       pathname === `/profile/${user?.name}${list.page}`
-                        ? "border-b-2 border-b-[#1d9bf0] pb-1"
+                        ? "border-b border-b-[#1d9bf0] pb-1"
                         : ""
                     }`}
                   >

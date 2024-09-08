@@ -13,7 +13,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             return NextResponse.json({ message: "Invalid User" }, { status: 400 });
         }
 
-        const { message, parentId, userId, repliedUserId } = await req.json();
+        const { message, parentId, userId, repliedUserId, spoiler } = await req.json();
         
         if (!message.trim()) {
             console.error("Message cannot be empty");
@@ -48,6 +48,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                             createdAt: new Date(),
                             love: 0,
                             notification: "unread",
+                            spoiler
                         },
                     },
                 },
@@ -86,6 +87,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                     userId,
                     repliedUserId: userId,
                     postId: params.id,
+                    spoiler
                 },
             });
             console.log("Created new comment:", creatingComment);
@@ -104,6 +106,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 }
 
 async function updateNestedReply(commentId: string, comments: any[], updatedData: any): Promise<any | null> {
+
     for (const comment of comments) {
         if (comment.replies) {
             const replyIndex = comment.replies.findIndex((reply: any) => reply.id === commentId);
