@@ -80,7 +80,7 @@ export default function RootLayout({
           async
         ></Script>
         <Script
-          strategy="lazyOnload"
+          strategy="afterInteractive"
           src="https://api.themoviedb.org"
           async
         ></Script>
