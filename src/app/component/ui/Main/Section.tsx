@@ -11,6 +11,8 @@ const LatestDrama = dynamic(() => import("../Fetching/LatestDrama"), {
 });
 const Trailer = dynamic(() => import("../Fetching/Trailer"), { ssr: false });
 
+export const revalidate = 0;
+
 export default function Section() {
   const trending = "Trending";
   const latestDrama = "Latest Drama";
