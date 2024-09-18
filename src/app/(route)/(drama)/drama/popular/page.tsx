@@ -7,6 +7,8 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Popular Drama",
   description: "Find Popular drama.",

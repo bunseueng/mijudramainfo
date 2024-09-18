@@ -56,7 +56,7 @@ const TrendingDrama = ({ heading }: any) => {
                           objectFit: "cover",
                           objectPosition: "bottom",
                         }}
-                        className="w-[150px] h-[200px] rounded-xl"
+                        className="w-[150px] h-[200px] rounded-xl bg-center"
                       />
                     </Link>
                     <p className="block min-h-[20px] break-words whitespace-normal text-sm">

@@ -9,6 +9,8 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Top 100 Japanese Dramas",
   description: "Explore our Top 100 Japanese Dramas",

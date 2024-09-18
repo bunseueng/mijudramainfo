@@ -7,6 +7,8 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Top 100 Korean Dramas",
   description: "Explore our Top 100 Korean Dramas",

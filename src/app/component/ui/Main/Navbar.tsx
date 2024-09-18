@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { IoCloseCircle, IoMenu, IoSearchSharp } from "react-icons/io5";
-import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   movie_subitems,
   navbar_items,
@@ -25,7 +25,6 @@ import {
   currentUserProps,
   findSpecificUserProps,
   FriendRequestProps,
-  SearchParamsType,
   UserProps,
 } from "@/helper/type";
 import { useDebouncedCallback } from "use-debounce";
@@ -284,7 +283,7 @@ const Navbar: React.FC<Notification> = ({
         <div className="max-w-6xl relative flex flex-wrap items-center justify-between mx-auto px-4 md:px-6">
           <div className="flex items-center relative py-1">
             <Link
-            prefetch={true}
+              prefetch={true}
               className="no-underline hover:no-underline font-bold text-2xl lg:text-4xl flex items-center"
               href="/"
               onClick={() => setCurrentNav("")}

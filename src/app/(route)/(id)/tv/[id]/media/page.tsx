@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 const MediaPhoto = dynamic(() => import("./Media"), { ssr: false });
+export const revalidate = 0;
 
 const MediaPage = ({
   tv,

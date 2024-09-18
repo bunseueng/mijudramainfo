@@ -5,7 +5,7 @@ import moment from "moment";
 import { ITvReview } from "@/helper/type";
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
-
+export const revalidate = 0;
 const ProfileItem = dynamic(() => import("./ProfileItem"), { ssr: false });
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),

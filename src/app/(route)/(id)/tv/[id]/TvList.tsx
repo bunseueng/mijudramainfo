@@ -33,7 +33,7 @@ const TvList = ({ tv_id }: any) => {
     }, 200);
   };
   return (
-    <div className="bg-[#191a20] border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
+    <div className="bg-[#191a20] text-white border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
       <LazyImage
         src={`https://image.tmdb.org/t/p/w500/${
           tv?.poster_path || tv?.backdrop_path
@@ -65,7 +65,7 @@ const TvList = ({ tv_id }: any) => {
             onMouseEnter={() => handleNavbarMouseEnter("Overview")}
             onMouseLeave={handleNavbarMouseLeave}
           >
-            <ul className="py-2">
+            <ul className="text-black py-2">
               <li className="text-sm text-muted-foreground hover:bg-[#f8f9fa] opacity-60 my-2 mx-6 cursor-text">
                 Edit Information
               </li>
@@ -138,7 +138,7 @@ const TvList = ({ tv_id }: any) => {
             onMouseEnter={() => handleNavbarMouseEnter("Media")}
             onMouseLeave={handleNavbarMouseLeave}
           >
-            <ul className="relative py-2">
+            <ul className="relative text-black py-2">
               <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
                 <Link href={`/tv/${tv_id}/media`}>
                   Backdrops{" "}
@@ -237,7 +237,7 @@ const TvList = ({ tv_id }: any) => {
             onMouseEnter={() => handleNavbarMouseEnter("Fandom")}
             onMouseLeave={handleNavbarMouseLeave}
           >
-            <ul className="py-2">
+            <ul className="text-black py-2">
               <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
                 Discuss
               </li>
@@ -266,7 +266,7 @@ const TvList = ({ tv_id }: any) => {
             onMouseEnter={() => handleNavbarMouseEnter("Share")}
             onMouseLeave={handleNavbarMouseLeave}
           >
-            <ul className="py-2">
+            <ul className="text-black py-2">
               <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
                 Share Links
               </li>

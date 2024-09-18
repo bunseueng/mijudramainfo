@@ -11,6 +11,8 @@ const SearchLoading = dynamic(
 const TvList = dynamic(() => import("./TvList"), { ssr: false });
 const DramaMain = dynamic(() => import("./DramaMain"), { ssr: false });
 
+export const revalidate = 0;
+
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const tv_id = params.id;
   const response = await fetch(
