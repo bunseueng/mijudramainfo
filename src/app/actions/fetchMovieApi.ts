@@ -1,4 +1,3 @@
-
 import moment from "moment";
 import { NextResponse } from "next/server";
 
@@ -19,6 +18,7 @@ const headers = {
 };
 
 export const fetchTrending = async () => {
+  try{ 
     const url  = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date.gte=${startDate}&first_air_date.lte${endDate}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN&with_original_language=zh&without_genres=16,10764,35`
  
     const options = {
@@ -34,9 +34,15 @@ export const fetchTrending = async () => {
   
     const json = await res.json();
     return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
 };
 
 export const fetchLatest = async () => {
+  try {
+    
     const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date_year=2024&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=first_air_date.desc&with_origin_country=CN&with_original_language=zh&without_genres=16,10764,10767,35`
     const options = {
       method: 'GET',
@@ -51,12 +57,15 @@ export const fetchLatest = async () => {
   
     const json = await res.json();
     return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
 };
 
 // fetch card when searching
 export const fetchEpisodeCount = async (result_id: any) => {
   try {
-    
     const url = `https://api.themoviedb.org/3/tv/${result_id}?api_key=${apiKey}&language=en-US`;
     const options = {
       method: 'GET',
@@ -81,41 +90,6 @@ export const fetchEpisodeCount = async (result_id: any) => {
   }
 }
 
-// fetch trailer
-export const fetchTrendingVideos = async () => {
-  const startDate = '2022-01-01'; // Start date for trending TV shows
-  const endDate = '2022-12-31';   // End date for trending TV shows
-
-  // Fetching trending TV shows
-  const tvShowsResponse = await fetch(
-    `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date.gte=${startDate}&first_air_date.lte=${endDate}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN&with_original_language=zh&without_genres=16&include_video=true`
-  );
-  const tvShowsData = await tvShowsResponse.json();
-  
-  // Extracting TV show IDs from the response
-  const tvShowIds = tvShowsData.results.map((tvShow: any) => tvShow.id);
-  
-  // Array to store TV shows with videos
-  const tvShowsWithVideos = [];
-
-  // Fetching videos for each TV show
-  for (const tvId of tvShowIds) {
-      // Fetching videos for the current TV show
-      const videosResponse = await fetch(
-          `https://api.themoviedb.org/3/tv/${tvId}/videos?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
-      );
-      const videosData = await videosResponse.json();
-      
-      // Adding TV show with its videos to the array
-      tvShowsWithVideos.push({
-          tvShow: tvShowsData.results.find((tvShow: any) => tvShow.id === tvId),
-          videos: videosData.results
-      });
-  }
-
-
-  return tvShowsWithVideos;
-};
 
 export const fetchActor = async () => {
   try {
@@ -350,24 +324,6 @@ export const fetchKeyword = async (tv_id: any) => {
   return json;
 }
 
-// Fetch Genre
-export const fetchGenre = async () => {
-  const url = `https://api.themoviedb.org/3/genre/tv/list?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
-  const options = {
-    method: 'GET',
-    headers,
-  };
-  
-  const res = await fetch(url, options);
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch movies');
-  }
-
-  const json = await res.json();
-  return json;
-}
-
 // Fetch title
 export const fetchTitle = async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/alternative_titles?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
@@ -504,20 +460,24 @@ export const fetchRecommendation = async (tv_id: any) => {
 }
 
 export const fetchSeasonEpisode = async (tv_id: any, season_number: any) => {
-  const url = `https://api.themoviedb.org/3/tv/${tv_id}/season/${season_number}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
-  const options = {
-    method: 'GET',
-    headers,
-  };
-  
-  const res = await fetch(url, options);
+  try {
+    const url = `https://api.themoviedb.org/3/tv/${tv_id}/season/${season_number}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    const res = await fetch(url, options);
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch movies');
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('Error fetching season episode:', error);
+    return { poster_path: null, episodes: [] }; // Return a default value or empty data
   }
-
-  const json = await res.json();
-  return json;
 }
 
 export const fetchEpCast = async (tv_id: any, season_number: any, episodes: any) => {
@@ -636,23 +596,6 @@ export const fetchPersonExternalID = async (tv_id: any) => {
     console.log("Failed to fetch", error)
     return null
   }
-}
-
-export const fetchYtThumbnail = async (key: any, api: any) => {
-  const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${key}&key=${api}`
-  const options = {
-    method: 'GET',
-    headers,
-  };
-  
-  const res = await fetch(url, options);
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch movies');
-  }
-
-  const json = await res.json();
-  return json;
 }
 
 // fetch multifor searching 
@@ -1247,19 +1190,6 @@ export const fetchMovieRecommendation = async (movie_id: any) => {
     return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
   }
 }
-
-export const fetchTvWatchProvider = async (tv_id: string) => {
-  try {
-    // Step 1: Fetch watch provider data from TMDb
-    const res = await fetch(
-      `https://api.themoviedb.org/3/tv/${tv_id}/watch/providers?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
-    );
-    const provider = await res.json();
-    return provider
-  } catch (error) {
-    return { message: "Failed to fetch data", status: 501 };
-  }
-};
 
 // Function to get user country code (Geolocation or IP-based)
 const getUserCountryCode = async () => {

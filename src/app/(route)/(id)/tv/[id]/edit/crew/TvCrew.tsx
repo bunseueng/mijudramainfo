@@ -5,14 +5,13 @@ import {
   fetchPerson,
   fetchPersonSearch,
 } from "@/app/actions/fetchMovieApi";
-import DeleteButton from "@/app/component/ui/Button/DeleteButton";
 import { crewRole } from "@/helper/item-list";
 import { CrewType, Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -25,6 +24,13 @@ import { IoCloseOutline } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { useDebouncedCallback } from "use-debounce";
+const DeleteButton = dynamic(
+  () => import("@/app/component/ui/Button/DeleteButton"),
+  { ssr: false }
+);
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: cast, isLoading } = useQuery({
@@ -341,22 +347,24 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         <div className="flex items-start w-full">
                           <div className="flex-1">
                             <div className="float-left pr-4">
-                              <Image
+                              <LazyImage
                                 src={
                                   crew?.profile_path === null
-                                    ? "/empty-pf.jpg"
-                                    : `https://image.tmdb.org/t/p/original/${crew?.profile_path}`
+                                    ? "/placeholder-image.avif"
+                                    : `https://image.tmdb.org/t/p/h632/${crew?.profile_path}`
                                 }
-                                alt={crew?.name}
-                                width={500}
-                                height={500}
+                                alt={`${crew?.name}'s Profile`}
+                                width={40}
+                                height={40}
                                 quality={100}
+                                priority
                                 className="block w-10 h-10 bg-center bg-cover object-cover leading-10 rounded-full align-middle pointer-events-none"
                               />
                             </div>
                             <div>
                               <b>
                                 <Link
+                                  prefetch={true}
                                   href={`/person/${crew?.id}`}
                                   className={`w-full text-sm font-normal pointer-events-none ${
                                     isNew && "text-green-500"
@@ -457,6 +465,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <td className="text-right border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-4 py-3">
                         {markedForDeletion[ind] || isItemChanging[ind] ? (
                           <button
+                            name="Reset"
                             type="button"
                             className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
                             onClick={(e) => {
@@ -481,7 +490,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           <DeleteButton
                             item={item}
                             storedData={storedData}
-                            setStoredData={setStoredData}
+                            setStoredData={setStoredData as any}
                             setOpen={setOpen}
                             open={open}
                             handleRemoveItem={handleRemoveItem}
@@ -559,16 +568,17 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                   key={idx}
                                   onClick={() => onClickAddMovie(person.id)}
                                 >
-                                  <Image
+                                  <LazyImage
                                     src={
                                       person?.profile_path === null
-                                        ? "/empty-pf.jpg"
-                                        : `https://image.tmdb.org/t/p/original/${person?.profile_path}`
+                                        ? "/placeholder-image.avif"
+                                        : `https://image.tmdb.org/t/p/h632/${person?.profile_path}`
                                     }
-                                    alt={person?.name}
-                                    width={50}
-                                    height={50}
+                                    alt={`${person?.name}'s Profile`}
+                                    width={40}
+                                    height={40}
                                     quality={100}
+                                    priority
                                     className="w-10 h-10 bg-cover bg-center object-cover mx-4 my-3 rounded-full"
                                   />
 
@@ -605,6 +615,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         </div>
       </div>
       <button
+        name="Submit"
         onClick={handleSubmit(onSubmit)}
         className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
           tvIds?.length > 0 ||
@@ -626,7 +637,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         }
       >
         <span className="mr-1 pt-1">
-          <ClipLoader color="#242526" loading={submitLoading} size={19} />
+          <ClipLoader color="#c3c3c3" loading={submitLoading} size={19} />
         </span>
         Submit
       </button>

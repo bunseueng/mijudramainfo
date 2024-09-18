@@ -11,13 +11,13 @@ import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { formatDate } from "@/app/actions/formatDate";
 import { DramaReleasedInfo } from "@/helper/type";
 
-export interface Youtube {
+interface Youtube {
   thumbnailUrl: string;
   channelName: string;
   duration: string;
 }
 
-export interface TvTrailerType {
+interface TvTrailerType {
   movie_id: string;
   movie: DramaReleasedInfo;
 }

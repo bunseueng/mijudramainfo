@@ -5,12 +5,13 @@ import { Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {ssr: false})
 
 const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [cover, setCover] = useState<string>();
@@ -82,40 +83,43 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <div className="block text-left overflow-hidden mb-2">
             <div>
               <div className="w-[250px] h-[350px] float-left mr-3 mb-3">
-                <Image
+                <LazyImage
                   src={
                     cover ||
                     tvDetails?.cover ||
-                    `https://image.tmdb.org/t/p/original/${
-                      tv?.backdrop_path || tv?.poster_path
-                    }`
+                    `https://image.tmdb.org/t/p/${
+                      tv?.backdrop_path ? "w300" : "w154"
+                    }/${tv?.backdrop_path || tv?.poster_path}`
                   }
-                  alt={tv?.name}
+                  alt={`${tv?.name}'s Backdrop`}
                   width={500}
                   height={500}
                   quality={100}
+                  priority
                   className="inline-block w-full h-full bg-[#eee] bg-cover bg-center object-cover border-2 border-[#fff] p-1"
                 />
               </div>
               <div className="float-left w-[84px] h-[120px]">
-                <Image
+                <LazyImage
                   src={
                     cover ||
                     tvDetails?.cover ||
-                    `https://image.tmdb.org/t/p/original/${
-                      tv?.backdrop_path || tv?.poster_path
-                    }`
+                    `https://image.tmdb.org/t/p/${
+                      tv?.backdrop_path ? "w300" : "w154"
+                    }/${tv?.backdrop_path || tv?.poster_path}`
                   }
-                  alt={tv?.name}
+                  alt={`${tv?.name}'s Backdrop`}
                   width={500}
                   height={500}
                   quality={100}
+                  priority
                   className="inline-block w-full h-full bg-cover bg-center object-cover align-middle"
                 />
               </div>
             </div>
           </div>
           <button
+            name="Submit"
             type="submit"
             className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
               cover
@@ -125,7 +129,7 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             disabled={cover ? false : true}
           >
             <span className="mr-1 pt-1">
-              <ClipLoader color="#fff" loading={loading} size={19} />
+              <ClipLoader color="#c3c3c3" loading={loading} size={19} />
             </span>
             Submit
           </button>

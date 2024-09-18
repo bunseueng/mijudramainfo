@@ -1,7 +1,8 @@
 import React from "react";
-import FriendRequest from "./FriendRequest";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import dynamic from "next/dynamic";
+const FriendRequest = dynamic(() => import("./FriendRequest"), { ssr: false });
 
 const FriendRequestPage = async ({ params }: { params: { name: string } }) => {
   const currentUser = await getCurrentUser();

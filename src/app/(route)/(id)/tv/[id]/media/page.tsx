@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import MediaPhoto from "./Media";
+import dynamic from "next/dynamic";
+const MediaPhoto = dynamic(() => import("./Media"), { ssr: false });
 
 const MediaPage = ({
   tv,

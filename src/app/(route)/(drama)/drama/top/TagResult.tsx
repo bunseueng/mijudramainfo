@@ -1,11 +1,15 @@
 "use client";
 
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { FaSearch } from "react-icons/fa";
 import { IoCloseCircleSharp } from "react-icons/io5";
+import dynamic from "next/dynamic";
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
 const TagResult = ({
   searchParams,

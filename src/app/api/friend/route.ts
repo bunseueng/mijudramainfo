@@ -1,22 +1,23 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/app/actions/getCurrentUser';
 import prisma from '@/lib/db';
 
 export async function GET(req: Request) {
   try {
-    // Get the current user
-    const currentUser = await getCurrentUser();
-
-    // Extract the query parameter from the URL
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('friQ') || ''; // Default to an empty string if not provided
+    const userId = searchParams.get('userId'); // Extract userId from query params
+
+    // Ensure userId is present
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
 
     // Query the friends table with optional search criteria
-    const user = await prisma.friend.findMany({
+    const users = await prisma.friend.findMany({
       where: {
         OR: [
-          { friendRequestId: currentUser?.id },
-          { friendRespondId: currentUser?.id },
+          { friendRequestId: userId },
+          { friendRespondId: userId },
         ],
         ...(query && { // Apply search only if query is present
           friendRespond: {
@@ -33,7 +34,7 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json({ user, message: 'Getting User' }, { status: 200 });
+    return NextResponse.json({ users, message: 'Getting User' }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

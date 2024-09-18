@@ -14,6 +14,7 @@ const nextConfig = {
       "upload.wikimedia.org",
       "static.wikia.nocookie.net",
     ],
+    formats: ["image/avif", "image/webp"],
   },
 };
 

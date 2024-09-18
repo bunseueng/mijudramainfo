@@ -1,5 +1,8 @@
 import React from "react";
-import EpisodeCast from "./EpisodeCast";
+import dynamic from "next/dynamic";
+const EpisodeCast = dynamic(() => import("./EpisodeCast"), {
+  ssr: false,
+});
 
 const EpisodeCastPage = () => {
   return <EpisodeCast />;

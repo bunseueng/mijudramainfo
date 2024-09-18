@@ -19,7 +19,6 @@ const PersonMovie = ({ data, heading }: any) => {
     );
   }
 
-  console.log(filteredMovie);
   return (
     <div className="relative top-0 left-0 mt-5 overflow-hidden">
       <h1 className="text-3xl font-bold my-5">{heading}</h1>
@@ -37,9 +36,8 @@ const PersonMovie = ({ data, heading }: any) => {
                   href={`/tv/${result?.id}`}
                   className="block hover:relative transform duration-100 group"
                 >
-                  {result?.poster_path || result?.backdrop_path !== null ? (
                     <Image
-                      src={`https://image.tmdb.org/t/p/original/${
+                      src={`https://image.tmdb.org/t/p/w500/${
                         result?.poster_path || result?.backdrop_path
                       }`}
                       alt="tv image"
@@ -48,16 +46,6 @@ const PersonMovie = ({ data, heading }: any) => {
                       quality={100}
                       className="rounded-xl w-[200px] h-[250px] object-cover"
                     />
-                  ) : (
-                    <Image
-                      src="/empty-img.jpg"
-                      alt="tv image"
-                      width={600}
-                      height={600}
-                      quality={100}
-                      className="rounded-xl w-[200px] h-[250px] object-cover"
-                    />
-                  )}
                 </Link>
                 <div className="flex items-center justify-between">
                   <p className="truncate">{result?.name || result?.title}</p>

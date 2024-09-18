@@ -13,12 +13,16 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import TagResult from "./TagResult";
 import { Slider } from "@mui/material";
 import { FaCheck } from "react-icons/fa";
 import { SearchParamsType } from "@/helper/type";
-import NetworkFilter from "@/app/component/ui/Search/NetworkFilter";
 import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
+const NetworkFilter = dynamic(
+  () => import("@/app/component/ui/Search/NetworkFilter"),
+  { ssr: false }
+);
+const TagResult = dynamic(() => import("./TagResult"), { ssr: false });
 
 const DramaFilter = () => {
   const [searchQuery, setSearchQuery] = useState("");

@@ -60,6 +60,7 @@ const Signin = () => {
       <div className="w-full md:w-2/5 xl:w-1/4 bg-white dark:bg-[#242526] flex flex-col justify-start items-center md:items-start pt-16 md:py-16 xl:px-4">
         <div className="order-0 md:order-1 mb-12 md:mb-0 w-full px-4">
           <Link
+            prefetch={true}
             className="no-underline hover:no-underline font-bold text-2xl lg:text-4xl flex items-center mb-5"
             href="/"
           >
@@ -67,9 +68,10 @@ const Signin = () => {
             <Image
               src="/Untitled.svg"
               alt="Website logo"
-              width={200}
-              height={200}
+              width={25}
+              height={50}
               quality={100}
+              loading="lazy"
               className="w-[25px] h-[50px] md:w-[50px]"
             />
           </Link>
@@ -78,6 +80,7 @@ const Signin = () => {
               <p className="mb-0 me-4 text-lg">Sign in with</p>
 
               <button
+                name="google"
                 type="button"
                 className="mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
                 onClick={() => signIn("google")}
@@ -86,6 +89,7 @@ const Signin = () => {
               </button>
 
               <button
+                name="github"
                 type="button"
                 className=" mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
                 onClick={() => signIn("github")}
@@ -94,6 +98,7 @@ const Signin = () => {
               </button>
 
               <button
+                name="facebook"
                 type="button"
                 className=" mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
               >
@@ -183,10 +188,11 @@ const Signin = () => {
 
             <div className="text-center lg:text-left">
               <button
+                name="Submit"
                 type="submit"
                 className="flex items-center justify-center w-full rounded bg-primary px-7 pb-2 pt-3 text-sm font-medium uppercase leading-normal text-white shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
               >
-                <ClipLoader color="#242526" size={20} loading={isLoading} />
+                <ClipLoader color="#c3c3c3" size={20} loading={isLoading} />
                 <span className="pl-1">{isLoading ? "Login..." : "Login"}</span>
               </button>
 

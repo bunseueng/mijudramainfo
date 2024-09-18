@@ -6,12 +6,23 @@ import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import Provider from "@/provider/Provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import SessionAllPage from "./component/ui/Main/SessionAllPage";
-import Footer from "./component/ui/Main/Footer";
 import { PHProvider } from "@/provider/PostHogProvider";
-import Adsense from "./component/ui/Adsense/Adsense";
-import AdBanner from "./component/ui/Adsense/AdBanner";
-import Loading from "./loading";
+import dynamic from "next/dynamic";
+import { ScrollProvider } from "@/provider/UseScroll";
+import Script from "next/script";
+const Adsense = dynamic(() => import("./component/ui/Adsense/Adsense"), {
+  ssr: false,
+});
+const Footer = dynamic(() => import("./component/ui/Main/Footer"), {
+  ssr: false,
+});
+const SessionAllPage = dynamic(
+  () => import("./component/ui/Main/SessionAllPage"),
+  {
+    ssr: false,
+  }
+);
+const Loading = dynamic(() => import("./loading"), { ssr: false });
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],
@@ -51,13 +62,41 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Preconnect to important origins */}
+        <link rel="preconnect" href="https://us.i.posthog.com" />
+        <link rel="preconnect" href="https://us-assets.i.posthog.com" />
+        <link rel="preconnect" href="https://api.themoviedb.org" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+
+        {/* DNS Prefetch for additional optimizations */}
+        <link rel="dns-prefetch" href="https://us.i.posthog.com" />
+        <link rel="dns-prefetch" href="https://us-assets.i.posthog.com" />
+        <link rel="dns-prefetch" href="https://api.themoviedb.org" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+
+        <Script
+          strategy="lazyOnload"
+          src="https://us.posthog.com"
+          async
+        ></Script>
+        <Script
+          strategy="lazyOnload"
+          src="https://api.themoviedb.org"
+          async
+        ></Script>
+        <Script
+          strategy="lazyOnload"
+          src="https://pagead2.googlesyndication.com"
+          async
+        ></Script>
+
         <Adsense pId="3369705912051027" />
         <meta
           name="google-adsense-account"
           content="ca-pub-3369705912051027"
         ></meta>
       </head>
-      <body className={`bg-[#fff] dark:bg-[#1e1e1e]  ${nunito.className}`}>
+      <body className={`bg-[#fff] dark:bg-[#14161a] ${nunito.className}`}>
         <PHProvider>
           <Provider>
             <TanstackProvider>
@@ -67,14 +106,19 @@ export default function RootLayout({
                 enableSystem
                 disableTransitionOnChange
               >
-                <Loading />
-                <div className="flex flex-col top-0 sticky z-[9999]">
-                  <SessionAllPage />
-                </div>
-                <div className="parent-container min-h-screen flex flex-col">
-                  <div className="content-container flex-grow">{children}</div>
-                  <Footer />
-                </div>
+                <ScrollProvider>
+                  <Loading />
+                  <div className="flex flex-col top-0 sticky z-[9999]">
+                    <SessionAllPage />
+                  </div>
+                  <div className="parent-container min-h-screen flex flex-col">
+                    <div className="content-container flex-grow">
+                      {children}
+                    </div>
+                    <Footer />
+                  </div>
+                </ScrollProvider>
+
                 <ToastContainer position="top-right" />
               </ThemeProvider>
             </TanstackProvider>

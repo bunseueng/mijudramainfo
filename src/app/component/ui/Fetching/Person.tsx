@@ -3,7 +3,6 @@
 import { fetchPerson } from "@/app/actions/fetchMovieApi";
 import { personLove, TPersonLove } from "@/helper/zod";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -11,6 +10,10 @@ import { GoHeart } from "react-icons/go";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false, // If you don't need server-side rendering
+});
 
 export type PersonDb = {
   id: string;
@@ -89,28 +92,20 @@ export default function Person({ result, currentUser }: any) {
     <div className="p-5 relative box-border h-[90%]">
       <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
         <div className="relative">
-          <Link href={`/person/${result?.id}`} className="block box-content">
-            {result?.profile_path !== null ? (
-              <Image
-                src={`https://image.tmdb.org/t/p/original/${result.profile_path}`}
-                alt={`${result?.name}'s Profile`}
-                width={200}
-                height={200}
-                style={{ width: "100%", height: "100%" }}
-                priority
-                className="w-full object-cover align-middle overflow-clip"
-              />
-            ) : (
-              <Image
-                src="/empty-img.jpg"
-                alt={`${result?.name}'s Profile`}
-                width={200}
-                height={200}
-                style={{ width: "100%", height: "100%" }}
-                priority
-                className="w-full h-full align-middle overflow-clip"
-              />
-            )}
+          <Link
+            rel="preload"
+            href={`/person/${result?.id}`}
+            className="block box-content"
+          >
+            <LazyImage
+              src={`https://image.tmdb.org/t/p/w185/${result.profile_path}`}
+              alt={`${result?.name}'s Profile`}
+              width={200}
+              height={200}
+              style={{ width: "100%", height: "100%" }}
+              priority
+              className="w-full object-cover align-middle overflow-clip"
+            />
           </Link>
         </div>
       </div>

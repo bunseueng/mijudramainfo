@@ -6,11 +6,17 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { VscQuestion } from "react-icons/vsc";
 import { useRouter, usePathname } from "next/navigation";
-import PersonDetails from "./PersonDetails";
-import PersonCover from "../cover/PersonCover";
-import PersonCast from "../cast/PersonCast";
-import PersonCrew from "../crew/PersonCrew";
-import PersonExternalLink from "../external_link/PersonExternalLink";
+import dynamic from "next/dynamic";
+
+const PersonDetails = dynamic(() => import("./PersonDetails"), { ssr: false });
+const PersonCover = dynamic(() => import("../cover/PersonCover"), {
+  ssr: false,
+});
+const PersonCast = dynamic(() => import("../cast/PersonCast"), { ssr: false });
+const PersonCrew = dynamic(() => import("../crew/PersonCrew"), { ssr: false });
+const PersonExternalLink = dynamic(
+  () => import("../external_link/PersonExternalLink")
+);
 
 export interface PersonEditList {
   person_id: string;

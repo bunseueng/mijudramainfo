@@ -5,7 +5,6 @@ import {
   fetchPerson,
   fetchPersonSearch,
 } from "@/app/actions/fetchMovieApi";
-import DeleteButton from "@/app/component/ui/Button/DeleteButton";
 import { castRole } from "@/helper/item-list";
 import { CastType, Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
@@ -25,6 +24,14 @@ import { toast } from "react-toastify";
 import { useDebouncedCallback } from "use-debounce";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import { GrPowerReset } from "react-icons/gr";
+import dynamic from "next/dynamic";
+const DeleteButton = dynamic(
+  () => import("@/app/component/ui/Button/DeleteButton"),
+  { ssr: false }
+);
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const determineRole = (cast: any) => {
   if (cast?.roles?.some((role: any) => role?.episode_count < 6)) {
@@ -419,22 +426,24 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <div className="flex items-start w-full">
                         <div className="flex-1">
                           <div className="float-left pr-4">
-                            <Image
+                            <LazyImage
                               src={
                                 cast?.profile_path === null
-                                  ? "/empty-pf.jpg"
-                                  : `https://image.tmdb.org/t/p/original/${cast?.profile_path}`
+                                  ? "/placeholder-image.avif"
+                                  : `https://image.tmdb.org/t/p/h632/${cast?.profile_path}`
                               }
-                              alt={cast?.name}
-                              width={500}
-                              height={500}
+                              alt={`${cast?.name}'s Profile`}
+                              width={40}
+                              height={40}
                               quality={100}
+                              priority
                               className="block w-10 h-10 bg-center bg-cover object-cover leading-10 rounded-full align-middle pointer-events-none"
                             />
                           </div>
                           <div>
                             <b>
                               <Link
+                                prefetch={true}
                                 href={`/person/${cast?.id}`}
                                 className={`w-full text-sm font-normal pointer-events-none ${
                                   isNew && "text-green-500"
@@ -547,6 +556,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           isItemChanging[ind] ||
                           isChanged ? (
                             <button
+                              name="Reset"
                               type="button"
                               className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3 mt-1"
                               onClick={(e) => {
@@ -558,6 +568,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             </button>
                           ) : (
                             <button
+                              name="Close"
                               className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3 mt-1"
                               onClick={(e) => {
                                 setOpen(!open), e.preventDefault();
@@ -576,7 +587,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               setDeleteIndex={setDeleteIndex}
                               item={item}
                               storedData={storedData}
-                              setStoredData={setStoredData}
+                              setStoredData={setStoredData as any}
                               markedForDeletion={markedForDeletion}
                               setMarkedForDeletion={setMarkedForDeletion}
                             />
@@ -639,16 +650,17 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                 key={idx}
                                 onClick={() => onClickAddMovie(person.id)}
                               >
-                                <Image
+                                <LazyImage
                                   src={
                                     person?.profile_path === null
-                                      ? "/empty-pf.jpg"
-                                      : `https://image.tmdb.org/t/p/original/${person?.profile_path}`
+                                      ? "/placeholder-image.avif"
+                                      : `https://image.tmdb.org/t/p/h632/${person?.profile_path}`
                                   }
-                                  alt={person?.name}
-                                  width={50}
-                                  height={50}
+                                  alt={`${person?.name}'s Poster`}
+                                  width={40}
+                                  height={40}
                                   quality={100}
+                                  priority
                                   className="w-10 h-10 bg-cover bg-center object-cover mx-4 my-3 rounded-full"
                                 />
 
@@ -676,6 +688,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         </div>
       </div>
       <button
+        name="Submit"
         onClick={handleSubmit(onSubmit)}
         className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
           tvIds?.length > 0 ||
@@ -697,7 +710,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         }
       >
         <span className="mr-1 pt-1">
-          <ClipLoader color="#242526" loading={submitLoading} size={19} />
+          <ClipLoader color="#c3c3c3" loading={submitLoading} size={19} />
         </span>
         Submit
       </button>

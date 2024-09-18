@@ -1,7 +1,12 @@
 import React, { Suspense } from "react";
-import FilterQuery from "@/app/component/ui/Search/FilterQuery";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
-
+import dynamic from "next/dynamic";
+const FilterQuery = dynamic(
+  () => import("@/app/component/ui/Search/FilterQuery")
+);
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 const Rating = () => {
   const BASE_URL = "https://api.themoviedb.org/3/discover/tv";
   return (

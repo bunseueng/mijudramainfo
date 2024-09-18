@@ -1,14 +1,21 @@
-import CastCard from "@/app/component/ui/Card/CastCard";
 import Link from "next/link";
 import React from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
-import AllSeason from "./AllSeason";
-import ReviewCard from "@/app/component/ui/Card/ReviewCard";
-import WatchProvider from "./WatchProvider";
-import TvInfo from "./TvInfo";
 import Image from "next/image";
 import { DramaDB, UserProps } from "@/helper/type";
-import TvListCard from "@/app/component/ui/Card/TvListCard";
+import dynamic from "next/dynamic";
+const AllSeason = dynamic(() => import("./AllSeason"), { ssr: false });
+const CastCard = dynamic(() => import("@/app/component/ui/Card/CastCard"), {
+  ssr: false,
+});
+const TvListCard = dynamic(() => import("@/app/component/ui/Card/TvListCard"), {
+  ssr: false,
+});
+const TvInfo = dynamic(() => import("./TvInfo"), { ssr: false });
+const WatchProvider = dynamic(() => import("./WatchProvider"), { ssr: false });
+const ReviewCard = dynamic(() => import("@/app/component/ui/Card/ReviewCard"), {
+  ssr: false,
+});
 
 const DramaCast = ({
   getDrama,
@@ -82,6 +89,7 @@ const DramaCast = ({
               <FaArrowAltCircleRight size={30} className="ml-2 font-bold" />
             </div>
             <Link
+              prefetch={true}
               href={`/tv/${tv_id}/cast`}
               className="text-md md:text-lg font-bold"
             >
@@ -153,7 +161,7 @@ const DramaCast = ({
                         width={200}
                         height={200}
                         quality={100}
-                        priority
+                        loading="lazy"
                         className="w-[200px] object-cover bg-center text-white"
                       />
                     </Link>
@@ -188,6 +196,7 @@ const DramaCast = ({
                         alt={getUser?.displayName || getUser?.name}
                         width={100}
                         height={100}
+                        loading="lazy"
                         className="size-[40px] object-cover rounded-full"
                       />
                     </div>

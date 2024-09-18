@@ -59,7 +59,7 @@ const ExploreMovieCard = ({ title, movie }: any) => {
                             />
                           ) : (
                             <Image
-                              src="/empty-img.jpg"
+                              src="/placeholder-image.avif"
                               alt={movie?.name || movie?.title}
                               width={200}
                               height={200}

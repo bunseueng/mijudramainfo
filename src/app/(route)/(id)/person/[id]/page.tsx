@@ -1,8 +1,13 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import FetchPerson from "../../../../component/ui/Fetching/FetchPerson";
 import prisma from "@/lib/db";
-import PersonList from "./PersonList";
 import { Metadata } from "next";
+import dynamic from "next/dynamic";
+
+const FetchPerson = dynamic(
+  () => import("../../../../component/ui/Fetching/FetchPerson"),
+  { ssr: false }
+);
+const PersonList = dynamic(() => import("./PersonList"), { ssr: false });
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const person_id = params.id;

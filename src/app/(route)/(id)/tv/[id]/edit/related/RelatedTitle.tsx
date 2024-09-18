@@ -1,15 +1,13 @@
 "use client";
 
-import DramaRegion from "@/app/(route)/lists/[listId]/edit/DramaRegion";
 import { fetchMultiSearch, fetchTv } from "@/app/actions/fetchMovieApi";
-import DeleteButton from "@/app/component/ui/Button/DeleteButton";
 import { storyFormat } from "@/helper/item-list";
 import { Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -22,6 +20,17 @@ import { IoCloseOutline } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { useDebouncedCallback } from "use-debounce";
+const DramaRegion = dynamic(
+  () => import("@/app/(route)/lists/[listId]/edit/DramaRegion"),
+  { ssr: false }
+);
+const DeleteButton = dynamic(
+  () => import("@/app/component/ui/Button/DeleteButton"),
+  { ssr: false }
+);
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [listSearch, setListSearch] = useState<string>("");
@@ -336,20 +345,24 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           )}
                           <div className="flex-1">
                             <div className="float-left pr-4">
-                              <Image
-                                src={`https://image.tmdb.org/t/p/original/${
+                              <LazyImage
+                                src={`https://image.tmdb.org/t/p/${
+                                  related?.backdrop_path ? "w300" : "w154"
+                                }/${
                                   related?.backdrop_path || related?.poster_path
                                 }`}
                                 alt={related?.name}
-                                width={500}
-                                height={500}
+                                width={40}
+                                height={48}
                                 quality={100}
+                                priority
                                 className="block w-10 h-12 bg-center bg-cover object-cover leading-10 rounded-sm align-middle pointer-events-none"
                               />
                             </div>
                             <div>
                               <b>
                                 <Link
+                                  prefetch={true}
                                   href={`/tv/${related?.id}`}
                                   className={`pointer-events-none ${
                                     isNew ? "text-green-500" : ""
@@ -444,6 +457,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       <td className="text-right border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-4 py-3">
                         {markedForDeletion[ind] || isItemChanging[ind] ? (
                           <button
+                            name="Reset"
                             type="button"
                             className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
                             onClick={(e) => {
@@ -531,14 +545,15 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               onClickAddMovie(item.id, item.media_type)
                             }
                           >
-                            <Image
-                              src={`https://image.tmdb.org/t/p/original/${
-                                item.poster_path || item.backdrop_path
-                              }`}
-                              alt="drama image"
+                            <LazyImage
+                              src={`https://image.tmdb.org/t/p/${
+                                item?.poster_path ? "w154" : "w300"
+                              }/${item.poster_path || item.backdrop_path}`}
+                              alt={`${item?.name}'s Poster`}
                               width={50}
                               height={50}
                               quality={100}
+                              priority
                               className="bg-cover bg-center mx-4 my-3"
                             />
                             <div className="flex flex-col items-start w-full">
@@ -561,6 +576,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         </div>
       </div>
       <button
+        name="submit"
         onClick={handleSubmit(onSubmit)}
         className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
           itemStories?.length > 0 ||

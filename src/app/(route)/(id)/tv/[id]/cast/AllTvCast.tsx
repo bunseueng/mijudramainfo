@@ -8,24 +8,53 @@ import {
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
-import Director from "@/app/component/ui/CastRole/Director";
-import GuestRole from "@/app/component/ui/CastRole/GuestRole";
-import MainRole from "@/app/component/ui/CastRole/MainRole";
-import MovieArt from "@/app/component/ui/CastRole/MovieArt";
-import MovieCamera from "@/app/component/ui/CastRole/MovieCamera";
-import Product from "@/app/component/ui/CastRole/Product";
-import Screenwriter from "@/app/component/ui/CastRole/Screenwriter";
-import Sound from "@/app/component/ui/CastRole/Sound";
-import SupportRole from "@/app/component/ui/CastRole/SupportRole";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import ColorThief from "colorthief";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import TvInfo from "../TvInfo";
+import dynamic from "next/dynamic";
+const Director = dynamic(() => import("@/app/component/ui/CastRole/Director"), {
+  ssr: false,
+});
+const GuestRole = dynamic(
+  () => import("@/app/component/ui/CastRole/GuestRole"),
+  { ssr: false }
+);
+const MainRole = dynamic(() => import("@/app/component/ui/CastRole/MainRole"), {
+  ssr: false,
+});
+const MovieArt = dynamic(() => import("@/app/component/ui/CastRole/MovieArt"), {
+  ssr: false,
+});
+const MovieCamera = dynamic(
+  () => import("@/app/component/ui/CastRole/MovieCamera"),
+  { ssr: false }
+);
+const Product = dynamic(() => import("@/app/component/ui/CastRole/Product"), {
+  ssr: false,
+});
+const Screenwriter = dynamic(
+  () => import("@/app/component/ui/CastRole/Screenwriter"),
+  { ssr: false }
+);
+const Sound = dynamic(() => import("@/app/component/ui/CastRole/Sound"), {
+  ssr: false,
+});
+const SupportRole = dynamic(
+  () => import("@/app/component/ui/CastRole/SupportRole"),
+  { ssr: false }
+);
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
+const TvInfo = dynamic(() => import("../TvInfo"), { ssr: false });
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const AllTvCast = ({ tv_id, getDrama }: any) => {
   const [dominantColor, setDominantColor] = useState<string | null>(null);
@@ -119,25 +148,27 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
         <div className="max-w-6xl mx-auto flex items-center mt-0 py-2">
           <div className="flex items-center lg:items-start px-4 md:px-6 cursor-default">
             {tv?.poster_path || tv?.backdrop_path !== null ? (
-              <Image
+              <LazyImage
                 ref={imgRef}
                 onLoad={extractColor}
-                src={`https://image.tmdb.org/t/p/original/${
-                  tv?.poster_path || tv?.backdrop_path
-                }`}
+                src={`https://image.tmdb.org/t/p/${
+                  tv?.poster_path ? "w154" : "w300"
+                }/${tv?.poster_path || tv?.backdrop_path}`}
                 alt={`${tv?.name || tv?.title}'s Poster`}
-                width={200}
-                height={200}
+                width={60}
+                height={90}
                 quality={100}
+                priority
                 className="w-[60px] h-[90px] bg-center object-center rounded-md"
               />
             ) : (
               <Image
                 src="/empty-img.jpg"
                 alt="Drama image"
-                width={200}
-                height={200}
+                width={60}
+                height={90}
                 quality={100}
+                loading="lazy"
                 className="w-[60px] h-[90px] bg-center object-center rounded-md"
               />
             )}
@@ -147,6 +178,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
                 {getYearFromDate(tv?.first_air_date || tv?.release_date)})
               </h1>
               <Link
+                prefetch={true}
                 href={`/tv/${tv_id}`}
                 className="flex items-center text-sm my-1 opacity-75 hover:opacity-90"
               >
@@ -257,13 +289,14 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
           </div>
           <div className="w-full h-full md:w-[33.33333%] px-3">
             <div className="flex flex-col items-center content-center max-w-[97rem] mx-auto py-10 md:p-4 border rounded-md bg-white p-2 dark:bg-[#242424]">
-              <Image
-                src={`https://image.tmdb.org/t/p/original/${
-                  tv?.poster_path || tv?.backdrop_path
-                }`}
-                alt="image"
-                width={500}
-                height={300}
+              <LazyImage
+                src={`https://image.tmdb.org/t/p/${
+                  tv?.poster_path ? "w154" : "w300"
+                }/${tv?.poster_path || tv?.backdrop_path}`}
+                alt={`${tv?.name}'s Poster`}
+                width={350}
+                height={480}
+                quality={100}
                 className="block align-middle w-[350px] h-[480px]"
               />
               <div className="mt-2 flex items-center justify-between">

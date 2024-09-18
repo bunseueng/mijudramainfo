@@ -21,6 +21,9 @@ const config = {
       backgroundImage: {
         "glyphicons_v2":"url(https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-739-check-white-a09b2a26e235b77489dfd57be3b66a17ff86efd5fb94d6db5f10cd3ced01e5a6.svg)",
         "menu-close": "url(https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-599-menu-close-7400e9a2ea92ad8d7cccf18d1ea34cd690790638a6e7768922eaef6e07109723.svg)",
+        "customLight": "linear-gradient(180deg,transparent,#fff 150px)",
+        "customDark": "linear-gradient(180deg,transparent,#14161a 150px)",
+        "headerTitle": "linear-gradient(90deg,hsla(0,0%,100%,0),hsla(0,0%,100%,.1) 77%,hsla(0,0%,100%,0))"
       },
       colors: {
         border: "hsl(var(--border))",

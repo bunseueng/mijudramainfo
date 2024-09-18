@@ -104,6 +104,7 @@ const ReviewCard = ({
                 <div className="w-[270px] h-[180px] mr-4" key={index}>
                   <div className="w-[270px] h-[180px] bg-cover">
                     <Link
+                      prefetch={true}
                       href={`/tv/${item?.id}`}
                       className="hover:relative transform duration-100 group"
                     >
@@ -182,18 +183,32 @@ const ReviewCard = ({
                   <div className="flex bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
                     {review?.author_details?.avatar_path === null ? (
                       <Image
-                        src="/default-pf.jpg"
-                        alt="profile image"
+                        src="/placeholder-image.avif"
+                        alt={
+                          `${review?.name || review?.title}'s Profile` ||
+                          "Person Profile"
+                        }
                         width={100}
                         height={100}
+                        priority
                         className="size-[50px] object-cover rounded-full border-2 border-slate-500"
                       />
                     ) : (
                       <Image
-                        src={`https://image.tmdb.org/t/p/original/${review.author_details?.avatar_path}`}
-                        alt="profile image"
+                        src={
+                          `https://image.tmdb.org/t/p/original/${review.author_details?.avatar_path}` ||
+                          `${
+                            review?.author_details?.profileAvatar ||
+                            review?.author_details?.image
+                          }`
+                        }
+                        alt={
+                          `${review?.name || review?.title}'s Profile` ||
+                          "Person Profile"
+                        }
                         width={100}
                         height={100}
+                        priority
                         className="size-[50px] object-cover rounded-full"
                       />
                     )}

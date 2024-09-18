@@ -1,8 +1,9 @@
 import React from "react";
-import Reviews from "./Reviews";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { ITvReview } from "@/helper/type";
+import dynamic from "next/dynamic";
+const Reviews = dynamic(() => import("./Reviews"), { ssr: false });
 
 const ReviewsPage = async ({ params }: { params: { id: string } }) => {
   const tv_id = params?.id;

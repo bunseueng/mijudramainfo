@@ -3,21 +3,22 @@
 import { friendItems } from "@/helper/item-list";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoSearch } from "react-icons/io5";
 import Image from "next/image";
 import { FaCheck } from "react-icons/fa6";
 import {
   currentUserProps,
-  IFindSpecificUser,
   IFriend,
   SearchParamsType,
   UserProps,
 } from "@/helper/type";
 import { useDebouncedCallback } from "use-debounce";
 import { useQuery } from "@tanstack/react-query";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import RingLoader from "react-spinners/RingLoader";
+import { toast } from "react-toastify";
+import { IoIosArrowDown } from "react-icons/io";
+import ClipLoader from "react-spinners/ClipLoader";
 
 interface currentUser {
   currentUser: currentUserProps | null;
@@ -35,23 +36,37 @@ const Friend: React.FC<IFriend & currentUser> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const query = searchParams?.get("friQ");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [modal, setModal] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const {
     data: friends,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["friends", query], // Include query in the key to refetch on changes
+    queryKey: ["friends", query, user?.id], // Add user ID to the key for refetching
     queryFn: async () => {
-      const response = await fetch(`/api/friend?friQ=${query || ""}`, {
-        method: "GET",
-      }); // Include query if present
+      const response = await fetch(
+        `/api/friend?friQ=${query || ""}&userId=${user?.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch friends");
       }
       return await response.json();
     },
   });
+
+  const friendRequestId = friends?.users?.find(
+    (item: any) => item?.friendRequestId
+  );
+
   const updateURLParams = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
@@ -71,29 +86,57 @@ const Friend: React.FC<IFriend & currentUser> = ({
     updateURLParams(value); // Only update the URL with debounced callback
   };
 
-  const findSpecificUser = users?.filter((user: any) =>
-    friends?.user
-      ?.map((friend: any) => friend?.friendRequestId)
-      .includes(user?.id)
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading]);
+
+  const getAllCurrentUserFriend = friends?.users?.filter((fri: any) =>
+    [fri?.friendRespondId, fri?.friendRequestId].includes(user?.id as string)
   );
 
-  const yourFriend = users?.filter((user: any) =>
-    friends?.user
-      ?.map((friend: any) => friend?.friendRespondId)
-      .includes(user?.id)
+  const getCurrentUserRespondFri = users?.filter((userFri) =>
+    friends?.users
+      ?.filter((stat: any) => stat?.status !== "pending")
+      ?.find((fri: any) => fri?.friendRespondId?.includes(userFri?.id))
   );
 
-  const isPendingOrRejected = friend?.filter(
-    (item) => item?.status === "pending" || item?.status === "rejected"
+  const isPendingOrRejected = friend?.some(
+    (item: any) => item?.status === "pending" || item?.status === "rejected"
   );
 
-  const yourFriends = yourFriend?.filter(
-    (item) => item?.id !== currentUser?.id
+  const currentUserFriends = friend.find(
+    (friendItem: any) =>
+      (friendItem.friendRequestId === currentUser?.id ||
+        friendItem.friendRespondId === currentUser?.id) &&
+      friendItem.status === "accepted"
   );
 
-  const yourSelf = findSpecificUser?.filter(
-    (item) => item?.id !== currentUser?.id
-  );
+  const deleteFriend = async (friendRequestId: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/friend/addFriend", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          friendRequestId: friendRequestId,
+        }),
+      });
+      if (response.ok) {
+        router.refresh();
+        toast.success("Success");
+      } else {
+        toast.error("Failed to delete friend");
+      }
+    } catch (error) {
+      console.error("Error delete friend:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (query) {
@@ -161,6 +204,7 @@ const Friend: React.FC<IFriend & currentUser> = ({
               placeholder="Search"
               value={search}
               onChange={handleInputChange}
+              ref={inputRef}
             />
 
             {/* <!--Search button--> */}
@@ -180,64 +224,95 @@ const Friend: React.FC<IFriend & currentUser> = ({
             </div>
           ) : (
             <div className="px-4 pb-5">
-              {yourSelf
-                ?.filter(
-                  (item) =>
-                    !isPendingOrRejected.find(
-                      (req) => req.friendRequestId === item?.id
-                    )
-                )
-                .map((item, idx: number) => (
-                  <div key={idx} className="mb-5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex">
-                        <Image
-                          src={item?.profileAvatar || (item?.image as any)}
-                          alt={`${item?.displayName || item?.name}'s Profile`}
-                          width={200}
-                          height={200}
-                          quality={100}
-                          className="w-[50px] h-[50px] bg-center bg-cover object-cover rounded-full"
-                          priority
-                        />
-                        <div className="pl-3">
-                          <Link
-                            href={`/profile/${item?.name}`}
-                            className="text-[#2490da] font-bold"
-                          >
-                            {item?.name}
-                          </Link>
-                          <p>{item?.country}</p>
+              {friend?.filter((fri) =>
+                fri?.friendRespondId?.includes(user?.id as string)
+              )?.length > 0 ? (
+                getAllCurrentUserFriend?.filter(
+                  (stat: any) => stat?.status !== "pending"
+                )?.length > 0 ? (
+                  getAllCurrentUserFriend
+                    ?.filter((stat: any) => stat?.status !== "pending")
+                    ?.map((fri: any) => (
+                      <div key={fri?.id} className="mb-5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex">
+                            <Image
+                              src={fri?.profileAvatar || (fri?.image as any)}
+                              alt={`${fri?.name}'s Profile`}
+                              width={200}
+                              height={200}
+                              quality={100}
+                              className="w-[50px] h-[50px] bg-center bg-cover object-cover rounded-full"
+                              priority
+                            />
+                            <div className="pl-3">
+                              <Link
+                                href={`/profile/${fri?.name}`}
+                                className="text-[#2490da] font-bold"
+                              >
+                                {fri?.name}
+                              </Link>
+                              <p>{fri?.country}</p>
+                            </div>
+                          </div>
+                          <div className="flex">
+                            {!isPendingOrRejected &&
+                              currentUserFriends &&
+                              (currentUserFriends.friendRespondId ===
+                                user?.id ||
+                                currentUserFriends.friendRequestId ===
+                                  user?.id) && (
+                                <button
+                                  className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
+                                  onClick={() => setModal(!modal)}
+                                >
+                                  <span className="relative flex items-center">
+                                    <FaCheck className="mr-2 mt-[2px]" />
+                                    <span className="pt-[2px]">Friends</span>
+                                    <IoIosArrowDown className="ml-1 mt-[2px]" />
+                                  </span>
+                                  {modal && (
+                                    <span
+                                      className="absolute top-[50px] right-6 dark:bg-[#3a3b3c] dark:bg-opacity-50 rounded-md px-5 md:px-6 py-2"
+                                      onClick={() =>
+                                        deleteFriend(
+                                          friendRequestId?.friendRequestId?.toString() as string
+                                        )
+                                      }
+                                    >
+                                      <p>
+                                        {!loading ? (
+                                          "Unfriend"
+                                        ) : (
+                                          <ClipLoader
+                                            loading={loading}
+                                            color="#c3c3c3"
+                                            size={14}
+                                          />
+                                        )}
+                                      </p>
+                                    </span>
+                                  )}
+                                </button>
+                              )}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex">
-                        <button
-                          name="Check Icon"
-                          className="bg-white dark:bg-[#3a3b3c] border-2 dark:border-[#3e4042] px-4 py-1"
-                        >
-                          <span className="flex items-center">
-                            <FaCheck className="mr-2" />
-                            Friends
-                          </span>
-                        </button>
-                      </div>
-                    </div>
+                    ))
+                ) : (
+                  <div className="flex justify-center">
+                    {user?.displayName || user?.name} does not have any friends
+                    yet.
                   </div>
-                ))}
-              {yourFriends
-                ?.filter(
-                  (item) =>
-                    !isPendingOrRejected.find(
-                      (req) => req.friendRespondId === item?.id
-                    )
                 )
-                .map((item, idx: number) => (
-                  <div key={idx} className="mb-5">
+              ) : getCurrentUserRespondFri?.length !== 0 ? (
+                getCurrentUserRespondFri?.map((fri) => (
+                  <div key={fri?.id} className="mb-5">
                     <div className="flex items-center justify-between">
                       <div className="flex">
                         <Image
-                          src={item?.profileAvatar || (item?.image as any)}
-                          alt={`${item?.displayName || item?.name}'s Profile`}
+                          src={fri?.profileAvatar || (fri?.image as any)}
+                          alt={`${fri?.displayName || fri?.name}'s Profile`}
                           width={200}
                           height={200}
                           quality={100}
@@ -246,25 +321,20 @@ const Friend: React.FC<IFriend & currentUser> = ({
                         />
                         <div className="pl-3">
                           <h1 className="text-[#2490da] font-bold">
-                            {item?.name}
+                            {fri?.name}
                           </h1>
-                          <p>{item?.country}</p>
+                          <p>{fri?.country}</p>
                         </div>
-                      </div>
-                      <div className="flex">
-                        <button
-                          name="Check icon"
-                          className="bg-white dark:bg-[#3a3b3c] border-2 dark:border-[#3e4042] px-4 py-1"
-                        >
-                          <span className="flex items-center">
-                            <FaCheck className="mr-2" />
-                            Friends
-                          </span>
-                        </button>
                       </div>
                     </div>
                   </div>
-                ))}
+                ))
+              ) : (
+                <div className="flex justify-center">
+                  {user?.displayName || user?.name} does not have any friends
+                  yet.
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 import React from "react";
-import PhotoAlbum from "./PhotoAlbum";
+import dynamic from "next/dynamic";
+const PhotoAlbum = dynamic(() => import("./PhotoAlbum"));
 
 const PhotosPage = () => {
   return <PhotoAlbum />;

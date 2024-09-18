@@ -39,9 +39,6 @@ const NotificationModal: React.FC<Notification> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const yourFriends = yourFriend?.filter(
-    (item) => item?.id !== currentUser?.id
-  );
   const acceptedRequests = friend.filter((item) => item.status === "accepted");
   const rejectedRequests = friend.filter((item) => item.status === "rejected");
   const pendingRequests = friend.filter((item) => item.status === "pending");
@@ -158,7 +155,6 @@ const NotificationModal: React.FC<Notification> = ({
   } else if (isError) {
     console.log("Failed to fetch tv");
   }
-  if (!currentUser) return null; // If currentUser is null, return null or handle as needed
 
   return (
     <AnimatePresence>
@@ -172,7 +168,7 @@ const NotificationModal: React.FC<Notification> = ({
           damping: 50,
           duration: 1,
         }}
-        className="w-full md:w-[440px] bg-white dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#3e4042] absolute left-0 md:left-auto md:right-[133px] top-[74px] shadow-md"
+        className="w-[410px] md:w-[440px] bg-white dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#3e4042] absolute left-3 md:left-auto md:right-[133px] top-[74px] shadow-md"
       >
         <div className="max-h-[660px] overflow-hidden overflow-y-auto">
           <div className="flex items-center justify-between">
@@ -278,13 +274,13 @@ const NotificationModal: React.FC<Notification> = ({
 
                     return (
                       <Link
-                        href="#"
+                        href={`/profile/${user?.name}`}
                         className="flex border-t border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-200 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
                         key={idx}
                       >
                         <Image
                           src={user?.profileAvatar || user?.image || ""}
-                          alt={`${user?.name} image`}
+                          alt={`${user?.name} Profile`}
                           width={40}
                           height={40}
                           quality={100}
@@ -305,7 +301,7 @@ const NotificationModal: React.FC<Notification> = ({
                   {comment.map((commentItem) => {
                     return commentItem.replies
                       ?.filter((rp: any) => rp?.notification !== "read")
-                      ?.filter((rp: any) => rp?.userId === currentUser.id)
+                      ?.filter((rp: any) => rp?.userId === currentUser?.id)
                       ?.map((reply: any, idx) => {
                         // Step 1: Find the user details based on repliedUserId
                         const user = users?.find(
@@ -317,13 +313,13 @@ const NotificationModal: React.FC<Notification> = ({
                         const date = reply.createdAt;
                         return (
                           <Link
-                            href="#"
+                            href={`/tv/${allTv?.id}`}
                             className="flex border-t border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-100 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
                             key={idx}
                           >
                             <Image
                               src={user.profileAvatar || user.image || ""}
-                              alt={`${user.name} image`}
+                              alt={`${user.name} Profile`}
                               width={40}
                               height={40}
                               quality={100}

@@ -1,8 +1,9 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import cloudinary from "@/lib/cloundinary";
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function PUT(request: Request) {
+export async function PATCH(request: Request) {
     try {
         const user = await getCurrentUser();
     
@@ -12,11 +13,44 @@ export async function PUT(request: Request) {
         
         const body = await request.json();
         
-        const { displayName, country, gender, dateOfBirth, biography } = body;
+        const { displayName, country, gender, dateOfBirth, biography, profileAvatar } = body;
 
         // Parse dateOfBirth string into Date object
         const parsedDateOfBirth = dateOfBirth ? new Date(dateOfBirth) : undefined;
 
+        if(profileAvatar) {
+            const imgId = user?.public_id
+            if(imgId) {
+                await cloudinary.uploader.destroy(imgId)
+            }
+            
+        const uploadRes = await cloudinary.uploader.upload(profileAvatar, {
+            upload_preset: "mijudrama_avatar"
+        })
+
+        if(uploadRes) {
+            const updateUserInfo = await prisma.user.update({
+            where: {
+                id: user.id
+            },
+            data: {
+                profileAvatar: uploadRes.url,
+                public_id: uploadRes.public_id,
+                displayName,
+                country,
+                gender,
+                dateOfBirth: parsedDateOfBirth, // Assign parsed dateOfBirth
+                biography
+            }
+        });
+
+        if (updateUserInfo) {
+            return NextResponse.json({ message: "User Profile updated successfully" }, { status: 200 });
+        }
+    }
+
+        return NextResponse.json({ message: "User Profile updated successfully" }, { status: 200 });
+    }
         const updateUserInfo = await prisma.user.update({
             where: {
                 id: user.id
@@ -30,9 +64,7 @@ export async function PUT(request: Request) {
             }
         });
 
-        if (updateUserInfo) {
-            return NextResponse.json({ message: "User Profile updated successfully" }, { status: 200 });
-        }
+        return NextResponse.json({updateUserInfo, message: "User Profile updated successfully" }, { status: 200 });
     } catch (error) {
         console.log(error);
         return NextResponse.json(error, { status: 500 });

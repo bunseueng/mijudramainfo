@@ -13,13 +13,14 @@ import { FaRegEyeSlash } from "react-icons/fa6";
 import { FiTrash } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
 import { toast } from "react-toastify";
-import DramaRegion from "./DramaRegion";
-import MovieResult from "./MovieResult";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useDebouncedCallback } from "use-debounce";
-import ListThumbnail from "./ListThumbnail";
 import { EditListProps } from "@/helper/type";
-import { AnimatePresence, Reorder, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
+const DramaRegion = dynamic(() => import("./DramaRegion"), { ssr: false });
+const MovieResult = dynamic(() => import("./MovieResult"), { ssr: false });
+const ListThumbnail = dynamic(() => import("./ListThumbnail"), { ssr: false });
 
 const EditList: React.FC<EditListProps> = ({
   list,
@@ -345,13 +346,14 @@ const EditList: React.FC<EditListProps> = ({
                           }
                         >
                           <Image
-                            src={`https://image.tmdb.org/t/p/original/${
+                            src={`https://image.tmdb.org/t/p/w500/${
                               item.poster_path || item.backdrop_path
                             }`}
                             alt="drama image"
                             width={50}
                             height={50}
                             quality={100}
+                            loading="lazy"
                             className="bg-cover bg-center mx-4 my-3"
                           />
                           <div className="flex flex-col items-start w-full">

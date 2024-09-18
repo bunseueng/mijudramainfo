@@ -46,3 +46,29 @@ export async function POST(request: Request) {
         return NextResponse.json({message: "Failed to create user"}, {status: 500})
     }
 }
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const query = searchParams.get("friQ") || "";
+
+    // Return empty array if no query is provided
+    if (!query) {
+      return NextResponse.json({ users: [], message: "No search query provided" }, { status: 200 });
+    }
+
+    // Fetch users if query is provided
+    const users = await prisma.user.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    return NextResponse.json({ users, message: "Getting User" }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

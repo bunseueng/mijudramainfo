@@ -3,9 +3,16 @@
 import { fetch100TopDrama } from "@/app/actions/fetchMovieApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import ExploreCard from "@/app/component/ui/Card/ExploreCard";
 import { Suspense } from "react";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import dynamic from "next/dynamic";
+const ExploreCard = dynamic(
+  () => import("@/app/component/ui/Card/ExploreCard"),
+  { ssr: false }
+);
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
 const Top100Japanese = () => {
   const searchParams = useSearchParams();

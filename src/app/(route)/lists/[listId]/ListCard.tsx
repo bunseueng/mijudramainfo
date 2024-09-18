@@ -1,4 +1,5 @@
-import RatingModal from "@/app/component/ui/CircleRating/RatingModal";
+"use client";
+
 import { createList, TCreateList } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import moment from "moment";
@@ -7,13 +8,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { CiEdit, CiHeart, CiStar } from "react-icons/ci";
+import { CiEdit, CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa6";
-import { IoMdAdd, IoMdHeart } from "react-icons/io";
+import { IoMdAdd } from "react-icons/io";
 import { RiComputerLine } from "react-icons/ri";
 import { toast } from "react-toastify";
 import { Lists } from "./Lists";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import dynamic from "next/dynamic";
+const RatingModal = dynamic(
+  () => import("@/app/component/ui/CircleRating/RatingModal")
+);
 
 interface listResultProps {
   listResult: any[] | undefined;

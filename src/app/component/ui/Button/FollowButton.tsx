@@ -12,11 +12,7 @@ interface ICurrentUser {
   currentUser: currentUserProps | null;
 }
 
-const FollowButton: React.FC<User & ICurrentUser> = ({
-  user,
-  users,
-  currentUser,
-}) => {
+const FollowButton: React.FC<User & ICurrentUser> = ({ user, currentUser }) => {
   const [followLoading, setFollowLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
   const router = useRouter();
@@ -75,6 +71,7 @@ const FollowButton: React.FC<User & ICurrentUser> = ({
   return (
     <>
       <button
+        type="button"
         name="follow btn"
         className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
         onClick={handleFollow}
@@ -99,8 +96,11 @@ const FollowButton: React.FC<User & ICurrentUser> = ({
         )}
       </button>
       {modal && (
-        <div id="YOUR_ID" className="fixed z-50 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div
+          id={currentUser?.id}
+          className="fixed z-50 inset-0 overflow-y-auto"
+        >
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div
               className="fixed inset-0 transition-opacity"
               aria-hidden="true"
@@ -124,6 +124,7 @@ const FollowButton: React.FC<User & ICurrentUser> = ({
               <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
                 <button
                   type="button"
+                  name="Close icon"
                   onClick={() => setModal(false)}
                   className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
@@ -166,6 +167,7 @@ const FollowButton: React.FC<User & ICurrentUser> = ({
               <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
+                  name="Cancel"
                   onClick={handleUnfollow}
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
                 >

@@ -1,7 +1,9 @@
 import React from "react";
-import TvEdit from "./TvEdit";
-import TvEditList from "./TvEditList";
 import prisma from "@/lib/db";
+import dynamic from "next/dynamic";
+
+const TvEdit = dynamic(() => import("./TvEdit"), { ssr: false });
+const TvEditList = dynamic(() => import("./TvEditList"), { ssr: false });
 
 const PrimaryDetailsPage = async ({ params }: { params: { id: string } }) => {
   const tv_id = params.id;

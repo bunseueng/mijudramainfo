@@ -1,8 +1,6 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import cloudinary from "@/lib/cloundinary";
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
-import { v4 as uuidv4 } from 'uuid';
 
 export async function PUT(request: Request, { params }: { params: { listId: string } }) {
   try {

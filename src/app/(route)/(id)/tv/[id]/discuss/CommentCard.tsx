@@ -1,11 +1,27 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import moment from "moment";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { CiChat2, CiHeart } from "react-icons/ci";
 import { HiDotsVertical } from "react-icons/hi";
 import { IoMdArrowDropdown } from "react-icons/io";
 import ClipLoader from "react-spinners/ClipLoader";
+import { toast } from "react-toastify";
+const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
+  ssr: false,
+});
 
 const CommentCard = ({
   users,
@@ -28,8 +44,12 @@ const CommentCard = ({
   revealSpoiler = {},
   session,
 }: any) => {
+  const [showActions, setShowActions] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const [enableDialog, setEnableDialog] = useState<boolean>(true);
+  const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const router = useRouter();
   const eachUser = users.find((u: any) => u.id === comment.repliedUserId);
-  const [showActions, setShowActions] = useState(false);
 
   const handleAction = () => {
     setShowActions(!showActions);
@@ -41,29 +61,62 @@ const CommentCard = ({
     }));
   };
   const isSpoilerRevealed = revealSpoiler[comment?.id] ?? false;
+  const updatingComment = async () => {
+    setSaveLoading(true);
+    try {
+      const res = await fetch(`/api/tv/${tv_id}/comment`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          commentId: comment?.id,
+          message: message,
+          spoiler: spoilerReply,
+        }),
+      });
+      if (res?.status === 200) {
+        setEnableDialog(false);
+        setShowActions(false);
+        router?.refresh();
+        toast.success("Success");
+      } else if (res?.status === 400) {
+        toast.error("Invalid User");
+      } else if (!res.ok) {
+        throw new Error("Failed to update comment");
+      }
+      const updatedComment = await res.json();
+      console.log("Updated comment:", updatedComment);
+    } catch (error) {
+      console.error("Error updating comment:", error);
+    } finally {
+      setSaveLoading(false);
+    }
+  };
   return (
     <>
       <div className="relative pb-4 transform duration-300">
         <div className="float-left relative inline-block w-[48px] h-[48px]">
-          <Link href={`/profile/${eachUser?.name}`}>
-            <Image
+          <Link prefetch={true} href={`/profile/${eachUser?.name}`}>
+            <ReusedImage
               src={
                 eachUser?.profileAvatar || eachUser?.image || "/default-pf.jpg"
               }
               alt={`${eachUser?.name}'s Profile`}
-              width={200}
-              height={200}
+              width={36}
+              height={36}
               quality={100}
-              priority
-              className="w-[40px] h-[40px] border-[1px] border-[#7a7c7e] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
+              loading="lazy"
+              className="w-[36px] h-[36px] border-[1px] border-[#7a7c7e] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
             />
           </Link>
         </div>
         <div className="ml-12">
           <div className="inline-block min-w-[300px] pb-1">
             <Link
+              prefetch={true}
               href={`/profile/${eachUser?.name}`}
-              className="text-[#2490da]"
+              className="text-sm text-[#2490da]"
             >
               <b>{eachUser?.displayName || eachUser?.name}</b>
             </Link>
@@ -100,6 +153,8 @@ const CommentCard = ({
           </div>
           <div className="mt-2 -ml-2 whitespace-nowrap relative">
             <button
+              type="button"
+              name="Like"
               className={`text-[#ffffff99] min-w-[30px] bg-transparent hover:text-red-500 border-0 rounded-sm transform duration-300 py-1 px-[6px] mr-[2px] cursor-default ${
                 comment.love === 0
                   ? "text-black dark:text-white"
@@ -124,6 +179,7 @@ const CommentCard = ({
               </span>{" "}
             </button>
             <button
+              name="Reply"
               className="text-[#ffffff99] min-w-[30px] bg-transparent rounded-sm py-1 px-[6px] mr-[2px] cursor-default"
               onClick={() => {
                 onReply(comment.id);
@@ -135,7 +191,11 @@ const CommentCard = ({
               </span>{" "}
             </button>
             <div className="inline-block relative">
-              <button className="text-black dark:text-[#ffffff99] min-w-[30px] bg-transparent rounded-sm py-1 px-[6px] mr-[2px] opacity-60 cursor-default">
+              <button
+                type="button"
+                name="Modal"
+                className="text-black dark:text-[#ffffff99] min-w-[30px] bg-transparent rounded-sm py-1 px-[6px] mr-[2px] opacity-60 cursor-default"
+              >
                 <HiDotsVertical
                   size={16}
                   className="cursor-pointer"
@@ -148,18 +208,18 @@ const CommentCard = ({
           {replyingTo && (
             <div className="border-t-[1px] border-t-[#3e4042] pt-4 mt-4">
               <div className="float-left relative inline-block w-[48px] h-[48px]">
-                <Link href={`/profile/${eachUser?.name}`}>
-                  <Image
+                <Link prefetch={true} href={`/profile/${user?.name}`}>
+                  <ReusedImage
                     src={
-                      eachUser?.profileAvatar ||
-                      eachUser?.image ||
-                      "/default-pf.jpg"
+                      user?.profileAvatar ||
+                      user?.image ||
+                      "/placeholder-image.avif"
                     }
-                    alt={`${eachUser?.name}'s Profile`}
-                    width={200}
-                    height={200}
+                    alt={`${user?.name}'s Profile`}
+                    width={36}
+                    height={36}
                     quality={100}
-                    priority
+                    loading="lazy"
                     className="w-[36px] h-[36px] border-[1px] border-[#7a7c7e] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
                   />
                 </Link>
@@ -203,14 +263,16 @@ const CommentCard = ({
                   </label>
                   <button
                     onClick={() => handlePostComment(comment.id)}
-                    className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-3 px-5 outline-none ${
-                      loading.main ? "opacity-50 pointer-events-none" : ""
+                    className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-2 px-5 outline-none ${
+                      loading
+                        ? "opacity-50 pointer-events-none align-bottom"
+                        : ""
                     } ${!session ? "cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     <span className="flex items-center">
                       <ClipLoader
                         color="#fff"
-                        size={20}
+                        size={15}
                         loading={loading}
                         className="mr-1"
                       />
@@ -218,7 +280,7 @@ const CommentCard = ({
                     </span>
                   </button>
                   <button
-                    className="inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-3 px-5 outline-none"
+                    className="inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-2 px-5 outline-none"
                     onClick={() => handleCancelReply(comment.id)}
                   >
                     Cancel
@@ -230,12 +292,68 @@ const CommentCard = ({
         </div>
       </div>
       {showActions && user?.id === eachUser?.id && (
-        <div className="min-w-[160px] absolute right-auto left-10 top-24 float-right text-start text-[#ffffffcc] bg-[#242526] border-[1px] border-[#3e4042] z-[9999]">
-          <button className="block w-full bg-transparent text-left clear-both py-1 px-5">
-            Edit
-          </button>
+        <div className="min-w-[160px] absolute right-auto left-5 top-24 float-right text-start text-[#ffffffcc] bg-[#242526] border-[1px] border-[#3e4042] rounded-md z-[9999]">
+          <Dialog>
+            <DialogTrigger className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-1 px-5">
+              Edit
+            </DialogTrigger>
+            {enableDialog && (
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Comment</DialogTitle>
+                  <DialogDescription>
+                    <textarea
+                      name="details.synopsis"
+                      className="w-full h-auto bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none overflow-hidden px-4 py-1"
+                      defaultValue={comment?.message}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        setMessage(e?.target?.value)
+                      }
+                    ></textarea>
+                  </DialogDescription>
+                  <div className="flex items-center justify-between">
+                    <label
+                      className={`text-sm transform duration-300 cursor-pointer ${
+                        spoilerReply === true
+                          ? "text-[#409eff] font-bold"
+                          : "text-black dark:text-[#ffffffde]"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="spoiler"
+                        value="spoiler"
+                        checked={spoilerReply === true}
+                        onChange={() => setSpoilerReply(!spoilerReply)}
+                        className="transform duration-300 cursor-pointer mr-1 px-2"
+                        defaultChecked={comment?.spoiler}
+                      />
+                      <span className="pl-1 text-sm mb-1">Spoiler</span>
+                    </label>
+                    <label
+                      htmlFor="comment"
+                      className="text-[#606266] font-semibold whitespace-nowrap cursor-pointer"
+                    >
+                      <span className="inline-block relative cursor-pointer whitespace-nowrap align-middle"></span>
+                    </label>
+                    <Button type="button" name="Save" onClick={updatingComment}>
+                      {saveLoading ? (
+                        <ClipLoader
+                          loading={saveLoading}
+                          color="#c3c3c3"
+                          size={12}
+                        />
+                      ) : (
+                        "Save"
+                      )}
+                    </Button>
+                  </div>
+                </DialogHeader>
+              </DialogContent>
+            )}
+          </Dialog>
           <button
-            className="block w-full bg-transparent text-left clear-both py-1 px-5"
+            className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-1 px-5"
             onClick={() => handleDelete(null, tv_id)}
           >
             Delete

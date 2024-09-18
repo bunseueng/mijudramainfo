@@ -1,7 +1,6 @@
 "use client";
 
 import { fetchTv } from "@/app/actions/fetchMovieApi";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { ITvReview, SearchParamsType } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import ColorThief from "colorthief";
@@ -18,6 +17,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 import { ReviewType } from "@/app/(route)/(id)/tv/[id]/reviews/Reviews";
+import dynamic from "next/dynamic";
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
 const ProfileReviews: React.FC<ReviewType> = ({
   getDrama,

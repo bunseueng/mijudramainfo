@@ -1,13 +1,10 @@
 "use client";
 
-import ExternalEditModal from "@/app/component/ui/Modal/ExternalEditModal";
 import { external_link } from "@/helper/item-list";
 import { Drama, ExternalLinkType, tvId } from "@/helper/type";
 import { TExternalLink, externalLink } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { JsonValue } from "@prisma/client/runtime/library";
 import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -17,6 +14,11 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { GrPowerReset } from "react-icons/gr";
+import dynamic from "next/dynamic";
+const ExternalEditModal = dynamic(
+  () => import("@/app/component/ui/Modal/ExternalEditModal"),
+  { ssr: false }
+);
 
 const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [storedData, setStoredData] = useState<ExternalLinkType[]>([]);
@@ -354,7 +356,6 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           const isInDatabase = database
                             ?.filter((item) => item?.title !== "Website")
                             ?.find((data) => data?.title === items?.label);
-                          console.log(isInDatabase);
                           return (
                             <li
                               ref={(el) => {
@@ -461,6 +462,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 </div>
               )}
               <button
+                name="Cancel"
                 type="button"
                 className="text-sm bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#c0c4cc] dark:border-[#3e4042] rounded-md px-5 py-2"
                 onClick={() => setOpenExternal(!openExternal)}
@@ -468,6 +470,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 Cancel
               </button>
               <button
+                name="Add"
                 type="button"
                 className="text-sm text-white bg-[#409effd9] border-[1px] border-[#409effcc] rounded-md px-5 py-2 ml-3"
                 onClick={() => addingItem(getValues())}
@@ -501,6 +504,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       )}
       <div className="border-t-2 border-t-[#78828c21] pt-5 mx-3">
         <button
+          name="Submit"
           type="submit"
           className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
             storedData?.length > 0 ||
@@ -518,7 +522,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           }
         >
           <span className="mr-1 pt-1">
-            <ClipLoader color="#242526" loading={loading} size={19} />
+            <ClipLoader color="#c3c3c3" loading={loading} size={19} />
           </span>
           Submit
         </button>

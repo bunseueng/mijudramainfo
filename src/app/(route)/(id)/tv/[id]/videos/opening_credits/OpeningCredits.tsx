@@ -7,17 +7,21 @@ import { formatDuration } from "@/app/actions/formattedDuration";
 import { fetchTrailer } from "@/app/actions/fetchMovieApi";
 import { FaYoutube } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { formatDate } from "@/app/actions/formatDate";
 import { DramaReleasedInfo } from "@/helper/type";
+import dynamic from "next/dynamic";
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
-export interface Youtube {
+interface Youtube {
   thumbnailUrl: string;
   channelName: string;
   duration: string;
 }
 
-export interface TvTrailerType {
+interface TvTrailerType {
   tv_id: string;
   tv: DramaReleasedInfo;
 }

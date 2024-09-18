@@ -1,10 +1,27 @@
-import React from "react";
-import CoverPhoto from "./CoverPhoto";
+import React, { Suspense } from "react";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import ProfileItem from "./ProfileItem";
 import moment from "moment";
 import { ITvReview } from "@/helper/type";
+import { Metadata } from "next";
+import dynamic from "next/dynamic";
+
+const ProfileItem = dynamic(() => import("./ProfileItem"), { ssr: false });
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
+
+export async function generateMetadata({ params }: any): Promise<Metadata> {
+  const user = await prisma?.user?.findUnique({ where: { name: params.name } });
+  return {
+    title: `${user?.displayName || user?.name}'s Profile`,
+    description:
+      user?.biography === null
+        ? `${user?.displayName || user?.name}'s page`
+        : user?.biography,
+  };
+}
 
 const ProfilePage = async ({ params }: { params: { name: string } }) => {
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
@@ -17,22 +34,19 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
       userId: user?.id,
     },
   });
-
   const formattedLists = lists.map((list) => ({
     ...list,
     tvId: list.tvId.flat(),
     movieId: list.movieId.flat(),
   }));
-
-  const tvid = formattedLists?.map((item: any) => item?.tvId);
-  const movieId = formattedLists?.map((item: any) => item?.movieId);
-
   const watchlist = await prisma?.watchlist?.findMany({
     where: { userId: user?.id },
     orderBy: { createdAt: "asc" },
   });
 
-  const tv_id = watchlist?.map((id: any) => id?.movieId).flat(); // Flatten the array of arrays
+  const tvid = formattedLists?.map((item: any) => item?.tvId);
+  const tv_id = watchlist?.map((id: any) => id?.tvId).flat(); // Flatten the array of arrays
+  const movie_id = watchlist?.map((id: any) => id?.movieId).flat(); // Flatten the array of arrays
   const existedFavorite = watchlist
     ?.map((id: any) => id?.favoriteIds?.map((item: any) => item?.id))
     ?.flat(); // Flatten the array of arrays
@@ -50,17 +64,9 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
 
   const friends = await prisma?.friend?.findMany({
     where: {
-      OR: [
-        { friendRequestId: currentUser?.id },
-        { friendRespondId: currentUser?.id },
-      ],
+      OR: [{ friendRequestId: user?.id }, { friendRespondId: user?.id }],
     },
   });
-
-  const yourFriend = users?.filter((user: any) =>
-    friends?.map((friend: any) => friend?.friendRespondId).includes(user?.id)
-  );
-
   const getDrama = await prisma.drama.findMany({});
   const getReview = await prisma.tvReview.findMany({
     where: { userId: user?.id },
@@ -78,26 +84,25 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
   return (
     <main className="overflow-hidden">
       <div className="relative">
-        <CoverPhoto user={user} users={users} currentUser={currentUser} />
         <div className="my-10">
-          <ProfileItem
-            user={user}
-            users={users}
-            currentUser={currentUser}
-            tv_id={tv_id as any}
-            existedFavorite={existedFavorite}
-            list={formattedLists}
-            movieId={movieId}
-            tvid={tvid}
-            formattedDate={formattedDate}
-            lastLogin={lastLogin}
-            findFriendId={findFriendId}
-            friend={friends}
-            yourFriend={yourFriend}
-            findSpecificUser={[]}
-            getDrama={getDrama as any}
-            getReview={formattedReviews}
-          />
+          <Suspense key={params?.name} fallback={<SearchLoading />}>
+            <ProfileItem
+              user={user as any}
+              users={users}
+              currentUser={currentUser}
+              tv_id={tv_id as any}
+              movieId={movie_id as any}
+              existedFavorite={existedFavorite}
+              list={formattedLists}
+              tvid={tvid}
+              formattedDate={formattedDate}
+              lastLogin={lastLogin}
+              findFriendId={findFriendId}
+              friend={friends}
+              getDrama={getDrama as any}
+              getReview={formattedReviews}
+            />
+          </Suspense>
         </div>
       </div>
     </main>

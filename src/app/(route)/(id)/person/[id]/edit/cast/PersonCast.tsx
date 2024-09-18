@@ -7,7 +7,6 @@ import {
   fetchPersonCombinedCredits,
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
-import DeleteButton from "@/app/component/ui/Button/DeleteButton";
 import { castRole, personTVShowRole } from "@/helper/item-list";
 import { CastType } from "@/helper/type";
 import { CreatePersonDetails, TCreatePersonDetails } from "@/helper/zod";
@@ -28,7 +27,16 @@ import { useDebouncedCallback } from "use-debounce";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import { GrPowerReset } from "react-icons/gr";
 import { PersonEditList } from "../details/PersonEditList";
-import DramaRegion from "@/app/(route)/lists/[listId]/edit/DramaRegion";
+import dynamic from "next/dynamic";
+
+const DeleteButton = dynamic(
+  () => import("@/app/component/ui/Button/DeleteButton"),
+  { ssr: false }
+);
+const DramaRegion = dynamic(
+  () => import("@/app/(route)/lists/[listId]/edit/DramaRegion"),
+  { ssr: false }
+);
 
 const determineRole = (cast: any, totalEpisodes: number) => {
   const guestRoleThreshold = 0.8; // 80%
@@ -716,7 +724,7 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                                 setDeleteIndex={setDeleteIndex}
                                 item={item}
                                 storedData={storedData}
-                                setStoredData={setStoredData}
+                                setStoredData={setStoredData as any}
                                 markedForDeletion={markedForDeletion}
                                 setMarkedForDeletion={setMarkedForDeletion}
                               />

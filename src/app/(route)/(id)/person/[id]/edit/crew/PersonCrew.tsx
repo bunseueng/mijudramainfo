@@ -8,15 +8,9 @@ import {
   fetchPersonSearch,
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
-import DeleteButton from "@/app/component/ui/Button/DeleteButton";
-import { crewRole, personCrewJob } from "@/helper/item-list";
-import { CrewType, Drama, tvId } from "@/helper/type";
-import {
-  createDetails,
-  CreatePersonDetails,
-  TCreateDetails,
-  TCreatePersonDetails,
-} from "@/helper/zod";
+import { personCrewJob } from "@/helper/item-list";
+import { CrewType } from "@/helper/type";
+import { CreatePersonDetails, TCreatePersonDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
@@ -34,7 +28,16 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { useDebouncedCallback } from "use-debounce";
 import { PersonEditList } from "../details/PersonEditList";
-import DramaRegion from "@/app/(route)/lists/[listId]/edit/DramaRegion";
+import dynamic from "next/dynamic";
+
+const DeleteButton = dynamic(
+  () => import("@/app/component/ui/Button/DeleteButton"),
+  { ssr: false }
+);
+const DramaRegion = dynamic(
+  () => import("@/app/(route)/lists/[listId]/edit/DramaRegion"),
+  { ssr: false }
+);
 
 const PersonCrew: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   const { data: person, isLoading } = useQuery({
@@ -497,7 +500,7 @@ const PersonCrew: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                           <DeleteButton
                             item={item}
                             storedData={storedData}
-                            setStoredData={setStoredData}
+                            setStoredData={setStoredData as any}
                             setOpen={setOpen}
                             open={open}
                             handleRemoveItem={handleRemoveItem}

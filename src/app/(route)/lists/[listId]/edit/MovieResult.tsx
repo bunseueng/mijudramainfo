@@ -9,9 +9,15 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { fetchMovie, fetchTv } from "@/app/actions/fetchMovieApi";
 import ClipLoader from "react-spinners/ClipLoader";
-import DramaListRating from "./DramaListRating";
-import CommentModal from "@/app/component/ui/Modal/CommentModal";
 import { MovieResultProps } from "@/helper/type";
+import dynamic from "next/dynamic";
+const DramaListRating = dynamic(() => import("./DramaListRating"), {
+  ssr: false,
+});
+const CommentModal = dynamic(
+  () => import("@/app/component/ui/Modal/CommentModal"),
+  { ssr: false }
+);
 
 const MovieResult: React.FC<MovieResultProps> = ({
   setMovieId,

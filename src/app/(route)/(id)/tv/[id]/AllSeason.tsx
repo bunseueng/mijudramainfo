@@ -1,7 +1,10 @@
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import React from "react";
 import { FaCalendarDays } from "react-icons/fa6";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const AllSeason = ({
   displaySeason,
@@ -23,8 +26,8 @@ const AllSeason = ({
             }`}
             className="w-full md:w-[20%] cursor-pointer"
           >
-            <Image
-              src={`https://image.tmdb.org/t/p/original/${
+            <LazyImage
+              src={`https://image.tmdb.org/t/p/w500/${
                 displaySeason?.poster_path ||
                 displaySeason?.backdrop_path ||
                 firstSeason?.poster_path ||
@@ -32,10 +35,18 @@ const AllSeason = ({
                 tv?.poster_path ||
                 tv?.backdrop_path
               }`}
-              alt="Drama image"
+              alt={`${
+                displaySeason?.name ||
+                displaySeason?.title ||
+                firstSeason?.name ||
+                firstSeason?.title ||
+                tv?.name ||
+                tv?.title
+              }' Poster`}
               width={500}
               height={300}
               quality={100}
+              priority
               className="block align-middle w-full h-auto rounded-lg"
             />
           </Link>

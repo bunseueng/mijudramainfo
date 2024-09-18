@@ -1,4 +1,5 @@
-import CommentCard from "./CommentCard";
+import dynamic from "next/dynamic";
+const CommentCard = dynamic(() => import("./CommentCard"), { ssr: false });
 
 const NestedComment = ({
   comments,
@@ -44,6 +45,7 @@ const NestedComment = ({
               </div>
             </div>
             <CommentCard
+              tv_id={tv_id}
               comment={comment}
               onReply={(commentId: string) =>
                 handleReply(commentId, comment.id)
@@ -61,7 +63,6 @@ const NestedComment = ({
               replyText={replyText}
               setReplyText={setReplyText}
               handleLove={() => handleLove(comment.id, comment.id)}
-              tv_id={tv_id}
               loadingLove={loadingLove[comment.id] || false}
               setLoadingLove={setLoadingLove}
               handleDelete={() => handleDelete(comment.id, comment.id)}
@@ -74,6 +75,7 @@ const NestedComment = ({
               session={session}
             />
             <NestedComment
+              tv_id={tv_id}
               comments={comments}
               parentId={comment.id}
               users={users}

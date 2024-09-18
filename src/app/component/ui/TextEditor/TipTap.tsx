@@ -56,7 +56,7 @@ const Tiptap = ({
   });
 
   return (
-    <div className="w-full md:w-[70%] rounded-md mt-3 md:mt-0 md:ml-5 py-3 ">
+    <div className="w-full rounded-md mt-3 md:mt-0 py-3">
       <Toolbar editor={editor} content={description} />
       <EditorContent style={{ whiteSpace: "pre-line" }} editor={editor} />
     </div>

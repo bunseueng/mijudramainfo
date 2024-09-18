@@ -228,36 +228,6 @@ export const genreCheckbox2 = [
   },
 ];
 
-export const networkCheckbox = [
-  {
-    id: "1419",
-    value: "Youku",
-  },
-  {
-    id: "1330",
-    value: "iQIYI",
-  },
-  {
-    id: "2007",
-    value: "WeTV",
-  },
-  {
-    id: "1631",
-    value: "Mango TV",
-  },
-];
-
-export const networkCheckbox2 = [
-  {
-    id: "989",
-    value: "Zhejiang Television",
-  },
-  {
-    id: "1056",
-    value: "Dragon TV",
-  },
-];
-
 export const starLabels = [
   {
     value: 1,
@@ -3715,7 +3685,7 @@ export const production_country = [
   },
 ];
 
-export const china_network = [
+const china_network = [
   {
     value: "Anhui TV",
   },
@@ -3796,7 +3766,7 @@ export const china_network = [
   },
 ];
 
-export const hk_network = [
+const hk_network = [
   {
     value: "ZJTV",
   },
@@ -3820,7 +3790,7 @@ export const hk_network = [
   },
 ];
 
-export const jp_network = [
+const jp_network = [
   {
     value: "ABC",
   },
@@ -3933,7 +3903,7 @@ export const jp_network = [
   { value: "YTV" },
 ];
 
-export const ph_network = [
+const ph_network = [
   { value: "A2Z" },
   { value: "ABS-CBN" },
   { value: "GMA" },
@@ -3942,7 +3912,7 @@ export const ph_network = [
   { value: "TV5" },
 ];
 
-export const korea_network = [
+const korea_network = [
   { value: "CGV" },
   { value: "Channel A" },
   { value: "Comedy TV" },
@@ -3986,7 +3956,7 @@ export const korea_network = [
   { value: "XtvN" },
 ];
 
-export const tw_network = [
+const tw_network = [
   { value: "Anhui" },
   { value: "BOBA" },
   { value: "CHOCO TV" },
@@ -4009,7 +3979,7 @@ export const tw_network = [
   { value: "Vidol" },
 ];
 
-export const th_network = [
+const th_network = [
   { value: "AIS Play" },
   { value: "ALTV" },
   { value: "Amarin TV 34 HD" },
@@ -4033,7 +4003,7 @@ export const th_network = [
   { value: "Workpoint TV" },
 ];
 
-export const other_network = [
+const other_network = [
   { value: "Disney+" },
   { value: "Hulu" },
   { value: "Kocowa" },
@@ -4429,23 +4399,6 @@ export const person_gender = [
   {
     value: "Female",
   },
-];
-
-export const person_id_link = [
-  { network: "facebook", link: "https://www.facebook.com/" },
-  { network: "instagram", link: "https://www.instagram.com/" },
-  { network: "tiktok", link: "https://www.tiktok.com/@" },
-  { network: "douyin", link: "https://www.douyin.com/user/" },
-  { network: "twitter", link: "https://x.com/" },
-  {
-    network: "weibo",
-    link: "https://m.weibo.cn/u/3669102477?t=0&luicode=10000011&lfid=",
-  },
-  { network: "youtube", link: "https://www.youtube.com/" },
-  { network: "imdb", link: "https://www.imdb.com/name/" },
-  { network: "wikidata", link: "https://www.wikidata.org/wiki/" },
-  { network: "trakt", link: "https://trakt.tv/shows/" },
-  { network: "mydramalist", link: "https://mydramalist.com/people/" },
 ];
 
 export const reviewLanguage = [

@@ -3,7 +3,6 @@
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
 import ColorThief from "colorthief";
-import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { currentUserProps } from "@/helper/type";
 import Rating from "@mui/material/Rating";
@@ -21,7 +20,10 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-
+import dynamic from "next/dynamic";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 type RatingCategory = "story" | "acting" | "music" | "rewatchValue" | "overall";
 
 interface WriteReview {
@@ -206,15 +208,16 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
       >
         <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
           <div className="flex items-center lg:items-start">
-            <Image
+            <LazyImage
               ref={imgRef}
               src={`https://image.tmdb.org/t/p/original/${
                 tv?.poster_path || tv?.backdrops_path
               }`}
-              alt="drama image"
+              alt={`${tv?.name || tv?.title}'s Poster`}
               width={200}
               height={200}
               quality={100}
+              priority
               className="w-[80px] h-[90px] bg-center bg-cover object-cover rounded-md"
             />
             <div className="flex flex-col pl-5 py-3">

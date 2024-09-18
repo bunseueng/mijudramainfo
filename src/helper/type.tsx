@@ -81,7 +81,7 @@ export interface UserProps {
   updatedAt: Date;
 }
 
-export interface IUser {
+interface IUser {
   user: UserProps | null;
 }
 
@@ -309,24 +309,24 @@ export interface DramaDB {
   updatedAt: Date;
 }
 
-export interface MovieDB {
-  id: string;
-  userId: string;
-  details: Prisma.JsonValue[];
-  cover: string | null;
-  related_title: Prisma.JsonValue[];
-  cast: Prisma.JsonValue[];
-  crew: Prisma.JsonValue[];
-  services: Prisma.JsonValue[];
-  external_links: Prisma.JsonValue[];
-  released_information: Prisma.JsonValue[];
-  production_information: Prisma.JsonValue[];
-  genres_tags: Prisma.JsonValue[];
-  changes: Prisma.JsonValue[];
-  changeCount: Number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// export interface MovieDB {
+//   id: string;
+//   userId: string;
+//   details: Prisma.JsonValue[];
+//   cover: string | null;
+//   related_title: Prisma.JsonValue[];
+//   cast: Prisma.JsonValue[];
+//   crew: Prisma.JsonValue[];
+//   services: Prisma.JsonValue[];
+//   external_links: Prisma.JsonValue[];
+//   released_information: Prisma.JsonValue[];
+//   production_information: Prisma.JsonValue[];
+//   genres_tags: Prisma.JsonValue[];
+//   changes: Prisma.JsonValue[];
+//   changeCount: Number;
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
 
 export interface DramaDetails {
   title: string;
@@ -554,7 +554,7 @@ export interface PersonType {
   poster_path: string | null;
 }
 
-export type PersonPopularity = {
+type PersonPopularity = {
   itemId: string;
   starCount: number;
   actorName: string;

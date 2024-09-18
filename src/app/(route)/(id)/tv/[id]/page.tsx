@@ -1,11 +1,15 @@
 import { Suspense } from "react";
-import DramaMain from "./DramaMain";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
-import TvList from "./TvList";
 import { Metadata } from "next";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
+import dynamic from "next/dynamic";
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
+const TvList = dynamic(() => import("./TvList"), { ssr: false });
+const DramaMain = dynamic(() => import("./DramaMain"), { ssr: false });
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const tv_id = params.id;
@@ -53,7 +57,7 @@ export default async function tvPage({ params }: { params: { id: string } }) {
   const lists = await prisma.dramaList.findMany({});
 
   const existedWatchlist = watchlist.find((item: any) =>
-    item.movieId.some((movie: any) => movie.id === parseInt(tv_id))
+    item.tvId.some((tv: any) => tv.id === parseInt(tv_id))
   );
 
   const existedFavorite = watchlist.find((item: any) =>

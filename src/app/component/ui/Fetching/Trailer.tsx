@@ -5,11 +5,14 @@ import { fetchTrending, fetchVideos } from "@/app/actions/fetchMovieApi";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useQuery } from "@tanstack/react-query";
 import { FaPlay } from "react-icons/fa";
+import Image from "next/image";
 
 const Trailer = ({ heading }: any) => {
   const { data: trending } = useQuery({
     queryKey: ["trending"],
     queryFn: fetchTrending,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: trendingVideos, isLoading } = useQuery({
@@ -55,7 +58,7 @@ const Trailer = ({ heading }: any) => {
   }
 
   return (
-    <section>
+    <div>
       <div className="relative mt-10 mx-4 md:mx-6">
         {trendingWithVideos?.map((result: any, idx: any) => (
           <div
@@ -64,18 +67,14 @@ const Trailer = ({ heading }: any) => {
             style={
               hoveredImageId === result.id
                 ? {
-                    backgroundImage: `url(https://image.tmdb.org/t/p/original/${
-                      result?.backdrop_path ||
-                      result?.poster_path ||
-                      result?.profile_path
+                    backgroundImage: `url(https://image.tmdb.org/t/p/w780/${
+                      result?.backdrop_path || result?.poster_path
                     })`,
                   }
                 : !hoveredImageId
                 ? {
-                    backgroundImage: `url(https://image.tmdb.org/t/p/original/${
-                      result?.backdrop_path ||
-                      result?.poster_path ||
-                      result?.profile_path
+                    backgroundImage: `url(https://image.tmdb.org/t/p/w780/${
+                      result?.backdrop_path || result?.poster_path
                     })`,
                   }
                 : undefined
@@ -83,13 +82,13 @@ const Trailer = ({ heading }: any) => {
           >
             <div className="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-fixed bg-gradient-to-r from-[rgba(3,37,65,0.25)] via-[rgba(3,37,65,0.20)] to-[rgba(3,37,65,0.25)] bg-opacity-75">
               <div className="">
-                <h1 className="text-3xl text-white font-bold p-4">{heading}</h1>
+                <h1 className="text-xl text-white font-bold p-4">{heading}</h1>
               </div>
             </div>
           </div>
         ))}
         <div className="relative top-0 left-0 mt-5 overflow-hidden">
-          <div className="flex items-center w-full h-[250px] overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4 mt-16 mb-5">
+          <div className="flex items-center w-full h-[250px] overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4 mt-5 mb-5">
             {trendingWithVideos?.map((result: any, index: any) => {
               // Find the corresponding video for this trending item
               const correspondingVideo = trendingVideos?.find(
@@ -97,21 +96,28 @@ const Trailer = ({ heading }: any) => {
               );
 
               return (
-                <div className="w-[300px] h-[200px] mx-3" key={index}>
-                  <div className="w-[300px] h-[200px] bg-cover">
-                    <div className="flex flex-col gap-6 group relative shadow-lg text-white rounded-xl px-6 py-8 h-[180px] w-[300px] overflow-hidden cursor-pointer">
+                <div className="w-[300px] h-[150px] mx-3" key={index}>
+                  <div className="w-[300px] h-[150px] bg-cover relative">
+                    <div className="flex flex-col gap-6 group relative shadow-lg text-white rounded-xl px-6 py-8 h-[150px] w-[300px] overflow-hidden cursor-pointer">
                       <div
                         onMouseEnter={() => handleImageHover(result.id)}
                         onMouseLeave={() => handleImageHover(null)}
                         className="absolute inset-0 bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url(https://image.tmdb.org/t/p/original/${
-                            result.backdrop_path ||
-                            result.poster_path ||
-                            result.profile_path
-                          })`,
-                        }}
-                      />
+                      >
+                        <Image
+                          src={`https://image.tmdb.org/t/p/w500/${
+                            result.poster_path || result.backdrop_path
+                          }`}
+                          alt={result.title || result.name}
+                          fill
+                          style={{
+                            objectFit: "cover",
+                            objectPosition: "center",
+                          }}
+                          priority
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      </div>
                       {/* Show play button only if corresponding video exists */}
                       <div className="absolute left-[130px] top-[65px] text-white">
                         {correspondingVideo?.results?.length > 0 ? (
@@ -144,38 +150,34 @@ const Trailer = ({ heading }: any) => {
         vid?.results?.map((result: any, videoIndex: number) => (
           <div key={videoIndex}>
             {clickedVideoId === vid.id && !closeVideo && (
-              <div className=" overflow-hidden">
-                <div className="relative">
+              <div className="fixed top-0 left-0 right-0 bottom-0 z-50">
+                <div
+                  className={`w-[95%] h-[50%] lg:h-[80%] m-auto ${
+                    closeVideo ? "hidden" : "block"
+                  }`}
+                >
+                  <iframe
+                    src={`https://www.youtube.com/embed/${result.key}`}
+                    className={`w-full h-full ${
+                      closeVideo ? "hidden" : "block"
+                    }`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
                   <div
-                    className={`fixed top-0 left-0 right-0 bottom-0 max-w-6xl m-auto w-[95%] h-[50%] lg:h-[80%] ${
-                      closeVideo ? "z-0 hidden" : "z-50"
+                    className={`bg-black w-full h-14 absolute -top-12 left-0 right-0 bottom-0 z-9 border-t-black rounded-t-md ${
+                      closeVideo ? "hidden" : "block"
                     }`}
                   >
-                    <iframe
-                      src={`https://www.youtube.com/embed/${result.key}`}
-                      className={`w-full h-full ${
-                        closeVideo ? "hidden" : "block"
-                      }`}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    ></iframe>
-                    <div
-                      className={`bg-black w-full h-14 absolute -top-12 left-0 right-0 bottom-0 z-9 border-t-black rounded-t-md ${
-                        closeVideo ? "hidden" : "block"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between p-4">
-                        <h1 className="text-white">Official Trailer</h1>
-                        <p
-                          className="text-white cursor-pointer"
-                          onClick={() => {
-                            setCloseVideo(!closeVideo);
-                          }}
-                        >
-                          <IoMdCloseCircle size={25} />
-                        </p>
-                      </div>
+                    <div className="flex items-center justify-between p-4">
+                      <h1 className="text-white">Official Trailer</h1>
+                      <p
+                        className="text-white cursor-pointer"
+                        onClick={() => setCloseVideo(!closeVideo)}
+                      >
+                        <IoMdCloseCircle size={25} />
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -184,7 +186,7 @@ const Trailer = ({ heading }: any) => {
           </div>
         ))
       )}
-    </section>
+    </div>
   );
 };
 

@@ -166,6 +166,7 @@ const ResetPassword = ({ params }: { params: { email: string } }) => {
 
         <div className="flex items-center justify-between">
           <button
+            name="Submit"
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
             disabled={isLoading}
@@ -173,6 +174,7 @@ const ResetPassword = ({ params }: { params: { email: string } }) => {
             {isLoading ? "Processing..." : "Change Password"}
           </button>
           <Link
+            prefetch={true}
             href="/sign-in"
             className="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer text-end"
           >

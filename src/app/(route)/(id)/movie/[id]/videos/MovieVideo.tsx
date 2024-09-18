@@ -11,13 +11,28 @@ import { VscQuestion } from "react-icons/vsc";
 import { movieVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
 import { DramaDB } from "@/helper/type";
-import MovieTrailers from "./trailers/MovieTrailers";
-import MovieTeasers from "./teasers/MovieTeasers";
-import MovieClips from "./clips/Clips";
-import MovieBehindTheScenes from "./behind_the_scenes/BehindTheScenes";
-import MovieBloopers from "./bloopers/Bloopers";
-import MovieFeaturettes from "./featurettes/Featurettes";
 import { getYearFromDate } from "../MovieMain";
+import dynamic from "next/dynamic";
+const MovieTrailers = dynamic(() => import("./trailers/MovieTrailers"), {
+  ssr: false,
+});
+const MovieTeasers = dynamic(() => import("./teasers/MovieTeasers"), {
+  ssr: false,
+});
+const MovieClips = dynamic(() => import("./clips/Clips"), { ssr: false });
+const MovieBehindTheScenes = dynamic(
+  () => import("./behind_the_scenes/BehindTheScenes"),
+  { ssr: false }
+);
+const MovieBloopers = dynamic(() => import("./bloopers/Bloopers"), {
+  ssr: false,
+});
+const MovieFeaturettes = dynamic(() => import("./featurettes/Featurettes"), {
+  ssr: false,
+});
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 interface TvTrailerType {
   movie_id: string;
@@ -93,21 +108,22 @@ const MovieVideo: React.FC<TvTrailerType> = ({ movie_id, movieDB }) => {
         <div className="max-w-6xl mx-auto flex items-center mt-0 px-2 py-2">
           <div className="flex items-center lg:items-start px-2 cursor-default">
             {movie?.poster_path || movie?.backdrop_path !== null ? (
-              <Image
+              <LazyImage
                 ref={imgRef} // Set the reference to the image
-                src={`https://image.tmdb.org/t/p/original/${
-                  movie?.poster_path || movie?.backdrop_path
-                }`}
+                src={`https://image.tmdb.org/t/p/${
+                  movie?.poster_path ? "w154" : "w300"
+                }/${movie?.poster_path || movie?.backdrop_path}`}
                 alt={`${movie?.name || movie?.title}'s Poster`}
-                width={200}
-                height={200}
+                width={60}
+                height={90}
                 quality={100}
+                priority
                 className="w-[60px] h-[90px] bg-center object-center rounded-md"
                 onLoad={extractColor} // Call extractColor on image load
               />
             ) : (
               <Image
-                src="/empty-img.jpg"
+                src="/placeholder-image.avif"
                 alt={`${movie?.name || movie?.title}'s Poster`}
                 width={200}
                 height={200}
@@ -121,6 +137,7 @@ const MovieVideo: React.FC<TvTrailerType> = ({ movie_id, movieDB }) => {
                 {getYearFromDate(movie?.first_air_date || movie?.release_date)})
               </h1>
               <Link
+                prefetch={true}
                 href={`/movie/${movie_id}`}
                 className="flex items-center text-sm my-1 opacity-75 hover:opacity-90"
               >
@@ -153,6 +170,7 @@ const MovieVideo: React.FC<TvTrailerType> = ({ movie_id, movieDB }) => {
                 }`}
               >
                 <Link
+                  prefetch={true}
                   href={`/movie/${movie?.id}/videos${item?.link}`}
                   className="text-md"
                   shallow

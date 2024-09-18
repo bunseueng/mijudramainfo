@@ -7,17 +7,28 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { VscQuestion } from "react-icons/vsc";
-import TvDetails from "./TvDetails";
 import { useRouter, usePathname } from "next/navigation";
-import TvCover from "../cover/TvCover";
-import RelatedTitle from "../related/RelatedTitle";
-import TvCast from "../cast/TvCast";
-import TvCrew from "../crew/TvCrew";
-import TvServices from "../services/TvServices";
-import ReleaseInfo from "../release/ReleaseInfo";
-import Production from "../production/Production";
-import Genres from "../genres/Genres";
-import ExternalLink from "../external_link/ExternalLink";
+import dynamic from "next/dynamic";
+const TvDetails = dynamic(() => import("./TvDetails"), { ssr: false });
+const TvCover = dynamic(() => import("../cover/TvCover"), { ssr: false });
+const TvCast = dynamic(() => import("../cast/TvCast"), { ssr: false });
+const TvCrew = dynamic(() => import("../crew/TvCrew"), { ssr: false });
+const RelatedTitle = dynamic(() => import("../related/RelatedTitle"), {
+  ssr: false,
+});
+const TvServices = dynamic(() => import("../services/TvServices"), {
+  ssr: false,
+});
+const ReleaseInfo = dynamic(() => import("../release/ReleaseInfo"), {
+  ssr: false,
+});
+const Production = dynamic(() => import("../production/Production"), {
+  ssr: false,
+});
+const Genres = dynamic(() => import("../genres/Genres"), { ssr: false });
+const ExternalLink = dynamic(() => import("../external_link/ExternalLink"), {
+  ssr: false,
+});
 
 const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [currentPage, setCurrentPage] = useState("/detail");
@@ -51,7 +62,9 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <div className="w-full relative h-auto float-right bg-white dark:bg-[#242526] border-2 border-slate-200 dark:border-[#232426] shadow-sm rounded-b-md">
         <div className="px-3 mb-2">
           <h1 className="text-2xl font-semibold pt-3 mb-2">
-            <Link href={`/tv/${tv?.id}`}>{tv?.title || tv?.name}</Link>
+            <Link prefetch={true} href={`/tv/${tv?.id}`}>
+              {tv?.title || tv?.name}
+            </Link>
           </h1>
         </div>
         <div className="relative float-left w-full md:w-[25%] py-3 px-4">
@@ -72,6 +85,7 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 }`}
               >
                 <Link
+                  prefetch={true}
                   href={`/tv/${tv?.id}/edit/${item?.link}`}
                   className="text-md"
                   shallow

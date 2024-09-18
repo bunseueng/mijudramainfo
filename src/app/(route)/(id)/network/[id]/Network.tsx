@@ -1,6 +1,5 @@
 "use client";
 
-import PlayTrailer from "@/app/(route)/(drama)/drama/top/PlayTrailer";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import { fetchTvByNetwork, fetchTvNetworks } from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
@@ -19,6 +18,14 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { BiSort } from "react-icons/bi";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
+import dynamic from "next/dynamic";
+const PlayTrailer = dynamic(
+  () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
+  { ssr: false }
+);
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 interface Network {
   network_id: string;
@@ -166,13 +173,14 @@ const Network: React.FC<Network> = ({ network_id }) => {
       >
         <div className="max-w-[1520px] mx-auto py-4 px-4 md:px-6">
           <div className="w-full">
-            <Image
+            <LazyImage
               ref={imgRef}
-              src={`https://image.tmdb.org/t/p/original/${networksDetail?.logo_path}`}
-              alt="drama image"
-              width={200}
+              src={`https://image.tmdb.org/t/p/w300/${networksDetail?.logo_path}`}
+              alt={`${networksDetail?.name}'s Logo`}
+              width={300}
               height={200}
               quality={100}
+              priority
               className="w-[300px] bg-center bg-cover object-cover rounded-md"
             />
           </div>
@@ -196,7 +204,9 @@ const Network: React.FC<Network> = ({ network_id }) => {
                 </li>
                 <li className="flex items-center px-2">
                   <RxLink1 className="mr-1" />{" "}
-                  <Link href={`${networksDetail?.homepage}`}>Homepage</Link>
+                  <Link prefetch={true} href={`${networksDetail?.homepage}`}>
+                    Homepage
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -221,11 +231,11 @@ const Network: React.FC<Network> = ({ network_id }) => {
                     <div className="relative">
                       <Link href={`/tv/${drama?.id}`}>
                         {drama?.poster_path || drama?.backdrop_path !== null ? (
-                          <Image
-                            src={`https://image.tmdb.org/t/p/original/${
-                              drama.poster_path || drama.backdrop_path
-                            }`}
-                            alt={drama?.name || drama?.title}
+                          <LazyImage
+                            src={`https://image.tmdb.org/t/p/${
+                              drama?.poster_path ? "w154" : "w300"
+                            }/${drama.poster_path || drama.backdrop_path}`}
+                            alt={`${drama?.name || drama?.title}'s Poster`}
                             width={200}
                             height={200}
                             style={{ width: "100%", height: "100%" }}
@@ -234,7 +244,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
                           />
                         ) : (
                           <Image
-                            src="/empty-img.jpg"
+                            src="/placeholder-image.avif"
                             alt={drama?.name || drama?.title}
                             width={200}
                             height={200}
@@ -249,6 +259,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
                   <div className="pl-2 md:pl-3 w-[80%]">
                     <div className="flex items-center justify-between">
                       <Link
+                        prefetch={true}
                         href={`/tv/${drama?.id}`}
                         className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
                       >

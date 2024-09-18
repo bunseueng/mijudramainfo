@@ -1,7 +1,6 @@
 "use client";
 
 import { fetchImages, fetchTv } from "@/app/actions/fetchMovieApi";
-import PhotoLoading from "@/app/component/ui/Loading/PhotoLoading";
 import { PaginationBtn } from "@/app/component/ui/Pagination/PaginationBtn";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -11,6 +10,14 @@ import { FaArrowLeft } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
+import dynamic from "next/dynamic";
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const PhotoAlbum = () => {
   const searchParams = useSearchParams();
@@ -35,10 +42,6 @@ const PhotoAlbum = () => {
   const combinedItems = currentPosters
     ?.concat(currentBackdrops)
     ?.reduce((acc: any, val: any) => acc.concat(val), []);
-
-  // If there are fewer items than expected per page,
-  // display all available items
-
   const per_page = searchParams?.get("per_page") || (20 as any);
   const start = (Number(page) - 1) * Number(per_page);
   const end = start + Number(per_page);
@@ -66,9 +69,8 @@ const PhotoAlbum = () => {
   }, [getTv]);
 
   if (isLoading) {
-    return <PhotoLoading />;
+    return <SearchLoading />;
   }
-
   return (
     <div>
       <div
@@ -77,15 +79,16 @@ const PhotoAlbum = () => {
       >
         <div className="max-w-6xl mx-auto flex items-center mt-0 px-4 py-2">
           <div className="flex items-center lg:items-start px-2 cursor-default">
-            <Image
+            <LazyImage
               ref={imgRef} // Set the reference to the image
-              src={`https://image.tmdb.org/t/p/original/${
-                getTv?.poster_path || getTv?.backdrop_path
-              }`}
+              src={`https://image.tmdb.org/t/p/${
+                getTv?.poster_path ? "w154" : "w300"
+              }/${getTv?.poster_path || getTv?.backdrop_path}`}
               alt={`${getTv?.name || getTv?.title}'s Poster`}
-              width={200}
-              height={200}
+              width={60}
+              height={90}
               quality={100}
+              priority
               className="w-[60px] h-[90px] bg-center object-center rounded-md"
             />
             <div className="flex flex-col pl-5 py-2">
@@ -94,6 +97,7 @@ const PhotoAlbum = () => {
                 {getYearFromDate(getTv?.first_air_date || getTv?.release_date)})
               </h1>
               <Link
+                prefetch={true}
                 href={`/tv/${tv_id}`}
                 className="flex items-center text-sm my-1 opacity-75 hover:opacity-90"
               >
@@ -113,11 +117,13 @@ const PhotoAlbum = () => {
             {currentItems.map((img: any, idx: number) => (
               <div className="m-2 h-full" key={idx}>
                 <div className="w-full h-full">
-                  <Image
+                  <LazyImage
                     src={`https://image.tmdb.org/t/p/original/${img?.file_path}`}
-                    alt="tvshow image"
+                    alt={`${getTv?.name || getTv?.title}'s Poster/Backdrop`}
                     width={300}
                     height={300}
+                    quality={100}
+                    priority
                     className="w-full h-auto"
                   />
                 </div>

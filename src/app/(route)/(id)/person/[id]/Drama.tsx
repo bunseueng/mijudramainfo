@@ -1,7 +1,10 @@
 "use client";
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const Drama = ({ data, heading }: any) => {
   const filteredCast = data?.cast?.filter(
@@ -21,7 +24,6 @@ const Drama = ({ data, heading }: any) => {
     );
   }
 
-  console.log(filteredCast);
   return (
     <div className="relative top-0 left-0 mt-5 overflow-hidden">
       <h1 className="text-3xl font-bold my-5">{heading}</h1>
@@ -30,30 +32,21 @@ const Drama = ({ data, heading }: any) => {
           <div className="w-[200px] h-[280px] mr-8" key={index}>
             <div className="w-[200px] h-[280px] bg-cover">
               <Link
+                rel="preload"
                 href={`/tv/${item?.id}`}
                 className="block hover:relative transform duration-100 group"
               >
-                {item?.poster_path || item?.backdrop_path !== null ? (
-                  <Image
-                    src={`https://image.tmdb.org/t/p/original/${
-                      item?.poster_path || item?.backdrop_path
-                    }`}
-                    alt="tv image"
-                    width={600}
-                    height={600}
-                    quality={100}
-                    className="rounded-xl w-[200px] h-[250px] object-cover"
-                  />
-                ) : (
-                  <Image
-                    src="/empty-img.jpg"
-                    alt="tv image"
-                    width={600}
-                    height={600}
-                    quality={100}
-                    className="rounded-xl w-[200px] h-[250px] object-cover"
-                  />
-                )}
+                <LazyImage
+                  src={`https://image.tmdb.org/t/p/w500/${
+                    item?.poster_path || item?.backdrop_path
+                  }`}
+                  alt={`${item?.poster_path}'s Poster`}
+                  width={200}
+                  height={250}
+                  quality={100}
+                  priority
+                  className="rounded-xl w-[200px] h-[250px] object-cover"
+                />
               </Link>
               <div className="flex items-center justify-between">
                 <p className="truncate">{item?.name || item?.title}</p>

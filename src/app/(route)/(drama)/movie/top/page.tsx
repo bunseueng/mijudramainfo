@@ -1,8 +1,11 @@
 import React, { Suspense } from "react";
-import TopDrama from "./TopDrama";
 import { Metadata } from "next";
-import ExploreLoading from "@/app/component/ui/Loading/ExploreLoading";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import dynamic from "next/dynamic";
+const TopDrama = dynamic(() => import("./TopDrama"), { ssr: false });
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   title: "Top Rated Movie",

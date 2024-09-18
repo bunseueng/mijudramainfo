@@ -1,9 +1,7 @@
 "use client";
 
-import { fetchTv, fetchTvWatchProvider } from "@/app/actions/fetchMovieApi";
+import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { getNetworkLogo } from "@/app/actions/getNetworkLogo";
-import TvAddModal from "@/app/component/ui/Modal/TvAddModal";
-import TvEditModal from "@/app/component/ui/Modal/TvEditModal";
 import {
   Drama,
   EditDramaPage,
@@ -14,6 +12,7 @@ import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder } from "framer-motion";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -22,6 +21,14 @@ import { CiEdit } from "react-icons/ci";
 import { GrPowerReset } from "react-icons/gr";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
+const TvAddModal = dynamic(
+  () => import("@/app/component/ui/Modal/TvAddModal"),
+  { ssr: false }
+);
+const TvEditModal = dynamic(
+  () => import("@/app/component/ui/Modal/TvEditModal"),
+  { ssr: false }
+);
 
 const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv, refetch } = useQuery({
@@ -248,7 +255,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           )?.name
                         ]
                       : `/channel${show?.service_logo}`) ||
-                    `https://image.tmdb.org/t/p/original/${show?.logo_path}`;
+                    `https://image.tmdb.org/t/p/w154/${show?.logo_path}`;
                 const tencent = show?.homepage;
                 return (
                   <Reorder.Item
@@ -270,8 +277,8 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           alt={
                             show?.service_name ? show?.service_name : show?.name
                           }
-                          width={200}
-                          height={200}
+                          width={40}
+                          height={40}
                           quality={100}
                           priority
                           className="w-10 h-10 bg-cover bg-center object-cover rounded-full pointer-events-none"
@@ -453,6 +460,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         </div>
       )}
       <button
+        name="Submit"
         type="submit"
         className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
           storedData?.length > 0 ||
@@ -470,7 +478,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         }
       >
         <span className="mr-1 pt-1">
-          <ClipLoader color="#242526" loading={loading} size={19} />
+          <ClipLoader color="#c3c3c3" loading={loading} size={19} />
         </span>
         Submit
       </button>

@@ -15,9 +15,7 @@ import { IoIosArrowDown, IoMdAdd } from "react-icons/io";
 import React, { useEffect, useState } from "react";
 import { CiEdit } from "react-icons/ci";
 import { FaCheck } from "react-icons/fa6";
-import AddSeasonModal from "@/app/component/ui/Modal/AddSeasonModal";
 import ClipLoader from "react-spinners/ClipLoader";
-import EditSeasonModal from "@/app/component/ui/Modal/EditSeasonModal";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
@@ -25,6 +23,13 @@ import { TimePicker as AntdTimePicker } from "antd";
 import moment from "moment";
 import { AnimatePresence, motion } from "framer-motion";
 import { GrPowerReset } from "react-icons/gr";
+import dynamic from "next/dynamic";
+const AddSeasonModal = dynamic(
+  () => import("@/app/component/ui/Modal/AddSeasonModal")
+);
+const EditSeasonModal = dynamic(
+  () => import("@/app/component/ui/Modal/EditSeasonModal")
+);
 
 const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv = [] } = useQuery({
@@ -1072,6 +1077,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             <hr className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] my-4 ml-3 " />
           ))}
         <button
+          name="Submit"
           type="submit"
           className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-3 mt-5 ${
             broadcast?.length > 0 ||
@@ -1095,7 +1101,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           }
         >
           <span className="mr-1 pt-1">
-            <ClipLoader color="#242526" loading={loading} size={19} />
+            <ClipLoader color="#c3c3c3" loading={loading} size={19} />
           </span>
           Submit
         </button>

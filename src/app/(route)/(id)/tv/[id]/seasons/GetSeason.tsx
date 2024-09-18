@@ -3,11 +3,14 @@
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
 import ColorThief from "colorthief";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaArrowLeft } from "react-icons/fa";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const GetSeason = () => {
   const pathParts = window.location.pathname.split("/");
@@ -52,15 +55,16 @@ const GetSeason = () => {
       >
         <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
           <div className="flex items-center lg:items-start">
-            <Image
+            <LazyImage
               ref={imgRef} // Set the reference to the image
-              src={`https://image.tmdb.org/t/p/original/${
-                tv?.poster_path || tv?.backdrop_path
-              }`}
-              alt="director image"
-              width={50}
-              height={50}
+              src={`https://image.tmdb.org/t/p/${
+                tv?.poster_path ? "w92" : "w300"
+              }/${tv?.poster_path || tv?.backdrop_path}`}
+              alt={`${tv?.name || tv?.title}'s Poser`}
+              width={90}
+              height={130}
               quality={100}
+              priority
               className="w-[90px] h-[130px] bg-center object-center rounded-md"
             />
             <div className="flex flex-col pl-5 py-5">
@@ -71,6 +75,7 @@ const GetSeason = () => {
               <Link
                 href={`/tv/${tv?.id}`}
                 className="flex items-center my-5 opacity-75 cursor-pointer hover:opacity-90"
+                prefetch={true}
               >
                 <FaArrowLeft className="text-white" size={20} />
                 <p className="text-white font-bold pl-2">Back to main</p>
@@ -85,24 +90,26 @@ const GetSeason = () => {
             className="flex flex-col md:flex-row md:items-center lg:items-start mb-2 md:mb-0 py-8 w-full border-b-2 border-b-slate-400"
             key={idx}
           >
-            <Image
-              src={`https://image.tmdb.org/t/p/original/${
-                season?.poster_path || season?.backdrop_path
-              }`}
-              alt="director image"
-              width={250}
-              height={250}
+            <LazyImage
+              src={`https://image.tmdb.org/t/p/${
+                tv?.poster_path ? "w500" : "w780"
+              }/${tv?.poster_path || tv?.backdrop_path}`}
+              alt={`${season?.name || season?.title}'s Poster`}
+              width={190}
+              height={190}
               quality={100}
+              priority
               className="w-[190px] h-full bg-center object-center rounded-md"
             />
             <div className="flex flex-col p-2 md:p-8">
               <Link
                 href={`/tv/${tv?.id}/seasons/${season?.season_number}`}
-                className="text-black text-3xl font-bold hover:opacity-70 transform duration-300 cursor-pointer"
+                className="text-black dark:text-white text-3xl font-bold hover:opacity-70 transform duration-300 cursor-pointer"
+                prefetch={true}
               >
                 {season?.name}
               </Link>
-              <div className="flex items-center text-black font-bold py-5">
+              <div className="flex items-center text-black dark:text-white font-bold py-5">
                 <h1 className="bg-black p-1 rounded-full flex flex-row items-center mr-2">
                   <BsStars className="text-white" size={15} />
                   <span className="text-white text-xs px-2">

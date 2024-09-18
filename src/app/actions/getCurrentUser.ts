@@ -2,7 +2,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 
-export async function getSession() {
+async function getSession() {
   return await getServerSession(authOptions);
 }
 

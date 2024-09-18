@@ -100,6 +100,7 @@ const ForgotPasswordForm = () => {
           <p className="text-center text-black dark:text-white">
             Not registered yet?
             <Link
+            prefetch={true}
               href="/sign-up"
               className="text-indigo-600 font-medium inline-flex space-x-1 items-center"
             >

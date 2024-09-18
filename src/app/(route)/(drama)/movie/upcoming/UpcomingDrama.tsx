@@ -3,9 +3,16 @@
 import { fetchUpcomingMovie } from "@/app/actions/fetchMovieApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import ExploreMovieCard from "@/app/component/ui/Card/ExploreMovieCard";
 import { Suspense } from "react";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import dynamic from "next/dynamic";
+const ExploreMovieCard = dynamic(
+  () => import("@/app/component/ui/Card/ExploreMovieCard"),
+  { ssr: false }
+);
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
 const UpcomingMovie = () => {
   const searchParams = useSearchParams();

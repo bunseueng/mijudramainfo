@@ -5,17 +5,39 @@ import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Bounce, toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
-import Tiptap from "@/app/component/ui/TextEditor/TipTap";
-import UploadAvatar from "./UploadAvatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+const Tiptap = dynamic(() => import("@/app/component/ui/TextEditor/TipTap"), {
+  ssr: false,
+});
+const UploadAvatar = dynamic(() => import("./UploadAvatar"), { ssr: false });
 
 const ProfileSetting = ({ user }: any) => {
   const { data: session } = useSession();
   const [avatar, setAvatar] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const { register, handleSubmit, reset, control } = useForm<TProfileSetting>({
     resolver: zodResolver(profileSetting),
     defaultValues: {
@@ -30,11 +52,12 @@ const ProfileSetting = ({ user }: any) => {
     setLoading(true);
     try {
       const response = await fetch("/api/setting/profile", {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          profileAvatar: avatar && avatar,
           displayName: data?.displayName,
           country: data?.country,
           gender: data?.gender,
@@ -45,7 +68,7 @@ const ProfileSetting = ({ user }: any) => {
 
       if (response.status === 200) {
         reset();
-        location.reload();
+        router?.refresh();
         toast.success("Profile saved successfully", {
           position: "top-right",
           autoClose: 2000,
@@ -59,7 +82,6 @@ const ProfileSetting = ({ user }: any) => {
         });
       } else {
         reset();
-        location.reload();
         toast.error("Failed to save profile", {
           position: "top-right",
           autoClose: 2000,
@@ -78,21 +100,24 @@ const ProfileSetting = ({ user }: any) => {
       setLoading(false);
     }
   };
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="max-w-[1520px] flex flex-wrap justify-between mx-auto py-3 px-4 md:px-6"
+      className="max-w-6xl mx-auto px-4 py-8"
     >
-      <div className="w-full h-auto bg-[#fff] dark:bg-[#242526] border-2 border-[#00000024] dark:border-[#272727] rounded-md">
-        <h1 className="text-2xl text-black dark:text-white p-5 border-b-2 border-b-[#78828c21] dark:border-b-[#272727]">
-          Settings
-        </h1>
-        <div className="p-5">
-          <div className="flex flex-col md:flex-row my-10">
-            <label className="float-left md:w-[16.66667%]">
-              Profile Picture:
-            </label>
-            <div className="flex flex-col md:flex-row md:items-center relative">
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>User Settings</CardTitle>
+          <CardDescription>
+            Update your profile information here.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Profile Picture */}
+          <div className="space-y-2">
+            <Label htmlFor="profile-picture">Profile Picture</Label>
+            <div className="flex items-center space-x-4 relative">
               <UploadAvatar
                 loading={loading}
                 setLoading={setLoading}
@@ -104,141 +129,129 @@ const ProfileSetting = ({ user }: any) => {
               />
             </div>
           </div>
-          <div className="flex flex-col md:flex-row my-10">
-            <label className="float-left md:w-[16.66667%]">Display Name:</label>
-            <div className="float-left md:w-[33.33333%] md:px-3">
-              <input
-                {...register("displayName")}
-                type="text"
-                placeholder={user?.displayName || ""}
-                name="displayName"
-                className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-2 px-6 outline-none"
-              />
-            </div>
+
+          {/* Display Name */}
+          <div className="space-y-2">
+            <Label htmlFor="display-name">Display Name</Label>
+            <Input
+              {...register("displayName")}
+              id="display-name"
+              placeholder="Enter your display name"
+            />
           </div>
-          <div className="flex flex-col md:flex-row my-10">
-            <label className="float-left md:w-[16.66667%]">Username:</label>
-            <div className="flex flex-col float-left md:w-[33.33333%] md:px-3">
-              <input
-                type="text"
-                placeholder={session?.user?.name || ""}
-                className="w-full bg-[#f5f7fa] dark:bg-[#1f1f1f] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-2 px-6 outline-none cursor-not-allowed"
-                disabled
-              />
-              <div className="text-muted-foreground dark:opacity-80">
-                <small>
-                  http://mijudramainfo.vercel.app/profile/ImPossiBle
-                </small>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row my-10">
-            <label className="float-left md:w-[16.66667%]">Email:</label>
-            <div className="float-left md:w-[33.33333%] md:px-3">
-              <input
-                type="text"
-                placeholder={session?.user?.email || ""}
-                className="w-full bg-[#f5f7fa] dark:bg-[#1f1f1f] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-2 px-6 outline-none cursor-not-allowed"
-                disabled
-              />
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row my-10">
-            <label className="float-left md:w-[16.66667%]">Country:</label>
-            <div className="float-left md:w-[33.33333%] md:px-3">
-              <input
-                {...register("country")}
-                type="text"
-                name="country"
-                placeholder="Enter your country"
-                className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row my-10">
-            <label className="float-left md:w-[16.66667%]">Gender:</label>
-            <div className="float-left md:w-[33.33333%] md:px-3">
-              <select
-                {...register("gender")}
-                name="gender"
-                id="gender"
-                className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
-              >
-                <option value="-">-</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
+
+          {/* Username (non-editable) */}
+          <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              value={session?.user?.name || ""}
+              disabled
+            />{" "}
+            <div className="text-muted-foreground dark:opacity-80 ml-1">
+              <small>
+                http://mijudramainfo.vercel.app/profile/
+                {session?.user?.name || ""}
+              </small>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row my-10">
-            <label className="float-left md:w-[16.66667%]">
-              Date of Birth:
-            </label>
-            <div className="float-left md:w-[33.33333%] md:px-3">
+          {/* Email (non-editable) */}
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={session?.user?.email || ""}
+              disabled
+            />
+          </div>
+
+          {/* Gender */}
+          <div className="space-y-2">
+            <Label htmlFor="gender">Gender</Label>
+            <Controller
+              name="gender"
+              control={control}
+              defaultValue={user?.gender}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="gender">
+                    <SelectValue
+                      placeholder="Select gender"
+                      defaultValue={user?.gender}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="prefer-not-to-say">
+                      Prefer not to say
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          {/* Country (now an input field) */}
+          <div className="space-y-2">
+            <Label htmlFor="country">Country</Label>
+            <Input
+              {...register("country")}
+              id="country"
+              placeholder="Enter your country"
+            />
+          </div>
+
+          {/* Date of Birth */}
+          <div className="space-y-2">
+            <Label htmlFor="dob">Date of Birth</Label>
+            <Input
+              {...register("dateOfBirth")}
+              name="dateOfBirth"
+              id="dob"
+              type="date"
+              defaultValue={
+                user?.dateOfBirth?.toISOString()?.split("T")[0] || "YYYY-MM-DD"
+              }
+            />
+          </div>
+
+          {/* Biography */}
+          <div className="space-y-2">
+            <Label htmlFor="bio">Biography</Label>
+            <div className="w-full">
               <Controller
                 control={control}
-                name="dateOfBirth"
+                name="biography"
                 render={({ field }) => {
                   return (
-                    <DatePicker
-                      placeholderText={
-                        user?.dateOfBirth?.toISOString()?.split("T")[0] ||
-                        "YYYY-MM-DD"
-                      }
-                      onChange={(date) => {
-                        // Format the date as YYYY-MM-DD before calling field.onChange()
-                        const formattedDate =
-                          date instanceof Date
-                            ? date.toISOString().split("T")[0]
-                            : "";
-                        field.onChange(formattedDate);
-                      }}
-                      selected={field.value}
-                      className="w-full bg-[#fff] dark:bg-[#3a3b3c] border-2 border-[#dcdfe6] dark:border-[#46494a] focus:border-[#409eff] rounded-md mt-3 md:mt-0 py-3 px-6 outline-none"
+                    <Tiptap
+                      description={user?.biography as string}
+                      onChange={field.onChange}
                     />
                   );
                 }}
               />
-            </div>
-          </div>
-
-          <div className="my-10">
-            <div className="flex flex-col md:flex-row">
-              <label className="float-left md:w-[16.66667%]">Biography:</label>
-              <div className="float-left w-full md:px-3">
-                <Controller
-                  control={control}
-                  name="biography"
-                  render={({ field }) => {
-                    return (
-                      <Tiptap
-                        description={user?.biography as string}
-                        onChange={field.onChange}
-                      />
-                    );
-                  }}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col md:flex-row">
+            </div>{" "}
+            <div>
               <span className="w-full md:w-[20%] lg:w-[15%]"></span>
-              <p className="text-sm text-[#818a91] ml-5">
+              <p className="text-sm text-[#818a91]">
                 Describe yourself in a sentence or two.
               </p>
             </div>
           </div>
-        </div>
-        <div className="border-t-2 border-t-[#78828c21] dark:border-t-[#272727] p-4">
-          <button
-            type="submit"
-            className="text-white border-2 border-[#409eff] bg-[#409eff] rounded-md py-2 px-4 flex items-center"
-          >
-            <ClipLoader color="#272727" size={25} loading={loading} />
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" className="ml-auto">
+            {" "}
+            <ClipLoader color="#fff" size={18} loading={loading} />
             <span className={`${loading && "ml-2"}`}>Submit</span>
-          </button>
-        </div>
-      </div>
+          </Button>
+        </CardFooter>
+      </Card>
     </form>
   );
 };

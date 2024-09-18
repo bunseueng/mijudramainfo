@@ -200,6 +200,65 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+    try {
+        const currentUser = await getCurrentUser();
+
+        if (!currentUser) {
+            console.error("Invalid User");
+            return NextResponse.json({ message: "Invalid User" }, { status: 400 });
+        }
+
+        const { commentId, message, spoiler } = await req.json();
+
+        // Fetch all comments related to the post
+        const allComments = await prisma.comment.findMany({
+            where: { postId: params.id },
+        });
+
+        // Find the target comment (could be a main comment or a reply)
+        const targetComment = await findCommentById(commentId, allComments);
+
+        if (!targetComment) {
+            console.error("Comment not found for commentId:", commentId);
+            return NextResponse.json({ message: "Comment not found" }, { status: 404 });
+        }
+
+        // Check if the current user is the owner of the comment (whether it's a main comment or reply)
+        if (currentUser.id !== targetComment.repliedUserId) {
+            return NextResponse.json({ message: "You are not the owner of this comment" }, { status: 405 });
+        }
+
+        // If the comment is a reply (has a parentId), update the specific reply in the parent's replies array
+        if (targetComment.parentId) {
+            const updatedParentComment = await updateNestedReply(
+                commentId, 
+                allComments, 
+                { message, spoiler }
+            );
+
+            if (updatedParentComment) {
+                return NextResponse.json({ message: "Reply updated successfully", updatedParentComment }, { status: 200 });
+            } else {
+                return NextResponse.json({ message: "Failed to update the reply", status: 500 });
+            }
+        } else {
+            // Update the main comment itself
+            const updatingComment = await prisma.comment.update({
+                where: { id: targetComment.id },
+                data: {
+                    message,
+                    spoiler,
+                },
+            });
+
+            return NextResponse.json({ message: "Main comment updated successfully", updatingComment }, { status: 200 });
+        }
+    } catch (error) {
+        console.error("Error updating comment:", error);
+        return NextResponse.json({ message: "Failed to update comment", error }, { status: 500 });
+    }
+}
 
 async function deleteNestedReply(commentId: string, comments: any[]): Promise<boolean> {
     for (const comment of comments) {

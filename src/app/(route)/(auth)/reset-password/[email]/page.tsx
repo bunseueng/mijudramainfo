@@ -1,5 +1,6 @@
+import dynamic from "next/dynamic";
 import React from "react";
-import ResetPassword from "./ResetPassword";
+const ResetPassword = dynamic(() => import("./ResetPassword"), { ssr: false });
 
 const ResetPasswordPage = ({ params }: { params: { email: string } }) => {
   return <ResetPassword params={params} />;

@@ -1,6 +1,5 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UploadAvatarProps } from "@/helper/type";
-import { TProfileSetting } from "@/helper/zod";
-import Image from "next/image";
 import React from "react";
 import { IoCamera } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -15,7 +14,7 @@ const UploadAvatar: React.FC<UploadAvatarProps> = ({
   register,
   handleSubmit,
 }) => {
-  const submitAvatar = async (data: TProfileSetting) => {
+  const submitAvatar = async () => {
     setLoading(true);
     try {
       const response = await fetch("/api/setting/avatar", {
@@ -60,8 +59,8 @@ const UploadAvatar: React.FC<UploadAvatarProps> = ({
   };
   return (
     <>
-      <div className="w-[100px] h-[100px]">
-        <Image
+      <Avatar className="w-24 h-24">
+        <AvatarImage
           src={
             avatar
               ? avatar
@@ -69,31 +68,31 @@ const UploadAvatar: React.FC<UploadAvatarProps> = ({
               ? user?.profileAvatar
               : (user?.image as any)
           }
-          alt="profile image"
-          width={200}
-          height={200}
-          quality={100}
-          className="w-full h-full bg-center bg-cover object-cover md:ml-5"
+          alt="Profile picture"
+          className="object-cover bg-cover"
         />
-      </div>
+        <AvatarFallback>UN</AvatarFallback>
+      </Avatar>
       {avatar ? (
         <div className="flex flex-col md:flex-row md:items-center relative">
-          <button className="w-[210px] md:w-auto flex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3 mr-2 my-5 md:my-0 md:ml-10">
+          <button className="w-[210px] md:w-auto flex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3 mr-2 my-5 md:my-0">
             <IoCamera /> <span className="pl-2">Change Profile Avatar</span>
           </button>
 
           <input
             {...register("profileAvatar")}
-            className="w-[209px] h-10 absolute top-5 md:top-0 left-0 md:left-10 block cursor-pointer opacity-0"
+            className="w-[209px] h-10 absolute top-5 md:top-0 block cursor-pointer opacity-0"
             type="file"
             name="profileAvatar"
             onChange={handleProductImage}
           />
           <button
             onClick={handleSubmit(submitAvatar)}
-            className="w-[100px] md:w-autoflex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3"
+            className={`w-[100px] md:w-auto bg-white border text-black border-slate-200 rounded-md py-2 px-3 ${
+              loading && "flex items-center"
+            }`}
           >
-            <ClipLoader color="#272727" size={25} loading={loading} />
+            <ClipLoader color="#c3c3c3" size={18} loading={loading} />
             <span className={`${loading && "ml-2"}`}>
               {loading ? "Submitting" : "Submit"}
             </span>
@@ -109,7 +108,7 @@ const UploadAvatar: React.FC<UploadAvatarProps> = ({
           </button>
           <input
             {...register("profileAvatar")}
-            className="block w-[104px] h-10 absolute md:right-0 bottom-0 md:bottom-8 smleft-0 cursor-pointer opacity-0"
+            className="block w-[104px] h-10 absolute md:left-[95px] bottom-0 md:bottom-[28px] sm:left-0 cursor-pointer opacity-0"
             type="file"
             name="profileAvatar"
             onChange={handleProductImage}

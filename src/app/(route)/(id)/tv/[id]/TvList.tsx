@@ -2,11 +2,13 @@
 
 import { fetchImages, fetchTv } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
-import ColorThief from "colorthief";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const TvList = ({ tv_id }: any) => {
   const { data: tv } = useQuery({
@@ -31,21 +33,22 @@ const TvList = ({ tv_id }: any) => {
     }, 200);
   };
   return (
-    <div className="border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
-      <Image
-        src={`https://image.tmdb.org/t/p/original/${
+    <div className="bg-[#191a20] border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
+      <LazyImage
+        src={`https://image.tmdb.org/t/p/w500/${
           tv?.poster_path || tv?.backdrop_path
         }`}
         alt={`${tv?.name || tv?.title}'s Poster`}
         width={200}
         height={200}
         quality={100}
+        priority
         className="w-[60px] h-[90px] bg-center object-center rounded-md hidden"
       />
       <ul className="relative inline-block m-0 p-0 z-50">
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-2 leading-[1px] -mb-[1px] ${
-            currentItem === "Overview" && "border-b-[3px] border-b-[#01b4e4]"
+          className={`inline-flex items-center justify-end mx-2 cursor-pointer pb-2 leading-[1px] -mb-[1px] ${
+            currentItem === "Overview" && "border-b-[2px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Overview")}
           onMouseEnter={() => handleNavbarMouseEnter("Overview")}
@@ -178,24 +181,36 @@ const TvList = ({ tv_id }: any) => {
                 {hovered === "Videos" && (
                   <div className="w-[200px] absolute -top-10 left-full bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2">
                     <ul className="py-2">
-                      <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
-                        Trailers
-                      </li>{" "}
-                      <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
-                        Behind The Scenes
-                      </li>{" "}
-                      <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
-                        Featurettes
-                      </li>{" "}
-                      <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
-                        Teasers
-                      </li>{" "}
-                      <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
-                        Opening Credits
-                      </li>{" "}
-                      <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
-                        Clips
-                      </li>
+                      <Link href={`/tv/${tv_id}/videos/trailers`}>
+                        <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
+                          Trailers
+                        </li>
+                      </Link>
+                      <Link href={`/tv/${tv_id}/videos/behind_the_scenes`}>
+                        <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
+                          Behind The Scenes
+                        </li>
+                      </Link>
+                      <Link href={`/tv/${tv_id}/videos/featurettes`}>
+                        <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
+                          Featurettes
+                        </li>
+                      </Link>
+                      <Link href={`/tv/${tv_id}/videos/teasers`}>
+                        <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
+                          Teasers
+                        </li>
+                      </Link>
+                      <Link href={`/tv/${tv_id}/videos/opening_credits`}>
+                        <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
+                          Opening Credits
+                        </li>
+                      </Link>
+                      <Link href={`/tv/${tv_id}/videos/clips`}>
+                        <li className="text-sm hover:bg-[#f8f9fa] font-semibold py-1 px-6 cursor-pointer">
+                          Clips
+                        </li>
+                      </Link>
                     </ul>
                   </div>
                 )}

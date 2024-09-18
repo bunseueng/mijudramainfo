@@ -155,7 +155,7 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                             />
                           ) : (
                             <Image
-                              src="/empty-img.jpg"
+                              src="/placeholder-image.avif"
                               alt={drama?.name || drama?.title}
                               width={200}
                               height={200}
@@ -171,13 +171,13 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                       <div className="flex items-center justify-between">
                         <Link
                           href={`/tv/${drama?.id}`}
-                          className="text-xl text-sky-700 dark:text-[#2196f3] font-bold"
+                          className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
                         >
                           {drama?.name || drama?.title}
                         </Link>
                         <p>#{overallIndex}</p>
                       </div>
-                      <p className="text-slate-400 py-1">
+                      <p className="text-sm text-slate-400 py-1">
                         {(drama?.origin_country?.[0] === "CN" &&
                           !drama?.genre_ids?.includes(10764) &&
                           !drama?.genre_ids?.includes(10767) &&

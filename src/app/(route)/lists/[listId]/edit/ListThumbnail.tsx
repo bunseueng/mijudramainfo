@@ -1,10 +1,8 @@
-import { TCreateList } from "@/helper/zod";
+"use client";
+
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { IoCamera } from "react-icons/io5";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
-import { SlCloudUpload } from "react-icons/sl";
 import { ListThumbnailProps } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMovie, fetchTv } from "@/app/actions/fetchMovieApi";

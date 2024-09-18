@@ -267,6 +267,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       })}
       <div className="border-t-2 border-t-[#78828c21] pt-5 mx-3">
         <button
+          name="submit"
           type="submit"
           className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
             language?.length > 0 || countries?.length > 0 || network?.length > 0
@@ -280,7 +281,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           }
         >
           <span className="mr-1 pt-1">
-            <ClipLoader color="#242526" loading={loading} size={19} />
+            <ClipLoader color="#c3c3c3" loading={loading} size={19} />
           </span>
           Submit
         </button>

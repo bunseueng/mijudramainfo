@@ -1,7 +1,6 @@
 "use client";
 
 import { fetchEpisodeCount } from "@/app/actions/fetchMovieApi";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -10,6 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import { StyledRating } from "@/app/actions/StyleRating";
+import dynamic from "next/dynamic";
+const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
+  ssr: false,
+});
 
 export default function Card({ result, BASE_URL }: any) {
   const [tvRating, setTvRating] = useState<any>();
@@ -116,35 +119,26 @@ export default function Card({ result, BASE_URL }: any) {
   if (isError) {
     console.log("Failed to fetch");
   }
-  console.log(result);
   return (
     <div className="p-5 relative box-border h-[90%]">
       <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
         <div className="relative">
-          <Link href={constructedHref} className="block box-content">
-            {result?.poster_path || result?.backdrop_path !== null ? (
-              <Image
-                src={`https://image.tmdb.org/t/p/original/${
-                  result.poster_path || result.backdrop_path
-                }`}
-                alt={result?.name || result?.title}
-                width={200}
-                height={200}
-                style={{ width: "100%", height: "100%" }}
-                priority
-                className="w-full object-cover align-middle overflow-clip"
-              />
-            ) : (
-              <Image
-                src="/empty-img.jpg"
-                alt={result?.name || result?.title}
-                width={200}
-                height={200}
-                style={{ width: "100%", height: "100%" }}
-                priority
-                className="w-full h-full align-middle overflow-clip"
-              />
-            )}
+          <Link
+            prefetch={true}
+            href={constructedHref}
+            className="block box-content"
+          >
+            <ReusedImage
+              src={`https://image.tmdb.org/t/p/w780/${
+                result.poster_path || result.backdrop_path
+              }`}
+              alt={result?.name || result?.title}
+              width={200}
+              height={200}
+              style={{ width: "100%", height: "100%" }}
+              loading="lazy"
+              className="w-full object-cover align-middle overflow-clip"
+            />
           </Link>
         </div>
       </div>

@@ -1,7 +1,13 @@
 import { Suspense } from "react";
-import SearchQuery from "../../component/ui/Search/SearchQuery";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import dynamic from "next/dynamic";
+const SearchQuery = dynamic(
+  () => import("../../component/ui/Search/SearchQuery")
+);
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
 const SearchPage = async () => {
   const BASE_URL = "https://api.themoviedb.org/3/search/multi";

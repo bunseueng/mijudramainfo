@@ -3,10 +3,13 @@
 import { fetchCompany } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import React from "react";
 import { FaSearch } from "react-icons/fa";
 import { IoCloseCircleSharp } from "react-icons/io5";
-import SearchLoading from "../Loading/SearchLoading";
+const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
+  ssr: false,
+});
 
 const NetworkFilter = ({
   searchParams,

@@ -1,6 +1,7 @@
 import React from "react";
-import Network from "./Network";
 import { Metadata } from "next";
+import dynamic from "next/dynamic";
+const Network = dynamic(() => import("./Network"), { ssr: false });
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const network_id = params.id;

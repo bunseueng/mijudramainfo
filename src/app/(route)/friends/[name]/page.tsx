@@ -1,7 +1,8 @@
 import React from "react";
-import Friend from "./Friend";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
+import dynamic from "next/dynamic";
+const Friend = dynamic(() => import("./Friend"), { ssr: false });
 
 const FriendPage = async ({ params }: { params: { name: string } }) => {
   const currentUser = await getCurrentUser();
@@ -11,10 +12,7 @@ const FriendPage = async ({ params }: { params: { name: string } }) => {
   const users = await prisma?.user?.findMany({});
   const friends = await prisma?.friend?.findMany({
     where: {
-      OR: [
-        { friendRequestId: currentUser?.id },
-        { friendRespondId: currentUser?.id },
-      ],
+      OR: [{ friendRequestId: user?.id }, { friendRespondId: user?.id }],
     },
   });
 

@@ -1,5 +1,7 @@
 import React from "react";
-import ProfilePage from "../page";
+import dynamic from "next/dynamic";
+
+const ProfilePage = dynamic(() => import("../page"), { ssr: false });
 
 const ProfileReviewsPage = async ({ params }: { params: { name: string } }) => {
   return (

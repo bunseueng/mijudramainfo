@@ -1,6 +1,9 @@
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import React from "react";
+const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
+  ssr: false,
+});
 
 const WatchProvider = ({ getDrama, tv }: any) => {
   const normalizeString = (str: string) => {
@@ -43,43 +46,29 @@ const WatchProvider = ({ getDrama, tv }: any) => {
                 key={show?.id}
               >
                 <div className="flex flex-row items-center justify-between">
-                  {show?.profile_path !== null ? (
-                    <Link href={`${show?.homepage || show?.link}`}>
-                      <Image
-                        src={
-                          show?.service_logo
-                            ? `/channel${show?.service_logo}`
-                            : show?.service_url
-                            ? youku ||
-                              tencent ||
-                              mangotv ||
-                              iqiyi ||
-                              hunan ||
-                              dragontv ||
-                              show?.service_url
-                            : `https://image.tmdb.org/t/p/original/${show?.logo_path}`
-                        }
-                        alt={`${show?.service_name}'s Logo`}
-                        width={200}
-                        height={200}
-                        quality={100}
-                        priority
-                        className="inline-block size-[60px] object-cover rounded-full hover:opacity-75 transform duration-300 cursor-pointer"
-                      />
-                    </Link>
-                  ) : (
-                    <Link href={`${show?.homepage || show?.link}`}>
-                      <Image
-                        src="/empty-pf.jpg"
-                        alt="Provider Logo"
-                        width={200}
-                        height={200}
-                        quality={100}
-                        priority
-                        className="inline-block size-[60px] object-cover rounded-full hover:opacity-75 transform duration-300 cursor-pointer"
-                      />
-                    </Link>
-                  )}
+                  <Link href={`${show?.homepage || show?.link}`}>
+                    <ReusedImage
+                      src={
+                        show?.service_logo
+                          ? `/channel${show?.service_logo}`
+                          : show?.service_url
+                          ? youku ||
+                            tencent ||
+                            mangotv ||
+                            iqiyi ||
+                            hunan ||
+                            dragontv ||
+                            show?.service_url
+                          : `https://image.tmdb.org/t/p/original/${show?.logo_path}`
+                      }
+                      alt={`${show?.service_name}'s Logo`}
+                      width={200}
+                      height={200}
+                      quality={100}
+                      priority
+                      className="inline-block size-[60px] object-cover rounded-full hover:opacity-75 transform duration-300 cursor-pointer"
+                    />
+                  </Link>
                   <div className="flex flex-col items-start ml-2">
                     <Link
                       href={`${show?.homepage || show?.link}`}
@@ -126,44 +115,32 @@ const WatchProvider = ({ getDrama, tv }: any) => {
                   key={show?.id}
                 >
                   <div className="flex flex-row items-center justify-between">
-                    {tv?.profile_path !== null ? (
-                      <Link href={`${tv?.homepage}`}>
-                        <Image
-                          src={
-                            youku ||
-                            tencent ||
-                            mangotv ||
-                            iqiyi ||
-                            hunan ||
-                            (dragontv as string)
-                              ? youku ||
-                                tencent ||
-                                mangotv ||
-                                iqiyi ||
-                                hunan ||
-                                (dragontv as string)
-                              : `https://image.tmdb.org/t/p/original/${show?.logo_path}`
-                          }
-                          alt={`${show?.service_name}'s Logo`}
-                          width={200}
-                          height={200}
-                          quality={100}
-                          priority
-                          className="inline-block size-[60px] object-cover rounded-full hover:opacity-75 transform duration-300 cursor-pointer"
-                        />
-                      </Link>
-                    ) : (
-                      <Link href={`${tv?.homepage}`}>
-                        <Image
-                          src="/empty-pf.jpg"
-                          alt="Provider Logo"
-                          width={200}
-                          height={200}
-                          quality={100}
-                          className="inline-block size-[60px] object-cover rounded-full hover:opacity-75 transform duration-300 cursor-pointer"
-                        />
-                      </Link>
-                    )}
+                    <Link href={`${tv?.homepage}`}>
+                      <ReusedImage
+                        src={
+                          youku ||
+                          tencent ||
+                          mangotv ||
+                          iqiyi ||
+                          hunan ||
+                          (dragontv as string)
+                            ? youku ||
+                              tencent ||
+                              mangotv ||
+                              iqiyi ||
+                              hunan ||
+                              (dragontv as string)
+                            : `https://image.tmdb.org/t/p/original/${show?.logo_path}`
+                        }
+                        alt={`${show?.service_name}'s Logo`}
+                        width={200}
+                        height={200}
+                        quality={100}
+                        priority
+                        className="inline-block size-[60px] object-cover rounded-full hover:opacity-75 transform duration-300 cursor-pointer"
+                      />
+                    </Link>
+
                     <div className="flex flex-col items-start ml-2">
                       <Link
                         href={tv?.homepage}

@@ -176,6 +176,7 @@ model Person {
 model Watchlist {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @db.ObjectId
+  tvId        Json[]
   movieId     Json[]
   favoriteIds Json[]
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)

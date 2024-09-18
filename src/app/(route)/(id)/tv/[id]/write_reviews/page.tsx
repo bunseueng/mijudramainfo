@@ -1,8 +1,8 @@
 import React from "react";
-import WriteReview from "./WriteReview";
 import { Metadata } from "next";
-import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import dynamic from "next/dynamic";
+const WriteReview = dynamic(() => import("./WriteReview"), { ssr: false });
 
 export const metadata: Metadata = {
   title: "New Review",

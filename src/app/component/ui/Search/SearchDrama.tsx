@@ -2,7 +2,7 @@
 
 import { SearchParamsType } from "@/helper/type";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 const SearchDrama = () => {

@@ -97,21 +97,6 @@ export const createRating = z.object({
 
 export type TCreateRating = z.infer<typeof createRating>;
 
-export const addFriend = z.object({
-  userId: z.any(),
-  friendId: z.any(),
-});
-
-export type TAddFriend = z.infer<typeof createRating>;
-
-export const comment = z.object({
-  userId: z.string().optional(),
-  love: z.any().optional(),
-  loveBy: z.any().optional(),
-});
-
-export type TComment = z.infer<typeof comment>;
-
 export const personLove = z.object({
   userId: z.string().optional(),
   love: z.number().optional(),

@@ -4,21 +4,34 @@ import ColorThief from "colorthief";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa6";
-import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { VscQuestion } from "react-icons/vsc";
 import { tvVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
-import TvTrailers from "./trailers/TvTrailers";
 import { DramaDB } from "@/helper/type";
-import Clips from "./clips/Clips";
-import BehindTheScenes from "./behind_the_scenes/BehindTheScenes";
-import Featurettes from "./featurettes/Featurettes";
-import OpeningCredits from "./opening_credits/OpeningCredits";
-import Bloopers from "./bloopers/Bloopers";
-import TvTeasers from "./teasers/TvTeasers";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
+import dynamic from "next/dynamic";
+const Clips = dynamic(() => import("./clips/Clips"), { ssr: false });
+const BehindTheScenes = dynamic(
+  () => import("./behind_the_scenes/BehindTheScenes"),
+  { ssr: false }
+);
+const Featurettes = dynamic(() => import("./featurettes/Featurettes"), {
+  ssr: false,
+});
+const OpeningCredits = dynamic(
+  () => import("./opening_credits/OpeningCredits"),
+  { ssr: false }
+);
+const Bloopers = dynamic(() => import("./bloopers/Bloopers"), { ssr: false });
+const TvTeasers = dynamic(() => import("./teasers/TvTeasers"), { ssr: false });
+const TvTrailers = dynamic(() => import("./trailers/TvTrailers"), {
+  ssr: false,
+});
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 interface TvTrailerType {
   tv_id: string;
@@ -93,29 +106,19 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB }) => {
       >
         <div className="max-w-6xl mx-auto flex items-center mt-0 px-2 py-2">
           <div className="flex items-center lg:items-start px-2 cursor-default">
-            {tv?.poster_path || tv?.backdrop_path !== null ? (
-              <Image
-                ref={imgRef} // Set the reference to the image
-                src={`https://image.tmdb.org/t/p/original/${
-                  tv?.poster_path || tv?.backdrop_path
-                }`}
-                alt={`${tv?.name || tv?.title}'s Poster`}
-                width={200}
-                height={200}
-                quality={100}
-                className="w-[60px] h-[90px] bg-center object-center rounded-md"
-                onLoad={extractColor}
-              />
-            ) : (
-              <Image
-                src="/empty-img.jpg"
-                alt={`${tv?.name || tv?.title}'s Poster`}
-                width={200}
-                height={200}
-                quality={100}
-                className="w-[60px] h-[90px] bg-center object-center rounded-md"
-              />
-            )}
+            <LazyImage
+              ref={imgRef} // Set the reference to the image
+              src={`https://image.tmdb.org/t/p/${
+                tv?.poster_path ? "w500" : "w780"
+              }/${tv?.poster_path || tv?.backdrop_path}`}
+              alt={`${tv?.name || tv?.title}'s Poster`}
+              width={200}
+              height={200}
+              quality={100}
+              className="w-[60px] h-[90px] bg-center object-center rounded-md"
+              priority
+              onLoad={extractColor}
+            />
             <div className="flex flex-col pl-5 py-2">
               <h1 className="text-white text-xl font-bold">
                 {tv?.name} (

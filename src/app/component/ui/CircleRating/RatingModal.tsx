@@ -331,9 +331,7 @@ const RatingModal = ({
                 className="scrollspy_item group relative flex items-center justify-center p-2 rounded-full bg-transparent before:absolute before:whitespace-nowrap before:right-6 before:rounded-lg before:text-[#032541] before:text-sm before:font-semibold before:pointer-events-none cursor-pointer"
               >
                 <span
-                  className={`h-2 w-2 rounded-full transition ease-in-out group-hover:bg-[#032541] group-hover:h-6 duration-300 bg-[#032541] ${
-                    "#rating" && "h6"
-                  }`}
+                  className={`h-2 w-2 rounded-full transition ease-in-out group-hover:bg-[#032541] group-hover:h-6 duration-300 bg-[#032541] ${"#rating"}`}
                 ></span>
               </a>
               <a

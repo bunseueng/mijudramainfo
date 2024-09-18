@@ -6,12 +6,15 @@ import {
   fetchPersonSearch,
   fetchTvSearch,
 } from "@/app/actions/fetchMovieApi";
-import Results from "@/app/component/ui/Search/Results";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
 import { SearchPagination } from "../Pagination/SearchPagination";
-import SearchLoading from "../Loading/SearchLoading";
+import dynamic from "next/dynamic";
+const Results = dynamic(() => import("@/app/component/ui/Search/Results"));
+const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
+  ssr: false,
+});
 
 const SearchQuery = ({ BASE_URL, currentUser }: any) => {
   const [page, setPage] = useState(1);
@@ -85,24 +88,25 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
   const items = totalResults?.total_results;
   const totalItems = results?.slice(start, end);
 
-  const { data: fetchTv } = useQuery({
-    queryKey: ["tv"],
-    queryFn: () => fetchTvSearch(searchQuery),
-  });
+  const fetchAllSearchResults = async (pages = 1) => {
+    try {
+      const [tv, movie, person, collection] = await Promise.all([
+        fetchTvSearch(searchQuery),
+        fetchMovieSearch(searchQuery),
+        fetchPersonSearch(searchQuery),
+        fetchCollectionSearch(searchQuery),
+      ]);
 
-  const { data: fetchMovie } = useQuery({
-    queryKey: ["movie"],
-    queryFn: () => fetchMovieSearch(searchQuery),
-  });
+      return { tv, movie, person, collection };
+    } catch (error) {
+      console.error("Failed to fetch", error);
+    }
+  };
 
-  const { data: fetchPersons } = useQuery({
-    queryKey: ["person"],
-    queryFn: () => fetchPersonSearch(searchQuery),
-  });
-
-  const { data: fetchCollection } = useQuery({
-    queryKey: ["collection"],
-    queryFn: () => fetchCollectionSearch(searchQuery),
+  const { data: combinedData } = useQuery({
+    queryKey: ["results", searchQuery, currentPage],
+    queryFn: () => fetchAllSearchResults(currentPage),
+    placeholderData: keepPreviousData,
   });
 
   if (isLoading) {
@@ -120,10 +124,10 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
             items={items}
             results={totalItems}
             searchQuery={searchQuery}
-            fetchMovie={fetchMovie}
-            fetchTv={fetchTv}
-            fetchCollection={fetchCollection}
-            fetchPersons={fetchPersons}
+            fetchMovie={combinedData?.movie}
+            fetchTv={combinedData?.tv}
+            fetchCollection={combinedData?.collection}
+            fetchPersons={combinedData?.person}
             BASE_URL={BASE_URL}
             searchParams={searchParams}
             currentUser={currentUser}

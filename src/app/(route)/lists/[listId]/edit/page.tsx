@@ -1,7 +1,8 @@
 import React from "react";
-import EditList from "./EditList";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import dynamic from "next/dynamic";
+const EditList = dynamic(() => import("./EditList"), { ssr: false });
 
 const EditListPage = async ({ params }: { params: { listId: string } }) => {
   const user = await getCurrentUser();

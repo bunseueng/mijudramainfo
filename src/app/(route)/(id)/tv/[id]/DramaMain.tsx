@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import CircleRating from "@/app/component/ui/CircleRating/CircleRating";
 import {
   MdBookmarkAdd,
   MdFormatListBulletedAdd,
   MdOutlineFavorite,
 } from "react-icons/md";
-import PlayTrailerBtn from "./PlayTrailerBtn";
 import {
   fetchCastCredit,
   fetchContentRating,
@@ -21,22 +19,38 @@ import {
   fetchTv,
   fetchVideos,
 } from "@/app/actions/fetchMovieApi";
-import DramaCast from "./DramaCast";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { IoIosAddCircle } from "react-icons/io";
 import Link from "next/link";
-import RatingModal from "@/app/component/ui/CircleRating/RatingModal";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
-import { Image as AntImage } from "antd";
 import Image from "next/image";
 import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
 import { formatDate } from "@/app/actions/formatDate";
 import ColorThief from "colorthief";
 import { getTextColor } from "@/app/actions/getTextColor";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
+import dynamic from "next/dynamic";
+const RatingModal = dynamic(
+  () => import("@/app/component/ui/CircleRating/RatingModal"),
+  { ssr: false }
+);
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
+const DramaCast = dynamic(() => import("./DramaCast"), { ssr: false });
+const PlayTrailerBtn = dynamic(() => import("./PlayTrailerBtn"), {
+  ssr: false,
+});
+const CircleRating = dynamic(
+  () => import("@/app/component/ui/CircleRating/CircleRating"),
+  { ssr: false }
+);
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const DramaMain = ({
   getDrama,
@@ -171,13 +185,13 @@ const DramaMain = ({
 
   const onSubmit = async () => {
     try {
-      const res = await fetch(`/api/watchlist/${tv?.id}`, {
+      const res = await fetch(`/api/tv/${tv?.id}/watchlist`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          movieId: tv?.id,
+          tvId: tv?.id,
         }),
       });
       if (res.status === 200) {
@@ -306,18 +320,19 @@ const DramaMain = ({
           >
             <div className="px-3">
               <div className="flex flex-col md:flex-row content-center max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5">
-                <Image
+                <LazyImage
                   ref={imgRef}
                   onLoad={extractColor}
                   src={
                     getDrama?.cover ||
-                    `https://image.tmdb.org/t/p/original/${
+                    `https://image.tmdb.org/t/p/w500/${
                       tv?.poster_path || tv?.backdrop_path
                     }`
                   }
                   alt={detail?.title || tv?.name}
                   width={500}
                   height={300}
+                  priority
                   className="block align-middle !w-[350px] md:!min-w-[350px] !h-[480px] bg-cover object-cover rounded-lg md:pl-0"
                 />
 
@@ -454,6 +469,7 @@ const DramaMain = ({
                             <Link
                               href="/lists/create"
                               className="flex items-center justify-center py-1"
+                              prefetch={true}
                             >
                               <IoIosAddCircle
                                 size={25}
@@ -534,6 +550,7 @@ const DramaMain = ({
                       <Link
                         href={`/tv/${tv?.id}/edit/detail`}
                         className="text-sm text-[#2490da] break-words"
+                        prefetch={true}
                       >
                         Edit Translation
                       </Link>

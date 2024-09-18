@@ -8,8 +8,11 @@ import { FaLock, FaRegEye, FaUser } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { IoTvSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
-import EditList from "../[listId]/edit/EditList";
-import { currentUserProps, ICurrentUser, UserProps } from "@/helper/type";
+import { currentUserProps } from "@/helper/type";
+import dynamic from "next/dynamic";
+const EditList = dynamic(() => import("../[listId]/edit/EditList"), {
+  ssr: false,
+});
 
 interface CurrentUser {
   currentUser: currentUserProps | null;

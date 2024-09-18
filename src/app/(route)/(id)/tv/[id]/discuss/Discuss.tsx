@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import CommentCard from "./CommentCard";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import NestedComment from "./NestedComment";
 import { toast } from "react-toastify";
 import { useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
+import ReusedImage from "@/components/ui/allreusedimage";
+const CommentCard = dynamic(() => import("./CommentCard"), { ssr: false });
+const NestedComment = dynamic(() => import("./NestedComment"), { ssr: false });
 
 const Discuss = ({ user, users, tv_id, getComment }: any) => {
   const [loading, setLoading] = useState<Record<string, boolean>>({});
@@ -43,12 +44,14 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
 
       if (response.status === 200) {
         const updatedComments = await response.json();
-        router.refresh();
         toast.success("Comment Posted");
+        router.refresh();
         getComment(updatedComments);
         setReplyText("");
         setCommentText("");
         setReplyingTo({});
+        setSpoilerComment(false);
+        setSpoilerReply(false);
       } else if (response.status === 400) {
         toast.error("Invalid User");
       } else if (response.status === 404) {
@@ -154,17 +157,20 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
         <div className="border-b-0 px-3 py-2">
           <div className="text-md font-bold">
             <div className="relative inline-block float-left w-[48px] h-[48px] bg-[#3e4042] mr-3 rounded-full">
-              <Image
+              <ReusedImage
                 src={user?.profileAvatar || user?.image || "/default-pf.jpg"}
                 alt={`${user?.displayName || user?.name}'s profile avatar`}
-                width={200}
-                height={200}
+                width={48}
+                height={48}
                 quality={100}
-                priority
+                loading="lazy"
                 className="w-[48px] h-[48px] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
               />
             </div>
-            <div className="overflow-hidden">
+            <form
+              action={() => handlePostComment(null, tv_id)}
+              className="overflow-hidden"
+            >
               <div className="text-left block mb-1">
                 <div className="relative inline-block w-full align-bottom text-md">
                   <textarea
@@ -202,16 +208,15 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                   <span className="inline-block relative cursor-pointer whitespace-nowrap align-middle"></span>
                 </label>
                 <button
-                  onClick={() => handlePostComment(null, tv_id)}
                   name="Posting Button"
-                  className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-3 px-5 outline-none ${
+                  className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-2 px-5 outline-none ${
                     loading.main ? "opacity-50 pointer-events-none" : ""
                   } ${!session ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   {loading.main ? "Posting..." : "Post"}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
         <div className="border-b border-b-[#78828c21] px-3 pt-2">
@@ -224,6 +229,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                   key={idx}
                 >
                   <CommentCard
+                    tv_id={tv_id}
                     comment={comment}
                     onReply={(commentId: string) =>
                       handleReply(commentId, comment.id)
@@ -254,6 +260,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                   />
 
                   <NestedComment
+                    tv_id={tv_id}
                     comments={comment.replies}
                     parentId={comment.id}
                     user={user}

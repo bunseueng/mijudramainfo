@@ -1,9 +1,15 @@
 import React from "react";
 import prisma from "@/lib/db";
-import PersonHeader from "../details/PersonHeader";
-import PersonEditList from "../details/PersonEditList";
-import PersonList from "../../PersonList";
 import { Metadata } from "next";
+import dynamic from "next/dynamic";
+
+const PersonHeader = dynamic(() => import("../details/PersonHeader"), {
+  ssr: false,
+});
+const PersonEditList = dynamic(() => import("../details/PersonEditList"), {
+  ssr: false,
+});
+const PersonList = dynamic(() => import("../../PersonList"), { ssr: false });
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const person_id = params.id;

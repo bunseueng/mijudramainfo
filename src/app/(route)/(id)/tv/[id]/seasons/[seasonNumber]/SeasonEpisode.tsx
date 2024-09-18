@@ -3,12 +3,15 @@
 import { fetchSeasonEpisode, fetchTv } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
 import ColorThief from "colorthief";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaArrowCircleDown, FaArrowLeft } from "react-icons/fa";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const SeasonEpisode = () => {
   const [expandedEpisode, setExpandedEpisode] = useState<number | null>(null);
@@ -84,13 +87,16 @@ const SeasonEpisode = () => {
       >
         <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
           <div className="flex items-center lg:items-start">
-            <Image
+            <LazyImage
               ref={imgRef} // Set the reference to the image
-              src={`https://image.tmdb.org/t/p/original/${season?.poster_path}`}
+              src={`https://image.tmdb.org/t/p/${
+                season?.poster_path ? "w92" : "w300"
+              }/${season?.poster_path}`}
               alt={`${tv?.name}'s Poster`}
-              width={200}
-              height={200}
+              width={90}
+              height={130}
               quality={100}
+              priority
               className="w-[90px] h-[130px] bg-center object-center rounded-md"
             />
             <div className="flex flex-col pl-5 py-5">
@@ -99,6 +105,7 @@ const SeasonEpisode = () => {
                 {getYearFromDate(tv?.first_air_date || tv?.release_date)})
               </h1>
               <Link
+                prefetch={true}
                 href={`/tv/${tv?.id}/seasons`}
                 className="flex items-center my-5 opacity-75 cursor-pointer hover:opacity-90"
               >
@@ -111,7 +118,7 @@ const SeasonEpisode = () => {
       </div>
 
       <div className="max-w-6xl mx-auto py-4 px-4 md:px-6">
-        <h1 className="text-2xl text-black font-bold mt-3">
+        <h1 className="text-2xl text-black dark:text-white font-bold mt-3">
           Episodes {season?.episodes?.length}
         </h1>
         {season?.episodes?.map((item: any, idx: number) => {
@@ -121,12 +128,17 @@ const SeasonEpisode = () => {
               key={idx}
             >
               <div className="flex flex-col md:flex-row items-start">
-                <Image
-                  src={`https://image.tmdb.org/t/p/original/${item?.still_path}`}
-                  alt={`${tv?.name}'s Poster`}
-                  width={250}
-                  height={250}
+                <LazyImage
+                  src={
+                    item?.still_path !== null
+                      ? `https://image.tmdb.org/t/p/w185/${item?.still_path}`
+                      : "/placeholder-image.avif"
+                  }
+                  alt={`${item?.name}'s Still`}
+                  width={200}
+                  height={130}
                   quality={100}
+                  priority
                   className="w-full h-full md:w-[200px] md:h-[130px] bg-cover object-cover rounded-tl-md"
                 />
                 <div className="w-full">
@@ -179,6 +191,7 @@ const SeasonEpisode = () => {
                     <ul className="flex items-center justify-between px-4 py-2 border-b-2 border-b-slate-500">
                       <li className="hover:opacity-70 transform duration-300">
                         <Link
+                          prefetch={true}
                           href={`https://www.themoviedb.org/tv/${tv?.id}/season/${season?.season_number}/episode/${item?.episode_number}/videos`}
                         >
                           Videos
@@ -186,6 +199,7 @@ const SeasonEpisode = () => {
                       </li>
                       <li className="hover:opacity-70 transform duration-300">
                         <Link
+                          prefetch={true}
                           href={`https://www.themoviedb.org/tv/${tv?.id}/season/${season?.season_number}/episode/${item?.episode_number}/images/backdrops`}
                         >
                           Images
@@ -193,6 +207,7 @@ const SeasonEpisode = () => {
                       </li>
                       <li className="hover:opacity-70 transform duration-300">
                         <Link
+                          prefetch={true}
                           href={`https://www.themoviedb.org/tv/${tv?.id}/season/${season?.season_number}/episode/${item?.episode_number}/changes`}
                         >
                           Changes
@@ -200,6 +215,7 @@ const SeasonEpisode = () => {
                       </li>
                       <li className="hover:opacity-70 transform duration-300">
                         <Link
+                          prefetch={true}
                           href={`https://www.themoviedb.org/tv/${tv?.id}/season/${season?.season_number}/episode/${item?.episode_number}/#`}
                         >
                           Report
@@ -207,6 +223,7 @@ const SeasonEpisode = () => {
                       </li>
                       <li className="hover:opacity-70 transform duration-300">
                         <Link
+                          prefetch={true}
                           href={`https://www.themoviedb.org/tv/${tv?.id}/season/${season?.season_number}/episode/${item?.episode_number}/edit?active_nav_item=primary_facts`}
                         >
                           Edit
@@ -233,13 +250,17 @@ const SeasonEpisode = () => {
                                   crew?.known_for_department === "Directing"
                               )
                               .map((crewItem: any, idx: number) => (
-                                <div className="flex items-center" key={idx}>
-                                  <Image
-                                    src={`https://image.tmdb.org/t/p/original/${crewItem?.profile_path}`}
-                                    alt="profile image"
-                                    width={150}
-                                    height={150}
-                                    className="w-[90px] h-[70px] rounded-md"
+                                <div
+                                  className="flex items-center py-1"
+                                  key={idx}
+                                >
+                                  <LazyImage
+                                    src={`https://image.tmdb.org/t/p/w185/${crewItem?.profile_path}`}
+                                    alt={`${crewItem?.name}'s Profile`}
+                                    width={90}
+                                    height={70}
+                                    priority
+                                    className="w-[90px] h-[70px] rounded-md object-cover"
                                   />
                                   <div className="ml-4">
                                     <p className="text-sm font-semibold">
@@ -268,13 +289,17 @@ const SeasonEpisode = () => {
                                   crew?.known_for_department === "Creator"
                               )
                               .map((crewItem: any, idx: number) => (
-                                <div className="flex items-center" key={idx}>
-                                  <Image
-                                    src={`https://image.tmdb.org/t/p/original/${crewItem?.profile_path}`}
-                                    alt="profile image"
-                                    width={150}
-                                    height={150}
-                                    className="w-[90px] h-[70px] rounded-md"
+                                <div
+                                  className="flex items-center py-1"
+                                  key={idx}
+                                >
+                                  <LazyImage
+                                    src={`https://image.tmdb.org/t/p/w185/${crewItem?.profile_path}`}
+                                    alt={`${crewItem?.name}'s Profile`}
+                                    width={90}
+                                    height={70}
+                                    priority
+                                    className="w-[90px] h-[70px] rounded-md object-cover"
                                   />
                                   <div className="ml-4">
                                     <p className="text-sm font-semibold">
@@ -301,13 +326,17 @@ const SeasonEpisode = () => {
                           <div>
                             {item?.guest_stars?.map(
                               (guest: any, idx: number) => (
-                                <div className="flex items-center" key={idx}>
-                                  <Image
-                                    src={`https://image.tmdb.org/t/p/original/${guest?.profile_path}`}
-                                    alt="profile image"
-                                    width={150}
-                                    height={150}
-                                    className="w-[90px] h-[70px] rounded-md"
+                                <div
+                                  className="flex items-center py-1"
+                                  key={idx}
+                                >
+                                  <LazyImage
+                                    src={`https://image.tmdb.org/t/p/w185/${guest?.profile_path}`}
+                                    alt={`${guest?.name}'s Profile`}
+                                    width={90}
+                                    height={70}
+                                    priority
+                                    className="w-[90px] h-[70px] rounded-md object-cover"
                                   />
                                   <div className="ml-4">
                                     <p className="text-sm font-semibold">
@@ -325,6 +354,7 @@ const SeasonEpisode = () => {
                       </div>
                       <div className="w-full md:w-[20%] text-end py-5 px-4">
                         <Link
+                          prefetch={true}
                           href={`${path}/cast`}
                           className="text-sm font-bold hover:opacity-70 cursor-pointer"
                         >

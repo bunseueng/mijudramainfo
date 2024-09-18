@@ -2,7 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import CoinModal from "@/app/component/ui/Modal/CoinModal";
+import dynamic from "next/dynamic";
+const CoinModal = dynamic(() => import("@/app/component/ui/Modal/CoinModal"), {
+  ssr: false,
+});
 
 interface UserI {
   getCoin: any;
@@ -58,6 +61,7 @@ const Coin: React.FC<UserI> = ({ getCoin, paypalClientID }) => {
                     alt="Coin Image"
                     width={100}
                     height={100}
+                    loading="lazy"
                     className="w-12 h-12 bg-cover bg-center object-cover"
                   />
                   <h1 className="text-white text-2xl font-bold pl-3">Coins</h1>

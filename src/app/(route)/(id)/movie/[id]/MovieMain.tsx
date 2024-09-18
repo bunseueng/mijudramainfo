@@ -1,7 +1,5 @@
 "use client";
 
-import CircleRating from "@/app/component/ui/CircleRating/CircleRating";
-import Image from "next/image";
 import { FaRegKissWinkHeart } from "react-icons/fa";
 import { MdBookmarkAdd, MdFormatListBulletedAdd } from "react-icons/md";
 import {
@@ -18,8 +16,18 @@ import {
   fetchRecommendation,
 } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
-import PlayTrailerBtn from "../../tv/[id]/PlayTrailerBtn";
-import MovieCast from "./MovieCast";
+import dynamic from "next/dynamic";
+const CircleRating = dynamic(
+  () => import("@/app/component/ui/CircleRating/CircleRating"),
+  { ssr: false }
+);
+const PlayTrailerBtn = dynamic(() => import("../../tv/[id]/PlayTrailerBtn"), {
+  ssr: false,
+});
+const MovieCast = dynamic(() => import("./MovieCast"), { ssr: false });
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 export const getYearFromDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -117,13 +125,15 @@ const MovieMain = ({ movie_id, user, users, getComment }: any) => {
             }}
           >
             <div className="flex flex-col md:flex-row content-center max-w-[97rem] mx-auto py-10 md:py-8 md:px-10">
-              <Image
-                src={`https://image.tmdb.org/t/p/original/${
-                  movie?.poster_path || movie?.backdrop_path
-                }`}
-                alt="image"
-                width={500}
-                height={300}
+              <LazyImage
+                src={`https://image.tmdb.org/t/p/${
+                  movie?.poster_path ? "w154" : "w300"
+                }/${movie?.poster_path || movie?.backdrop_path}`}
+                alt={`${movie?.name || movie?.title}'s Poster`}
+                width={350}
+                height={480}
+                quality={100}
+                priority
                 className="block align-middle w-[350px] h-[480px] rounded-lg pl-8 md:pl-0"
               />
               <div className="px-8 py-5">

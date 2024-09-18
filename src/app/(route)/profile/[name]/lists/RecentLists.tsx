@@ -3,9 +3,12 @@
 import React, { useState } from "react";
 import { RiComputerLine } from "react-icons/ri";
 import Link from "next/link";
-import FetchRecentList from "./FetchRecentList";
 import { CiHeart } from "react-icons/ci";
 import { IList } from "@/helper/type";
+import dynamic from "next/dynamic";
+const FetchRecentList = dynamic(() => import("./FetchRecentList"), {
+  ssr: false,
+});
 
 const RecentLists: React.FC<IList> = ({ list }) => {
   const [hoveredIndexes, setHoveredIndexes] = useState<(number | null)[]>([]);

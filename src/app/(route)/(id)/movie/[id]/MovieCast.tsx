@@ -1,8 +1,13 @@
-import CastCard from "@/app/component/ui/Card/CastCard";
 import Link from "next/link";
 import React from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
-import ReviewCard from "@/app/component/ui/Card/ReviewCard";
+import dynamic from "next/dynamic";
+const CastCard = dynamic(() => import("@/app/component/ui/Card/CastCard"), {
+  ssr: false,
+});
+const ReviewCard = dynamic(() => import("@/app/component/ui/Card/ReviewCard"), {
+  ssr: false,
+});
 
 const MovieCast = ({
   cast,
@@ -48,6 +53,7 @@ const MovieCast = ({
               <FaArrowAltCircleRight size={30} className="ml-2 font-bold" />
             </div>
             <Link
+              prefetch={true}
               href={`/movie/${movie_id}/cast`}
               className="text-lg font-bold"
             >

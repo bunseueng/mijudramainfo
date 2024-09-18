@@ -105,11 +105,13 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                     }`}
                     width={100}
                     height={100}
+                    loading="lazy"
                     className="size-[50px] object-cover rounded-full"
                   />
 
                   <div className="flex flex-col text-black pl-2">
                     <Link
+                      prefetch={true}
                       href={`/person/${review?.userId}`}
                       className="text-[#2490da] text-sm md:text-md"
                     >
@@ -228,6 +230,7 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                       alt={`${tv?.name || tv?.title}`}
                       width={100}
                       height={100}
+                      priority
                       className="w-[100px] h-[150px] object-cover rounded-md"
                     />
                   </div>

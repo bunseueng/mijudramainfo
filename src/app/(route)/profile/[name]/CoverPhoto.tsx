@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { User } from "./ProfileItem";
 import { currentUserProps } from "@/helper/type";
+import Image from "next/image";
 
 interface currentUser {
   currentUser: currentUserProps | null;
@@ -70,15 +71,36 @@ const CoverPhoto: React.FC<User & currentUser> = ({ user, currentUser }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full h-full">
-      <div
-        className="w-full h-[400px] relative bg-cover bg-center object-cover bg-no-repeat"
-        style={{
-          backgroundImage: cover
-            ? `url(${cover})`
-            : `url(${user?.coverPhoto || "/default-cover.png"})`,
-        }}
-      >
-        <div className="absolute right-5 -bottom-4">
+      {currentUser?.id === user?.id ? (
+        <Image
+          src={
+            cover
+              ? cover
+              : user?.coverPhoto
+              ? user.coverPhoto
+              : "/default-cover.png"
+          }
+          alt={`${user?.displayName || user?.name}'s Cover Image`}
+          width={500}
+          height={300}
+          quality={100}
+          priority
+          className="w-full h-[350px] bg-center object-cover rounded-lg mb-4"
+        />
+      ) : (
+        <Image
+          src={user?.coverPhoto ? user.coverPhoto : "/default-cover.png"}
+          alt={`${user?.displayName || user?.name}'s Cover Image`}
+          width={500}
+          height={300}
+          quality={100}
+          priority
+          className="w-full h-[350px] bg-center object-cover rounded-lg mb-4"
+        />
+      )}
+
+      <div className="w-full relative">
+        <div className="absolute right-5 bottom-10">
           {currentUser?.id === user?.id && (
             <div className="overflow-hidden relative">
               {cover ? (

@@ -2,9 +2,6 @@
 
 import Image from "next/image";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
-import Drama from "../../../(route)/(id)/person/[id]/Drama";
-import VarietyShow from "../../../(route)/(id)/person/[id]/VarietyShow";
-import PersonMovie from "@/app/(route)/(id)/person/[id]/PersonMovie";
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchPerson,
@@ -29,9 +26,7 @@ import {
   TwitterIcon,
   TwitterShareButton,
 } from "next-share";
-import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
 import { personPopularity } from "@/helper/item-list";
-import PopularityModal from "../Modal/PopularityModal";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CommentProps,
@@ -40,6 +35,19 @@ import {
   UserProps,
 } from "@/helper/type";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+const Drama = dynamic(() => import("../../../(route)/(id)/person/[id]/Drama"));
+const VarietyShow = dynamic(
+  () => import("../../../(route)/(id)/person/[id]/VarietyShow")
+);
+const PersonMovie = dynamic(
+  () => import("@/app/(route)/(id)/person/[id]/PersonMovie")
+);
+const Discuss = dynamic(
+  () => import("@/app/(route)/(id)/tv/[id]/discuss/Discuss")
+);
+const PopularityModal = dynamic(() => import("../Modal/PopularityModal"));
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"));
 
 type UserTotalPopularity = {
   itemId: string;
@@ -275,10 +283,8 @@ const FetchPerson: React.FC<IFetchPerson> = ({
           <div className="w-full min-[560px]:w-[40%] lg:w-[30%] h-full">
             <div className="block bg-white dark:bg-[#242526] border-[1px] border-[#00000024] dark:border-[#232425] rounded-md">
               <div className="lg:w-full h-full min-h-full flex items-center justify-center md:justify-start p-4">
-                <Image
-                  src={`https://image.tmdb.org/t/p/original/${
-                    persons?.profile_path || persons?.poster_path
-                  }`}
+                <LazyImage
+                  src={`https://image.tmdb.org/t/p/h632/${persons?.profile_path}`}
                   alt={`${persons?.name}'s Avartar`}
                   width={600}
                   height={600}
@@ -297,7 +303,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   </div>
                   <div className="px-10">
                     <p className="text-center text-black dark:text-[#ffffffde] text-lg font-bold">
-                      {getPersons?.love}
+                      {getPersons?.love ? getPersons?.love : 0}
                     </p>
                     <p className="text-[#818a91] text-sm">Hearts</p>
                   </div>
@@ -489,13 +495,11 @@ const FetchPerson: React.FC<IFetchPerson> = ({
 
             <div className="w-full bg-white dark:bg-[#242526] border-[1px] border-[#00000024] dark:border-[#232425] rounded-md mt-5 overflow-hidden">
               <div className="flex items-center justify-center py-5">
-                <Image
-                  src={`https://image.tmdb.org/t/p/original/${
-                    persons?.profile_path || persons?.poster_path
-                  }`}
+                <LazyImage
+                  src={`https://image.tmdb.org/t/p/w185/${persons?.profile_path}`}
                   alt={`${persons?.name}'s Avartar`}
-                  width={600}
-                  height={600}
+                  width={80}
+                  height={80}
                   quality={100}
                   className="w-20 h-20 rounded-full bg-center bg-cover object-cover"
                   priority
@@ -509,6 +513,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                       alt={`${item?.name}`}
                       width={100}
                       height={100}
+                      quality={90}
                       className="w-12 h-12 bg-cover bg-center object-cover mx-2"
                       priority
                     />
@@ -571,6 +576,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                               alt={`${currentUsers?.name}'s Profile`}
                               width={100}
                               height={100}
+                              quality={90}
                               className="w-6 h-6 bg-center object-cover rounded-full"
                               priority
                             />
@@ -627,6 +633,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                           alt={`${user?.name}'s Avartar`}
                           width={100}
                           height={100}
+                          quality={90}
                           className="w-10 h-10 bg-cover object-cover rounded-full"
                           priority
                         />

@@ -7,7 +7,6 @@ import {
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import {
   currentUserProps,
   DramaDB,
@@ -20,7 +19,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa6";
-import TvInfo from "../TvInfo";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
 import { IoIosArrowDown } from "react-icons/io";
 import { AnimatePresence, motion } from "framer-motion";
@@ -31,6 +29,18 @@ import { formatDate } from "@/app/actions/formatDate";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
+import dynamic from "next/dynamic";
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
+const TvInfo = dynamic(() => import("../TvInfo"), { ssr: false });
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
+const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
+  ssr: false,
+});
 
 export type ReviewType = {
   tv_id: string;
@@ -249,25 +259,27 @@ const Reviews: React.FC<ReviewType> = ({
         <div className="max-w-6xl mx-auto flex items-center mt-0 py-2">
           <div className="flex items-center lg:items-start px-4 md:px-6 cursor-default">
             {tv?.poster_path || tv?.backdrop_path !== null ? (
-              <Image
+              <LazyImage
                 ref={imgRef}
                 onLoad={extractColor}
-                src={`https://image.tmdb.org/t/p/original/${
-                  tv?.poster_path || tv?.backdrop_path
-                }`}
+                src={`https://image.tmdb.org/t/p/${
+                  tv?.poster_path ? "w154" : "w300"
+                }/${tv?.poster_path || tv?.backdrop_path}`}
                 alt={`${tv?.name || tv?.title}'s Poster`}
-                width={200}
-                height={200}
+                width={60}
+                height={90}
                 quality={100}
+                priority
                 className="w-[60px] h-[90px] bg-center object-center rounded-md"
               />
             ) : (
               <Image
-                src="/empty-img.jpg"
-                alt="Drama image"
-                width={200}
-                height={200}
+                src="/placeholder-image.avif"
+                alt={`${tv?.name || tv?.title}'s Poster`}
+                width={60}
+                height={90}
                 quality={100}
+                loading="lazy"
                 className="w-[60px] h-[90px] bg-center object-center rounded-md"
               />
             )}
@@ -277,6 +289,7 @@ const Reviews: React.FC<ReviewType> = ({
                 {getYearFromDate(tv?.first_air_date || tv?.release_date)})
               </h1>
               <Link
+                prefetch={true}
                 href={`/tv/${tv_id}`}
                 className="flex items-center text-sm my-1 opacity-75 hover:opacity-90"
               >
@@ -509,7 +522,7 @@ const Reviews: React.FC<ReviewType> = ({
                       <div className=" bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
                         <div className="flex justify-between">
                           <div className="flex items-center">
-                            <Image
+                            <ReusedImage
                               src={`${
                                 review?.userInfo?.profileAvatar ||
                                 review?.userInfo?.image
@@ -518,13 +531,16 @@ const Reviews: React.FC<ReviewType> = ({
                                 review?.userInfo?.displayName ||
                                 review?.userInfo?.name
                               }`}
-                              width={100}
-                              height={100}
+                              width={50}
+                              height={50}
+                              quality={100}
+                              loading="lazy"
                               className="size-[50px] object-cover rounded-full"
                             />
 
                             <div className="flex flex-col text-black pl-2">
                               <Link
+                                prefetch={true}
                                 href={`/person/${review?.userId}`}
                                 className="w-auto text-[#2490da] text-sm md:text-md pb-1 cursor-default"
                               >
@@ -534,6 +550,7 @@ const Reviews: React.FC<ReviewType> = ({
                                 </span>
                               </Link>
                               <Link
+                                prefetch={true}
                                 href={`/profile/${review?.userInfo?.name}/reviews`}
                                 className="text-[#2490da] text-sm md:text-md pb-1"
                               >
@@ -652,13 +669,15 @@ const Reviews: React.FC<ReviewType> = ({
                               )}
                             </div>
                             <div className="relative float-right border border-[#00000024] rounded-sm m-2">
-                              <Image
-                                src={`https://image.tmdb.org/t/p/original/${
-                                  tv.poster_path || tv.backdrop_path
-                                }`}
+                              <LazyImage
+                                src={`https://image.tmdb.org/t/p/${
+                                  tv?.poster_path ? "w154" : "w300"
+                                }/${tv.poster_path || tv.backdrop_path}`}
                                 alt={`${tv?.name || tv?.title}`}
                                 width={100}
-                                height={100}
+                                height={150}
+                                quality={100}
+                                priority
                                 className="w-[100px] h-[150px] object-cover rounded-md"
                               />
                             </div>
@@ -816,13 +835,15 @@ const Reviews: React.FC<ReviewType> = ({
           </div>
           <div className="w-full h-full md:w-[33.33333%] px-3">
             <div className="flex flex-col items-center content-center max-w-[97rem] mx-auto py-10 md:p-4 border rounded-md bg-white p-2 dark:bg-[#242424]">
-              <Image
-                src={`https://image.tmdb.org/t/p/original/${
-                  tv?.poster_path || tv?.backdrop_path
-                }`}
-                alt="image"
+              <LazyImage
+                src={`https://image.tmdb.org/t/p/${
+                  tv?.poster_path ? "w154" : "w300"
+                }/${tv?.poster_path || tv?.backdrop_path}`}
+                alt={`${tv?.name}'s Poster`}
                 width={500}
-                height={300}
+                height={480}
+                quality={100}
+                priority
                 className="block align-middle w-[350px] h-[480px]"
               />
               <div className="mt-2 flex items-center justify-between">

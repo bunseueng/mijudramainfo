@@ -5,17 +5,15 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import ListCard from "./ListCard";
 import {
   currentUserProps,
-  ICurrentUser,
-  IList,
   IRating,
   List,
   Rating,
   UserProps,
 } from "@/helper/type";
-import { User } from "../../profile/[name]/ProfileItem";
+import dynamic from "next/dynamic";
+const ListCard = dynamic(() => import("./ListCard"), { ssr: false });
 
 export interface Lists {
   findSpecificRating: IRating[];

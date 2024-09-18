@@ -7,19 +7,45 @@ import {
   fetchMovieLanguages,
 } from "@/app/actions/fetchMovieApi";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
-import Director from "@/app/component/ui/CastRole/Director";
-import GuestRole from "@/app/component/ui/CastRole/GuestRole";
-import MainRole from "@/app/component/ui/CastRole/MainRole";
-import MovieArt from "@/app/component/ui/CastRole/MovieArt";
-import MovieCamera from "@/app/component/ui/CastRole/MovieCamera";
-import MovieSupportRole from "@/app/component/ui/CastRole/MovieSupportRole";
-import Product from "@/app/component/ui/CastRole/Product";
-import Screenwriter from "@/app/component/ui/CastRole/Screenwriter";
-import Sound from "@/app/component/ui/CastRole/Sound";
 import { useQuery } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
+const Director = dynamic(() => import("@/app/component/ui/CastRole/Director"), {
+  ssr: false,
+});
+const GuestRole = dynamic(
+  () => import("@/app/component/ui/CastRole/GuestRole"),
+  { ssr: false }
+);
+const MainRole = dynamic(() => import("@/app/component/ui/CastRole/MainRole"), {
+  ssr: false,
+});
+const MovieArt = dynamic(() => import("@/app/component/ui/CastRole/MovieArt"), {
+  ssr: false,
+});
+const MovieCamera = dynamic(
+  () => import("@/app/component/ui/CastRole/MovieCamera"),
+  { ssr: false }
+);
+const MovieSupportRole = dynamic(
+  () => import("@/app/component/ui/CastRole/MovieSupportRole"),
+  { ssr: false }
+);
+const Product = dynamic(() => import("@/app/component/ui/CastRole/Product"), {
+  ssr: false,
+});
+const Screenwriter = dynamic(
+  () => import("@/app/component/ui/CastRole/Screenwriter"),
+  { ssr: false }
+);
+const Sound = dynamic(() => import("@/app/component/ui/CastRole/Sound"), {
+  ssr: false,
+});
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const AllMovieCast = ({ movie_id }: any) => {
   const { data: movie } = useQuery({
@@ -84,14 +110,15 @@ const AllMovieCast = ({ movie_id }: any) => {
       <div className=" bg-cyan-600 dark:bg-[#242424]">
         <div className="w-full container mx-auto flex items-center mt-0 px-2 py-2 lg:py-6">
           <div className="flex items-center lg:items-start px-2 cursor-default">
-            <Image
-              src={`https://image.tmdb.org/t/p/original/${
-                movie?.poster_path || movie?.backdrop_path
-              }`}
-              alt="director image"
-              width={200}
-              height={200}
+            <LazyImage
+              src={`https://image.tmdb.org/t/p/${
+                movie?.poster_path ? "w154" : "w300"
+              }/${movie?.poster_path || movie?.backdrop_path}`}
+              alt={`${movie?.title || movie?.name}'s Poster`}
+              width={90}
+              height={130}
               quality={100}
+              priority
               className="w-[90px] h-[130px] bg-center object-center rounded-md"
             />
             <div className="flex flex-col pl-5 py-5">
@@ -100,6 +127,7 @@ const AllMovieCast = ({ movie_id }: any) => {
                 {getYearFromDate(movie?.first_air_date || movie?.release_date)})
               </h1>
               <Link
+                prefetch={true}
                 href={`/movie/${movie_id}`}
                 className="flex items-center my-5 cursor-default"
               >
@@ -221,20 +249,22 @@ const AllMovieCast = ({ movie_id }: any) => {
           </div>
           <div className="w-full h-full lg:w-[40%] xl:w-[25%]">
             <div className="flex flex-col items-center content-center max-w-[97rem] mx-auto py-10 md:p-5 border rounded-md bg-white dark:bg-[#242424] p-2">
-              <Image
-                src={`https://image.tmdb.org/t/p/original/${
-                  movie?.poster_path || movie?.backdrop_path
-                }`}
-                alt="image"
-                width={500}
-                height={300}
+              <LazyImage
+                src={`https://image.tmdb.org/t/p/${
+                  movie?.poster_path ? "w154" : "w300"
+                }/${movie?.poster_path || movie?.backdrop_path}`}
+                alt={`${movie?.poster_path}'s Poster`}
+                width={350}
+                height={480}
+                quality={100}
+                priority
                 className="block align-middle w-[350px] h-[480px] rounded-lg"
               />
               <div className="mt-2 flex items-center justify-between">
                 <ShareButton
-                  movie={`https://image.tmdb.org/t/p/original/${
-                    movie?.poster_path || movie?.backdrop_path
-                  }`}
+                  movie={`https://image.tmdb.org/t/p/${
+                    movie?.poster_path ? "w154" : "w300"
+                  }/${movie?.poster_path || movie?.backdrop_path}`}
                 />
               </div>
             </div>

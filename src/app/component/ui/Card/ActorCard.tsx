@@ -1,7 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-
+import dynamic from "next/dynamic";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false, // If you don't need server-side rendering
+});
 const ActorCard = ({ result }: any) => {
   // Extracting relevant data from the result object
   const { cast } = result;
@@ -23,33 +25,34 @@ const ActorCard = ({ result }: any) => {
   return backgroundImage ? (
     <div className="w-[150px] h-[200px] bg-cover">
       <Link
+        prefetch={true}
         href={`/person/${person}`}
         className="block hover:relative transform duration-100 group"
+        style={{ width: "auto", height: "auto" }}
       >
-        {result?.profile_path !== null ? (
-          <Image
-            src={`https://image.tmdb.org/t/p/original/${backgroundImage.profile_path}`}
-            alt={`${actorName}'s avatar`}
-            width={600}
-            height={600}
-            quality={100}
-            className="rounded-xl w-[150px] h-[200px] object-cover"
-            priority
-          />
-        ) : (
-          <Image
-            src="/empty-img.jpg"
-            alt={`${actorName}'s avatar`}
-            width={600}
-            height={600}
-            quality={100}
-            className="rounded-xl w-[150px] h-[200px] object-cover"
-            priority
-          />
-        )}
+        <LazyImage
+          src={backgroundImage?.profile_path}
+          w={"h632"}
+          alt={`${actorName}'s avatar`}
+          width={150}
+          height={250}
+          quality={100}
+          priority
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "bottom",
+          }}
+          className="w-[150px] h-[190px] rounded-xl object-cover"
+        />
       </Link>
       <div className="flex items-center justify-between">
-        <Link href={`/person/${person}`} className="truncate">
+        <Link
+          prefetch={true}
+          href={`/person/${person}`}
+          className="text-sm truncate min-h-[20px]"
+        >
           {actorName}
         </Link>
       </div>

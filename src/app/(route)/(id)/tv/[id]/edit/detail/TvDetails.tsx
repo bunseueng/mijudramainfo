@@ -15,7 +15,7 @@ import { Drama, DramaDetails, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   IoIosArrowDown,
@@ -897,6 +897,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         </div>
         <div className="inline-flex mt-5">
           <button
+            name="Submit"
             type="submit"
             className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 mr-5 ${
               isSubmitEnabled || results?.length > 0
@@ -906,11 +907,12 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             disabled={isSubmitEnabled || results?.length > 0 ? false : true}
           >
             <span className="mr-1 pt-1">
-              <ClipLoader color="#242526" loading={loading} size={19} />
+              <ClipLoader color="#c3c3c3" loading={loading} size={19} />
             </span>
             Submit
           </button>
           <button
+            name="Reset"
             className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
               isSubmitEnabled || results?.length > 0
                 ? "cursor-pointer"
@@ -921,7 +923,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           >
             {resetLoading ? (
               <span className="pt-1 mr-1">
-                <ClipLoader color="#242526" loading={!loading} size={19} />
+                <ClipLoader color="#c3c3c3" loading={!loading} size={19} />
               </span>
             ) : (
               <span className="mr-1">

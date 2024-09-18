@@ -47,7 +47,7 @@ export function SearchPagination({
   const showNext = currentPage < totalPages;
 
   return (
-    <Pagination className="flex flex-wrap items-start justify-start px-1 md:px-4">
+    <Pagination className="flex flex-wrap items-start justify-start px-1 md:px-4 z-50">
       <PaginationContent className="flex-wrap">
         {showPrevious && (
           <PaginationItem>

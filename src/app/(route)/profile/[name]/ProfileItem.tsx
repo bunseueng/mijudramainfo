@@ -13,33 +13,50 @@ import React, { useEffect, useState } from "react";
 import ImageResize from "tiptap-extension-resize-image";
 import Links from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import Watchlist from "./watchlist/Watchlist";
-import Image from "next/image";
 import { FaCheck, FaList, FaUserCheck } from "react-icons/fa6";
 import { IoPersonAddSharp } from "react-icons/io5";
-import ProfileList from "./lists/ProfileList";
-import RecentLists from "./lists/RecentLists";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { IoIosArrowDown } from "react-icons/io";
 import {
-  IFindSpecificUser,
+  FriendRequestProps,
   IFriend,
   ProfilePageProps,
   UserProps,
 } from "@/helper/type";
-import FollowButton from "@/app/component/ui/Button/FollowButton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarDays, MapPin, Users } from "lucide-react";
+import dynamic from "next/dynamic";
 import { ReviewType } from "../../(id)/tv/[id]/reviews/Reviews";
-import ProfileReviews from "./reviews/ProfileReviews";
+import Image from "next/image";
+const Watchlist = dynamic(() => import("./watchlist/Watchlist"), {
+  ssr: false,
+});
+const ProfileList = dynamic(() => import("./lists/ProfileList"), {
+  ssr: false,
+});
+const RecentLists = dynamic(() => import("./lists/RecentLists"), {
+  ssr: false,
+});
+const FollowButton = dynamic(
+  () => import("@/app/component/ui/Button/FollowButton"),
+  { ssr: false }
+);
+const ProfileReviews = dynamic(() => import("./reviews/ProfileReviews"), {
+  ssr: false,
+});
+const CoverPhoto = dynamic(() => import("./CoverPhoto"), { ssr: false });
+const AcceptRejectButton = dynamic(
+  () => import("@/app/component/ui/Button/AcceptRejectButton"),
+  { ssr: false }
+);
 
 export interface User {
   user: UserProps | null;
   users: UserProps[] | null;
 }
 
-const ProfileItem: React.FC<
-  ProfilePageProps & IFriend & User & IFindSpecificUser & ReviewType
-> = ({
+const ProfileItem: React.FC<ProfilePageProps & IFriend & User & ReviewType> = ({
   user,
   users,
   currentUser,
@@ -52,7 +69,6 @@ const ProfileItem: React.FC<
   lastLogin,
   findFriendId,
   friend,
-  yourFriend,
   getDrama,
   getReview,
 }) => {
@@ -60,6 +76,7 @@ const ProfileItem: React.FC<
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
+  const [friRequestModal, setFriRequestModal] = useState<boolean>(false);
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -149,7 +166,9 @@ const ProfileItem: React.FC<
     (item: any) => item?.status === "pending" || item?.status === "rejected"
   );
 
-  const friendRequestId = friend?.find((item) => item?.friendRequestId);
+  const friendRequestId = friend?.find(
+    (item: FriendRequestProps) => item?.friendRequestId
+  );
 
   const currentUserFriends = friend.find(
     (friendItem: any) =>
@@ -158,25 +177,25 @@ const ProfileItem: React.FC<
       friendItem.status === "accepted"
   );
 
-  const yourFriends = yourFriend?.filter(
-    (item) => item?.id !== currentUser?.id
+  const getAllCurrentUserFriend = friend?.filter((fri: FriendRequestProps) =>
+    [fri?.friendRespondId, fri?.friendRequestId].includes(user?.id as string)
   );
 
-  const friends = friend.filter(
-    (item) => item.friendRespondId === currentUser?.id
-  );
-
-  const combinedFriend = [...friends, ...yourFriends];
-
-  const getAllCurrentUserFriend = friend?.filter((fri) =>
-    user?.id?.includes(fri?.friendRespondId)
-  );
-
-  const getCurrentUserRespondFri = users?.filter((userFri) =>
+  const getCurrentUserRespondFri = users?.filter((userFri: UserProps) =>
     friend
-      ?.filter((stat) => stat?.status !== "pending")
-      ?.find((fri) => fri?.friendRespondId?.includes(userFri?.id))
+      ?.filter((stat: FriendRequestProps) => stat?.status !== "pending")
+      ?.find((fri: FriendRequestProps) =>
+        fri?.friendRespondId?.includes(userFri?.id)
+      )
   );
+
+  const currentFriendStatus = friend?.find(
+    (fri: FriendRequestProps) =>
+      (fri.friendRequestId === currentUser?.id ||
+        fri.friendRespondId === currentUser?.id) &&
+      (fri.friendRequestId === user?.id || fri.friendRespondId === user?.id)
+  )?.status;
+
   // Manage component mount state to ensure hooks run only on the client
   useEffect(() => {
     setIsMounted(true);
@@ -195,7 +214,6 @@ const ProfileItem: React.FC<
   if (!editor) {
     return null;
   }
-
   return (
     <div className="max-w-6xl w-full mx-auto py-3 md:px-6">
       <div className="flex flex-col md:block md:-mx-3">
@@ -246,11 +264,12 @@ const ProfileItem: React.FC<
                     <Links href="" className="block ">
                       <span>
                         {" "}
-                        {friend?.filter((fri) =>
+                        {friend?.filter((fri: FriendRequestProps) =>
                           fri?.friendRespondId?.includes(user?.id as string)
                         )?.length > 0
                           ? getAllCurrentUserFriend?.filter(
-                              (stat) => stat?.status !== "pending"
+                              (stat: FriendRequestProps) =>
+                                stat?.status !== "pending"
                             )?.length
                           : getCurrentUserRespondFri?.length}
                       </span>
@@ -269,33 +288,54 @@ const ProfileItem: React.FC<
               <div className="bg-white dark:bg-[#1b1c1d] px-3 py-2">
                 <ul className="rounded-sm">
                   <li className="block relative p-0">
-                    <b className="inline-block font-bold">Last Online: </b>
-                    <span className="text-sm opacity-90"> {lastLogin}</span>
+                    <Users className="inline-block mr-1" size={14} />
+                    <b className="inline-block text-sm font-semibold">
+                      Last Online:{" "}
+                      <span className="text-sm font-normal opacity-90">
+                        {" "}
+                        {lastLogin}
+                      </span>
+                    </b>
                   </li>
                   <li className="block relative p-0">
-                    <b className="inline-block font-bold">Gender: </b>
-                    <span className="text-sm opacity-90">
-                      {" "}
-                      {user?.gender
-                        ? user.gender.charAt(0).toUpperCase() +
-                          user.gender.slice(1)
-                        : ""}
-                    </span>
+                    <span className="inline-block mr-1">⚥</span>
+                    <b className="inline-block text-sm font-semibold">
+                      Gender:{" "}
+                      <span className="text-sm font-normal opacity-90">
+                        {user?.gender
+                          ? user.gender.charAt(0).toUpperCase() +
+                            user.gender.slice(1)
+                          : ""}
+                      </span>
+                    </b>
                   </li>
                   <li className="block relative p-0">
-                    <b className="inline-block font-bold">Location: </b>
-                    <span className="text-sm opacity-90"> {user?.country}</span>
+                    <MapPin className="inline-block mr-1" size={14} />
+                    <b className="inline-block text-sm font-semibold">
+                      Location:{" "}
+                      <span className="text-sm font-normal opacity-90">
+                        {" "}
+                        {user?.country}
+                      </span>
+                    </b>
                   </li>
                   <li className="block relative p-0">
-                    <b className="inline-block font-bold">Roles: </b>
-                    <span className="text-sm opacity-90">
-                      {" "}
-                      {user?.role === "USER" && "Member"}
-                    </span>
+                    <span className="inline-block mr-1">🎭</span>
+                    <b className="inline-block text-sm font-semibold">
+                      Roles:{" "}
+                      <span className="text-sm font-normal opacity-90">
+                        {user?.role === "USER" && "Member"}
+                      </span>
+                    </b>
                   </li>
                   <li className="block relative p-0">
-                    <b className="inline-block font-bold">Join Date: </b>{" "}
-                    <span className="text-sm opacity-90"> {formattedDate}</span>
+                    <CalendarDays className="inline-block mr-1" size={14} />
+                    <b className="inline-block text-sm font-semibold">
+                      Join Date:{" "}
+                      <span className="text-sm font-normal opacity-90">
+                        {formattedDate}
+                      </span>
+                    </b>{" "}
                   </li>
                 </ul>
               </div>
@@ -332,15 +372,18 @@ const ProfileItem: React.FC<
                   href=""
                   className="flex flex-wrap items-center relative leading-9 rounded-full whitespace-nowrap"
                 >
-                  {friend?.filter((fri) =>
+                  {friend?.filter((fri: FriendRequestProps) =>
                     fri?.friendRespondId?.includes(user?.id as string)
                   )?.length > 0 ? (
                     getAllCurrentUserFriend?.filter(
-                      (stat) => stat?.status !== "pending"
+                      (stat: FriendRequestProps) => stat?.status !== "pending"
                     )?.length > 0 ? (
                       getAllCurrentUserFriend
-                        ?.filter((stat) => stat?.status !== "pending")
-                        ?.map((fri) => (
+                        ?.filter(
+                          (stat: FriendRequestProps) =>
+                            stat?.status !== "pending"
+                        )
+                        ?.map((fri: FriendRequestProps) => (
                           <Image
                             key={fri?.id}
                             src={fri?.profileAvatar || fri?.image}
@@ -348,6 +391,7 @@ const ProfileItem: React.FC<
                             width={200}
                             height={200}
                             quality={100}
+                            priority
                             className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
                           />
                         ))
@@ -366,6 +410,7 @@ const ProfileItem: React.FC<
                         width={200}
                         height={200}
                         quality={100}
+                        priority
                         className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
                       />
                     ))
@@ -381,6 +426,7 @@ const ProfileItem: React.FC<
           </div>
         </div>
         <div className="order-1 float-left w-full md:w-[66.66667%] relative px-3">
+          <CoverPhoto user={user} users={users} currentUser={currentUser} />
           <div className="inline-block w-full h-full bg-[#fff] dark:bg-[#242526] relative border border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
             <div className="inline-block w-full h-full relative mt-5 md:mt-2">
               <div className="float-left relative px-3 mb-2">
@@ -393,6 +439,7 @@ const ProfileItem: React.FC<
                         width={200}
                         height={200}
                         quality={100}
+                        priority
                         className="w-full h-full align-middle rounded-full bg-center bg-cover object-cover"
                       />
                     </div>
@@ -442,10 +489,15 @@ const ProfileItem: React.FC<
                       </button>
                     )}
 
-                  {isPendingOrRejected && (
+                  {friend?.find(
+                    (fri: FriendRequestProps) =>
+                      currentUser?.id === fri?.friendRequestId
+                  )?.status === "pending" && (
                     <button
+                      type="button"
                       name="friend button"
                       className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
+                      onClick={() => setFriRequestModal(!friRequestModal)}
                     >
                       <span className="flex items-center">
                         {findFriendId ? (
@@ -464,65 +516,94 @@ const ProfileItem: React.FC<
                             )}
                           </>
                         )}
-                        <span className="pt-[2px]">Friend Request Sent</span>
+                        <span className="tex-xs md:text-sm pt-[2px]">
+                          Friend Request Sent
+                        </span>
                       </span>
+                      {friRequestModal && (
+                        <span
+                          className="text-xs md:text-sm absolute top-[40px] md:top-[50px] right-[89px] md:right-[97px] dark:bg-[#3a3b3c] dark:bg-opacity-50 rounded-md px-5 md:px-6 py-2"
+                          onClick={() =>
+                            deleteFriend(currentUser?.id as string)
+                          }
+                        >
+                          <p>Cancel Request</p>
+                        </span>
+                      )}
                     </button>
                   )}
-                  {!isPendingOrRejected && !findFriendId && (
-                    <button
-                      name="Add friend button"
-                      className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
-                      onClick={sendFriendRequest}
-                    >
-                      <span className="flex items-center">
-                        {findFriendId ? (
-                          <FaUserCheck className="mr-2" />
-                        ) : (
-                          <>
-                            {loading ? (
-                              <ClipLoader
-                                color="#fff"
-                                size={20}
-                                loading={loading}
-                                className="mr-1"
-                              />
-                            ) : (
-                              <IoPersonAddSharp className="mr-2" />
-                            )}
-                          </>
-                        )}
-                        <span className="pt-[2px]">Add Friend</span>
-                      </span>
-                    </button>
-                  )}
+                  {currentFriendStatus !== "pending" &&
+                    currentFriendStatus !== "accepted" && (
+                      <button
+                        name="Add friend button"
+                        className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
+                        onClick={sendFriendRequest}
+                      >
+                        <span className="flex items-center">
+                          {findFriendId ? (
+                            <FaUserCheck className="mr-2" />
+                          ) : (
+                            <>
+                              {loading ? (
+                                <ClipLoader
+                                  color="#fff"
+                                  size={20}
+                                  loading={loading}
+                                  className="mr-1"
+                                />
+                              ) : (
+                                <IoPersonAddSharp className="mr-2" />
+                              )}
+                            </>
+                          )}
+                          <span className="pt-[2px]">Add Friend</span>
+                        </span>
+                      </button>
+                    )}
+
+                  {friend?.filter(
+                    (fri: FriendRequestProps) =>
+                      currentUser?.id === fri?.friendRespondId
+                  )?.length > 0 &&
+                    friend
+                      ?.filter(
+                        (item: FriendRequestProps) => item?.status === "pending"
+                      )
+                      .map((item: FriendRequestProps, idx: number) => (
+                        <div key={idx} className="mr-3">
+                          <AcceptRejectButton friend={friend} item={item} />
+                        </div>
+                      ))}
 
                   <FollowButton
                     user={user}
-                    users={users}
                     currentUser={currentUser}
+                    users={null}
                   />
                 </div>
               )}
-              <ul className="inline-block w-full h-full border-b border-b-[#78828c21] -my-4 pb-1 mt-4">
+              <Tabs className="inline-block w-full h-full  border-b border-b-[#78828c21] -my-4 mt-4">
                 {profileList?.map((list: any, idx: number) => (
-                  <li
+                  <TabsList
                     key={idx}
                     id={list.id}
-                    className={`float-left -mb-1 cursor-pointer hover:border-b-[1px] hover:border-b-[#3f3f3f] hover:pb-[5px] ${
+                    className={`float-left -mb-1 my-1 cursor-pointer ${
                       pathname === `/profile/${user?.name}${list.page}`
-                        ? "border-b border-b-[#1d9bf0] pb-1"
+                        ? "bg-white rounded-md"
                         : ""
                     }`}
                   >
-                    <Links
-                      href={`${list.link}/${user?.name}/${list.page}`}
-                      className="relative font-bold px-4 py-2"
-                    >
-                      {list?.label}
-                    </Links>
-                  </li>
+                    <TabsTrigger value={list?.label}>
+                      <Links
+                        href={`${list.link}/${user?.name}/${list.page}`}
+                        className="relative text-xs md:text-sm font-bold px-4 py-2"
+                      >
+                        {list?.label}
+                      </Links>
+                    </TabsTrigger>
+                  </TabsList>
                 ))}
-              </ul>
+              </Tabs>
             </div>
             <div className="overflow-hidden px-4 py-2">
               {pathname === `/profile/${user?.name}` && (
@@ -532,7 +613,7 @@ const ProfileItem: React.FC<
                       This profile does not have biography yet
                     </p>
                   ) : (
-                    <div className="inline-block bg-white dark:bg-[#242424] border border-[#00000024] dark:border-[#272727] md:p-4">
+                    <div className="bg-white dark:bg-[#242424] border border-[#00000024] dark:border-[#272727] md:p-4">
                       <EditorContent editor={editor} />
                     </div>
                   )}
@@ -544,6 +625,9 @@ const ProfileItem: React.FC<
                   tv_id={tv_id}
                   existedFavorite={existedFavorite}
                   user={user}
+                  list={list}
+                  tvId={tvid}
+                  movieId={movieId}
                 />
               )}
               {pathname === `/profile/${user?.name}/lists` && (

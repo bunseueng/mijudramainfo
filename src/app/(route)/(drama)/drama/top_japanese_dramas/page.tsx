@@ -1,7 +1,13 @@
 import { Metadata } from "next";
 import React, { Suspense } from "react";
-import Top100Japanese from "./Top100Japanese";
-import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import dynamic from "next/dynamic";
+const Top100Japanese = dynamic(() => import("./Top100Japanese"), {
+  ssr: false,
+});
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   title: "Top 100 Japanese Dramas",

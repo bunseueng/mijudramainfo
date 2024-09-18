@@ -1,44 +1,102 @@
 "use client";
 
-import { fetchTv } from "@/app/actions/fetchMovieApi";
-import WatchlistRating from "@/app/component/ui/CircleRating/WatchlistRating";
-import { SearchParamsType, WatchListProps } from "@/helper/type";
+import { fetchMovie, fetchTv } from "@/app/actions/fetchMovieApi";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { IList, SearchParamsType, WatchListProps } from "@/helper/type";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { Check, ChevronsUpDown } from "lucide-react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CiCircleList } from "react-icons/ci";
+import { FaPlus } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
+import { toast } from "react-toastify";
+const WatchlistRating = dynamic(
+  () => import("@/app/component/ui/CircleRating/WatchlistRating"),
+  { ssr: false }
+);
+const SearchLoading = dynamic(
+  () => import("@/app/component/ui/Loading/SearchLoading"),
+  { ssr: false }
+);
 
-const Watchlist: React.FC<WatchListProps> = ({
+const Watchlist: React.FC<WatchListProps & IList> = ({
   tv_id,
   existedFavorite,
   user,
+  list,
+  movieId,
 }) => {
+  const [open, setOpen] = useState<boolean>(false);
+  const [value, setValue] = useState<string>("");
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   const sortby = searchParams?.get("sortby") ?? "";
+  const queryKey = ["tv", "movie"];
 
   const {
     data: tv,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["tv"],
+    queryKey,
     queryFn: async () => {
       if (!tv_id || (Array.isArray(tv_id) && tv_id.length === 0)) return [];
+
+      // Handle tv_id and movieId
       const tvId = Array.isArray(tv_id)
         ? tv_id.map((item) => item?.id)
         : [tv_id.id];
+      const movie_id = Array.isArray(movieId)
+        ? movieId.map((item) => item?.id)
+        : [movieId.movieId];
+
+      // Fetch TV details and add media_type property
       const tvDetails = await Promise.all(
-        tvId.map(async (id: number) => await fetchTv(id))
+        tvId.map(async (id: number) => {
+          const tvDetail = await fetchTv(id);
+          return { ...tvDetail, media_type: "tv" }; // Add media_type property
+        })
       );
 
-      let sortedTvDetails = [...tvDetails];
+      // Fetch movie details and add media_type property
+      const movieDetails = await Promise.all(
+        movie_id.map(async (id: number) => {
+          const movieDetail = await fetchMovie(id);
+          return { ...movieDetail, media_type: "movie" }; // Add media_type property
+        })
+      );
 
+      // Combine TV and movie details
+      let sortedTvDetails = [...tvDetails, ...movieDetails];
+
+      // Sort the combined list based on the sortby option
       if (sortby === "asc") {
         sortedTvDetails.sort(
           (a, b) =>
@@ -93,25 +151,115 @@ const Watchlist: React.FC<WatchListProps> = ({
     });
   };
 
-  React.useEffect(() => {
+  const addToList = async (listId: string, tvId: string, movieId: string) => {
+    try {
+      const res = await fetch(`/api/list`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listId: listId,
+          tvId: tvId,
+          movieId: movieId,
+        }),
+      });
+      if (res.status === 200) {
+        toast.success("Success");
+        router.refresh();
+      } else if (res.status === 500) {
+        toast.error("Failed.");
+      }
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  };
+
+  const onFavorite = async (favId: string) => {
+    try {
+      const res = await fetch(`/api/favorite/${favId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          favoriteIds: favId,
+        }),
+      });
+      if (res.status === 200) {
+        router.refresh();
+      } else if (res.status === 500) {
+        toast.error("Failed.");
+      }
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  };
+
+  const onDeleteFavorite = async (favId: string) => {
+    try {
+      const res = await fetch(`/api/favorite/${favId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          favoriteIds: favId,
+        }),
+      });
+      if (res.status === 200) {
+        toast.success("Success");
+        router.refresh();
+      } else if (res.status === 500) {
+        toast.error("Failed.");
+      }
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  };
+
+  const onDeleteWatchlist = async (favId: string) => {
+    try {
+      const res = await fetch(`/api/watchlist/${favId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          movieId: favId,
+        }),
+      });
+      if (res.status === 200) {
+        toast.success("Success");
+        router.refresh();
+      } else if (res.status === 500) {
+        toast.error("Failed.");
+      }
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  };
+
+  useEffect(() => {
     refetch();
   }, [sortby, refetch]);
 
   if (isLoading || !tv) {
-    return <div>Loading...</div>;
+    return <SearchLoading />;
   }
-
   return (
     <div className="mt-4 pl-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-black dark:text-white text-xl md:text-2xl font-bold">
+        <h1 className="text-black dark:text-white text-md md:text-xl font-bold">
           My Watchlist
         </h1>
         {pathname === `/profile/${user?.name}/watchlist` && (
           <div className="flex items-center flex-nowrap">
-            <h1>Filter by:</h1>
+            <label htmlFor="Filter" className="text-sm md:text-md">
+              Filter by:
+            </label>
             <div className="flex items-center flex-nowrap">
-              <div className="p-4">
+              <div className="p-2 md:p-4">
                 <select
                   className="bg-transparent text-black dark:text-white bg-gray-700 border-b-2 border-b-[#959595] rounded-t-sm relative top-0 left-0 z-2 pl-2 cursor-pointer"
                   name="sort"
@@ -132,25 +280,26 @@ const Watchlist: React.FC<WatchListProps> = ({
         tv?.map((item: any, idx: number) => (
           <div
             key={idx}
-            className="w-full h-auto flex bg-white dark:bg-[#242424] border-2 border-slate-200 dark:border-[#272727] rounded-md overflow-hidden my-5 box-border"
+            className="w-full h-auto flex bg-white dark:bg-[#1b1c1d] border border-slate-200 dark:border-[#272727] rounded-md overflow-hidden my-5 box-border"
           >
             <div className="w-[160px] min-w-[160px] h-[250px] box-border">
-              <div className="w-full h-full flex items-center justify-center box-border">
-                <Link href="/" className="box-border">
+              <div className="w-full h-auto flex items-center justify-center box-border">
+                <Link href={`/tv/${item?.id}`} className="box-border">
                   <Image
                     src={`https://image.tmdb.org/t/p/original/${
                       item?.poster_path || item?.backdrop_path
                     }}`}
-                    alt="drama image"
+                    alt={`${item?.title || item?.name}'s Poster`}
                     width={200}
                     height={200}
                     quality={100}
-                    className="block w-[160px] min-w-[160px] h-[250px] outline-none box-border"
+                    priority
+                    className="block w-[160px] min-w-[160px] h-full outline-none box-border"
                   />
                 </Link>
               </div>
             </div>
-            <div className="w-full flex flex-wrap items-center align-middle px-3 py-2 md:py-4">
+            <div className="w-full align-middle px-3 my-5">
               <div className="w-full">
                 <div className="flex items-start md:items-center w-full">
                   <div className="mr-2">
@@ -164,20 +313,20 @@ const Watchlist: React.FC<WatchListProps> = ({
                   </div>
                   <div className="w-full flex flex-col align-baseline overflow-hidden">
                     <div className="">
-                      <h1 className="text-black dark:text-white text-md md:text-xl font-bold">
+                      <h1 className="text-black dark:text-white text-sm md:text-md font-bold">
                         {item?.name || item?.title}{" "}
                         <span className="text-[#999]">
                           ({item?.original_name})
                         </span>
                       </h1>
                     </div>
-                    <h4 className="text-sm md:text-md">
+                    <h4 className="text-xs md:text-sm">
                       {item?.first_air_date}
                     </h4>
                   </div>
                 </div>
                 <div className="mt-5">
-                  <p className="truncates">{item?.overview}</p>
+                  <p className="text-sm truncates">{item?.overview}</p>
                 </div>
               </div>
 
@@ -187,8 +336,11 @@ const Watchlist: React.FC<WatchListProps> = ({
                     {Array.isArray(existedFavorite) ? (
                       existedFavorite.includes(item?.id) ? (
                         <>
-                          <span className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-[#ef47b6] border-2 border-[#ef47b6] rounded-full">
-                            <FaHeart className="text-white text-md" />
+                          <span
+                            className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-[#ef47b6] border-2 border-[#ef47b6] rounded-full cursor-pointer"
+                            onClick={() => onDeleteFavorite(item?.id)}
+                          >
+                            <FaHeart className="text-white text-sm" />
                           </span>
                           <span className="text-[#c0c0c0] dark:text-[#959595] ml-2">
                             Favorite
@@ -196,8 +348,11 @@ const Watchlist: React.FC<WatchListProps> = ({
                         </>
                       ) : (
                         <>
-                          <span className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-[#959595] border-2 border-[#959595] rounded-full">
-                            <FaHeart className="text-white text-md" />
+                          <span
+                            className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-[#959595] border-2 border-[#959595] rounded-full cursor-pointer"
+                            onClick={() => onFavorite(item?.id)}
+                          >
+                            <FaHeart className="text-white text-sm" />
                           </span>
                           <span className="text-[#c0c0c0] dark:text-[#959595] ml-2">
                             Favorite
@@ -207,14 +362,99 @@ const Watchlist: React.FC<WatchListProps> = ({
                     ) : null}
                   </li>
                   <li className="text-[#959595] flex items-center mr-3 mb-2 md:mb-0 md:mr-5">
-                    <span className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-transparent border-2 border-[#959595] rounded-full">
-                      <CiCircleList className="text-[#c0c0c0] dark:text-white text-md" />
-                    </span>
-                    <span className="text-[#c0c0c0] dark:text-[#959595] ml-2">
-                      Add to list
-                    </span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <span className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-transparent border-2 border-[#959595] rounded-full">
+                          <CiCircleList className="text-[#c0c0c0] dark:text-white text-md" />
+                        </span>
+                        <span className="text-[#c0c0c0] dark:text-[#959595] ml-2">
+                          Add to list
+                        </span>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuLabel>
+                          <Link href="/lists/create" className="cursor-pointer">
+                            <span className="inline-block align-middle">
+                              <FaPlus className="mr-1" />
+                            </span>
+                            Create New List
+                          </Link>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>
+                          <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={open}
+                                className="w-[200px] justify-between"
+                              >
+                                {value
+                                  ? list?.find(
+                                      (list) => list.listTitle === value
+                                    )?.listTitle
+                                  : "Select list..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[200px] p-0">
+                              <Command>
+                                <CommandInput placeholder="Search list..." />
+                                <CommandList>
+                                  <CommandEmpty>No list found.</CommandEmpty>
+                                  <CommandGroup>
+                                    {list?.map((lItem) => {
+                                      const tvId =
+                                        item?.media_type === "tv" && item?.id;
+                                      const movieId =
+                                        item?.media_type === "movie" &&
+                                        item?.id;
+
+                                      return (
+                                        <CommandItem
+                                          key={lItem.listTitle}
+                                          value={lItem.listTitle}
+                                          onSelect={(currentValue) => {
+                                            setValue(
+                                              currentValue === value
+                                                ? ""
+                                                : currentValue
+                                            );
+                                            setOpen(false);
+                                            addToList(
+                                              lItem?.listId,
+                                              tvId,
+                                              movieId
+                                            );
+                                          }}
+                                          className="cursor-pointer"
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              value === lItem.listTitle
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                          />
+                                          {lItem.listTitle}
+                                        </CommandItem>
+                                      );
+                                    })}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </DropdownMenuLabel>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </li>
-                  <li className="text-[#959595] flex items-center mr-3 md:mr-5">
+                  <li
+                    className="text-[#959595] flex items-center mr-3 md:mr-5 cursor-pointer"
+                    onClick={() => onDeleteWatchlist(item?.id)}
+                  >
                     <span className="w-6 h-6 md:w-8 md:h-8 inline-flex items-center justify-center bg-transparent border-2 border-[#959595] rounded-full">
                       <IoMdClose className="text-[#c0c0c0] dark:text-white text-md" />
                     </span>

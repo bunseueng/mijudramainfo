@@ -1,7 +1,8 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import React, { Suspense } from "react";
 import prisma from "@/lib/db";
-import Navbar from "./Navbar";
+import dynamic from "next/dynamic";
+const Navbar = dynamic(() => import("./Navbar"), { ssr: false });
 
 const SessionAllPage = async () => {
   const users = await prisma?.user?.findMany({});

@@ -6,11 +6,15 @@ import {
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
+  ssr: false,
+});
 
 const EpisodeCast = () => {
   const [episode, setEpisode] = useState<any>();
@@ -67,11 +71,11 @@ const EpisodeCast = () => {
       <div className="bg-cyan-600">
         <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
           <div className="flex items-center lg:items-start">
-            <Image
-              src={`https://image.tmdb.org/t/p/original/${
-                tv?.poster_path || tv?.backdrop_path
-              }`}
-              alt="director image"
+            <LazyImage
+              src={`https://image.tmdb.org/t/p/${
+                tv?.poster_path ? "w92" : "w300"
+              }/${tv?.poster_path || tv?.backdrop_path}`}
+              alt={`${tv?.name || tv?.title}'s Poster`}
               width={50}
               height={50}
               quality={100}
@@ -86,6 +90,7 @@ const EpisodeCast = () => {
               <Link
                 href={`/tv/${tv?.id}`}
                 className="flex items-center my-5 opacity-75 cursor-pointer hover:opacity-90"
+                prefetch={true}
               >
                 <FaArrowLeft className="text-white" size={20} />
                 <p className="text-white font-bold pl-2">Back to main</p>
@@ -119,11 +124,11 @@ const EpisodeCast = () => {
             </h1>
             {castEp?.cast?.map((item: any, idx: number) => (
               <div className="flex items-center" key={idx}>
-                <Image
-                  src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                  alt="director image"
-                  width={50}
-                  height={50}
+                <LazyImage
+                  src={`https://image.tmdb.org/t/p/w185/${item?.profile_path}`}
+                  alt={`${item?.name || item?.title}'s Profile`}
+                  width={100}
+                  height={100}
                   quality={100}
                   priority
                   className="size-[100px] bg-center object-center rounded-full my-5"
@@ -145,11 +150,11 @@ const EpisodeCast = () => {
               <>
                 {castEp?.guest_stars?.map((item: any, idx: number) => (
                   <div className="flex items-center" key={idx}>
-                    <Image
-                      src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                      alt="Guest star images"
-                      width={50}
-                      height={50}
+                    <LazyImage
+                      src={`https://image.tmdb.org/t/p/w185/${item?.profile_path}`}
+                      alt={`${item?.name || item?.title}'s Profile`}
+                      width={100}
+                      height={100}
                       quality={100}
                       priority
                       className="size-[100px] bg-center object-center rounded-full my-5"
@@ -171,11 +176,11 @@ const EpisodeCast = () => {
               <>
                 {castEp?.crew?.map((item: any, idx: number) => (
                   <div className="flex items-center" key={idx}>
-                    <Image
-                      src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                      alt="Guest star images"
-                      width={50}
-                      height={50}
+                    <LazyImage
+                      src={`https://image.tmdb.org/t/p/w185/${item?.profile_path}`}
+                      alt={`${item?.name || item?.title}'s Profile`}
+                      width={100}
+                      height={100}
                       quality={100}
                       priority
                       className="size-[100px] bg-center object-center rounded-full my-5"
