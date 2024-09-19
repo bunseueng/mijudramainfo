@@ -36,18 +36,14 @@ import {
 } from "@/helper/type";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-const Drama = dynamic(() => import("../../../(route)/(id)/person/[id]/Drama"));
-const VarietyShow = dynamic(
-  () => import("../../../(route)/(id)/person/[id]/VarietyShow")
-);
-const PersonMovie = dynamic(
-  () => import("@/app/(route)/(id)/person/[id]/PersonMovie")
-);
-const Discuss = dynamic(
-  () => import("@/app/(route)/(id)/tv/[id]/discuss/Discuss")
-);
-const PopularityModal = dynamic(() => import("../Modal/PopularityModal"));
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"));
+import LazyImage from "@/components/ui/lazyimage";
+import Drama from "@/app/(route)/(id)/person/[id]/Drama";
+import VarietyShow from "@/app/(route)/(id)/person/[id]/VarietyShow";
+import PersonMovie from "@/app/(route)/(id)/person/[id]/PersonMovie";
+import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
+const PopularityModal = dynamic(() => import("../Modal/PopularityModal"), {
+  ssr: false,
+});
 
 type UserTotalPopularity = {
   itemId: string;
@@ -412,8 +408,8 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                     ?.map((paragraph: string, index: number) => (
                       <span key={index}>
                         {persons?.biography === "" ? (
-                          <div className="text-lg font-bold text-center py-5">
-                            Sorry!! This person currently has no biography.
+                          <div className="text-md font-semibold text-center py-5">
+                            {persons?.name} currently has no biography.
                           </div>
                         ) : (
                           // Use a span for the last paragraph to keep it inline with the link
@@ -571,7 +567,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                               src={
                                 currentUsers?.profileAvatar ||
                                 currentUsers?.image ||
-                                "/empty-pf.jpg"
+                                "/placeholder-image.avif"
                               }
                               alt={`${currentUsers?.name}'s Profile`}
                               width={100}
@@ -692,7 +688,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                       <span key={index}>
                         {persons?.biography === "" ? (
                           <div className="text-lg font-bold text-center py-5">
-                            Sorry!! This person currently has no biography.
+                            {persons?.name} currently has no biography.
                           </div>
                         ) : (
                           // Use a span for the last paragraph to keep it inline with the link

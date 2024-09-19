@@ -34,6 +34,7 @@ import CoverPhoto from "./CoverPhoto";
 import Watchlist from "./watchlist/Watchlist";
 import ProfileList from "./lists/ProfileList";
 import ProfileReviews from "./reviews/ProfileReviews";
+import Feeds from "./feeds/Feeds";
 const FollowButton = dynamic(
   () => import("@/app/component/ui/Button/FollowButton"),
   { ssr: false }
@@ -624,6 +625,9 @@ const ProfileItem: React.FC<ProfilePageProps & IFriend & User & ReviewType> = ({
               )}
               {pathname === `/profile/${user?.name}/lists` && (
                 <ProfileList list={list} movieId={movieId} tvId={tvid} />
+              )}
+              {pathname === `/profile/${user?.name}/feeds` && (
+                <Feeds list={list} movieId={movieId} tvId={tvid} />
               )}
             </div>{" "}
             {pathname === `/profile/${user?.name}/reviews` && (

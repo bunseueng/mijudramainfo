@@ -2,10 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import dynamic from "next/dynamic";
-const CoinModal = dynamic(() => import("@/app/component/ui/Modal/CoinModal"), {
-  ssr: false,
-});
+import CoinModal from "@/app/component/ui/Modal/CoinModal";
 
 interface UserI {
   getCoin: any;

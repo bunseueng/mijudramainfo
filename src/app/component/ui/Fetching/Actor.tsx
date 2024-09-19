@@ -4,8 +4,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchActor } from "@/app/actions/fetchMovieApi";
 import { SkeletonCard } from "../Loading/HomeLoading";
-import dynamic from "next/dynamic";
-const ActorCard = dynamic(() => import("../Card/ActorCard"), { ssr: false });
+import ActorCard from "../Card/ActorCard";
 const Actor = ({ heading }: any) => {
   const { data, isLoading } = useQuery({
     queryKey: ["actor"],

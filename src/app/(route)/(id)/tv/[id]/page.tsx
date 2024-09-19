@@ -4,12 +4,12 @@ import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { Metadata } from "next";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
+import DramaMain from "./DramaMain";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
 const TvList = dynamic(() => import("./TvList"), { ssr: false });
-const DramaMain = dynamic(() => import("./DramaMain"), { ssr: false });
 
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const tv_id = params.id;

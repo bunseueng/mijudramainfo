@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import Link from "next/link";
 import LazyImage from "@/components/ui/lazyimage";
@@ -14,8 +13,8 @@ const Drama = ({ data, heading }: any) => {
 
   if (castLength === 0) {
     return (
-      <div className="text-lg font-bold text-center py-5">
-        Sorry!! This person currently has no drama.
+      <div className="text-md font-semibold text-start py-5">
+        No data available.
       </div>
     );
   }

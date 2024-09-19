@@ -5,11 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchLatest } from "@/app/actions/fetchMovieApi";
 import Link from "next/link";
 import { SkeletonCard } from "../Loading/HomeLoading";
-import dynamic from "next/dynamic";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false, // If you don't need server-side rendering
-});
-
+import LazyImage from "@/components/ui/lazyimage";
 const LatestDrama = ({ heading }: any) => {
   const { data, isLoading } = useQuery({
     queryKey: ["latestDrama"],

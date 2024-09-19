@@ -1,9 +1,6 @@
+import LazyImage from "@/components/ui/lazyimage";
 import Link from "next/link";
 import React from "react";
-import dynamic from "next/dynamic";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false, // If you don't need server-side rendering
-});
 const ActorCard = ({ result }: any) => {
   // Extracting relevant data from the result object
   const { cast } = result;

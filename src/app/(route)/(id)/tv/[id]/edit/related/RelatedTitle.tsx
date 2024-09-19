@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchMultiSearch, fetchTv } from "@/app/actions/fetchMovieApi";
+import LazyImage from "@/components/ui/lazyimage";
 import { storyFormat } from "@/helper/item-list";
 import { Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
@@ -28,9 +29,6 @@ const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
   { ssr: false }
 );
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [listSearch, setListSearch] = useState<string>("");

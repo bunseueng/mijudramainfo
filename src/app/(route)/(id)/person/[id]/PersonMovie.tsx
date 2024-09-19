@@ -1,7 +1,6 @@
-"use client";
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import LazyImage from "@/components/ui/lazyimage";
 
 const PersonMovie = ({ data, heading }: any) => {
   const filteredMovie = data?.cast?.filter(
@@ -13,8 +12,8 @@ const PersonMovie = ({ data, heading }: any) => {
   );
   if (filteredMovie?.length === 0) {
     return (
-      <div className="text-lg font-bold text-center py-5">
-        Sorry!! This person currently has no movie.
+      <div className="text-md font-semibold text-start py-5">
+        No data available.
       </div>
     );
   }
@@ -36,16 +35,17 @@ const PersonMovie = ({ data, heading }: any) => {
                   href={`/tv/${result?.id}`}
                   className="block hover:relative transform duration-100 group"
                 >
-                    <Image
-                      src={`https://image.tmdb.org/t/p/w500/${
-                        result?.poster_path || result?.backdrop_path
-                      }`}
-                      alt="tv image"
-                      width={600}
-                      height={600}
-                      quality={100}
-                      className="rounded-xl w-[200px] h-[250px] object-cover"
-                    />
+                  <LazyImage
+                    src={`https://image.tmdb.org/t/p/w500/${
+                      result?.poster_path || result?.backdrop_path
+                    }`}
+                    alt={`${result?.name || result?.title}'s Poster`}
+                    width={200}
+                    height={250}
+                    quality={100}
+                    priority
+                    className="rounded-xl w-[200px] h-[250px] object-cover"
+                  />
                 </Link>
                 <div className="flex items-center justify-between">
                   <p className="truncate">{result?.name || result?.title}</p>

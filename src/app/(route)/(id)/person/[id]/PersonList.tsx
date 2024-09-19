@@ -21,7 +21,7 @@ const PersonList = ({ personId }: any) => {
   };
 
   return (
-    <div className="bg border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
+    <div className="bg dark:bg-[#191a20] border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
       <ul className="relative inline-block m-0 p-0">
         <li
           className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-2 leading-[1px] -mb-[1px] ${
@@ -42,12 +42,13 @@ const PersonList = ({ personId }: any) => {
             onMouseEnter={() => handleNavbarMouseEnter("Overview")}
             onMouseLeave={handleNavbarMouseLeave}
           >
-            <ul className="py-2">
+            <ul className="text-black py-2">
               <li className="text-sm text-muted-foreground opacity-60 my-2 mx-6 cursor-text">
                 Edit Information
               </li>
               <li className="text-sm my-2 mx-6 cursor-pointer">
                 <Link
+                  prefetch={true}
                   href={`/person/${personId}/edit/details`}
                   onClick={() => setCurrentItem("Overview")}
                 >
@@ -55,21 +56,32 @@ const PersonList = ({ personId }: any) => {
                 </Link>
               </li>
               <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link href={`/person/${personId}/edit/cover`}>Cover Image</Link>
+                <Link prefetch={true} href={`/person/${personId}/edit/cover`}>
+                  Cover Image
+                </Link>
               </li>
               <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link href={`/person/${personId}/edit/cast`}>Cast Credits</Link>
+                <Link prefetch={true} href={`/person/${personId}/edit/cast`}>
+                  Cast Credits
+                </Link>
               </li>
               <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link href={`/person/${personId}/edit/crew`}>Crew Credits</Link>
+                <Link prefetch={true} href={`/person/${personId}/edit/crew`}>
+                  Crew Credits
+                </Link>
               </li>
               <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link href={`/person/${personId}/edit/external_link`}>
+                <Link
+                  prefetch={true}
+                  href={`/person/${personId}/edit/external_link`}
+                >
                   External_Links Credits
                 </Link>
               </li>
               <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link href={`/person/${personId}/edit/details`}>Report</Link>
+                <Link prefetch={true} href={`/person/${personId}/edit/details`}>
+                  Report
+                </Link>
               </li>
             </ul>
           </div>
@@ -93,7 +105,7 @@ const PersonList = ({ personId }: any) => {
             onMouseEnter={() => handleNavbarMouseEnter("Media")}
             onMouseLeave={handleNavbarMouseLeave}
           >
-            <ul className="py-2">
+            <ul className="text-black py-2">
               <li className="text-sm my-2 mx-6 cursor-pointer">Profiles</li>
             </ul>
           </div>
@@ -141,7 +153,7 @@ const PersonList = ({ personId }: any) => {
             onMouseEnter={() => handleNavbarMouseEnter("Share")}
             onMouseLeave={handleNavbarMouseLeave}
           >
-            <ul className="py-2">
+            <ul className="text-black py-2">
               <li className="text-sm my-2 mx-6 cursor-pointer">Share Links</li>
               <li className="text-sm my-2 mx-6 cursor-pointer">Facebook</li>
               <li className="text-sm my-2 mx-6 cursor-pointer">Tweet</li>

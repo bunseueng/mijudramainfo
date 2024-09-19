@@ -10,11 +10,7 @@ import { GoHeart } from "react-icons/go";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false, // If you don't need server-side rendering
-});
-
+import LazyImage from "@/components/ui/lazyimage";
 export type PersonDb = {
   id: string;
   personId: string;
@@ -93,7 +89,7 @@ export default function Person({ result, currentUser }: any) {
       <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
         <div className="relative">
           <Link
-            rel="preload"
+            prefetch={true}
             href={`/person/${result?.id}`}
             className="block box-content"
           >
@@ -113,6 +109,7 @@ export default function Person({ result, currentUser }: any) {
         <div className="w-full  px-2">
           <div className="flex items-center justify-between">
             <Link
+              prefetch={true}
               href={`/person/${result?.id}`}
               className="text-[#2490da] text-md font-bold inline-block"
             >

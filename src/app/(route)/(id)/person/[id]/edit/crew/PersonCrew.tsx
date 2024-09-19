@@ -1,11 +1,9 @@
 "use client";
 
 import {
-  fetchAllCast,
   fetchMultiSearch,
   fetchPerson,
   fetchPersonCombinedCredits,
-  fetchPersonSearch,
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
 import { personCrewJob } from "@/helper/item-list";
@@ -29,13 +27,10 @@ import { toast } from "react-toastify";
 import { useDebouncedCallback } from "use-debounce";
 import { PersonEditList } from "../details/PersonEditList";
 import dynamic from "next/dynamic";
+import DramaRegion from "@/app/(route)/lists/[listId]/edit/DramaRegion";
 
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
-  { ssr: false }
-);
-const DramaRegion = dynamic(
-  () => import("@/app/(route)/lists/[listId]/edit/DramaRegion"),
   { ssr: false }
 );
 
