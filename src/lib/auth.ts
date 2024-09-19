@@ -88,56 +88,36 @@ export const authOptions: NextAuthOptions = {
             console.log("User updated successfully")
         } 
 
-      await prisma.user.update({
-        where: {
-          id: token.id as string
-        }, 
-        data: {
-          name: token.name as string,
-        }
-      })
-
-      await prisma.user.update({
-        where: {
-          id: token.id as string
-        }, 
-        data: {
-          image: token.image as string,
-        }
-      })
-
-
+        await prisma.user.update({
+          where: { id: token.id as string },
+          data: {
+            name: token.name as string,
+            image: token.image as string,
+          }
+        });
       return token
   },
-    async session({ session, token }: any) {
-      const sessionUser = await prisma.user.findUnique({ where: { email: session.user.email } })
 
-      session.user.id = sessionUser?.id
-      return {
-          ...session,
-          user: {
-            ...session.user,
-            id: token.id,
-            image: token.image as string,
-            name: token.name,
-            role: token.role
-          }
-      }
+    async session({ session, token }: any) {
+      // Avoid database lookup if token already has user info
+      session.user.id = token.id;
+      session.user.name = token.name;
+      session.user.image = token.image;
+      session.user.role = token.role;
+      
+      return session;
     },
+  
     async signIn({ account, profile }: any) {
       try {
         if (account?.provider === "google") {
           console.log("Google Provider Sign In:", profile.email);
     
-          // Check if the user already exists in the database
-          const existingUser = await prisma.user.findUnique({
-            where: { email: profile.email },
-          });
+          const existingUser = await prisma.user.findUnique({ where: { email: profile.email } });
     
           if (existingUser) {
             console.log("User exists:", profile.email);
           } else {
-            // User doesn't exist, create a new user
             const formattedName = profile?.name?.replace(/\s+/g, "");
     
             await prisma.user.create({
@@ -154,12 +134,13 @@ export const authOptions: NextAuthOptions = {
           }
         }
     
-        return true; // Return true if sign-in is successful
-      } catch (error) {
-        console.error("Error signing in:", error);
-        return false; // Return false if there's an error
+        return true;
+      } catch (error: any) {
+        console.error("Error signing in with provider:", account?.provider, "Error message:", error.message);
+        return false;
       }
-    },
+    },  
+    
     async redirect({ baseUrl }) { return baseUrl },
   }
 }
