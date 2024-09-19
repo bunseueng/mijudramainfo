@@ -29,23 +29,15 @@ import { CalendarDays, MapPin, Users } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReviewType } from "../../(id)/tv/[id]/reviews/Reviews";
 import Image from "next/image";
-const Watchlist = dynamic(() => import("./watchlist/Watchlist"), {
-  ssr: false,
-});
-const ProfileList = dynamic(() => import("./lists/ProfileList"), {
-  ssr: false,
-});
-const RecentLists = dynamic(() => import("./lists/RecentLists"), {
-  ssr: false,
-});
+import RecentLists from "./lists/RecentLists";
+import CoverPhoto from "./CoverPhoto";
+import Watchlist from "./watchlist/Watchlist";
+import ProfileList from "./lists/ProfileList";
+import ProfileReviews from "./reviews/ProfileReviews";
 const FollowButton = dynamic(
   () => import("@/app/component/ui/Button/FollowButton"),
   { ssr: false }
 );
-const ProfileReviews = dynamic(() => import("./reviews/ProfileReviews"), {
-  ssr: false,
-});
-const CoverPhoto = dynamic(() => import("./CoverPhoto"), { ssr: false });
 const AcceptRejectButton = dynamic(
   () => import("@/app/component/ui/Button/AcceptRejectButton"),
   { ssr: false }

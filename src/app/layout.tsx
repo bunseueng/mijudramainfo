@@ -10,18 +10,9 @@ import { PHProvider } from "@/provider/PostHogProvider";
 import dynamic from "next/dynamic";
 import { ScrollProvider } from "@/provider/UseScroll";
 import Script from "next/script";
-const Adsense = dynamic(() => import("./component/ui/Adsense/Adsense"), {
-  ssr: false,
-});
-const Footer = dynamic(() => import("./component/ui/Main/Footer"), {
-  ssr: false,
-});
-const SessionAllPage = dynamic(
-  () => import("./component/ui/Main/SessionAllPage"),
-  {
-    ssr: false,
-  }
-);
+import Adsense from "./component/ui/Adsense/Adsense";
+import SessionAllPage from "./component/ui/Main/SessionAllPage";
+import Footer from "./component/ui/Main/Footer";
 const Loading = dynamic(() => import("./loading"), { ssr: false });
 
 const nunito = Nunito({

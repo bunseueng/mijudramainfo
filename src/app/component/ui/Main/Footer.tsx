@@ -4,7 +4,9 @@ import Link from "next/link";
 import React from "react";
 import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
 import dynamic from "next/dynamic";
-const ThemeSwitch = dynamic(() => import("@/components/ui/ThemeIcon"));
+const ThemeSwitch = dynamic(() => import("@/components/ui/ThemeIcon"), {
+  ssr: false,
+});
 
 const Footer = () => {
   return (

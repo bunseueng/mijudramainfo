@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchMovie, fetchTv } from "@/app/actions/fetchMovieApi";
+import WatchlistRating from "@/app/component/ui/CircleRating/WatchlistRating";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -36,10 +37,6 @@ import { FaPlus } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { toast } from "react-toastify";
-const WatchlistRating = dynamic(
-  () => import("@/app/component/ui/CircleRating/WatchlistRating"),
-  { ssr: false }
-);
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
