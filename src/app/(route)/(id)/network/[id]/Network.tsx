@@ -19,6 +19,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { BiSort } from "react-icons/bi";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 import dynamic from "next/dynamic";
+import LazyImage from "@/components/ui/lazyimage";
 const PlayTrailer = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
   { ssr: false }
