@@ -89,7 +89,7 @@ export default async function tvPage({ params }: { params: { id: string } }) {
   return (
     <>
       <TvList tv_id={tv_id} />
-      <Suspense fallback={<SearchLoading />}>
+      <Suspense key={tv_id} fallback={<SearchLoading />}>
         <DramaMain
           tv_id={tv_id}
           existedWatchlist={existedWatchlist}

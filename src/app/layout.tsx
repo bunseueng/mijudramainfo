@@ -74,22 +74,6 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.themoviedb.org" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
 
-        <Script
-          strategy="lazyOnload"
-          src="https://us.posthog.com"
-          async
-        ></Script>
-        <Script
-          strategy="afterInteractive"
-          src="https://api.themoviedb.org"
-          async
-        ></Script>
-        <Script
-          strategy="lazyOnload"
-          src="https://pagead2.googlesyndication.com"
-          async
-        ></Script>
-
         <Adsense pId="3369705912051027" />
         <meta
           name="google-adsense-account"
