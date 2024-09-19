@@ -16,45 +16,21 @@ import { FaArrowLeft } from "react-icons/fa";
 import ColorThief from "colorthief";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
-const Director = dynamic(() => import("@/app/component/ui/CastRole/Director"), {
-  ssr: false,
-});
-const GuestRole = dynamic(
-  () => import("@/app/component/ui/CastRole/GuestRole"),
-  { ssr: false }
-);
-const MainRole = dynamic(() => import("@/app/component/ui/CastRole/MainRole"), {
-  ssr: false,
-});
-const MovieArt = dynamic(() => import("@/app/component/ui/CastRole/MovieArt"), {
-  ssr: false,
-});
-const MovieCamera = dynamic(
-  () => import("@/app/component/ui/CastRole/MovieCamera"),
-  { ssr: false }
-);
-const Product = dynamic(() => import("@/app/component/ui/CastRole/Product"), {
-  ssr: false,
-});
-const Screenwriter = dynamic(
-  () => import("@/app/component/ui/CastRole/Screenwriter"),
-  { ssr: false }
-);
-const Sound = dynamic(() => import("@/app/component/ui/CastRole/Sound"), {
-  ssr: false,
-});
-const SupportRole = dynamic(
-  () => import("@/app/component/ui/CastRole/SupportRole"),
-  { ssr: false }
-);
+import LazyImage from "@/components/ui/lazyimage";
+import Director from "@/app/component/ui/CastRole/Director";
+import Product from "@/app/component/ui/CastRole/Product";
+import Screenwriter from "@/app/component/ui/CastRole/Screenwriter";
+import Sound from "@/app/component/ui/CastRole/Sound";
+import MovieArt from "@/app/component/ui/CastRole/MovieArt";
+import MovieCamera from "@/app/component/ui/CastRole/MovieCamera";
+import MainRole from "@/app/component/ui/CastRole/MainRole";
+import SupportRole from "@/app/component/ui/CastRole/SupportRole";
+import GuestRole from "@/app/component/ui/CastRole/GuestRole";
+import TvInfo from "../TvInfo";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
-const TvInfo = dynamic(() => import("../TvInfo"), { ssr: false });
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const AllTvCast = ({ tv_id, getDrama }: any) => {
   const [dominantColor, setDominantColor] = useState<string | null>(null);

@@ -8,7 +8,6 @@ const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
-export const revalidate = 0;
 
 const SearchPage = async () => {
   const BASE_URL = "https://api.themoviedb.org/3/search/multi";

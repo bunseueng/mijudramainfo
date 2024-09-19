@@ -11,27 +11,14 @@ import { tvVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
 import { DramaDB } from "@/helper/type";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import dynamic from "next/dynamic";
-const Clips = dynamic(() => import("./clips/Clips"), { ssr: false });
-const BehindTheScenes = dynamic(
-  () => import("./behind_the_scenes/BehindTheScenes"),
-  { ssr: false }
-);
-const Featurettes = dynamic(() => import("./featurettes/Featurettes"), {
-  ssr: false,
-});
-const OpeningCredits = dynamic(
-  () => import("./opening_credits/OpeningCredits"),
-  { ssr: false }
-);
-const Bloopers = dynamic(() => import("./bloopers/Bloopers"), { ssr: false });
-const TvTeasers = dynamic(() => import("./teasers/TvTeasers"), { ssr: false });
-const TvTrailers = dynamic(() => import("./trailers/TvTrailers"), {
-  ssr: false,
-});
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
+import LazyImage from "@/components/ui/lazyimage";
+import TvTrailers from "./trailers/TvTrailers";
+import TvTeasers from "./teasers/TvTeasers";
+import Clips from "./clips/Clips";
+import BehindTheScenes from "./behind_the_scenes/BehindTheScenes";
+import Bloopers from "./bloopers/Bloopers";
+import Featurettes from "./featurettes/Featurettes";
+import OpeningCredits from "./opening_credits/OpeningCredits";
 
 interface TvTrailerType {
   tv_id: string;

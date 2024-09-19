@@ -1,5 +1,6 @@
 "use client";
 
+import ReusedImage from "@/components/ui/allreusedimage";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,7 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import moment from "moment";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -19,9 +19,6 @@ import { HiDotsVertical } from "react-icons/hi";
 import { IoMdArrowDropdown } from "react-icons/io";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
-const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
-  ssr: false,
-});
 
 const CommentCard = ({
   users,

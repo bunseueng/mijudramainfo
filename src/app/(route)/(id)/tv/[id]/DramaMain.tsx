@@ -32,6 +32,8 @@ import ColorThief from "colorthief";
 import { getTextColor } from "@/app/actions/getTextColor";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
+import LazyImage from "@/components/ui/lazyimage";
+import DramaCast from "./DramaCast";
 const RatingModal = dynamic(
   () => import("@/app/component/ui/CircleRating/RatingModal"),
   { ssr: false }
@@ -40,7 +42,6 @@ const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
-const DramaCast = dynamic(() => import("./DramaCast"), { ssr: false });
 const PlayTrailerBtn = dynamic(() => import("./PlayTrailerBtn"), {
   ssr: false,
 });
@@ -48,9 +49,6 @@ const CircleRating = dynamic(
   () => import("@/app/component/ui/CircleRating/CircleRating"),
   { ssr: false }
 );
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const DramaMain = ({
   getDrama,

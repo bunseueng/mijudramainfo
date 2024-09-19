@@ -30,17 +30,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 import dynamic from "next/dynamic";
+import LazyImage from "@/components/ui/lazyimage";
+import ReusedImage from "@/components/ui/allreusedimage";
+import TvInfo from "../TvInfo";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
-const TvInfo = dynamic(() => import("../TvInfo"), { ssr: false });
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
-const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
-  ssr: false,
-});
 
 export type ReviewType = {
   tv_id: string;

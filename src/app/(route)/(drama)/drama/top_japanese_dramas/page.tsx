@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
-const Top100Japanese = dynamic(() => import("./Top100Japanese"), {
-  ssr: false,
-});
+import Top100Japanese from "./Top100Japanese";
+
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }

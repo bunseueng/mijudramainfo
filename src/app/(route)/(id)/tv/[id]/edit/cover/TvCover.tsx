@@ -1,17 +1,16 @@
 "use client";
 
 import { fetchTv } from "@/app/actions/fetchMovieApi";
+import LazyImage from "@/components/ui/lazyimage";
 import { Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {ssr: false})
 
 const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [cover, setCover] = useState<string>();

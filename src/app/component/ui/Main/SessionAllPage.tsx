@@ -1,8 +1,7 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import React, { Suspense } from "react";
 import prisma from "@/lib/db";
-import dynamic from "next/dynamic";
-const Navbar = dynamic(() => import("./Navbar"));
+import Navbar from "./Navbar";
 
 export const revalidate = 0;
 

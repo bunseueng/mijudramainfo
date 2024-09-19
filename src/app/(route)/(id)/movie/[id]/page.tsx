@@ -1,7 +1,6 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
-import dynamic from "next/dynamic";
-const MovieMain = dynamic(() => import("./MovieMain"), { ssr: false });
+import MovieMain from "./MovieMain";
 
 export default async function tvPage({ params }: any) {
   const movie_id = params.id;

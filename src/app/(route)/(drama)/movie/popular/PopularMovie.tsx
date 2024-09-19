@@ -5,10 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { fetchPopularMovie } from "@/app/actions/fetchMovieApi";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-const ExploreMovieCard = dynamic(
-  () => import("@/app/component/ui/Card/ExploreMovieCard"),
-  { ssr: false }
-);
+import ExploreMovieCard from "@/app/component/ui/Card/ExploreMovieCard";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }

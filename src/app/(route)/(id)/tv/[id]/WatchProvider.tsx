@@ -1,9 +1,6 @@
-import dynamic from "next/dynamic";
+import ReusedImage from "@/components/ui/allreusedimage";
 import Link from "next/link";
 import React from "react";
-const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
-  ssr: false,
-});
 
 const WatchProvider = ({ getDrama, tv }: any) => {
   const normalizeString = (str: string) => {

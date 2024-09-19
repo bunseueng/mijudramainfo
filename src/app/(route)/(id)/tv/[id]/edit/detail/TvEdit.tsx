@@ -5,11 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import ColorThief from "colorthief";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import dynamic from "next/dynamic";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
-
+import LazyImage from "@/components/ui/lazyimage";
 interface tvId {
   tv_id: string;
 }

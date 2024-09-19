@@ -25,13 +25,11 @@ import { useDebouncedCallback } from "use-debounce";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
+import LazyImage from "@/components/ui/lazyimage";
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
   { ssr: false }
 );
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const determineRole = (cast: any) => {
   if (cast?.roles?.some((role: any) => role?.episode_count < 6)) {

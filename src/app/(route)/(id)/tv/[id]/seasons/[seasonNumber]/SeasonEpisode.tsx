@@ -1,17 +1,14 @@
 "use client";
 
 import { fetchSeasonEpisode, fetchTv } from "@/app/actions/fetchMovieApi";
+import LazyImage from "@/components/ui/lazyimage";
 import { useQuery } from "@tanstack/react-query";
 import ColorThief from "colorthief";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaArrowCircleDown, FaArrowLeft } from "react-icons/fa";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const SeasonEpisode = () => {
   const [expandedEpisode, setExpandedEpisode] = useState<number | null>(null);

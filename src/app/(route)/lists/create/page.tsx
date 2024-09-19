@@ -1,7 +1,6 @@
 import React from "react";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import dynamic from "next/dynamic";
-const CreateList = dynamic(() => import("./CreateList"), { ssr: false });
+import CreateList from "./CreateList";
 
 const ListCreatePage = async () => {
   const currentUser = await getCurrentUser();

@@ -1,14 +1,11 @@
 "use client";
 
 import { fetchImages, fetchTv } from "@/app/actions/fetchMovieApi";
+import LazyImage from "@/components/ui/lazyimage";
 import { useQuery } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const TvList = ({ tv_id }: any) => {
   const { data: tv } = useQuery({

@@ -5,6 +5,7 @@ import {
   fetchPerson,
   fetchPersonSearch,
 } from "@/app/actions/fetchMovieApi";
+import LazyImage from "@/components/ui/lazyimage";
 import { crewRole } from "@/helper/item-list";
 import { CrewType, Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
@@ -28,9 +29,6 @@ const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
   { ssr: false }
 );
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: cast, isLoading } = useQuery({

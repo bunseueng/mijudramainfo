@@ -12,27 +12,13 @@ import { movieVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
 import { DramaDB } from "@/helper/type";
 import { getYearFromDate } from "../MovieMain";
-import dynamic from "next/dynamic";
-const MovieTrailers = dynamic(() => import("./trailers/MovieTrailers"), {
-  ssr: false,
-});
-const MovieTeasers = dynamic(() => import("./teasers/MovieTeasers"), {
-  ssr: false,
-});
-const MovieClips = dynamic(() => import("./clips/Clips"), { ssr: false });
-const MovieBehindTheScenes = dynamic(
-  () => import("./behind_the_scenes/BehindTheScenes"),
-  { ssr: false }
-);
-const MovieBloopers = dynamic(() => import("./bloopers/Bloopers"), {
-  ssr: false,
-});
-const MovieFeaturettes = dynamic(() => import("./featurettes/Featurettes"), {
-  ssr: false,
-});
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
+import MovieTrailers from "./trailers/MovieTrailers";
+import MovieTeasers from "./teasers/MovieTeasers";
+import MovieClips from "./clips/Clips";
+import MovieBehindTheScenes from "./behind_the_scenes/BehindTheScenes";
+import MovieBloopers from "./bloopers/Bloopers";
+import MovieFeaturettes from "./featurettes/Featurettes";
+import LazyImage from "@/components/ui/lazyimage";
 
 interface TvTrailerType {
   movie_id: string;

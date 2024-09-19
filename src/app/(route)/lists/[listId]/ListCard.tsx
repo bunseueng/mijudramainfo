@@ -17,7 +17,8 @@ import { Lists } from "./Lists";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import dynamic from "next/dynamic";
 const RatingModal = dynamic(
-  () => import("@/app/component/ui/CircleRating/RatingModal")
+  () => import("@/app/component/ui/CircleRating/RatingModal"),
+  { ssr: false }
 );
 
 interface listResultProps {

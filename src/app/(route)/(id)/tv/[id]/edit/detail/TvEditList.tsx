@@ -8,27 +8,16 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { VscQuestion } from "react-icons/vsc";
 import { useRouter, usePathname } from "next/navigation";
-import dynamic from "next/dynamic";
-const TvDetails = dynamic(() => import("./TvDetails"), { ssr: false });
-const TvCover = dynamic(() => import("../cover/TvCover"), { ssr: false });
-const TvCast = dynamic(() => import("../cast/TvCast"), { ssr: false });
-const TvCrew = dynamic(() => import("../crew/TvCrew"), { ssr: false });
-const RelatedTitle = dynamic(() => import("../related/RelatedTitle"), {
-  ssr: false,
-});
-const TvServices = dynamic(() => import("../services/TvServices"), {
-  ssr: false,
-});
-const ReleaseInfo = dynamic(() => import("../release/ReleaseInfo"), {
-  ssr: false,
-});
-const Production = dynamic(() => import("../production/Production"), {
-  ssr: false,
-});
-const Genres = dynamic(() => import("../genres/Genres"), { ssr: false });
-const ExternalLink = dynamic(() => import("../external_link/ExternalLink"), {
-  ssr: false,
-});
+import TvDetails from "./TvDetails";
+import TvCover from "../cover/TvCover";
+import RelatedTitle from "../related/RelatedTitle";
+import TvCast from "../cast/TvCast";
+import TvCrew from "../crew/TvCrew";
+import TvServices from "../services/TvServices";
+import ReleaseInfo from "../release/ReleaseInfo";
+import Production from "../production/Production";
+import Genres from "../genres/Genres";
+import ExternalLink from "../external_link/ExternalLink";
 
 const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [currentPage, setCurrentPage] = useState("/detail");

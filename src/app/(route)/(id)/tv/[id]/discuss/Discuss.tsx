@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
 import ReusedImage from "@/components/ui/allreusedimage";
-const CommentCard = dynamic(() => import("./CommentCard"), { ssr: false });
-const NestedComment = dynamic(() => import("./NestedComment"), { ssr: false });
+import CommentCard from "./CommentCard";
+import NestedComment from "./NestedComment";
 
 const Discuss = ({ user, users, tv_id, getComment }: any) => {
   const [loading, setLoading] = useState<Record<string, boolean>>({});

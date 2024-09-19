@@ -1,6 +1,5 @@
 import React from "react";
-import dynamic from "next/dynamic";
-const AllMovieCast = dynamic(() => import("./AllMovieCast"), { ssr: false });
+import AllMovieCast from "./AllMovieCast";
 
 const AllMovieCastPage = ({ params }: any) => {
   const movie_id = params.id;

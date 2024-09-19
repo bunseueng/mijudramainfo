@@ -9,11 +9,7 @@ import { IoMdClose } from "react-icons/io";
 import { IoTvSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 import { currentUserProps } from "@/helper/type";
-import dynamic from "next/dynamic";
-const EditList = dynamic(() => import("../[listId]/edit/EditList"), {
-  ssr: false,
-});
-
+import EditList from "../[listId]/edit/EditList";
 interface CurrentUser {
   currentUser: currentUserProps | null;
 }

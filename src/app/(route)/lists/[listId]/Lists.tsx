@@ -12,8 +12,7 @@ import {
   Rating,
   UserProps,
 } from "@/helper/type";
-import dynamic from "next/dynamic";
-const ListCard = dynamic(() => import("./ListCard"), { ssr: false });
+import ListCard from "./ListCard";
 
 export interface Lists {
   findSpecificRating: IRating[];

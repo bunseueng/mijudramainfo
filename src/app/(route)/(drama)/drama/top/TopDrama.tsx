@@ -5,10 +5,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-const ExploreCard = dynamic(
-  () => import("@/app/component/ui/Card/ExploreCard"),
-  { ssr: false }
-);
+import ExploreCard from "@/app/component/ui/Card/ExploreCard";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }

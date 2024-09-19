@@ -1,6 +1,5 @@
 import React from "react";
-import dynamic from "next/dynamic";
-const SeasonEpisode = dynamic(() => import("./SeasonEpisode"), { ssr: false });
+import SeasonEpisode from "./SeasonEpisode";
 
 const SeasonPage = () => {
   return <SeasonEpisode />;

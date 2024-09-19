@@ -1,10 +1,7 @@
-import dynamic from "next/dynamic";
+import LazyImage from "@/components/ui/lazyimage";
 import Link from "next/link";
 import React from "react";
 import { FaCalendarDays } from "react-icons/fa6";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const AllSeason = ({
   displaySeason,

@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
-const TopDrama = dynamic(() => import("./TopDrama"), { ssr: false });
+import TopDrama from "./TopDrama";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }

@@ -4,18 +4,13 @@ import { FaArrowAltCircleRight } from "react-icons/fa";
 import Image from "next/image";
 import { DramaDB, UserProps } from "@/helper/type";
 import dynamic from "next/dynamic";
-const AllSeason = dynamic(() => import("./AllSeason"), { ssr: false });
-const CastCard = dynamic(() => import("@/app/component/ui/Card/CastCard"), {
-  ssr: false,
-});
-const TvListCard = dynamic(() => import("@/app/component/ui/Card/TvListCard"), {
-  ssr: false,
-});
-const TvInfo = dynamic(() => import("./TvInfo"), { ssr: false });
+import CastCard from "@/app/component/ui/Card/CastCard";
+import AllSeason from "./AllSeason";
+import ReviewCard from "@/app/component/ui/Card/ReviewCard";
+import TvInfo from "./TvInfo";
+import TvListCard from "@/app/component/ui/Card/TvListCard";
+
 const WatchProvider = dynamic(() => import("./WatchProvider"), { ssr: false });
-const ReviewCard = dynamic(() => import("@/app/component/ui/Card/ReviewCard"), {
-  ssr: false,
-});
 
 const DramaCast = ({
   getDrama,

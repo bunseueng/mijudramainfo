@@ -11,9 +11,7 @@ import { fetchMovie, fetchTv } from "@/app/actions/fetchMovieApi";
 import ClipLoader from "react-spinners/ClipLoader";
 import { MovieResultProps } from "@/helper/type";
 import dynamic from "next/dynamic";
-const DramaListRating = dynamic(() => import("./DramaListRating"), {
-  ssr: false,
-});
+import DramaListRating from "./DramaListRating";
 const CommentModal = dynamic(
   () => import("@/app/component/ui/Modal/CommentModal"),
   { ssr: false }

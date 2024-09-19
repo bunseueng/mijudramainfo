@@ -1,16 +1,13 @@
 "use client";
 
 import { fetchTv } from "@/app/actions/fetchMovieApi";
+import LazyImage from "@/components/ui/lazyimage";
 import { useQuery } from "@tanstack/react-query";
 import ColorThief from "colorthief";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaArrowLeft } from "react-icons/fa";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const GetSeason = () => {
   const pathParts = window.location.pathname.split("/");

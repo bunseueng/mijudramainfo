@@ -17,15 +17,13 @@ import {
 } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
+import LazyImage from "@/components/ui/lazyimage";
+import MovieCast from "./MovieCast";
 const CircleRating = dynamic(
   () => import("@/app/component/ui/CircleRating/CircleRating"),
   { ssr: false }
 );
 const PlayTrailerBtn = dynamic(() => import("../../tv/[id]/PlayTrailerBtn"), {
-  ssr: false,
-});
-const MovieCast = dynamic(() => import("./MovieCast"), { ssr: false });
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
   ssr: false,
 });
 

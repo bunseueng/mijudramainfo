@@ -3,7 +3,6 @@
 import { fetchImages, fetchTv } from "@/app/actions/fetchMovieApi";
 import { PaginationBtn } from "@/app/component/ui/Pagination/PaginationBtn";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa";
@@ -11,13 +10,11 @@ import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
+import LazyImage from "@/components/ui/lazyimage";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const PhotoAlbum = () => {
   const searchParams = useSearchParams();

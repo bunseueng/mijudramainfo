@@ -20,10 +20,8 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import dynamic from "next/dynamic";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
+import LazyImage from "@/components/ui/lazyimage";
+
 type RatingCategory = "story" | "acting" | "music" | "rewatchValue" | "overall";
 
 interface WriteReview {

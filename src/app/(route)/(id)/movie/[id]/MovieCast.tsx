@@ -1,13 +1,8 @@
+import CastCard from "@/app/component/ui/Card/CastCard";
+import ReviewCard from "@/app/component/ui/Card/ReviewCard";
 import Link from "next/link";
 import React from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
-import dynamic from "next/dynamic";
-const CastCard = dynamic(() => import("@/app/component/ui/Card/CastCard"), {
-  ssr: false,
-});
-const ReviewCard = dynamic(() => import("@/app/component/ui/Card/ReviewCard"), {
-  ssr: false,
-});
 
 const MovieCast = ({
   cast,

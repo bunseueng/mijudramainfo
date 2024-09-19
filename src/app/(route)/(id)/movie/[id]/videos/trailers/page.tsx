@@ -1,7 +1,6 @@
 import React from "react";
 import prisma from "@/lib/db";
-import dynamic from "next/dynamic";
-const MovieVideo = dynamic(() => import("../MovieVideo"), { ssr: false });
+import MovieVideo from "../MovieVideo";
 
 const TrailerPage = async ({ params }: { params: { id: string } }) => {
   const movie_id = params.id;

@@ -1,8 +1,7 @@
 import prisma from "@/lib/db";
 import React from "react";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import dynamic from "next/dynamic";
-const Lists = dynamic(() => import("./Lists"), { ssr: false });
+import Lists from "./Lists";
 
 const ListsPage = async ({ params }: { params: { listId: string } }) => {
   const list = await prisma.dramaList?.findUnique({

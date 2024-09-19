@@ -1,7 +1,6 @@
 import prisma from "@/lib/db";
 import React from "react";
-import dynamic from "next/dynamic";
-const TvVideo = dynamic(() => import("../TvVideo"), { ssr: false });
+import TvVideo from "../TvVideo";
 
 const BloopersPage = async ({ params }: any) => {
   const tv_id = params.id;

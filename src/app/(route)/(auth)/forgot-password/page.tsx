@@ -1,8 +1,5 @@
 import { Metadata } from "next";
-import dynamic from "next/dynamic";
-const ForgotPasswordForm = dynamic(() => import("./ForgotPassword"), {
-  ssr: false,
-});
+import ForgotPasswordForm from "./ForgotPassword";
 
 export const metadata: Metadata = {
   title: "Forgot Password",

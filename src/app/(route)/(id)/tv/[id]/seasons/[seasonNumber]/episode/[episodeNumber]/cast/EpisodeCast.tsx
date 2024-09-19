@@ -5,17 +5,13 @@ import {
   fetchSeasonEpisode,
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
+import LazyImage from "@/components/ui/lazyimage";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
-
 const EpisodeCast = () => {
   const [episode, setEpisode] = useState<any>();
   const router = useRouter();

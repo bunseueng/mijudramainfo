@@ -1,17 +1,8 @@
-import dynamic from "next/dynamic";
 import React, { Suspense } from "react";
-
-// Lazy load components
-const TrendingDrama = dynamic(() => import("../Fetching/TrendingDrama"), {
-  ssr: false,
-});
-const Actor = dynamic(() => import("../Fetching/Actor"), { ssr: false });
-const LatestDrama = dynamic(() => import("../Fetching/LatestDrama"), {
-  ssr: false,
-});
-const Trailer = dynamic(() => import("../Fetching/Trailer"), { ssr: false });
-
-export const revalidate = 0;
+import TrendingDrama from "../Fetching/TrendingDrama";
+import Actor from "../Fetching/Actor";
+import LatestDrama from "../Fetching/LatestDrama";
+import Trailer from "../Fetching/Trailer";
 
 export default function Section() {
   const trending = "Trending";

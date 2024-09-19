@@ -1,7 +1,5 @@
 import { Suspense } from "react";
-import dynamic from "next/dynamic";
-const MediaPhoto = dynamic(() => import("./Media"), { ssr: false });
-export const revalidate = 0;
+import MediaPhoto from "./Media";
 
 const MediaPage = ({
   tv,
@@ -15,7 +13,7 @@ const MediaPage = ({
   tv_id,
 }: any) => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense key={tv_id} fallback={<div>Loading...</div>}>
       <MediaPhoto
         tv={tv}
         mediaActive={mediaActive}

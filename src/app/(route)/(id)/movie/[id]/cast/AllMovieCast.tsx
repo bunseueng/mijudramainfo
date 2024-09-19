@@ -7,45 +7,19 @@ import {
   fetchMovieLanguages,
 } from "@/app/actions/fetchMovieApi";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
+import Director from "@/app/component/ui/CastRole/Director";
+import GuestRole from "@/app/component/ui/CastRole/GuestRole";
+import MainRole from "@/app/component/ui/CastRole/MainRole";
+import MovieArt from "@/app/component/ui/CastRole/MovieArt";
+import MovieCamera from "@/app/component/ui/CastRole/MovieCamera";
+import MovieSupportRole from "@/app/component/ui/CastRole/MovieSupportRole";
+import Product from "@/app/component/ui/CastRole/Product";
+import Screenwriter from "@/app/component/ui/CastRole/Screenwriter";
+import Sound from "@/app/component/ui/CastRole/Sound";
+import LazyImage from "@/components/ui/lazyimage";
 import { useQuery } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
-import Image from "next/image";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
-const Director = dynamic(() => import("@/app/component/ui/CastRole/Director"), {
-  ssr: false,
-});
-const GuestRole = dynamic(
-  () => import("@/app/component/ui/CastRole/GuestRole"),
-  { ssr: false }
-);
-const MainRole = dynamic(() => import("@/app/component/ui/CastRole/MainRole"), {
-  ssr: false,
-});
-const MovieArt = dynamic(() => import("@/app/component/ui/CastRole/MovieArt"), {
-  ssr: false,
-});
-const MovieCamera = dynamic(
-  () => import("@/app/component/ui/CastRole/MovieCamera"),
-  { ssr: false }
-);
-const MovieSupportRole = dynamic(
-  () => import("@/app/component/ui/CastRole/MovieSupportRole"),
-  { ssr: false }
-);
-const Product = dynamic(() => import("@/app/component/ui/CastRole/Product"), {
-  ssr: false,
-});
-const Screenwriter = dynamic(
-  () => import("@/app/component/ui/CastRole/Screenwriter"),
-  { ssr: false }
-);
-const Sound = dynamic(() => import("@/app/component/ui/CastRole/Sound"), {
-  ssr: false,
-});
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
 
 const AllMovieCast = ({ movie_id }: any) => {
   const { data: movie } = useQuery({

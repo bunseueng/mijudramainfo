@@ -23,10 +23,6 @@ const PlayTrailer = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
   { ssr: false }
 );
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
-
 interface Network {
   network_id: string;
 }

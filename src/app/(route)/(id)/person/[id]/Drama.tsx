@@ -1,11 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
-  ssr: false,
-});
-
+import LazyImage from "@/components/ui/lazyimage";
 const Drama = ({ data, heading }: any) => {
   const filteredCast = data?.cast?.filter(
     (item: any) =>

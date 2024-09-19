@@ -1,11 +1,7 @@
 import React from "react";
 import prisma from "@/lib/db";
-import dynamic from "next/dynamic";
-
-const TvEdit = dynamic(() => import("../detail/TvEdit"), { ssr: false });
-const TvEditList = dynamic(() => import("../detail/TvEditList"), {
-  ssr: false,
-});
+import TvEditList from "../detail/TvEditList";
+import TvEdit from "../detail/TvEdit";
 
 const TvCrewPage = async ({ params }: { params: { id: string } }) => {
   const tv_id = params.id;

@@ -1,8 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import dynamic from "next/dynamic";
-const WriteReview = dynamic(() => import("./WriteReview"), { ssr: false });
+import WriteReview from "./WriteReview";
 
 export const metadata: Metadata = {
   title: "New Review",
