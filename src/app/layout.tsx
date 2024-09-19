@@ -62,18 +62,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Preconnect to important origins */}
-        <link rel="preconnect" href="https://us.i.posthog.com" />
-        <link rel="preconnect" href="https://us-assets.i.posthog.com" />
-        <link rel="preconnect" href="https://api.themoviedb.org" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
-
-        {/* DNS Prefetch for additional optimizations */}
-        <link rel="dns-prefetch" href="https://us.i.posthog.com" />
-        <link rel="dns-prefetch" href="https://us-assets.i.posthog.com" />
-        <link rel="dns-prefetch" href="https://api.themoviedb.org" />
-        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-
         <Adsense pId="3369705912051027" />
         <meta
           name="google-adsense-account"
