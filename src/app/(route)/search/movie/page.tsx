@@ -7,7 +7,6 @@ const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
-export const revalidate = 0;
 const MoviePage = () => {
   const BASE_URL = "https://api.themoviedb.org/3/search/movie";
   return (

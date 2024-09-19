@@ -7,8 +7,6 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
-export const revalidate = 0;
-
 export const metadata: Metadata = {
   title: "Top Rated Movie",
   description: "Find Top Rated movie.",

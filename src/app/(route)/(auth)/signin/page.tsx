@@ -1,6 +1,5 @@
-import dynamic from "next/dynamic";
 import React from "react";
-const Signin = dynamic(() => import("./Signin"), { ssr: false });
+import Signin from "./Signin";
 
 const SigninPage = () => {
   return <Signin />;
