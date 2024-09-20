@@ -11,6 +11,8 @@ const SearchLoading = dynamic(
 );
 const TvList = dynamic(() => import("./TvList"), { ssr: false });
 
+export const maxDuration = 60;
+
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const tv_id = params.id;
   const response = await fetch(

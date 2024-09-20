@@ -1,9 +1,8 @@
-import React from "react";
+import React, { lazy } from "react";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import dynamic from "next/dynamic";
-const ProfileSetting = dynamic(() => import("./ProfileSetting"), {
-  ssr: false,
-});
+const ProfileSetting = lazy(() => import("./ProfileSetting"));
+
+export const maxDuration = 60;
 
 const ProfileSettingPage = async () => {
   const user = await getCurrentUser();

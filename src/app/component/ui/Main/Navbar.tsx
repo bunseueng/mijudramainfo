@@ -599,7 +599,7 @@ const Navbar: React.FC<Notification> = ({
                                     ? `${item.link}/${session?.user?.name}`
                                     : item.link
                                 }`}
-                                className="flex items-center text-center text-sm my-2 ml-2"
+                                className="flex items-center text-center text-[16px] my-2 ml-2"
                               >
                                 {item.icon}{" "}
                                 <span className="ml-2">{item.label}</span>

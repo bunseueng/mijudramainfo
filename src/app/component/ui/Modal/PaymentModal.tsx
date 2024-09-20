@@ -16,6 +16,7 @@ import {
   usePayPalScriptReducer,
 } from "@paypal/react-paypal-js";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 
 interface PaymentType {
   value: number | null;
@@ -246,6 +247,10 @@ const PaymentModal: React.FC<PaymentType> = ({
                 Total: <span>${price}</span>
               </div>
               <div className="w-full mb-5">
+                <Script
+                  src={`https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}`}
+                  strategy="afterInteractive"
+                />
                 {paymentMethod === "Paypal" && paypalClientID && (
                   <PayPalScriptProvider options={{ clientId: paypalClientID }}>
                     <PrintLoadingState />

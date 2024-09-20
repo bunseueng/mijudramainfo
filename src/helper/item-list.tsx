@@ -4,6 +4,7 @@ import { CgProfile } from "react-icons/cg";
 import { FaRegRectangleList } from "react-icons/fa6";
 import { CiDark, CiSettings } from "react-icons/ci";
 import { TiArrowForward } from "react-icons/ti";
+import { TbCoins } from "react-icons/tb";
 
 export const navbar_items = [
   {
@@ -368,6 +369,11 @@ export const sessionItems = [
     icon: <CiDark />,
     link: "",
     label: "Dark Mode",
+  },
+  {
+    icon: <TbCoins />,
+    link: "/coin",
+    label: "Coin",
   },
   {
     icon: <CiSettings />,

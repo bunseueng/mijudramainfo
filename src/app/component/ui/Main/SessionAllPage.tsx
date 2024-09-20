@@ -1,9 +1,8 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import React, { Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import prisma from "@/lib/db";
-import Navbar from "./Navbar";
-
-export const revalidate = 0;
+const Navbar = lazy(() => import("./Navbar"));
+export const maxDuration = 60;
 
 const SessionAllPage = async () => {
   const users = await prisma?.user?.findMany({});

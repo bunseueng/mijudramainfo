@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "New Review",
   description: "Create review for TVShows.",
 };
+
+export const maxDuration = 60;
+
 const WriteReviewPage = async ({ params }: { params: { id: string } }) => {
   const tv_id = params?.id;
   const currentUser = await getCurrentUser();

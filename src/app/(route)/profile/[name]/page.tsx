@@ -12,6 +12,7 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
+export const maxDuration = 60;
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
   return {

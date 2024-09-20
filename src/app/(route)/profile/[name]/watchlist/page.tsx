@@ -1,6 +1,8 @@
 import React from "react";
 import ProfilePage from "../page";
 
+export const maxDuration = 60;
+
 const WatchlistPage = async ({ params }: { params: { name: string } }) => {
   return (
     <div>

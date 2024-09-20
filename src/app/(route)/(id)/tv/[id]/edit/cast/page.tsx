@@ -3,6 +3,8 @@ import prisma from "@/lib/db";
 import TvEditList from "../detail/TvEditList";
 import TvEdit from "../detail/TvEdit";
 
+export const maxDuration = 60;
+
 const TvCastPage = async ({ params }: { params: { id: string } }) => {
   const tv_id = params.id;
   const tvDetails = await prisma.drama.findUnique({
