@@ -54,18 +54,26 @@ const Reviews: React.FC<ReviewType> = ({
   const { data: tv, isLoading } = useQuery({
     queryKey: ["drama", tv_id],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: language } = useQuery({
     queryKey: ["tvLanguage", tv_id],
     queryFn: fetchLanguages,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: content } = useQuery({
     queryKey: ["tvContent", tv_id],
     queryFn: () => fetchContentRating(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: allTvShows } = useQuery({
     queryKey: ["tvCast", tv_id],
     queryFn: fetchAllPopularTvShows,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>("");

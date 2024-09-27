@@ -22,6 +22,8 @@ const TvCover: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv } = useQuery({
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const handleProductImage = (e: any) => {

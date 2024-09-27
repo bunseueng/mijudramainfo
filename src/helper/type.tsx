@@ -81,10 +81,6 @@ export interface UserProps {
   updatedAt: Date;
 }
 
-interface IUser {
-  user: UserProps | null;
-}
-
 export interface findSpecificUserProps {
   id: string;
   public_id: string | null;
@@ -256,6 +252,7 @@ export interface CommentProps {
   message: string;
   userId: string;
   postId: string;
+  type: string;
   replies: Prisma.JsonValue[] | undefined; // Adjust this to match the type of replies in comment
   parentId: string | null;
   repliedUserId: string | null;
@@ -565,6 +562,7 @@ export interface PersonDBType {
   name: string | null;
   love: number | null;
   lovedBy: Prisma.JsonValue[];
+  totalPopularity: number;
   popularity: PersonPopularity | any;
   sentBy: Prisma.JsonValue[];
   details: Prisma.JsonValue[];
@@ -637,4 +635,34 @@ export interface ITvReview {
   ];
   updatedAt: string;
   createdAt: Date;
+}
+
+type TProfileFeeds = {
+  id: string;
+  userId: string;
+  username: string;
+  content: string;
+  link: {
+    author: string;
+    date: string;
+    description: string;
+    image: string;
+    logo: string;
+    publisher: string;
+    title: string;
+    url: string;
+  };
+  image: string | null;
+  spoiler: boolean;
+  tag: ITmdbDrama[];
+  like: number;
+  likeBy: string[];
+  comment: Prisma.JsonValue[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export interface IProfileFeeds {
+  getFeeds: TProfileFeeds[];
+  currentUser: currentUserProps | null;
 }

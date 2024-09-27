@@ -38,22 +38,32 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
   const { data: tv } = useQuery({
     queryKey: ["movie", tv_id],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: cast } = useQuery({
     queryKey: ["tvCast", tv_id],
     queryFn: () => fetchAllCast(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: language } = useQuery({
     queryKey: ["tvLanguage", tv_id],
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
     queryFn: fetchLanguages,
   });
   const { data: content } = useQuery({
     queryKey: ["tvContent", tv_id],
     queryFn: () => fetchContentRating(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: allTvShows } = useQuery({
     queryKey: ["tvCast", tv_id],
     queryFn: fetchAllPopularTvShows,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const crew = cast?.crew?.map((item: any) => item);
 

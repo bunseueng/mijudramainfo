@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import moment from "moment";
-import { ITvReview } from "@/helper/type";
+import { CommentProps, IProfileFeeds, ITvReview } from "@/helper/type";
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
 import ProfileItem from "./ProfileItem";
@@ -16,7 +16,7 @@ export const maxDuration = 60;
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
   return {
-    title: `${user?.displayName || user?.name}'s Profile`,
+    title: `${user?.displayName || user?.name}'s Profile` || "User's Profile",
     description:
       user?.biography === null
         ? `${user?.displayName || user?.name}'s page`
@@ -28,8 +28,23 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
   const users = await prisma?.user?.findMany({});
   const currentUser = await getCurrentUser();
-  const date = new Date(user?.createdAt as Date);
-  const formattedDate = date?.toISOString()?.split("T")[0];
+  // Check if user?.createdAt is valid
+  const createdAt = user?.createdAt;
+  let formattedDate;
+  if (createdAt) {
+    const date = new Date(createdAt);
+    // Ensure the date is valid
+    if (!isNaN(date.getTime())) {
+      formattedDate = date.toISOString().split("T")[0]; // Format the date as YYYY-MM-DD
+    } else {
+      // Handle invalid date case if needed
+      console.error("Invalid date:", createdAt);
+      formattedDate = ""; // or some default value
+    }
+  } else {
+    formattedDate = ""; // Handle the case when createdAt is undefined
+  }
+
   const lists = await prisma.dramaList.findMany({
     where: {
       userId: user?.id,
@@ -72,6 +87,21 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
   const getReview = await prisma.tvReview.findMany({
     where: { userId: user?.id },
   });
+  const getFeeds = await prisma.feeds.findMany({
+    where: {
+      username: params?.name,
+    },
+  });
+  const getUniqueFeed = await prisma.feeds.findUnique({
+    where: {
+      username: params?.name,
+    },
+  });
+  const getComment = await prisma.comment.findMany({
+    where: {
+      postId: getUniqueFeed?.id,
+    },
+  });
   const formattedReviews: ITvReview[] = getReview.map((review) => ({
     ...review,
     review: review?.review as ITvReview["review"],
@@ -102,6 +132,8 @@ const ProfilePage = async ({ params }: { params: { name: string } }) => {
               friend={friends}
               getDrama={getDrama as any}
               getReview={formattedReviews}
+              getFeeds={getFeeds as IProfileFeeds | any}
+              getComment={getComment as CommentProps | any}
             />
           </Suspense>
         </div>

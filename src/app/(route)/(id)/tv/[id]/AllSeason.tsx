@@ -15,13 +15,14 @@ const AllSeason = ({
         <span className="border border-l-yellow-500 border-l-4 rounded-md mr-4"></span>
         {displaySeason?.name || firstSeason?.name}
       </h1>
-      <div className="w-full h-fullmd:flex-row">
-        <div className="flex flex-col md:flex-row border border-slate-400 rounded-lg">
+      <div className="w-full h-full md:flex-row">
+        <div className="flex flex-row border border-slate-400 rounded-lg">
           <Link
+            prefetch={true}
             href={`${tv.id}/seasons/${
               displaySeason?.season_number || firstSeason?.season_number
             }`}
-            className="w-full md:w-[20%] cursor-pointer"
+            className="w-[20%] cursor-pointer"
           >
             <LazyImage
               src={`https://image.tmdb.org/t/p/w500/${
@@ -49,6 +50,7 @@ const AllSeason = ({
           </Link>
           <div className="w-full md:w-[80%] flex flex-col items-start px-5 pt-5 pb-3">
             <Link
+              prefetch={true}
               href={`${tv.id}/seasons/${
                 displaySeason?.season_number || firstSeason?.season_number
               }`}
@@ -56,7 +58,7 @@ const AllSeason = ({
             >
               {displaySeason?.name || firstSeason?.name}
             </Link>
-            <h4 className="text-md font-semibold">
+            <h4 className="text-xs md:text-md font-semibold">
               {getYearFromDate(
                 displaySeason?.air_date || firstSeason?.air_date
               )}{" "}
@@ -66,7 +68,7 @@ const AllSeason = ({
                 Episode
               </span>
             </h4>
-            <p className="pt-4 text-md font-semibold">
+            <p className="pt-4 text-xs md:text-sm font-semibold">
               {displaySeason?.overview ||
               firstSeason?.overview ||
               firstSeason?.overview === "" ? (
@@ -81,7 +83,7 @@ const AllSeason = ({
                 </span>
               )}
             </p>
-            <p className="flex items-center font-semibold mt-3">
+            <p className="flex items-center font-semibold text-xs md:text-base mt-3">
               <FaCalendarDays className="mr-2" />{" "}
               <span className="border-b-[1px] border-b-black dark:border-b-[#2196f3]">
                 {displaySeason?.episode_count || firstSeason?.episode_count}{" "}

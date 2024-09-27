@@ -17,7 +17,6 @@ const MediaPhoto = ({
   setOpenTrailer,
   tv_id,
 }: any) => {
-  const ytApi = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
   return (
     <div className="pt-5">
       <div className="flex items-center">
@@ -59,7 +58,7 @@ const MediaPhoto = ({
         {mediaActive === "videos" && (
           <>
             {video?.results?.length === 0 ? (
-              <p className="flex items-center justify-center my-10">
+              <p className="flex items-center justify-start ">
                 There no video for {tv?.title || tv?.name} yet!
               </p>
             ) : (

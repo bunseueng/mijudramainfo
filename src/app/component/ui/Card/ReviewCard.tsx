@@ -4,7 +4,7 @@ import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
 import MediaPage from "@/app/(route)/(id)/tv/[id]/media/page";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaBookmark } from "react-icons/fa";
 import { IoHeartSharp } from "react-icons/io5";
@@ -74,19 +74,17 @@ const ReviewCard = ({
 
   return (
     <div>
-      <Suspense fallback={<div>Loading...</div>}>
-        <MediaPage
-          tv={tv}
-          mediaActive={mediaActive}
-          setMediaActive={setMediaActive}
-          image={image}
-          video={video}
-          thumbnails={thumbnails}
-          openTrailer={openTrailer}
-          setOpenTrailer={setOpenTrailer}
-          tv_id={tv_id}
-        />
-      </Suspense>
+      <MediaPage
+        tv={tv}
+        mediaActive={mediaActive}
+        setMediaActive={setMediaActive}
+        image={image}
+        video={video}
+        thumbnails={thumbnails}
+        openTrailer={openTrailer}
+        setOpenTrailer={setOpenTrailer}
+        tv_id={tv_id}
+      />
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         <div className="border-t-[1px] border-t-slate-400 pt-3">
           <h1 className="text-2xl font-bold py-4">Recommendations</h1>
@@ -258,6 +256,7 @@ const ReviewCard = ({
           users={users}
           getComment={getComment}
           tv_id={tv_id}
+          type="tv"
         />
       </div>
     </div>

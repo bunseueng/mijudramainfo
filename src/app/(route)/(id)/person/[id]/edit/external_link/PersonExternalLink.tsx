@@ -39,19 +39,24 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
   const { data: person } = useQuery({
     queryKey: ["personEdit", person_id],
     queryFn: () => fetchPerson(person_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: getFullDetails } = useQuery({
     queryKey: ["getFullDetails", person?.name],
     queryFn: () => fetchPersonSearch(person?.name),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: personExternalID } = useQuery({
     queryKey: ["personExternalID", person_id],
     queryFn: () => fetchPersonExternalID(person_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
-  const { register, handleSubmit, reset, control } =
-    useForm<TCreatePersonDetails>({
-      resolver: zodResolver(CreatePersonDetails),
-    });
+  const { register, handleSubmit, reset } = useForm<TCreatePersonDetails>({
+    resolver: zodResolver(CreatePersonDetails),
+  });
   const router = useRouter();
   const [detailDB]: PersonExternalID[] = (personDB?.external_links ||
     []) as unknown as PersonExternalID[];
@@ -267,7 +272,6 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
     }
   };
 
-  console.log(initialDouyin);
   return (
     <form className="py-3 px-2 md:px-4" onSubmit={handleSubmit(onSubmit)}>
       <div className="inline-flex">

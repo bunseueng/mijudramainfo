@@ -32,14 +32,20 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv } = useQuery({
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: content } = useQuery({
     queryKey: ["content"],
     queryFn: () => fetchContentRating(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: title } = useQuery({
     queryKey: ["title"],
     queryFn: () => fetchTitle(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [detail]: DramaDetails[] = (tvDetails?.details ||
     []) as unknown as DramaDetails[]; // get rid of array without using map or filter

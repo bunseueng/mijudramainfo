@@ -2,6 +2,7 @@
 
 import { profileList } from "@/helper/item-list";
 import Color from "@tiptap/extension-color";
+import CoverPhoto from "./CoverPhoto";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
@@ -9,7 +10,7 @@ import TextStyle from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useEffect, useState } from "react";
+import React, { lazy, useEffect, useState } from "react";
 import ImageResize from "tiptap-extension-resize-image";
 import Links from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -19,8 +20,10 @@ import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { IoIosArrowDown } from "react-icons/io";
 import {
+  CommentProps,
   FriendRequestProps,
   IFriend,
+  IProfileFeeds,
   ProfilePageProps,
   UserProps,
 } from "@/helper/type";
@@ -29,12 +32,11 @@ import { CalendarDays, MapPin, Users } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReviewType } from "../../(id)/tv/[id]/reviews/Reviews";
 import Image from "next/image";
-import RecentLists from "./lists/RecentLists";
-import CoverPhoto from "./CoverPhoto";
-import Watchlist from "./watchlist/Watchlist";
-import ProfileList from "./lists/ProfileList";
-import ProfileReviews from "./reviews/ProfileReviews";
-import Feeds from "./feeds/Feeds";
+const RecentLists = lazy(() => import("./lists/RecentLists"));
+const Watchlist = lazy(() => import("./watchlist/Watchlist"));
+const ProfileList = lazy(() => import("./lists/ProfileList"));
+const ProfileReviews = lazy(() => import("./reviews/ProfileReviews"));
+const Feeds = lazy(() => import("./feeds/Feeds"));
 const FollowButton = dynamic(
   () => import("@/app/component/ui/Button/FollowButton"),
   { ssr: false }
@@ -49,7 +51,12 @@ export interface User {
   users: UserProps[] | null;
 }
 
-const ProfileItem: React.FC<ProfilePageProps & IFriend & User & ReviewType> = ({
+type CommentType = {
+  getComment: CommentProps;
+};
+const ProfileItem: React.FC<
+  ProfilePageProps & IFriend & User & ReviewType & IProfileFeeds & CommentType
+> = ({
   user,
   users,
   currentUser,
@@ -64,6 +71,8 @@ const ProfileItem: React.FC<ProfilePageProps & IFriend & User & ReviewType> = ({
   friend,
   getDrama,
   getReview,
+  getFeeds,
+  getComment,
 }) => {
   const [editable, setEditable] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -588,6 +597,7 @@ const ProfileItem: React.FC<ProfilePageProps & IFriend & User & ReviewType> = ({
                   >
                     <TabsTrigger value={list?.label}>
                       <Links
+                        prefetch={true}
                         href={`${list.link}/${user?.name}/${list.page}`}
                         className="relative text-xs md:text-sm font-bold px-4 py-2"
                       >
@@ -627,7 +637,13 @@ const ProfileItem: React.FC<ProfilePageProps & IFriend & User & ReviewType> = ({
                 <ProfileList list={list} movieId={movieId} tvId={tvid} />
               )}
               {pathname === `/profile/${user?.name}/feeds` && (
-                <Feeds list={list} movieId={movieId} tvId={tvid} />
+                <Feeds
+                  user={user}
+                  users={users}
+                  currentUser={currentUser}
+                  getFeeds={getFeeds}
+                  getComment={getComment as CommentProps[] | any}
+                />
               )}
             </div>{" "}
             {pathname === `/profile/${user?.name}/reviews` && (

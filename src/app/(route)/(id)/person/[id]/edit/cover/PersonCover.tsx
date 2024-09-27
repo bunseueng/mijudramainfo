@@ -22,6 +22,8 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   const { data: person } = useQuery({
     queryKey: ["personEdit", person_id],
     queryFn: () => fetchPerson(person_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   console.log(person);
 

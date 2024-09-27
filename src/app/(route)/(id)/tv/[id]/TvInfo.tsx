@@ -72,7 +72,9 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
               Airs On:
             </h1>
-            {info?.broadcast?.map((broad) => broad?.day)?.join(", ")}
+            {info?.broadcast?.length > 0
+              ? info?.broadcast?.map((broad) => broad?.day)?.join(", ")
+              : "?"}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">

@@ -1,9 +1,10 @@
 "use client";
 
-import { FiSun, FiMoon } from "react-icons/fi";
+import { FiSun } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
+import { GiMoonBats } from "react-icons/gi";
 
 // Loading SVG placeholder
 const LoadingPlaceholder = () => (
@@ -13,6 +14,7 @@ const LoadingPlaceholder = () => (
     height={36}
     alt="Loading Light/Dark Toggle"
     title="Loading Light/Dark Toggle"
+    loading="lazy"
     priority={false} // Not critical for initial render
   />
 );
@@ -40,9 +42,9 @@ export default function ThemeSwitch() {
 
   if (resolvedTheme === "light") {
     return (
-      <FiMoon
+      <GiMoonBats
         onClick={() => setTheme("dark")}
-        className="cursor-pointer text-xl"
+        className="cursor-pointer text-white text-xl"
       />
     );
   }

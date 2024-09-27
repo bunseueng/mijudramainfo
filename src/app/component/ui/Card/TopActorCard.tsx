@@ -54,6 +54,8 @@ const TopActorCard: React.FC<ITopActor> = ({
       queryKey: ["fetchPerson", id],
       queryFn: () => fetchPerson([id]), // Fetch persons for each ID
       enabled: !!id,
+      staleTime: 3600000, // Cache data for 1 hour
+      refetchOnWindowFocus: true, // Refetch when window is focused
     })),
   });
 
@@ -119,9 +121,9 @@ const TopActorCard: React.FC<ITopActor> = ({
 
   return (
     <div className="max-w-[1134px] mx-auto py-4">
-      {/* <div className="py-5">
+      <div className="py-5">
         <AdBanner dataAdFormat="auto" dataAdSlot="8077904488" />
-      </div> */}
+      </div>
       <div className="mt-10">
         <div className="flex flex-col md:flex-row mt-10 w-full">
           <div className="w-full md:w-[70%] px-1 md:px-3">
@@ -212,9 +214,9 @@ const TopActorCard: React.FC<ITopActor> = ({
             })}
           </div>
           <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3">
-            {/* <div className="py-5 hidden md:block">
+            <div className="py-5 hidden md:block">
               <AdBanner dataAdFormat="auto" dataAdSlot="3527489220" />
-            </div> */}
+            </div>
             <div className="border bg-white dark:bg-[#242424] rounded-lg">
               <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:border-[#272727]">
                 Advanced Search
@@ -223,11 +225,11 @@ const TopActorCard: React.FC<ITopActor> = ({
                 <DramaFilter />
               </Suspense>
             </div>
-            {/* <div className="hidden md:block relative bg-black mx-auto my-5">
+            <div className="hidden md:block relative bg-black mx-auto my-5">
               <div className="min-w-auto min-h-screen">
                 <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
               </div>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

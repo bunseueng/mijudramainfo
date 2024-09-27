@@ -14,6 +14,7 @@ const LazyImage = ({
   blurDataURL,
   onLoad,
   quality,
+  sizes,
 }: any) => {
   const [isVisible, setIsVisible] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -55,6 +56,7 @@ const LazyImage = ({
       priority={priority}
       blurDataURL={blurDataURL}
       onLoad={onLoad}
+      sizes={sizes}
     />
   );
 };

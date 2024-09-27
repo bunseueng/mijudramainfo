@@ -1,21 +1,27 @@
 "use client";
 
 import React, { useState } from "react";
-import { fetchTrending, fetchVideos } from "@/app/actions/fetchMovieApi";
-import { IoMdCloseCircle } from "react-icons/io";
 import { useQuery } from "@tanstack/react-query";
-import { FaPlay } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { fetchTrending, fetchVideos } from "@/app/actions/fetchMovieApi";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Play, X } from "lucide-react";
+import YouTubeTrailerSkeleton from "../Loading/YoutubeLoading";
 
-const Trailer = ({ heading }: any) => {
-  const { data: trending } = useQuery({
+export default function YouTubeTrailer({ heading }: { heading: string }) {
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+
+  const { data: trending, isLoading: isTrendingLoading } = useQuery({
     queryKey: ["trending"],
     queryFn: fetchTrending,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
-  const { data: trendingVideos, isLoading } = useQuery({
+  const { data: trendingVideos, isLoading: isVideosLoading } = useQuery({
     queryKey: [
       "trendingVideos",
       trending?.results?.map((item: any) => item.id),
@@ -29,165 +35,130 @@ const Trailer = ({ heading }: any) => {
     },
     enabled: !!trending,
   });
+  const [hoveredImageId, setHoveredImageId] = useState<any>(null);
 
-  // Filter out trending items that do not have associated videos
+  const handleImageHover = (imageId: any) => {
+    setHoveredImageId(imageId);
+  };
   const trendingWithVideos = trending?.results?.filter((result: any) => {
     const videoData = trendingVideos?.find((vid) => vid?.id === result.id);
     return videoData?.results?.length > 0;
   });
 
-  const [clickedVideoId, setClickedVideoId] = useState<string | null>(null);
-  const [hoveredImageId, setHoveredImageId] = useState<any>(null);
-  const [closeVideo, setCloseVideo] = useState<boolean>(false);
-
-  const handleImageClick = (videoId: string) => {
-    if (videoId !== clickedVideoId) {
-      setClickedVideoId(videoId);
-      setCloseVideo(false);
-    } else {
-      setCloseVideo(!closeVideo);
-    }
-  };
-
-  const handleImageHover = (imageId: any) => {
-    setHoveredImageId(imageId);
-  };
-
-  if (isLoading) {
-    return <div>Fetching Data...</div>;
+  if (isTrendingLoading || isVideosLoading) {
+    return <YouTubeTrailerSkeleton heading={heading} />;
   }
 
   return (
-    <div>
-      <div className="relative mt-10 mx-4 md:mx-6">
-        {trendingWithVideos?.map((result: any, idx: any) => (
-          <div
-            className="absolute inset-0 overflow-hidden rounded-lg bg-cover bg-no-repeat"
-            key={idx}
-            style={
-              hoveredImageId === result.id
-                ? {
-                    backgroundImage: `url(https://image.tmdb.org/t/p/w780/${
-                      result?.backdrop_path || result?.poster_path
-                    })`,
-                  }
-                : !hoveredImageId
-                ? {
-                    backgroundImage: `url(https://image.tmdb.org/t/p/w780/${
-                      result?.backdrop_path || result?.poster_path
-                    })`,
-                  }
-                : undefined
-            }
-          >
-            <div className="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-fixed bg-gradient-to-r from-[rgba(3,37,65,0.25)] via-[rgba(3,37,65,0.20)] to-[rgba(3,37,65,0.25)] bg-opacity-75">
-              <div className="">
-                <h1 className="text-xl text-white font-bold p-4">{heading}</h1>
-              </div>
+    <div className="mx-auto px-4">
+      <h1 className="text-xl font-bold my-2">{heading}</h1>
+      <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+        <div className="relative">
+          {trendingWithVideos?.map((result: any, idx: any) => (
+            <div
+              className="absolute inset-0 overflow-hidden rounded-lg bg-center object-cover"
+              key={idx}
+              style={
+                hoveredImageId === result.id
+                  ? {
+                      backgroundImage: `url(https://image.tmdb.org/t/p/w780/${
+                        result?.backdrop_path || result?.poster_path
+                      })`,
+                    }
+                  : !hoveredImageId
+                  ? {
+                      backgroundImage: `url(https://image.tmdb.org/t/p/w780/${
+                        result?.backdrop_path || result?.poster_path
+                      })`,
+                    }
+                  : undefined
+              }
+            >
+              <div className="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-fixed bg-gradient-to-r from-[rgba(3,37,65,0.25)] via-[rgba(3,37,65,0.20)] to-[rgba(3,37,65,0.25)] bg-opacity-75"></div>
             </div>
-          </div>
-        ))}
-        <div className="relative top-0 left-0 mt-5 overflow-hidden">
-          <div className="flex items-center w-full h-[250px] overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4 mt-5 mb-5">
-            {trendingWithVideos?.map((result: any, index: any) => {
-              // Find the corresponding video for this trending item
+          ))}
+          <div className="flex space-x-4 p-4">
+            {trendingWithVideos?.map((result: any) => {
               const correspondingVideo = trendingVideos?.find(
                 (vid) => vid?.id === result.id
               );
+              const videoKey = correspondingVideo?.results?.[0]?.key;
 
               return (
-                <div className="w-[300px] h-[150px] mx-3" key={index}>
-                  <div className="w-[300px] h-[150px] bg-cover relative">
-                    <div className="flex flex-col gap-6 group relative shadow-lg text-white rounded-xl px-6 py-8 h-[150px] w-[300px] overflow-hidden cursor-pointer">
-                      <div
-                        onMouseEnter={() => handleImageHover(result.id)}
-                        onMouseLeave={() => handleImageHover(null)}
-                        className="absolute inset-0 bg-cover bg-center"
-                      >
-                        <Image
-                          src={`https://image.tmdb.org/t/p/w500/${
-                            result.poster_path || result.backdrop_path
-                          }`}
-                          alt={result.title || result.name}
-                          fill
-                          style={{
-                            objectFit: "cover",
-                            objectPosition: "center",
-                          }}
-                          priority
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                      </div>
-                      {/* Show play button only if corresponding video exists */}
-                      <div className="absolute left-[130px] top-[65px] text-white">
-                        {correspondingVideo?.results?.length > 0 ? (
-                          <FaPlay
-                            size={35}
-                            onClick={() => handleImageClick(result.id)}
-                          />
-                        ) : (
-                          <span className="text-xs text-gray-300">
-                            No Trailer
-                          </span>
-                        )}
-                      </div>
+                <Card key={result.id} className="w-[250px] flex-shrink-0">
+                  <CardContent className="p-0">
+                    <div
+                      className="relative h-[140px] overflow-hidden rounded-t-lg"
+                      onMouseEnter={() => handleImageHover(result.id)}
+                      onMouseLeave={() => handleImageHover(null)}
+                    >
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w500/${
+                          result.backdrop_path || result.poster_path
+                        }`}
+                        alt={result.title || result.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        style={{
+                          objectFit: "cover",
+                        }}
+                      />
+                      {videoKey && (
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-black/50 hover:bg-black/75 transition-colors"
+                          onClick={() => setSelectedVideo(videoKey)}
+                        >
+                          <Play className="h-6 w-6 text-white dark:text-base" />
+                        </Button>
+                      )}
                     </div>
-                    <div className="w-[200px] text-white mb-12">
-                      <h1 className="text-sm lg:text-md w-full">
+                    <div className="relative top-0 overflow-hidden px-2">
+                      <h3 className="text-white font-semibold text-lg truncate">
                         {result.title || result.name}
-                      </h1>
-                      <p className="text-sm">{result.first_air_date}</p>
+                      </h3>
+                      <p className="text-sm text-white opacity-50 dark:text-muted-foreground dark:opacity-100">
+                        {result.release_date || result.first_air_date}
+                      </p>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         </div>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
-      {trendingVideos?.map((vid, idx) =>
-        vid?.results?.map((result: any, videoIndex: number) => (
-          <div key={videoIndex}>
-            {clickedVideoId === vid.id && !closeVideo && (
-              <div className="fixed top-0 left-0 right-0 bottom-0 z-50">
-                <div
-                  className={`w-[95%] h-[50%] lg:h-[80%] m-auto ${
-                    closeVideo ? "hidden" : "block"
-                  }`}
-                >
-                  <iframe
-                    src={`https://www.youtube.com/embed/${result.key}`}
-                    className={`w-full h-full ${
-                      closeVideo ? "hidden" : "block"
-                    }`}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                  <div
-                    className={`bg-black w-full h-14 absolute -top-12 left-0 right-0 bottom-0 z-9 border-t-black rounded-t-md ${
-                      closeVideo ? "hidden" : "block"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between p-4">
-                      <h1 className="text-white">Official Trailer</h1>
-                      <p
-                        className="text-white cursor-pointer"
-                        onClick={() => setCloseVideo(!closeVideo)}
-                      >
-                        <IoMdCloseCircle size={25} />
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ))
-      )}
+      <AnimatePresence>
+        {selectedVideo && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          >
+            <div className="relative w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
+              <iframe
+                src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="absolute top-4 right-4 rounded-full"
+                onClick={() => setSelectedVideo(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-};
-
-export default Trailer;
+}

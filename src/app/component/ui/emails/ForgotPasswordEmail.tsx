@@ -23,7 +23,7 @@ export default function ForgotPasswordEmail({
 
       <Text>
         Need Help? <Link href="">Contact our support team</Link> or hit us on
-        Twitter <Link href="/">@discord</Link>.
+        Twitter or <Link href="/">@discord</Link>.
       </Text>
       <Text>
         Want to give us feedback? Let us know what you think on our{" "}

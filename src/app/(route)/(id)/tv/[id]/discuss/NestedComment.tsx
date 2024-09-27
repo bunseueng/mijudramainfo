@@ -27,6 +27,7 @@ const NestedComment = ({
   setRevealSpoiler,
   revealSpoiler,
   session,
+  type,
 }: any) => {
   const nestedComments = comments?.filter(
     (comment: any) => comment.parentId === parentId
@@ -73,6 +74,7 @@ const NestedComment = ({
               revealSpoiler={revealSpoiler}
               setRevealSpoiler={setRevealSpoiler}
               session={session}
+              type={type}
             />
             <NestedComment
               tv_id={tv_id}
@@ -102,6 +104,7 @@ const NestedComment = ({
               setRevealSpoiler={setRevealSpoiler}
               revealSpoiler={revealSpoiler}
               session={session}
+              type={type}
             />
           </div>
         </li>

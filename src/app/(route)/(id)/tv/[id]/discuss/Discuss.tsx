@@ -7,8 +7,10 @@ import { useSession } from "next-auth/react";
 import ReusedImage from "@/components/ui/allreusedimage";
 import CommentCard from "./CommentCard";
 import NestedComment from "./NestedComment";
+import ClipLoader from "react-spinners/ClipLoader";
 
-const Discuss = ({ user, users, tv_id, getComment }: any) => {
+const Discuss = ({ user, users, tv_id, getComment, type }: any) => {
+  const [mainLoading, setMainLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [loadingLove, setLoadingLove] = useState<Record<string, boolean>>({});
   const [commentText, setCommentText] = useState<string>("");
@@ -26,7 +28,8 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
     const loadingKey = parentId || "main";
     try {
       setLoading((prev) => ({ ...prev, [loadingKey]: true }));
-      const response = await fetch(`/api/tv/${tv_id}/comment`, {
+      setMainLoading(true);
+      const response = await fetch(`/api/${type}/${tv_id}/comment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,6 +65,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
       console.error("Error posting comment:", error);
     } finally {
       setLoading((prev) => ({ ...prev, [loadingKey]: false }));
+      setMainLoading(false);
     }
   };
 
@@ -80,8 +84,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
     const loadingKey = commentId;
     try {
       setLoading((prev) => ({ ...prev, [loadingKey]: true }));
-
-      const res = await fetch(`/api/tv/${tv_id}/comment`, {
+      const res = await fetch(`/api/${type}/${tv_id}/comment`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -119,7 +122,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
   const handleLove = async (commentId: string, parentId: string | null) => {
     try {
       setLoadingLove((prev) => ({ ...prev, [commentId]: true }));
-      const res = await fetch(`/api/tv/${tv_id}/comment`, {
+      const res = await fetch(`/api/${type}/${tv_id}/comment`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -146,8 +149,14 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
   };
 
   return (
-    <div className="py-5">
-      <div className="min-h-[100px] relative bg-white dark:bg-[#242526] text-[#ffffffde] border-[1px] border-[#00000024] shadow-sm rounded-sm mb-2">
+    <div className={`${type === "feeds" ? "py-0" : "py-5"}`}>
+      <div
+        className={`min-h-[100px] relative bg-white text-[#ffffffde] ${
+          type === "feeds"
+            ? "dark:bg-[#1b1c1d] border-t mb-0 rounded-b-md"
+            : "mb-2 dark:bg-[#242526] border border-[#00000024] rounded-md"
+        }`}
+      >
         <div className="border-b border-b-[#78828c21] px-3 py-2">
           <h3 className="text-black dark:text-white text-md font-bold">
             Comments
@@ -155,7 +164,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
         </div>
         <div className="border-b-0 px-3 py-2">
           <div className="text-md font-bold">
-            <div className="relative inline-block float-left w-[48px] h-[48px] bg-[#3e4042] mr-3 rounded-full">
+            <div className="relative inline-block float-left w-[38px] h-[38px] md:w-[48px] md:h-[48px] bg-[#3e4042] mr-3 rounded-full">
               <ReusedImage
                 src={user?.profileAvatar || user?.image || "/default-pf.jpg"}
                 alt={`${user?.displayName || user?.name}'s profile avatar`}
@@ -163,11 +172,14 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                 height={48}
                 quality={100}
                 loading="lazy"
-                className="w-[48px] h-[48px] whitespace-nowrap bg-center bg-cover object-cover rounded-full align-middle"
+                className="w-[38px] h-[38px] md:w-[48px] md:h-[48px] bg-center object-cover rounded-full align-middle"
               />
             </div>
             <form
-              action={() => handlePostComment(null, tv_id)}
+              onSubmit={(e) => {
+                e.preventDefault(); // Prevent default form submission
+                handlePostComment(null, tv_id); // Call handlePostComment with null parentId and tv_id
+              }}
               className="overflow-hidden"
             >
               <div className="text-left block mb-1">
@@ -177,7 +189,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                     id="comment"
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
-                    className="w-full h-[53.6px] min-h-[53.6px] text-[#606266] dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] focus:border-blue-500 focus:ring-blue-500  text-sm font-normal rounded-sm outline-none focus:transform focus:duration-300 py-2 px-4"
+                    className="w-full h-[53.6px] min-h-[53.6px] text-[#606266] dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] focus:border-blue-500 focus:ring-blue-500 text-sm font-normal rounded-sm outline-none focus:transform focus:duration-300 py-2 px-4"
                     placeholder="Post a comment..."
                   ></textarea>
                 </div>
@@ -200,19 +212,23 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                   />
                   <span className="pl-1 text-sm mb-1">Spoiler</span>
                 </label>
-                <label
-                  htmlFor="comment"
-                  className="text-[#606266] font-semibold whitespace-nowrap cursor-pointer"
-                >
-                  <span className="inline-block relative cursor-pointer whitespace-nowrap align-middle"></span>
-                </label>
                 <button
                   name="Posting Button"
                   className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-2 px-5 outline-none ${
-                    loading.main ? "opacity-50 pointer-events-none" : ""
+                    loading["main"] ? "opacity-50 pointer-events-none" : ""
                   } ${!session ? "cursor-not-allowed" : "cursor-pointer"}`}
+                  disabled={loading["main"] || !session}
                 >
-                  {loading.main ? "Posting..." : "Post"}
+                  {loading["main"] ? (
+                    <ClipLoader
+                      color="#c3c3c3"
+                      loading={loading["main"]}
+                      size={14}
+                      className="align-middle"
+                    />
+                  ) : (
+                    "Post"
+                  )}
                 </button>
               </div>
             </form>
@@ -256,6 +272,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                     setRevealSpoiler={setRevealSpoiler}
                     revealSpoiler={revealSpoiler}
                     session={session}
+                    type={type}
                   />
 
                   <NestedComment
@@ -284,6 +301,7 @@ const Discuss = ({ user, users, tv_id, getComment }: any) => {
                     setRevealSpoiler={setRevealSpoiler}
                     revealSpoiler={revealSpoiler}
                     session={session}
+                    type={type}
                   />
                 </li>
               ))}

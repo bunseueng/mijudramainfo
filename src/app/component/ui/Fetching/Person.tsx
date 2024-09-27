@@ -36,6 +36,8 @@ export default function Person({ result, currentUser }: any) {
   const { data: person } = useQuery({
     queryKey: ["person", tv_id],
     queryFn: () => fetchPerson(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   useEffect(() => {

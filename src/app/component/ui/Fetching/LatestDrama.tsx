@@ -10,16 +10,16 @@ const LatestDrama = ({ heading }: any) => {
   const { data, isLoading } = useQuery({
     queryKey: ["latestDrama"],
     queryFn: fetchLatest,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   return (
-    <div className="relative top-0 left-0 mt-5 mx-4 md:mx-6 overflow-hidden">
+    <div className="relative top-0 left-0 mx-4 md:mx-6 overflow-hidden">
       <h1 className="text-xl font-bold my-2">{heading}</h1>
-      <div className="flex items-center w-full h-full overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4">
+      <div className="flex items-start w-full h-full overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4">
         {isLoading
           ? // Show loading skeletons if data is loading
-            Array(20)
+            Array(8)
               .fill(0)
               .map((_, index) => <SkeletonCard key={index} />)
           : data?.results
@@ -34,7 +34,6 @@ const LatestDrama = ({ heading }: any) => {
                 >
                   <div className="block w-[150px] h-[250px] bg-cover">
                     <Link
-                      prefetch={true}
                       className="block hover:relative transform duration-100 group"
                       href={`/tv/${item?.id}`}
                       style={{ width: "auto", height: "auto" }}
@@ -44,24 +43,23 @@ const LatestDrama = ({ heading }: any) => {
                         w={item?.poster_path ? "w500" : "w780"}
                         alt={item?.name || item?.title}
                         width={150}
-                        height={250}
-                        quality={100}
+                        height={200}
+                        quality={75}
+                        sizes="(max-width: 768px) 100vw, (min-width: 1024px) 50vw, 150px"
                         style={{
                           width: "auto",
                           height: "auto",
-                          objectFit: "cover",
-                          objectPosition: "bottom",
                         }}
                         priority
-                        className="w-[150px] h-[200px] rounded-xl"
+                        className="aspect-[150/200] rounded-xl bg-center object-cover"
                       />
                     </Link>
-                    <p className="block min-h-[20px] break-words whitespace-normal text-sm">
+                    <h2 className="mt-2 text-sm font-medium line-clamp-2">
                       {item?.name || item?.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground opacity-70 dark:opacity-80">
-                      {item?.first_air_date !== "" ? (
-                        item?.first_air_date?.split("-")[0]
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {item?.first_air_date ? (
+                        item.first_air_date.split("-")[0]
                       ) : (
                         <span className="text-[#2490da]">Upcoming</span>
                       )}

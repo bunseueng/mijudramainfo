@@ -1,10 +1,10 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import { currentUserProps } from "@/helper/type";
 import prisma from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
+import {  NextResponse } from "next/server";
 
 interface PopularityItem {
   itemId: string;
+  personId: string;
   starCount: number;
   actorName: string
 }
@@ -23,7 +23,7 @@ const isPopularityItemArray = (arr: any): arr is PopularityItem[] => {
   return Array.isArray(arr) && arr.every(isPopularityItem);
 };
 
-export async function PUT(
+export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
 ) {
@@ -43,18 +43,21 @@ export async function PUT(
     });
 
     if (calculateTotalCoins > (currentUser?.coin ?? 0)) {
-      return NextResponse.json({ message: "You don't have enough coin" }, { status: 404 });
+      return NextResponse.json(
+        { message: "You don't have enough coin" },
+        { status: 404 }
+      );
     }
 
     let updatingPopularity;
-    if (findPerson) {
-      const existingPopularity: any = findPerson.popularity || [];
-      const validExistingPopularity = isPopularityItemArray(existingPopularity)
-        ? existingPopularity
-        : [];
+    let totalStarCount = 0;
 
-      // Merge new popularity with existing popularity
-      const updatedPopularity: PopularityItem[] = [...validExistingPopularity];
+    if (findPerson) {
+      const existingPopularity: PopularityItem[] | any =
+        findPerson.popularity || [];
+
+      // Step 1: Merge new popularity with existing popularity
+      const updatedPopularity = [...existingPopularity];
 
       for (const newPop of popularity) {
         const existingPopIndex = updatedPopularity.findIndex(
@@ -67,31 +70,48 @@ export async function PUT(
           // Add the new item
           updatedPopularity.push(newPop);
         }
+        // Increment totalStarCount
+        totalStarCount += newPop.starCount;
       }
 
       // Ensure unique sentBy IDs
-      const uniqueSentBy = Array.from(new Set([...findPerson.sentBy, currentUser.id]));
+      const uniqueSentBy = Array.from(
+        new Set([...findPerson.sentBy, currentUser.id])
+      );
 
+      // Step 2: Update person model, including totalPopularity
       updatingPopularity = await prisma.person.update({
         where: {
           personId: params.id,
         },
         data: {
           popularity: updatedPopularity as any,
-          sentBy: uniqueSentBy as any,  // Cast to avoid type error
+          sentBy: uniqueSentBy as any,
+          totalPopularity: {
+            increment: totalStarCount, // Update total popularity by adding the new starCount
+          },
         },
       });
     } else {
+      // Calculate total popularity from the new popularity entries
+      totalStarCount = popularity.reduce(
+        (acc: number, pop: PopularityItem) => acc + pop.starCount,
+        0
+      );
+
+      // Step 3: Create new person and set totalPopularity
       updatingPopularity = await prisma.person.create({
         data: {
           personId: params.id,
           popularity,
           sentBy: [currentUser?.id],
+          totalPopularity: totalStarCount, // Set the initial totalPopularity
         },
       });
     }
 
     if (updatingPopularity) {
+      // Step 4: Update user's coin balance
       await prisma.user.update({
         where: {
           id: currentUser?.id,
@@ -100,10 +120,12 @@ export async function PUT(
           coin: { decrement: calculateTotalCoins },
         },
       });
-      const existingUserPopularitySent: any[] = currentUser.popularitySent || [];
-      // Merge existing and new popularity arrays
+
+      const existingUserPopularitySent: PopularityItem[] | any =
+        currentUser.popularitySent || [];
       const actorMap = new Map<string, PopularityItem[]>();
-      // Populate actorMap with existing data
+
+      // Step 5: Populate actorMap with existing popularity data
       for (const popArray of existingUserPopularitySent) {
         for (const item of popArray) {
           const { actorName } = item;
@@ -114,7 +136,7 @@ export async function PUT(
         }
       }
 
-      // Add/update new data
+      // Step 6: Merge new popularity data with the existing ones
       for (const newPop of popularity) {
         const { actorName } = newPop;
         if (!actorMap.has(actorName)) {
@@ -125,38 +147,53 @@ export async function PUT(
           (pop: PopularityItem) => pop.itemId === newPop.itemId
         );
         if (existingPopIndex !== -1) {
-          // Update the existing item
           existingArray[existingPopIndex].starCount += newPop.starCount;
         } else {
-          // Add the new item
           existingArray.push(newPop);
         }
       }
 
-      // Convert actorMap to the desired structure
-      const updatedPopularitySent = Array.from(actorMap.values());
-      // Calculate total starCount for each actor and prepare the totalPopularitySent array
-      const updatedTotalPopularitySent = Array.from(actorMap.entries()).map(
-        ([actorName, popularityItems]) => {
-          const totalStarCount = popularityItems.reduce((total, item) => {
-            return total + item.starCount;
-          }, 0);
+      // Fetch the existing totalPopularitySent from the user
+      const existingTotalPopularitySent: PopularityItem[] | any = currentUser.totalPopularitySent || [];
 
-          return {
-            personId: params.id,
-            actorName,
-            totalPopularity: totalStarCount,
-          };
-        }
+      // Step 7: Create a map for existing totalPopularitySent entries by personId
+      const totalPopularityMap = new Map(
+        existingTotalPopularitySent.map(
+          (pop: { personId: string | any}) => [pop.personId, pop]
+        )
       );
 
+      // Update or add the new popularity data for the specific personId
+      for (const [actorName, popularityItems] of actorMap.entries() as any) {
+        const totalStarCount = popularityItems.reduce((total: number, item: PopularityItem[] | any) => {
+          return total + item.starCount;
+        }, 0);
+
+        const updatedPopularityEntry = {
+          personId: params.id,
+          actorName,
+          totalPopularity: totalStarCount,
+        };
+
+        // If the personId already exists, update it, otherwise add a new entry
+        if (totalPopularityMap.has(params.id)) {
+          totalPopularityMap.set(params.id, updatedPopularityEntry);
+        } else {
+          totalPopularityMap.set(params.id, updatedPopularityEntry);
+        }
+      }
+
+      // Convert the map back to an array for updating the database
+      const updatedTotalPopularitySent = Array.from(totalPopularityMap.values());
+
+      // Step 8: Update user model with popularitySent and totalPopularitySent
       await prisma.user.update({
         where: {
           id: currentUser?.id,
         },
         data: {
-          popularitySent: updatedPopularitySent as any,
-          totalPopularitySent: updatedTotalPopularitySent
+          popularitySent: Array.from(actorMap.values()) as any, // Fixed to correctly update popularitySent
+          totalPopularitySent: updatedTotalPopularitySent as any, // Use the updated array
         },
       });
     }
@@ -165,11 +202,15 @@ export async function PUT(
       { updatingPopularity, message: "Success" },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    return NextResponse.json(error, { status: 500 });
+    return NextResponse.json(
+      { message: "Server error", error: error.message },
+      { status: 500 }
+    );
   }
 }
+
 
 let currentIndex = 0;
 export async function GET() {

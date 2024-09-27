@@ -102,6 +102,8 @@ const FilterQuery = ({ BASE_URL }: any) => {
     queryKey: ["results", currentPage],
     queryFn: () => fetchMultiSearch(currentPage),
     placeholderData: keepPreviousData,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const per_page = searchParams?.get("per_page") || (20 as any);
   const start = (Number(page) - 1) * Number(per_page);
@@ -112,21 +114,29 @@ const FilterQuery = ({ BASE_URL }: any) => {
   const { data: fetchTv } = useQuery({
     queryKey: ["tv"],
     queryFn: () => fetchTvSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const { data: fetchMovie } = useQuery({
     queryKey: ["movie"],
     queryFn: () => fetchMovieSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const { data: fetchPersons } = useQuery({
     queryKey: ["person"],
     queryFn: () => fetchPersonSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const { data: fetchCollection } = useQuery({
     queryKey: ["collection"],
     queryFn: () => fetchCollectionSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   return (

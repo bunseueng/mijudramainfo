@@ -26,3 +26,18 @@ export const sendEmail = async (
   
     return info?.messageId;
 }
+
+export const sendEmailFromReport = async (
+    from: string,
+    subject: string,
+    html: string
+  ): Promise<string | null> => {
+    const info = await transporter.sendMail({
+      from: from,
+      to: process.env.EMAIL_FROM,
+      subject: subject,
+      html: html,
+    });
+  
+    return info?.messageId;
+}

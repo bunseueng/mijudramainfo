@@ -87,7 +87,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                     userId,
                     repliedUserId: userId,
                     postId: params.id,
-                    spoiler
+                    spoiler,
+                    type: "tv"
                 },
             });
             console.log("Created new comment:", creatingComment);

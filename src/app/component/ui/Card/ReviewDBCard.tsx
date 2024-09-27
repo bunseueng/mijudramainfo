@@ -16,6 +16,8 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
   const { data: tv, isLoading } = useQuery({
     queryKey: ["tv"],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
     new Set()

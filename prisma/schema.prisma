@@ -152,22 +152,23 @@ model Movie {
 }
 
 model Person {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  personId       String   @unique
-  userID         String?
-  name           String?
-  love           Int?
-  lovedBy        String[]
-  popularity     Json[]
-  sentBy         Json[]
-  public_id      String?
-  cover          String?
-  details        Json[]
-  cast           Json[]
-  crew           Json[]
-  external_links Json[]
-  changes        Json[]   @default([])
-  changeCount    Int      @default(0)
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  personId        String   @unique
+  userID          String?
+  name            String?
+  love            Int?
+  lovedBy         String[]
+  popularity      Json[]
+  totalPopularity Int      @default(0)
+  sentBy          Json[]
+  public_id       String?
+  cover           String?
+  details         Json[]
+  cast            Json[]
+  crew            Json[]
+  external_links  Json[]
+  changes         Json[]   @default([])
+  changeCount     Int      @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -182,6 +183,24 @@ model Watchlist {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Feeds {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  username  String   @unique
+  content   String
+  link      Json?
+  image     String?
+  public_id String?
+  spoiler   Boolean  @default(false)
+  tag       Json[]
+  like      Int      @default(0)
+  likeBy    String[]
+  comment   Json[]
+  report    Json[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model DramaList {
@@ -212,7 +231,8 @@ model Comment {
   message       String
   userId        String    @db.ObjectId
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId        String
+  postId        String    @unique
+  type          String
   parent        Comment?  @relation("ParentChild", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children      Comment[] @relation("ParentChild")
   replies       Json[]

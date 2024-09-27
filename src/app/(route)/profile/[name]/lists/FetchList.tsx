@@ -29,6 +29,8 @@ const FetchList: React.FC<FetchRecentListProps> = ({
     queryKey: ["tv", tvId, "movie", movieId],
     queryFn: fetchDetails,
     enabled: !!tvId || !!movieId,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const item = itemData?.item;

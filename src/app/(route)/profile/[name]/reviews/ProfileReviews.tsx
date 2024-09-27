@@ -42,6 +42,8 @@ const ProfileReviews: React.FC<ReviewType> = ({
   const { data: tv, isLoading } = useQuery({
     queryKey: ["drama", tv_ids], // Query key includes the array of tv_ids to keep the query unique
     queryFn: () => fetchMultipleTvShows(tv_ids), // Function to fetch all TV shows
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   console.log(tv);
   const [loading, setLoading] = useState(false);

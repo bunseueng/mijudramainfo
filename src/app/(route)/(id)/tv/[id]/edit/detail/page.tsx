@@ -4,6 +4,7 @@ import TvEditList from "../detail/TvEditList";
 import TvEdit from "../detail/TvEdit";
 
 export const maxDuration = 60;
+export const revalidate = 3600;
 
 const PrimaryDetailsPage = async ({ params }: { params: { id: string } }) => {
   const tv_id = params.id;

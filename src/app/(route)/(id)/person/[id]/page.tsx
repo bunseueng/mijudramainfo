@@ -3,7 +3,9 @@ import FetchPerson from "@/app/component/ui/Fetching/FetchPerson";
 import prisma from "@/lib/db";
 import { Metadata } from "next";
 import PersonList from "./PersonList";
+import { CommentProps } from "@/helper/type";
 
+export const revalidate = 3600;
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const person_id = params.id;
   const response = await fetch(
@@ -21,6 +23,19 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
   return {
     title: `${person?.results[0]?.original_name}`,
     description: person?.results[0]?.biography,
+    openGraph: {
+      type: "website",
+      url: "https://mijudramainfo.vercel.app/",
+      title: person?.results[0]?.name,
+      description: `All information of ${person?.results[0]?.name}`,
+      images: [
+        {
+          url: `https://image.tmdb.org/t/p/original/${person?.results[0]?.profile_path}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
   };
 }
 
@@ -54,7 +69,7 @@ export default async function PersonPage({ params }: any) {
     })
   );
 
-  const sortedUsers = findSpecificPerson.sort((a, b) => {
+  const sortedUsers = findSpecificPerson?.sort((a, b) => {
     const totalA = a.totalPopularitySent.reduce(
       (sum: number, item: any) => sum + item.totalPopularity,
       0
@@ -73,7 +88,7 @@ export default async function PersonPage({ params }: any) {
         tv_id={person_id}
         currentUser={currentUser}
         users={users}
-        getComment={getComment}
+        getComment={getComment as CommentProps | any}
         getPersons={getPersons}
         sortedUsers={sortedUsers}
       />

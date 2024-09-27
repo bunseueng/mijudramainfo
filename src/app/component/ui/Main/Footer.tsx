@@ -1,9 +1,9 @@
 import { footer, footerRecommend } from "@/helper/item-list";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
-import dynamic from "next/dynamic";
 const ThemeSwitch = dynamic(() => import("@/components/ui/ThemeIcon"), {
   ssr: false,
 });
@@ -95,13 +95,9 @@ const Footer = () => {
             <h1 className="text-md font-semibold text-white pb-2 uppercase">
               Dark Mode
             </h1>
-            <ul className="ul flex items-center">
-              <li className="li dark:border-[#3a3b3c] darkMode">
-                <span className="bg-white  dark:bg-black rounded-full mr-2 p-2 link relative">
-                  <ThemeSwitch />
-                </span>
-              </li>
-            </ul>
+            <span className="flex mr-2 p-2">
+              <ThemeSwitch />
+            </span>
           </div>
         </div>
 

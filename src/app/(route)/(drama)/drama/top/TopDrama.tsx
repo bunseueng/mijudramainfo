@@ -11,8 +11,6 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
-export const revalidate = 0;
-
 const TopDrama = () => {
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams?.get("page") || "1");

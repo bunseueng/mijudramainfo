@@ -1,7 +1,8 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import React, { lazy, Suspense } from "react";
+import React, { lazy } from "react";
 import prisma from "@/lib/db";
 const Navbar = lazy(() => import("./Navbar"));
+
 export const maxDuration = 60;
 
 const SessionAllPage = async () => {
@@ -27,17 +28,15 @@ const SessionAllPage = async () => {
     friend?.map((friend: any) => friend?.friendRespondId).includes(user?.id)
   );
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Navbar
-        users={users}
-        user={user}
-        currentUser={currentUser}
-        findSpecificUser={findSpecificUser}
-        yourFriend={yourFriend}
-        friend={friend}
-        comment={comment}
-      />
-    </Suspense>
+    <Navbar
+      users={users}
+      user={user}
+      currentUser={currentUser}
+      findSpecificUser={findSpecificUser}
+      yourFriend={yourFriend}
+      friend={friend}
+      comment={comment}
+    />
   );
 };
 

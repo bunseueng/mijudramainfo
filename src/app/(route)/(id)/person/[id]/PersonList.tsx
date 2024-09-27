@@ -129,7 +129,7 @@ const PersonList = ({ personId }: any) => {
             onMouseEnter={() => handleNavbarMouseEnter("Fandom")}
             onMouseLeave={handleNavbarMouseLeave}
           >
-            <ul className="py-2">
+            <ul className="py-2 text-black">
               <li className="text-sm my-2 mx-6 cursor-pointer">Discuss</li>
             </ul>
           </div>

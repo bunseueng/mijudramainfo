@@ -14,6 +14,8 @@ const TvEdit: React.FC<tvId> = ({ tv_id }) => {
   const { data: tv } = useQuery({
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const [dominantColor, setDominantColor] = useState<string | null>(null);

@@ -1,47 +1,78 @@
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
-import TanstackProvider from "@/provider/TanstackProvider";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
-import Provider from "@/provider/Provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { PHProvider } from "@/provider/PostHogProvider";
-import dynamic from "next/dynamic";
-import { ScrollProvider } from "@/provider/UseScroll";
 import Script from "next/script";
 import Adsense from "./component/ui/Adsense/Adsense";
 import SessionAllPage from "./component/ui/Main/SessionAllPage";
-import Footer from "./component/ui/Main/Footer";
+import dynamic from "next/dynamic";
+import { PHProvider } from "@/provider/PostHogProvider";
+import Provider from "@/provider/Provider";
+import TanstackProvider from "@/provider/TanstackProvider";
+import { ScrollProvider } from "@/provider/UseScroll";
 const Loading = dynamic(() => import("./loading"), { ssr: false });
+const LenisScroll = dynamic(() => import("@/provider/LenisScroll"), {
+  ssr: false,
+});
+const Footer = dynamic(() => import("./component/ui/Main/Footer"), {
+  ssr: false,
+});
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mijudramainfo.vercel.app/"),
+  metadataBase: new URL("https://mijudramainfo.vercel.app"),
   title: {
     default: "MijuDramaInfo (MDI)",
     template: "%s - MijuDramaInfo (MDI)",
   },
   description:
-    "Discover, Discuss, and Organize the Best Asian Dramas, Movies, and Actors",
+    "Explore the vibrant world of Asian dramas and movies at MijuDramaInfo (MDI). Discover in-depth insights, trending titles, and the latest news about your favorite shows and actors.",
   icons: {
-    icon: ["/favicon.ico?v=4"],
-    apple: ["/apple-touch-icon.png?v=4"],
-    shortcut: ["/apple-touch-icon.png"],
+    icon: [{ url: "/favicon.ico", type: "image/x-icon", sizes: "any" }],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: [{ url: "/apple-touch-icon.png" }],
   },
+  applicationName: "MijuDramaInfo",
+  keywords: ["mijudramainfo", "drama", "movie", "actor", "asian"],
+  authors: [{ name: "Eng Bunseu", url: "https://mijudramainfo.vercel.app" }],
+  creator: "Eng Bunseu",
+  publisher: "Eng Bunseu",
   openGraph: {
     title:
       "Discover, Discuss, and Organize the Best Asian Dramas, Movies, and Actors | MijuDramaInfo",
     description:
-      "Discover, Discuss, and Organize the Best Asian Dramas, Movies, and Actors",
+      "Explore the vibrant world of Asian dramas and movies at MijuDramaInfo (MDI). Join a community of fans passionate about sharing reviews, recommendations, and discussions.",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "MijuDramaInfo Banner",
+      },
+    ],
     type: "website",
     locale: "en_US",
-    url: "https://mijudramainfo.vercel.app/",
+    url: "https://mijudramainfo.vercel.app",
     siteName: "MijuDramaInfo",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title:
+      "Discover, Discuss, and Organize the Best Asian Dramas, Movies, and Actors | MijuDramaInfo",
+    description:
+      "Explore the vibrant world of Asian dramas and movies at MijuDramaInfo (MDI). Join a community of fans passionate about sharing reviews, recommendations, and discussions.",
+    images: ["/opengraph-image.png"],
+    site: "@MijuDramaInfo",
+    creator: "@EngBunseu",
   },
 };
 
@@ -51,42 +82,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={nunito.className}>
       <head>
-        {/* Preconnect to important origins */}
-        <link rel="preconnect" href="https://us.i.posthog.com" />
-        <link rel="preconnect" href="https://us-assets.i.posthog.com" />
+        <link rel="preconnect" href="https://app.posthog.com" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
-
-        {/* DNS Prefetch for additional optimizations */}
-        <link rel="dns-prefetch" href="https://us.i.posthog.com" />
-        <link rel="dns-prefetch" href="https://us-assets.i.posthog.com" />
-        <link rel="dns-prefetch" href="https://api.themoviedb.org" />
-        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-        <Script
-          strategy="lazyOnload"
-          src="https://us.posthog.com"
-          async
-        ></Script>
-        <Script
-          strategy="lazyOnload"
-          src="https://api.themoviedb.org"
-          async
-        ></Script>
-        <Script
-          strategy="lazyOnload"
-          src="https://pagead2.googlesyndication.com"
-          async
-        ></Script>
-
+        <meta name="google-adsense-account" content="ca-pub-3369705912051027" />
         <Adsense pId="3369705912051027" />
-        <meta
-          name="google-adsense-account"
-          content="ca-pub-3369705912051027"
-        ></meta>
       </head>
-      <body className={`bg-[#fff] dark:bg-[#14161a] ${nunito.className}`}>
+      <body className="bg-white dark:bg-[#14161a]">
         <PHProvider>
           <Provider>
             <TanstackProvider>
@@ -98,22 +102,28 @@ export default function RootLayout({
               >
                 <ScrollProvider>
                   <Loading />
+                  <LenisScroll />
                   <div className="flex flex-col top-0 sticky z-[9999]">
                     <SessionAllPage />
                   </div>
                   <div className="parent-container min-h-screen flex flex-col">
-                    <div className="content-container flex-grow">
+                    <main className="content-container flex-grow">
                       {children}
-                    </div>
+                    </main>
                     <Footer />
                   </div>
                 </ScrollProvider>
-
                 <ToastContainer position="top-right" />
               </ThemeProvider>
             </TanstackProvider>
           </Provider>
         </PHProvider>
+        <Script strategy="afterInteractive" src="https://app.posthog.com" />
+        <Script strategy="afterInteractive" src="https://api.themoviedb.org" />
+        <Script
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com"
+        />
       </body>
     </html>
   );

@@ -25,10 +25,14 @@ const SeasonEpisode = () => {
   } = useQuery({
     queryKey: ["season"],
     queryFn: () => fetchSeasonEpisode(tv_id, season_number),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: tv } = useQuery({
     queryKey: ["tv", tv_id],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image

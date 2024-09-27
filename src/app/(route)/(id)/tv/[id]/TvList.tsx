@@ -11,10 +11,14 @@ const TvList = ({ tv_id }: any) => {
   const { data: tv } = useQuery({
     queryKey: ["tv"],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: image } = useQuery({
     queryKey: ["image"],
     queryFn: () => fetchImages(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [hovered, setHovered] = useState<string | null>(null);
   const [currentItem, setCurrentItem] = useState<string>("Overview");

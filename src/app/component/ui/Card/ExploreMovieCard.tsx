@@ -7,10 +7,17 @@ import { Suspense, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Link from "next/link";
-import DramaFilter from "@/app/(route)/(drama)/drama/top/DramaFilter";
-import PlayMovieTrailer from "@/app/(route)/(drama)/movie/top/PlayMovieTrailer";
 import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
+import dynamic from "next/dynamic";
+const PlayMovieTrailer = dynamic(
+  () => import("@/app/(route)/(drama)/movie/top/PlayMovieTrailer"),
+  { ssr: false }
+);
+const DramaFilter = dynamic(
+  () => import("@/app/(route)/(drama)/drama/top/DramaFilter"),
+  { ssr: false }
+);
 
 const ExploreMovieCard = ({ title, movie }: any) => {
   const searchParams = useSearchParams();
@@ -23,10 +30,10 @@ const ExploreMovieCard = ({ title, movie }: any) => {
   const totalItems = movie?.results?.slice(start, end);
 
   return (
-    <div className="max-w-[1520px] mx-auto py-4 px-4 md:px-6">
+    <div className="max-w-6xl mx-auto py-4 px-4 md:px-6">
       <div className="mt-10">
         <div className="flex flex-col md:flex-row mt-10 w-full">
-          <div className="w-full md:w-[70%]">
+          <div className="w-full md:w-4/6">
             <div className="flex items-center justify-between mb-5">
               <h1 className="text-2xl font-bold">{title}</h1>
               <p>{movie?.total_results} results</p>
@@ -116,7 +123,7 @@ const ExploreMovieCard = ({ title, movie }: any) => {
                 );
               })}
           </div>
-          <div className="w-full md:w-[30%]">
+          <div className="w-full md:w-2/6">
             <div className="border bg-white dark:bg-[#242424] rounded-lg ml-4 lg:ml-10">
               <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:bg-[#272727]">
                 Advanced Search

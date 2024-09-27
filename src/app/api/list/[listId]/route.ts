@@ -22,7 +22,7 @@ export async function PUT(request: Request, { params }: { params: { listId: stri
       return NextResponse.json({ message: "List not found" }, { status: 404 });
     }
 
-    const { movieId, tvId, type, listTitle, privacy, description, thumbnail, love } = await request.json();
+    const { movieId, tvId, type, listTitle, privacy, description, thumbnail } = await request.json();
 
     const updatedLovedBy = findList.lovedBy?.includes(currentUser.id)
       ? findList.lovedBy?.filter((id) => id !== currentUser.id)

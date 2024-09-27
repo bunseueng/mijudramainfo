@@ -9,7 +9,7 @@ import ColorThief from "colorthief";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { cache, Suspense, useEffect, useRef, useState } from "react";
 import { BsGlobeAsiaAustralia } from "react-icons/bs";
 import { CiLocationOn } from "react-icons/ci";
 import { PiShareNetworkBold } from "react-icons/pi";
@@ -32,6 +32,8 @@ const Network: React.FC<Network> = ({ network_id }) => {
   const { data: networksDetail } = useQuery({
     queryKey: ["networksDetail", network_id],
     queryFn: () => fetchTvNetworks(network_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [sortby, setSortby] = useState<string>();
   const [genre, setGenre] = useState<string>("18");
@@ -124,7 +126,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
     fetchRating();
   }, [networks]);
 
-  const fetchEpisodeCount = async (ids: number[]) => {
+  const fetchEpisodeCount = cache(async (ids: number[]) => {
     try {
       const promises = ids.map((id) =>
         fetch(
@@ -150,12 +152,14 @@ const Network: React.FC<Network> = ({ network_id }) => {
     } catch (error: any) {
       console.log(error);
     }
-  };
+  });
 
   const result_id = totalItems?.map((drama: any) => drama?.id);
   const { data: episodes, isError } = useQuery({
     queryKey: ["episodes", result_id],
     queryFn: () => fetchEpisodeCount(result_id || []),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   if (isError) {
@@ -188,18 +192,18 @@ const Network: React.FC<Network> = ({ network_id }) => {
                   isBright ? "bg-black text-white" : "bg-white text-black"
                 } p-2 rounded-md`}
               >
-                <li className="flex items-center px-2">
+                <li className="flex items-center text-xs md:text-base px-2">
                   <PiShareNetworkBold className="mr-1" /> {networksDetail?.name}
                 </li>
-                <li className="flex items-center px-2">
+                <li className="flex items-center text-xs md:text-base px-2">
                   <CiLocationOn className="mr-1" />{" "}
                   {networksDetail?.headquarters}
                 </li>
-                <li className="flex items-center px-2">
+                <li className="flex items-center text-xs md:text-base px-2">
                   <BsGlobeAsiaAustralia className="mr-1" />
                   {networksDetail?.origin_country}
                 </li>
-                <li className="flex items-center px-2">
+                <li className="flex items-center text-xs md:text-base px-2">
                   <RxLink1 className="mr-1" />{" "}
                   <Link prefetch={true} href={`${networksDetail?.homepage}`}>
                     Homepage

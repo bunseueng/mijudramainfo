@@ -74,10 +74,14 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   const { data: personDetails } = useQuery({
     queryKey: ["personEdit", person_id],
     queryFn: () => fetchPerson(person_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: person, isLoading } = useQuery({
     queryKey: ["personCredits", person_id],
     queryFn: () => fetchPersonCombinedCredits(person_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const tvid = person?.cast?.map((item: any) => item?.id);
   const { data: castData } = useQuery({
@@ -114,6 +118,8 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
         return {};
       }
     },
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
     enabled: !!tvid && tvid.length > 0,
   });
   const [open, setOpen] = useState<boolean>(false);
@@ -156,6 +162,8 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   } = useQuery({
     queryKey: ["multiSearch"],
     queryFn: () => fetchMultiSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const { data: tvAndMovieResult = [], refetch: refetchData } = useQuery({
@@ -166,6 +174,8 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
       );
       return [...tvDetails];
     },
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
     enabled: true,
   });
   const filterDuplicates = (arr: any) => {

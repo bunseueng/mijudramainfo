@@ -48,7 +48,6 @@ export default function Card({ result, BASE_URL }: any) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const result_id = result?.id;
-  const query = searchParams?.get("query") ?? "";
   const type = searchParams?.get("type") ?? "";
   const country = searchParams?.get("country") ?? "";
   const { data: episode, isError } = useQuery({

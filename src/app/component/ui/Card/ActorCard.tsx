@@ -32,16 +32,11 @@ const ActorCard = ({ result }: any) => {
           w={"h632"}
           alt={`${actorName}'s avatar`}
           width={150}
-          height={250}
+          height={200}
           quality={100}
           priority
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "bottom",
-          }}
-          className="w-[150px] h-[190px] rounded-xl object-cover"
+          style={{ width: "auto", height: "auto" }}
+          className="w-[150px] h-[200px] rounded-xl bg-center object-cover"
         />
       </Link>
       <div className="flex items-center justify-between">

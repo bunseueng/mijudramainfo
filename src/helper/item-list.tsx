@@ -2,9 +2,10 @@ import { IoMailOutline } from "react-icons/io5";
 import { LiaUserFriendsSolid } from "react-icons/lia";
 import { CgProfile } from "react-icons/cg";
 import { FaRegRectangleList } from "react-icons/fa6";
-import { CiDark, CiSettings } from "react-icons/ci";
+import { CiSettings } from "react-icons/ci";
 import { TiArrowForward } from "react-icons/ti";
 import { TbCoins } from "react-icons/tb";
+import { GiMoonBats } from "react-icons/gi";
 
 export const navbar_items = [
   {
@@ -366,7 +367,7 @@ export const sessionItems = [
     label: "My Watchlist",
   },
   {
-    icon: <CiDark />,
+    icon: <GiMoonBats />,
     link: "",
     label: "Dark Mode",
   },

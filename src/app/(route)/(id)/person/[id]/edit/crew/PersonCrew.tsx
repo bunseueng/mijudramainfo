@@ -38,9 +38,10 @@ const PersonCrew: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   const { data: person, isLoading } = useQuery({
     queryKey: ["personCredits", person_id],
     queryFn: () => fetchPersonCombinedCredits(person_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const tvid = person?.crew?.map((item: any) => item?.id);
-  console.log(person);
   const [open, setOpen] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -78,6 +79,8 @@ const PersonCrew: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   } = useQuery({
     queryKey: ["searchMulti"],
     queryFn: () => fetchMultiSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const { data: tvAndMovieResult = [], refetch: refetchData } = useQuery({
@@ -89,6 +92,8 @@ const PersonCrew: React.FC<PersonEditList> = ({ person_id, personDB }) => {
       return [...tvDetails];
     },
     enabled: true,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const filterDuplicates = (arr: any) => {
     const uniqueIds = new Set();

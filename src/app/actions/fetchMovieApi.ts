@@ -1,5 +1,6 @@
 import moment from "moment";
 import { NextResponse } from "next/server";
+import { cache } from 'react'
 
 const currentYear = new Date().getFullYear();
 const startDate = moment(`${currentYear}-01-01`).format("YYYY-MM-DD");
@@ -17,7 +18,7 @@ const headers = {
   Authorization: 'Bearer ' + apiKey,
 };
 
-export const fetchTrending = async () => {
+export const fetchTrending = cache(async () => {
   try{ 
     const url  = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date.gte=${startDate}&first_air_date.lte${endDate}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN&with_original_language=zh&without_genres=16,10764,35`
  
@@ -38,9 +39,9 @@ export const fetchTrending = async () => {
     console.error('An error occurred while fetching the Trending data:', error);
     return null; // Return null or handle appropriately
   }
-};
+});
 
-export const fetchLatest = async () => {
+export const fetchLatest = cache(async () => {
   try {
     
     const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date_year=2024&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=first_air_date.desc&with_origin_country=CN&with_original_language=zh&without_genres=16,10764,10767,35`
@@ -61,10 +62,10 @@ export const fetchLatest = async () => {
     console.error('An error occurred while fetching the Trending data:', error);
     return null; // Return null or handle appropriately
   }
-};
+});
 
 // fetch card when searching
-export const fetchEpisodeCount = async (result_id: any) => {
+export const fetchEpisodeCount = cache(async (result_id: any) => {
   try {
     const url = `https://api.themoviedb.org/3/tv/${result_id}?api_key=${apiKey}&language=en-US`;
     const options = {
@@ -88,10 +89,10 @@ export const fetchEpisodeCount = async (result_id: any) => {
     console.error('An error occurred while fetching the TV show data:', error);
     return null; // Return null or handle appropriately
   }
-}
+})
 
 
-export const fetchActor = async () => {
+export const fetchActor = cache(async () => {
   try {
     const tvShowsResponse = await fetch(
       `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&first_air_date.gte=${startDate}&first_air_date.lte=${endDate}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN&with_original_language=zh&without_genres=16&include_video=true&without_genre_ids=16,10764,10767`
@@ -136,22 +137,16 @@ export const fetchActor = async () => {
     console.error('Error fetching data:', error);
     return null; // Or handle the error as appropriate for your application
   }
-};
+});
 
 // fetch tv
-export const fetchTv = async (tv_id: any) => {
+
+export const fetchTv = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
   const countryUrl = `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
   
-  const options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
-  
   try {
-    const [res, resOfCountry] = await Promise.all([fetch(url, options), fetch(countryUrl, options)]);
+    const [res, resOfCountry] = await Promise.all([fetch(url), fetch(countryUrl)]);
 
     if (!res.ok || !resOfCountry.ok) {
       console.log('Failed to fetch data');
@@ -161,28 +156,24 @@ export const fetchTv = async (tv_id: any) => {
     const tvShowData = await res.json();
     const countryData = await resOfCountry.json();
 
-    // Find the matching country
     const originCountries = tvShowData.origin_country || [];
     const countryNames = originCountries.map((countryCode: string) => {
       const country = countryData.find((c: any) => c.iso_3166_1 === countryCode);
       return country ? country.english_name : countryCode;
     });
 
-    // Add the 'type' field and origin country names
-    const extraData = {
+    return {
       ...tvShowData,
       type: countryNames,
     };
-
-    return extraData;
   } catch (error) {
     console.error('An error occurred while fetching the data:', error);
     return null;
   }
-};
+});
 
 // fetch tv trailer
-export const fetchTrailer = async (tv_id: any) => {
+export const fetchTrailer = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/videos?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -197,10 +188,10 @@ export const fetchTrailer = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch movie trailer
-export const fetchMovieTrailer = async (movie_id: any) => {
+export const fetchMovieTrailer = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}/videos?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -215,9 +206,9 @@ export const fetchMovieTrailer = async (movie_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 // fetch cast credit
-export const fetchCastCredit = async (tv_id: any) => {
+export const fetchCastCredit = cache(async (tv_id: any) => {
     const url = `https://api.themoviedb.org/3/tv/${tv_id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
     const options = {
       method: 'GET',
@@ -232,10 +223,10 @@ export const fetchCastCredit = async (tv_id: any) => {
   
     const json = await res.json();
     return json;
-}
+})
 
 // fetch cast content
-export const fetchContentRating = async (tv_id: any) => {
+export const fetchContentRating = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/content_ratings?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -250,10 +241,10 @@ export const fetchContentRating = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch all cast credit details
-export const fetchAllCast = async (tv_id: any) => {
+export const fetchAllCast = cache(async (tv_id: any) => {
   const url =  `https://api.themoviedb.org/3/tv/${tv_id}/aggregate_credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -268,10 +259,10 @@ export const fetchAllCast = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch languages
-export const fetchLanguages = async () => {
+export const fetchLanguages = cache(async () => {
     const url = `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
     const options = {
       method: 'GET',
@@ -286,10 +277,10 @@ export const fetchLanguages = async () => {
   
     const json = await res.json();
     return json;
-}
+})
 
 //fetch keyword
-export const fetchAllKeywords = async (searchQuery: any) => {
+export const fetchAllKeywords = cache(async (searchQuery: any) => {
   const url = `https://api.themoviedb.org/3/search/keyword?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}`
   const options = {
     method: 'GET',
@@ -304,10 +295,10 @@ export const fetchAllKeywords = async (searchQuery: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // Fetch tv keyword
-export const fetchKeyword = async (tv_id: any) => {
+export const fetchKeyword = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -322,10 +313,10 @@ export const fetchKeyword = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // Fetch title
-export const fetchTitle = async (tv_id: any) => {
+export const fetchTitle = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/alternative_titles?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -340,10 +331,10 @@ export const fetchTitle = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch all page from popular tv show 
-export async function fetchAllPopularTvShows() {
+export const fetchAllPopularTvShows = cache( async() => { 
   let allTvShows = [] as any[];
   let page = 1;
   let totalPages = 1000; // Set an initial value
@@ -389,10 +380,10 @@ export async function fetchAllPopularTvShows() {
   }
 
   return allTvShows;
-}
+})
 
 // fetch review 
-export const fetchReview = async (tv_id: any) => {
+export const fetchReview = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/reviews?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -407,10 +398,10 @@ export const fetchReview = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch images
-export const fetchImages = async (tv_id: any) => {
+export const fetchImages = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/images?api_key=${process.env.NEXT_PUBLIC_API_KEY}`;
   const options = {
     method: 'GET',
@@ -425,10 +416,10 @@ export const fetchImages = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch videos
-export const fetchVideos = async (tv_id: any) => {
+export const fetchVideos = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/videos?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -443,10 +434,10 @@ export const fetchVideos = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch recommendations
-export const fetchRecommendation = async (tv_id: any) => {
+export const fetchRecommendation = cache(async (tv_id: any) => {
   try {
     const res = await fetch(
       `https://api.themoviedb.org/3/tv/${tv_id}/recommendations?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&page=1`
@@ -457,9 +448,9 @@ export const fetchRecommendation = async (tv_id: any) => {
   } catch (error) {
     return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
   }
-}
+})
 
-export const fetchSeasonEpisode = async (tv_id: any, season_number: any) => {
+export const fetchSeasonEpisode = cache(async (tv_id: any, season_number: any) => {
   try {
     const url = `https://api.themoviedb.org/3/tv/${tv_id}/season/${season_number}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
     const options = {
@@ -478,9 +469,9 @@ export const fetchSeasonEpisode = async (tv_id: any, season_number: any) => {
     console.error('Error fetching season episode:', error);
     return { poster_path: null, episodes: [] }; // Return a default value or empty data
   }
-}
+})
 
-export const fetchEpCast = async (tv_id: any, season_number: any, episodes: any) => {
+export const fetchEpCast = cache(async (tv_id: any, season_number: any, episodes: any) => {
   const url = `https://api.themoviedb.org/3/tv/${tv_id}/season/${season_number}/episode/${episodes}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -495,9 +486,9 @@ export const fetchEpCast = async (tv_id: any, season_number: any, episodes: any)
 
   const json = await res.json();
   return json;
-}
+})
 
-export const fetchPerson = async (tv_id: any) => {
+export const fetchPerson = cache(async (tv_id: any) => {
   try {
     
   const url = `https://api.themoviedb.org/3/person/${tv_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&with_original_language=zh&region=CN`
@@ -518,9 +509,9 @@ export const fetchPerson = async (tv_id: any) => {
     console.log("Failed to fetch", error)
     return null
   }
-}
+})
 
-export const fetchPersonCombinedCredits = async (tv_id: any) => {
+export const fetchPersonCombinedCredits = cache(async (tv_id: any) => {
   try {
     const url = `https://api.themoviedb.org/3/person/${tv_id}/combined_credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&with_original_language=zh&region=CN`
     const options = {
@@ -540,9 +531,9 @@ export const fetchPersonCombinedCredits = async (tv_id: any) => {
     console.log("Failed to fetch", error)
     return null
   }
-}
+})
 
-export const fetchPersonTv = async (tv_id: any) => {
+export const fetchPersonTv = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/person/${tv_id}/tv_credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -557,9 +548,9 @@ export const fetchPersonTv = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
-export const fetchPersonMovie = async (tv_id: any) => {
+export const fetchPersonMovie = cache(async (tv_id: any) => {
   const url = `https://api.themoviedb.org/3/person/${tv_id}/movie_credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -574,9 +565,9 @@ export const fetchPersonMovie = async (tv_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
-export const fetchPersonExternalID = async (tv_id: any) => {
+export const fetchPersonExternalID = cache(async (tv_id: any) => {
   try {
     const url = `https://api.themoviedb.org/3/person/${tv_id}/external_ids?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
     const options = {
@@ -596,10 +587,10 @@ export const fetchPersonExternalID = async (tv_id: any) => {
     console.log("Failed to fetch", error)
     return null
   }
-}
+})
 
 // fetch multifor searching 
-export const fetchMultiSearch = async (searchQuery: any) => {
+export const fetchMultiSearch = cache(async (searchQuery: any) => {
   const url = `https://api.themoviedb.org/3/search/multi?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`;
   const countryUrl = `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
 
@@ -648,10 +639,10 @@ export const fetchMultiSearch = async (searchQuery: any) => {
     console.error('An error occurred while fetching multi search data:', error);
     return null;
   }
-};
+});
 
 // fetch tv for searching 
-export const fetchTvSearch = async (searchQuery: any) => {
+export const fetchTvSearch = cache(async (searchQuery: any) => {
   const url = `https://api.themoviedb.org/3/search/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`
   const options = {
     method: 'GET',
@@ -666,10 +657,10 @@ export const fetchTvSearch = async (searchQuery: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch Movie for searching 
-export const fetchMovieSearch = async (searchQuery: any) => {
+export const fetchMovieSearch = cache(async (searchQuery: any) => {
   const url = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`
   const options = {
     method: 'GET',
@@ -684,10 +675,10 @@ export const fetchMovieSearch = async (searchQuery: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch fetchCollection for searching 
-export const fetchCollectionSearch = async (searchQuery: any) => {
+export const fetchCollectionSearch = cache(async (searchQuery: any) => {
   const url = `https://api.themoviedb.org/3/search/collection?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`
   const options = {
     method: 'GET',
@@ -702,10 +693,10 @@ export const fetchCollectionSearch = async (searchQuery: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch fetchPerson for searching 
-export const fetchPersonSearch = async (searchQuery: any) => {
+export const fetchPersonSearch = cache(async (searchQuery: any) => {
   const url = `https://api.themoviedb.org/3/search/person?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`
   const options = {
     method: 'GET',
@@ -720,9 +711,9 @@ export const fetchPersonSearch = async (searchQuery: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
-export const fetchCompany = async (searchQuery: string, page = 1) => {
+export const fetchCompany = cache(async (searchQuery: string, page = 1) => {
   try {
     const url = `https://api.themoviedb.org/3/search/company?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&page=${page}&language=en-US`;
     const options = {
@@ -742,9 +733,9 @@ export const fetchCompany = async (searchQuery: string, page = 1) => {
     console.error(error)
     throw new Error(error)
   }
-}
+})
 
-export const fetchTvNetworks = async (network_id:string) => {
+export const fetchTvNetworks = cache(async (network_id:string) => {
   try {
     const url = `https://api.themoviedb.org/3/network/${network_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
     const options = {
@@ -764,9 +755,9 @@ export const fetchTvNetworks = async (network_id:string) => {
     console.error(error)
     throw new Error(error)
   }
-}
+})
 
-export const fetchTopPeople = async (pages = 1) => {
+export const fetchTopPeople = cache(async (pages = 1) => {
   try {
     const url = `https://api.themoviedb.org/3/person/popular?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&page=${pages}`;
     const options = {
@@ -786,10 +777,10 @@ export const fetchTopPeople = async (pages = 1) => {
     console.error(error)
     throw new Error(error)
   }
-}
+})
 
 // fetch top_rated drama
-export const fetchTopDrama = async (pages  = 1) => {
+export const fetchTopDrama = cache(async (pages  = 1) => {
   try {
     const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
     const countryParam = countries.join('|'); // Join countries with a pipe character
@@ -813,12 +804,12 @@ export const fetchTopDrama = async (pages  = 1) => {
     console.error(error)
     throw new Error(error)
   }
-}
+})
 
 // fetch 100 top_rated drama
-export const fetch100TopDrama = async (pages  = 1, countryParam = "") => {
+export const fetch100TopDrama = cache(async (pages  = 1, countryParam = "") => {
   
-    for (pages ; pages <= 5; pages++) {
+  for (pages ; pages <= 5; pages++) {
   const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=${pages}&sort_by=vote_count.desc&with_origin_country=${countryParam}&without_genres=16`;
   
   const options = {
@@ -834,10 +825,10 @@ export const fetch100TopDrama = async (pages  = 1, countryParam = "") => {
   const json = await res.json();
   return json;
 }
-}
+})
 
 // fetch variety shows
-export const fetchVariety = async (pages  = 1) => {
+export const fetchVariety = cache(async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character
   
@@ -856,10 +847,10 @@ export const fetchVariety = async (pages  = 1) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch popular drama
-export const fetchPopular = async (pages  = 1) => {
+export const fetchPopular = cache(async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character
   
@@ -878,10 +869,10 @@ export const fetchPopular = async (pages  = 1) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch newest drama
-export const fetchNewest = async (pages  = 1) => {
+export const fetchNewest = cache(async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character
   
@@ -900,10 +891,10 @@ export const fetchNewest = async (pages  = 1) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch upcoming drama
-export const fetchUpcoming = async (pages  = 1) => {
+export const fetchUpcoming = cache(async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character
   
@@ -922,12 +913,10 @@ export const fetchUpcoming = async (pages  = 1) => {
 
   const json = await res.json();
   return json;
-}
-
-/// Fetch Movie
+})
 
 // fetch top_rated movie
-export const fetchTopMovie = async (pages  = 1) => {
+export const fetchTopMovie = cache(async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character
   
@@ -946,10 +935,10 @@ export const fetchTopMovie = async (pages  = 1) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch popular movie
-export const fetchPopularMovie = async (pages  = 1) => {
+export const fetchPopularMovie = cache(async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character
   
@@ -968,10 +957,10 @@ export const fetchPopularMovie = async (pages  = 1) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch newest movie
-export const fetchNewestMovie = async (pages  = 1) => {
+export const fetchNewestMovie = cache(async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character
   
@@ -990,10 +979,10 @@ export const fetchNewestMovie = async (pages  = 1) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch upcoming movie
-export const fetchTvByNetwork = async (pages  = 1, network_id: string, sortby: string | undefined, genre: string | undefined, without_genre: string | undefined) => {
+export const fetchTvByNetwork = cache(async (pages  = 1, network_id: string, sortby: string | undefined, genre: string | undefined, without_genre: string | undefined) => {
   const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&language=en-US&page=${pages}&sort_by=primary_release_date.desc&with_networks=${network_id}&with_genres=${genre}&without_genres=${without_genre}&sort_by=${sortby}`;
   
   const options = {
@@ -1009,9 +998,9 @@ export const fetchTvByNetwork = async (pages  = 1, network_id: string, sortby: s
 
   const json = await res.json();
   return json;
-}
+})
 
-export const fetchUpcomingMovie = async (pages  = 1) => {
+export const fetchUpcomingMovie = cache(async (pages  = 1) => {
   const countries = ['CN', 'KR', 'JP']; // Example: add your desired countries here
   const countryParam = countries.join('|'); // Join countries with a pipe character
   
@@ -1030,10 +1019,10 @@ export const fetchUpcomingMovie = async (pages  = 1) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch movie
-export const fetchMovie = async (movie_id: any) => {
+export const fetchMovie = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -1048,10 +1037,10 @@ export const fetchMovie = async (movie_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch movie cast credit
-export const fetchMovieCastCredit = async (movie_id: any) => {
+export const fetchMovieCastCredit = cache(async (movie_id: any) => {
     const url = `https://api.themoviedb.org/3/movie/${movie_id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
     const options = {
       method: 'GET',
@@ -1066,10 +1055,10 @@ export const fetchMovieCastCredit = async (movie_id: any) => {
   
     const json = await res.json();
     return json;
-}
+})
 
 // fetch languages
-export const fetchMovieLanguages = async () => {
+export const fetchMovieLanguages = cache(async () => {
     const url = `https://api.themoviedb.org/3/configuration/languages?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
     const options = {
       method: 'GET',
@@ -1084,10 +1073,10 @@ export const fetchMovieLanguages = async () => {
   
     const json = await res.json();
     return json;
-}
+})
 
 // Fetch movie keyword
-export const fetchMovieKeyword = async (movie_id: any) => {
+export const fetchMovieKeyword = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -1102,10 +1091,10 @@ export const fetchMovieKeyword = async (movie_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // Fetch movie title
-export const fetchMovieTitle = async (movie_id: any) => {
+export const fetchMovieTitle = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}/alternative_titles?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
   const options = {
     method: 'GET',
@@ -1120,11 +1109,11 @@ export const fetchMovieTitle = async (movie_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 
 // fetch movie review 
-export const fetchMovieReview = async (movie_id: any) => {
+export const fetchMovieReview = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}/reviews?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -1139,10 +1128,10 @@ export const fetchMovieReview = async (movie_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch movie images
-export const fetchMovieImages = async (movie_id: any) => {
+export const fetchMovieImages = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}/images?api_key=${process.env.NEXT_PUBLIC_API_KEY}`;
   const options = {
     method: 'GET',
@@ -1157,10 +1146,10 @@ export const fetchMovieImages = async (movie_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch movie videos
-export const fetchMovieVideos = async (movie_id: any) => {
+export const fetchMovieVideos = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}/videos?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
   const options = {
     method: 'GET',
@@ -1175,10 +1164,10 @@ export const fetchMovieVideos = async (movie_id: any) => {
 
   const json = await res.json();
   return json;
-}
+})
 
 // fetch movie recommendations
-export const fetchMovieRecommendation = async (movie_id: any) => {
+export const fetchMovieRecommendation = cache(async (movie_id: any) => {
   try {
     const res = await fetch(
       `https://api.themoviedb.org/3/movie/${movie_id}/recommendations?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&page=1`
@@ -1189,10 +1178,10 @@ export const fetchMovieRecommendation = async (movie_id: any) => {
   } catch (error) {
     return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
   }
-}
+})
 
 // Function to get user country code (Geolocation or IP-based)
-const getUserCountryCode = async () => {
+const getUserCountryCode = cache(async () => {
   try {
     // Using a third-party API to get the country code
     const response = await fetch("https://ipapi.co/json/");
@@ -1202,4 +1191,4 @@ const getUserCountryCode = async () => {
     console.error("Failed to fetch country code: ", error);
     return "US"; // Default to "US" as a fallback
   }
-};
+});

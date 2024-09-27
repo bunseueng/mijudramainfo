@@ -1,6 +1,7 @@
 "use client";
 
-import { fetchMultiSearch, fetchTv } from "@/app/actions/fetchMovieApi";
+import { fetchTv, fetchTvSearch } from "@/app/actions/fetchMovieApi";
+import FetchingTv from "@/app/component/ui/Fetching/FetchingTv";
 import LazyImage from "@/components/ui/lazyimage";
 import { storyFormat } from "@/helper/item-list";
 import { Drama, tvId } from "@/helper/type";
@@ -10,21 +11,14 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { CiSearch } from "react-icons/ci";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { GrPowerReset } from "react-icons/gr";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
-import { useDebouncedCallback } from "use-debounce";
-const DramaRegion = dynamic(
-  () => import("@/app/(route)/lists/[listId]/edit/DramaRegion"),
-  { ssr: false }
-);
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
   { ssr: false }
@@ -34,7 +28,6 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [listSearch, setListSearch] = useState<string>("");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [tvIds, setTvIds] = useState<number[]>(tv_id ? [] : []);
@@ -48,9 +41,8 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchResultRef = useRef<HTMLDivElement>(null);
   const searchQuery = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
   const query = searchQuery?.get("query") || "";
+  const router = useRouter();
   const { register, handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
   });
@@ -68,6 +60,19 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       return [...tvDetails];
     },
     enabled: true,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
+  });
+
+  const {
+    data: dynamicSearch,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ["tvSearch"],
+    queryFn: () => fetchTvSearch(query),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const [storedData, setStoredData] = useState<any[]>([]);
@@ -75,12 +80,6 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [itemStories, setItemStories] = useState<string[]>([]);
   const [itemRelatedStories, setItemRelatedStories] = useState<string[]>([]);
   const prevItemRef = useRef(item);
-
-  useEffect(() => {
-    if (tvAndMovieResult.length > 0) {
-      setItemStories(Array(tvAndMovieResult.length).fill(""));
-    }
-  }, [tvAndMovieResult]);
 
   const setItemRelatedStory = (idx: number, story: string) => {
     setItemRelatedStories((prev) => {
@@ -100,87 +99,10 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     });
   };
 
-  useEffect(() => {
-    const addingItems = storedData?.map((data) => ({
-      ...data,
-      story: itemRelatedStories,
-    }));
-
-    const newItems = [...addingItems, ...(tvDetails?.related_title || [])];
-
-    setItem(newItems);
-  }, [tvDetails?.related_title, storedData, itemRelatedStories]);
-
-  useEffect(() => {
-    refetchData();
-  }, [tvIds, refetchData]);
-
   const handleDropdownToggle = (dropdown: string, idx: number) => {
     setOpenDropdown((prev) =>
       prev === `${dropdown}-${idx}` ? null : `${dropdown}-${idx}`
     );
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node) &&
-        searchResultRef.current &&
-        !searchResultRef.current.contains(event.target as Node)
-      ) {
-        setListSearch("");
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const {
-    data: multiSearch,
-    refetch,
-    isFetching,
-  } = useQuery({
-    queryKey: ["multiSearch"],
-    queryFn: () => fetchMultiSearch(query),
-  });
-
-  const onInput = useDebouncedCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLoading(true);
-      const { value } = e.target;
-      setListSearch(value);
-      const params = new URLSearchParams(searchQuery as string | any);
-
-      if (value) {
-        params.set("query", value);
-      } else {
-        params.delete("query");
-      }
-      router.push(`${pathname}/?${params.toString()}`, {
-        scroll: false,
-      });
-    },
-    300
-  );
-
-  const onClickAddMovie = async (id: string, mediaType: string) => {
-    const parsedId = parseInt(id, 10);
-    if (mediaType === "tv" && !tvIds.includes(parsedId)) {
-      setTvIds((prevTvIds) => [...prevTvIds, parsedId]);
-      setListSearch(""); // Clear the search input
-    }
-    try {
-      const tvDetail = await fetchTv(parsedId);
-      setItem((prevItems) => [...prevItems, tvDetail]);
-      setStoredData((prevData) => [...prevData, tvDetail]);
-      setListSearch("");
-    } catch (error) {
-      console.error("Error adding related title:", error);
-      toast.error("Failed to add related title.");
-    }
   };
 
   const handleRemoveItem = (
@@ -191,7 +113,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     setItem((prevItems) => prevItems.filter((_, idx) => idx !== indexToRemove));
   };
 
-  const onSubmit = async (data: TCreateDetails) => {
+  const onSubmit = async () => {
     try {
       // Create a map of updated stories by matching indices
       const updatedStoriesMap = itemRelatedStories.reduce(
@@ -264,6 +186,44 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       prev.map((marked, index) => (index === ind ? false : marked))
     );
   };
+
+  useEffect(() => {
+    if (tvAndMovieResult.length > 0) {
+      setItemStories(Array(tvAndMovieResult.length).fill(""));
+    }
+  }, [tvAndMovieResult]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node) &&
+        searchResultRef.current &&
+        !searchResultRef.current.contains(event.target as Node)
+      ) {
+        setListSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const addingItems = storedData?.map((data) => ({
+      ...data,
+      story: itemRelatedStories,
+    }));
+
+    const newItems = [...addingItems, ...(tvDetails?.related_title || [])];
+
+    setItem(newItems);
+  }, [tvDetails?.related_title, storedData, itemRelatedStories]);
+
+  useEffect(() => {
+    refetchData();
+  }, [tvIds, refetchData]);
 
   useEffect(() => {
     if (prevItemRef.current !== item) {
@@ -350,9 +310,9 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                                   related?.backdrop_path || related?.poster_path
                                 }`}
                                 alt={related?.name}
-                                width={40}
+                                width={100}
                                 height={48}
-                                quality={100}
+                                quality={80}
                                 priority
                                 className="block w-10 h-12 bg-center bg-cover object-cover leading-10 rounded-sm align-middle pointer-events-none"
                               />
@@ -504,72 +464,17 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       <div className="text-left-p-4">
         <div className="float-right w-[50%]">
           <div className="block relative">
-            <div className="relative w-full inline-block">
-              <input
-                type="text"
-                className="w-full h-10 leading-10 text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] hover:border-[#c0c4cc] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 px-4"
-                placeholder="Search to add a related title"
-                ref={inputRef}
-                onChange={onInput}
-              />
-              <span className="absolute right-3 top-3">
-                <CiSearch />
-              </span>
-              {listSearch && (
-                <AnimatePresence>
-                  <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    ref={searchResultRef}
-                    className={`w-full h-[250px] absolute bg-white dark:bg-[#242424] border-[1px] border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll ${
-                      openSearch === false ? "block" : "hidden"
-                    }`}
-                  >
-                    {isFetching ? (
-                      <div className="absolute top-[45%] left-[50%]">
-                        <ClipLoader color="#fff" size={25} loading={loading} />
-                      </div>
-                    ) : (
-                      <>
-                        {multiSearch?.map((item: any, idx: number) => (
-                          <div
-                            className={`flex items-center text-sm hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer w-full ${
-                              listSearch && "force-overflow"
-                            }`}
-                            key={idx}
-                            onClick={() =>
-                              onClickAddMovie(item.id, item.media_type)
-                            }
-                          >
-                            <LazyImage
-                              src={`https://image.tmdb.org/t/p/${
-                                item?.poster_path ? "w154" : "w300"
-                              }/${item.poster_path || item.backdrop_path}`}
-                              alt={`${item?.name}'s Poster`}
-                              width={50}
-                              height={50}
-                              quality={100}
-                              priority
-                              className="bg-cover bg-center mx-4 my-3"
-                            />
-                            <div className="flex flex-col items-start w-full">
-                              <p className="text-[#2490da]">
-                                {item.name || item.title}
-                              </p>
-                              <h4>
-                                <DramaRegion item={item} />
-                              </h4>
-                            </div>
-                          </div>
-                        ))}
-                      </>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-              )}
-            </div>
+            <FetchingTv
+              dynamicSearch={dynamicSearch?.results}
+              isFetching={isFetching}
+              searchQuery={searchQuery as string | any}
+              tvIds={tvIds}
+              setTvIds={setTvIds}
+              setStoredData={setStoredData}
+              openSearch={openSearch}
+              setItem={setItem}
+              setQuery={""}
+            />
           </div>
         </div>
       </div>

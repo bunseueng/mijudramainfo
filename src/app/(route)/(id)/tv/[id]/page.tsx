@@ -12,7 +12,7 @@ const SearchLoading = dynamic(
 const TvList = dynamic(() => import("./TvList"), { ssr: false });
 
 export const maxDuration = 60;
-
+export const revalidate = 3600;
 export async function generateMetadata({ params }: any): Promise<Metadata> {
   const tv_id = params.id;
   const response = await fetch(
@@ -41,11 +41,28 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
     countryToLanguageMap[matchedCountry?.english_name] ||
     matchedCountry?.english_name;
 
+  if (!response) {
+    throw new Error("Network response was not ok");
+  }
+
   return {
     title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
     )})`,
     description: `All information of ${tvDetails?.name}`,
+    openGraph: {
+      type: "website",
+      url: "https://mijudramainfo.vercel.app/",
+      title: tvDetails?.name,
+      description: `All information of ${tvDetails?.name}`,
+      images: [
+        {
+          url: `https://image.tmdb.org/t/p/original/${tvDetails?.backdrop_path}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
   };
 }
 

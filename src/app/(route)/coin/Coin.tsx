@@ -48,7 +48,7 @@ const Coin: React.FC<UserI> = ({ getCoin, paypalClientID }) => {
         <div className="relative max-w-[1134px] mx-auto z-10">
           <div className="mx-auto px-4">
             <div className="-mx-3">
-              <div className="relative float-left w-[50%] px-3 mb-6">
+              <div className="relative float-left w-full md:w-[50%] px-3 mb-6">
                 <h1 className="max-w-[280px] text-white text-[30px] font-bold m-0">
                   MijuDramaInfo
                 </h1>

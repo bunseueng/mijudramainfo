@@ -71,23 +71,8 @@ const Navbar: React.FC<Notification> = ({
   const [backgroundColor, setBackgroundColor] = useState("transparent");
   const [currentNav, setCurrentNav] = useState<string>("");
   const { setTheme, resolvedTheme } = useTheme();
-  useEffect(() => {
-    const unsubscribe = smoothScrollProgress.on("change", (progress: any) => {
-      if (progress <= 0.1) {
-        setBackgroundColor("transparent");
-      } else {
-        setBackgroundColor(
-          "bg-gradient-to-r from-sky-900 to-blue-800 dark:bg-gradient-to-r dark:from-[#191a20] dark:to-[#191a20]"
-        );
-      }
-    });
-
-    return () => unsubscribe();
-  }, [smoothScrollProgress]);
-
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const query = searchParams?.get("query") ?? "";
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -111,6 +96,9 @@ const Navbar: React.FC<Notification> = ({
 
   const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Cancel the debounced update
+    updateURL.cancel();
+
     const params = new URLSearchParams(searchParams as any);
     if (navSearch) {
       params.set("query", navSearch);
@@ -122,15 +110,6 @@ const Navbar: React.FC<Notification> = ({
     setShowResults(false);
     setShowSearch(false);
   };
-
-  useEffect(() => {
-    // Toggle the display of search results based on whether a query is present
-    if (navSearch) {
-      setShowResults(true);
-    } else {
-      setShowResults(false);
-    }
-  }, [navSearch]);
 
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -160,48 +139,43 @@ const Navbar: React.FC<Notification> = ({
     }, 200);
   };
 
-  useEffect(() => {
-    return () => {
-      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
-      setHovered(false);
-      setNavbarItemsHovered(false);
-    };
-  }, []);
-
-  useEffect(() => {
-    comment.forEach((c) => {
-      if (c.replies?.length === 0) {
-      } else {
-        c.replies?.forEach((reply: any) => {
-          setRepliedUserId((prevRepliedUserId) => [
-            ...(prevRepliedUserId || []),
-            reply.repliedUserId,
-          ]);
-          setUserId((prevUserId) => [...(prevUserId || []), reply.userId]);
-        });
-      }
-    });
-  }, [comment]);
-
+  // Fetch all friend notification status
   const acceptedRequests = friend.filter((item) => item.status === "accepted");
   const rejectedRequests = friend.filter((item) => item.status === "rejected");
   const pendingRequests = friend.filter((item) => item.status === "pending");
-  const isPending = pendingRequests.filter(
-    (req) =>
-      req.friendRequestId === currentUser?.id ||
-      req.friendRespondId === currentUser?.id
-  );
-  const isAccepted = acceptedRequests.filter(
-    (req) =>
-      req.friendRequestId === currentUser?.id ||
-      req.friendRespondId === currentUser?.id
-  );
-  const isRejected = rejectedRequests.filter(
-    (req) =>
-      req.friendRequestId === currentUser?.id ||
-      req.friendRespondId === currentUser?.id
-  );
-  const status = [...isPending, ...isAccepted, ...isRejected];
+
+  // Filter pending requests made by the current user
+  const isPending = pendingRequests
+    .filter((req) => req.friendRequestId === currentUser?.id)
+    .filter((req) => req.notification === "unread"); // Ensure only unread are counted
+
+  // Count unread requests received (where current user is the responder)
+  const isPendingReceived = pendingRequests
+    .filter((req) => req.friendRespondId === currentUser?.id)
+    .filter((req) => req.notification === "unread"); // Ensure only unread are counted
+
+  const isAccepted = acceptedRequests
+    .filter(
+      (req) =>
+        req.friendRequestId === currentUser?.id ||
+        req.friendRespondId === currentUser?.id
+    )
+    .filter((req) => req.notification === "unread"); // Ensure only unread are counted
+
+  const isRejected = rejectedRequests
+    .filter(
+      (req) =>
+        req.friendRequestId === currentUser?.id ||
+        req.friendRespondId === currentUser?.id
+    )
+    .filter((req) => req.notification === "unread"); // Ensure only unread are counted
+
+  // Combine unread notifications (excluding sent pending requests)
+  const status = [
+    ...isPendingReceived, // Only count pending requests received
+    ...isAccepted,
+    ...isRejected,
+  ];
   status.sort((a: any, b: any) => {
     return (
       new Date(b?.actionDatetime).getTime() -
@@ -209,28 +183,44 @@ const Navbar: React.FC<Notification> = ({
     );
   });
 
+  // Extract friend notification status
   const friendNoti = status.map((fri) => fri?.notification).flat();
-  // Check if there are any unread reply notifications
+
+  // Find unread reply notifications
   const findReply = comment
     .map((com) =>
       com.replies?.filter((rp: any) => rp?.userId === currentUser?.id)
     )
     .flat();
+
+  // Filter out unread replies
   const findRpNoti = findReply.filter(
     (item: any) => item?.notification === "unread"
   ).length;
+
+  // Find replies by the user (replied themselves)
   const isRepliedItself = comment
     .map((com) =>
       com.replies?.filter((rp: any) => rp?.repliedUserId === currentUser?.id)
     )
     .flat();
-  // Check if there are any read reply notifications
+
+  // Count unread replies
   const readRepliesCount = findReply.filter(
-    (item: any) => item?.notification === "unread"
+    (item: any) => item?.notification === "read"
   ).length;
 
-  // Check if there are any unread friend notifications
+  // Check for unread friend notifications
   const hasUnreadFriends = friendNoti.includes("unread");
+
+  // Log for debugging
+  console.log({
+    friendNoti,
+    findRpNoti,
+    readRepliesCount,
+    hasUnreadFriends,
+    isRepliedItself,
+  });
 
   const handleNavClick = () => {
     setNav(!nav);
@@ -267,6 +257,51 @@ const Navbar: React.FC<Notification> = ({
       setShowSearch(false);
     }
   };
+  useEffect(() => {
+    const unsubscribe = smoothScrollProgress.on("change", (progress: any) => {
+      if (progress <= 0.1) {
+        setBackgroundColor("transparent");
+      } else {
+        setBackgroundColor(
+          "bg-gradient-to-r from-sky-900 to-blue-800 dark:bg-gradient-to-r dark:from-[#191a20] dark:to-[#191a20]"
+        );
+      }
+    });
+
+    return () => unsubscribe();
+  }, [smoothScrollProgress]);
+
+  useEffect(() => {
+    // Toggle the display of search results based on whether a query is present
+    if (navSearch) {
+      setShowResults(true);
+    } else {
+      setShowResults(false);
+    }
+  }, [navSearch]);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+      setHovered(false);
+      setNavbarItemsHovered(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    comment.forEach((c) => {
+      if (c.replies?.length === 0) {
+      } else {
+        c.replies?.forEach((reply: any) => {
+          setRepliedUserId((prevRepliedUserId) => [
+            ...(prevRepliedUserId || []),
+            reply.repliedUserId,
+          ]);
+          setUserId((prevUserId) => [...(prevUserId || []), reply.userId]);
+        });
+      }
+    });
+  }, [comment]);
 
   const isHomePage = pathname === "/";
   return (
@@ -280,7 +315,7 @@ const Navbar: React.FC<Notification> = ({
         style={{ backgroundColor }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
       >
-        <div className="max-w-6xl relative flex flex-wrap items-center justify-between mx-auto px-4 md:px-6">
+        <div className="max-w-6xl relative flex flex-wrap items-center justify-between mx-auto px-4 md:px-5">
           <div className="flex items-center relative py-1">
             <Link
               prefetch={true}
@@ -443,52 +478,30 @@ const Navbar: React.FC<Notification> = ({
               ))}
             </ul>
           </motion.div>
-          <div className="flex items-center lg:order-2">
+          <div className="flex items-center">
             <button
-              name="Notification Icon"
-              className="mx-2 relative"
+              name="Notification"
+              className="mx-2 relative pt-1.5"
               onClick={handleNotiDropClick}
             >
-              <span className="relative">
+              <span className="relative inline-block">
                 <IoIosNotificationsOutline className="text-lg md:text-2xl text-white" />
-                {hasUnreadFriends && isRepliedItself?.length < 1 ? (
-                  <span className="absolute -top-2">
+                {/* Notification Badge for unread notifications */}
+                {(hasUnreadFriends || findRpNoti) && (
+                  <span className="absolute top-0 right-0 transform translate-x-[50%] -translate-y-[50%]">
                     <span
-                      className={`text-white min-w-[4px] min-h-[4px] text-xs px-1 rounded-md ${
-                        hasUnreadFriends && isRepliedItself?.length < 1
-                          ? "bg-[#f44455]"
-                          : "bg-transparent"
-                      }`}
+                      className={`text-white text-xs px-2 py-[1px] rounded-full bg-[#f44455]`}
                     >
-                      {(isPending?.length > 0 &&
-                        isPending?.length + readRepliesCount) ||
-                        (isAccepted?.length > 0 &&
-                          isAccepted?.length + readRepliesCount) ||
-                        (isRejected?.length > 0 &&
-                          isRejected?.length + readRepliesCount)}
-                    </span>
-                  </span>
-                ) : null}
-                {findRpNoti && isRepliedItself?.length < 1 ? (
-                  <span className="absolute -top-2">
-                    <span
-                      className={`text-white min-w-[4px] min-h-[4px] text-xs px-1 rounded-md ${
-                        findRpNoti && isRepliedItself?.length < 1
-                          ? "bg-[#f44455]"
-                          : "bg-transparent"
-                      }`}
-                    >
+                      {/* Count only unread notifications */}
                       {hasUnreadFriends
-                        ? (isPending?.length > 0 &&
-                            isPending?.length + readRepliesCount) ||
-                          (isAccepted?.length > 0 &&
-                            isAccepted?.length + readRepliesCount) ||
-                          (isRejected?.length > 0 &&
-                            isRejected?.length + readRepliesCount)
+                        ? // Total unread notifications from different statuses
+                          isPendingReceived.length + // Count only pending requests received
+                          isAccepted.length +
+                          isRejected.length
                         : readRepliesCount}
                     </span>
                   </span>
-                ) : null}
+                )}
               </span>
             </button>
             {notiDrop && (
@@ -501,26 +514,27 @@ const Navbar: React.FC<Notification> = ({
                 comment={comment}
               />
             )}
-            <button
-              type="button"
-              name="Search"
-              className={`text-white rounded-lg text-sm mx-1 md:mx-2 ${
-                showSearch ? "hidden" : "block"
-              }`}
-              onClick={handleSearchClick}
-            >
-              <IoSearchSharp className="text-lg md:text-2xl lg:mr-2" />
-            </button>
-            <button
-              type="button"
-              name="Close"
-              className={`text-white rounded-lg text-sm mx-1 md:mx-4 ${
-                showSearch ? "block" : "hidden"
-              }`}
-              onClick={handleSearchClick}
-            >
-              <IoMdClose className="text-lg md:text-xl" />
-            </button>
+
+            {showSearch ? (
+              <button
+                type="button"
+                name="Close"
+                className="text-white rounded-lg text-sm mx-1 md:mx-2"
+                onClick={handleSearchClick}
+              >
+                <IoMdClose className="text-lg md:text-2xl lg:mr-2" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                name="Search"
+                className="text-white rounded-lg text-sm mx-1 md:mx-2"
+                onClick={handleSearchClick}
+              >
+                <IoSearchSharp className="text-lg md:text-2xl lg:mr-2" />
+              </button>
+            )}
+
             <button
               type="button"
               name="Hamburgur"
@@ -529,6 +543,7 @@ const Navbar: React.FC<Notification> = ({
             >
               <IoMenu className="text-white text-xl md:text-2xl mr-2" />
             </button>
+
             {!session && (
               <div className="relative">
                 <Link
@@ -539,87 +554,83 @@ const Navbar: React.FC<Notification> = ({
                 </Link>
               </div>
             )}
+
             {session && (
-              <>
-                <div className="relative" onClick={handleSessionDropClick}>
-                  <div className="flex items-center cursor-pointer">
-                    <Image
-                      src={
-                        user?.profileAvatar
-                          ? user?.profileAvatar
-                          : (session?.user?.image as string)
-                          ? session?.user?.image
-                          : ("/placeholder-image.avif" as string | any)
-                      }
-                      alt={
-                        `${user?.displayName || user?.name}'s Profile` ||
-                        "User Profile"
-                      }
-                      width={33}
-                      height={33}
-                      quality={100}
-                      loading="lazy"
-                      className="w-[33px] h-[33px] bg-cover bg-center object-cover rounded-full"
-                    />
-                    <IoMdArrowDropdown className="text-white" />
-                  </div>
-                  {sessionDrop && (
-                    <AnimatePresence>
-                      <motion.ul
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.8, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="w-[300px] flex flex-col absolute top-[54.5px] right-0 bg-white dark:bg-[#242424] rounded-md shadow-md m-o p-0"
-                      >
-                        {sessionItems?.map((item: any, idx: number) => (
-                          <li
-                            key={idx}
-                            className="relative hover:bg-[#00000011] transform duration-300 cursor-pointer"
-                          >
-                            {item.label === "Dark Mode" ? (
-                              <button
-                                name="theme"
-                                onClick={() =>
-                                  resolvedTheme === "dark"
-                                    ? setTheme("light")
-                                    : setTheme("dark")
-                                }
-                                className="w-full flex items-center text-center text-sm my-2 ml-2"
-                              >
-                                {item.icon}{" "}
-                                <span className="ml-2">{item.label}</span>
-                              </button>
-                            ) : (
-                              <Link
-                                href={`${
-                                  item.link === "/profile"
-                                    ? `${item.link}/${session?.user?.name}`
-                                    : item.link === "/friends"
-                                    ? `${item.link}/${session?.user?.name}`
-                                    : item.link
-                                }`}
-                                className="flex items-center text-center text-[16px] my-2 ml-2"
-                              >
-                                {item.icon}{" "}
-                                <span className="ml-2">{item.label}</span>
-                              </Link>
-                            )}
-                          </li>
-                        ))}
-                        <li className="w-full border-b-2 border-b-[#78828c21] dark:border-b-slate-700"></li>
-                        <li
-                          className="flex items-center hover:bg-[#00000011] transform duration-300 pl-2 my-2 cursor-pointer"
-                          onClick={() => signOut()}
-                        >
-                          <RiLogoutCircleRLine />
-                          <span className="ml-2">Sign out</span>
-                        </li>
-                      </motion.ul>
-                    </AnimatePresence>
-                  )}
+              <div className="relative" onClick={handleSessionDropClick}>
+                <div className="flex items-center cursor-pointer">
+                  <Image
+                    src={
+                      user?.profileAvatar ||
+                      session?.user?.image ||
+                      "/placeholder-image.avif"
+                    }
+                    alt={`${user?.displayName || user?.name}'s Profile`}
+                    width={33}
+                    height={33}
+                    quality={100}
+                    priority
+                    className="w-[33px] h-[33px] bg-cover bg-center object-cover rounded-full"
+                  />
+                  <IoMdArrowDropdown className="text-white" />
                 </div>
-              </>
+
+                {sessionDrop && (
+                  <AnimatePresence>
+                    <motion.ul
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="w-[300px] h-auto flex flex-col absolute top-[54.5px] right-0 bg-white dark:bg-[#242424] rounded-md shadow-md m-0 p-0"
+                    >
+                      {sessionItems?.map((item: any, idx: number) => (
+                        <li
+                          key={idx}
+                          className="relative hover:bg-[#00000011] transform duration-300 cursor-pointer"
+                        >
+                          {item.label === "Dark Mode" ? (
+                            <button
+                              name="theme"
+                              onClick={() =>
+                                resolvedTheme === "dark"
+                                  ? setTheme("light")
+                                  : setTheme("dark")
+                              }
+                              className="w-full flex items-center text-center my-2 ml-2"
+                            >
+                              <span className="text-lg">{item.icon}</span>
+                              <span className="text-md ml-2">{item.label}</span>
+                            </button>
+                          ) : (
+                            <Link
+                              prefetch={true}
+                              href={`${
+                                item.link === "/profile"
+                                  ? `${item.link}/${session?.user?.name}`
+                                  : item.link === "/friends"
+                                  ? `${item.link}/${session?.user?.name}`
+                                  : item.link
+                              }`}
+                              className="flex items-center text-center text-[16px] my-2 ml-2"
+                            >
+                              {item.icon}
+                              <span className="ml-2">{item.label}</span>
+                            </Link>
+                          )}
+                        </li>
+                      ))}
+                      <li className="w-full border-b-2 border-b-[#78828c21] dark:border-b-slate-700"></li>
+                      <li
+                        className="flex items-center hover:bg-[#00000011] transform duration-300 pl-2 my-2 cursor-pointer"
+                        onClick={() => signOut()}
+                      >
+                        <RiLogoutCircleRLine />
+                        <span className="ml-2">Sign out</span>
+                      </li>
+                    </motion.ul>
+                  </AnimatePresence>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -655,7 +666,7 @@ const Navbar: React.FC<Notification> = ({
                   />
                 </div>
               </div>
-              {query && showResults && <SearchResult />}
+              {showResults && <SearchResult />}
             </motion.form>
           )}
         </AnimatePresence>

@@ -29,6 +29,8 @@ const Clips: React.FC<TvTrailerType> = ({ tv_id, tv }) => {
   const { data: tvTrailer, isLoading } = useQuery({
     queryKey: ["tvTrailer"],
     queryFn: () => fetchTrailer(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
   const [thumbnails, setThumbnails] = useState<Youtube[]>([]);

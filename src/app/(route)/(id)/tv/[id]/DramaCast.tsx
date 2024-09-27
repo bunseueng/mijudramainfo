@@ -1,5 +1,4 @@
 import Link from "next/link";
-import React from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
 import Image from "next/image";
 import { DramaDB, UserProps } from "@/helper/type";
@@ -110,12 +109,8 @@ const DramaCast = ({
             tv={tv}
             getYearFromDate={getYearFromDate}
           />
-          <div className="border-b-[1px] border-b-slate-400 pb-5 mt-5 mx-2 md:mx-0">
-            <Link href={`/tv/${tv_id}/seasons`} className="text-lg font-bold">
-              View all seasons
-            </Link>
-          </div>
-          <div className="py-5 mx-2 md:mx-0">
+          <div className="border-b-[1px] border-b-slate-400 pb-5 mt-5 mx-2 md:mx-0"></div>
+          <div className="pb-5 mx-2 md:mx-0">
             <ReviewCard
               user={user}
               users={users}
@@ -149,7 +144,11 @@ const DramaCast = ({
                   origin_country: string;
                 }) => (
                   <div className="block mt-5" id={`${net?.id}`} key={net?.id}>
-                    <Link href={`/network/${net?.id}`} className="inline-block">
+                    <Link
+                      prefetch={true}
+                      href={`/network/${net?.id}`}
+                      className="inline-block"
+                    >
                       <Image
                         src={`https://image.tmdb.org/t/p/original/${net?.logo_path}`}
                         alt={net?.name}

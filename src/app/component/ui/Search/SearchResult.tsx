@@ -12,10 +12,14 @@ const SearchResult = () => {
   const [showResults, setShowResults] = useState(true); // State to manage visibility of search results
   const searchParams = useSearchParams();
   let searchQuery = searchParams?.get("query") ?? "";
-  const params = new URLSearchParams(searchParams as unknown as SearchParamsType);
+  const params = new URLSearchParams(
+    searchParams as unknown as SearchParamsType
+  );
   const { data: results } = useQuery({
     queryKey: ["searchResults", searchQuery],
     queryFn: () => fetchMultiSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const handleClick = () => {
     setShowResults(false); // Hide search results when clicking on a result

@@ -9,8 +9,8 @@ const Actor = ({ heading }: any) => {
   const { data, isLoading } = useQuery({
     queryKey: ["actor"],
     queryFn: fetchActor,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   return (
@@ -19,7 +19,7 @@ const Actor = ({ heading }: any) => {
       <div className="flex items-center w-full h-full overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-8 mt-0">
         {isLoading
           ? // Show loading skeletons if data is loading
-            Array(20)
+            Array(8)
               .fill(0)
               .map((_, index) => <SkeletonCard key={index} />)
           : data

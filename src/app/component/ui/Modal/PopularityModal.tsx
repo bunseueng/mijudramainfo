@@ -125,7 +125,7 @@ const PopularityModal: React.FC<PopularityType> = ({
     setLoading(true);
     try {
       const res = await fetch(`/api/person/${tv_id}/send-popularity`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -137,6 +137,7 @@ const PopularityModal: React.FC<PopularityType> = ({
                 value === "Custom" ? stars.get(index) : Number(value);
               return {
                 itemId: item?.name, // Assuming item has an 'id' property
+                personId: tv_id,
                 starCount: starCount,
                 actorName: persons?.name,
               };

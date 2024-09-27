@@ -1,19 +1,29 @@
 "use client";
 
+const AdBanner = dynamic(() => import("../Adsense/AdBanner"), { ssr: false });
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { cache, Suspense, useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Link from "next/link";
-import PlayTrailer from "@/app/(route)/(drama)/drama/top/PlayTrailer";
-import DramaFilter from "@/app/(route)/(drama)/drama/top/DramaFilter";
 import { useQuery } from "@tanstack/react-query";
 import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
-import SearchLoading from "../Loading/SearchLoading";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
+import dynamic from "next/dynamic";
+const PlayTrailer = dynamic(
+  () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
+  { ssr: false }
+);
+const DramaFilter = dynamic(
+  () => import("@/app/(route)/(drama)/drama/top/DramaFilter"),
+  { ssr: false }
+);
+const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
+  ssr: false,
+});
 
 const ExploreCard = ({ title, topDramas, total_results }: any) => {
   const searchParams = useSearchParams();
@@ -77,7 +87,7 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
     fetchRating();
   }, [topDramas]);
 
-  const fetchEpisodeCount = async (ids: number[]) => {
+  const fetchEpisodeCount = cache(async (ids: number[]) => {
     try {
       const promises = ids.map((id) =>
         fetch(
@@ -104,25 +114,27 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
     } catch (error: any) {
       console.log(error);
     }
-  };
+  });
 
   const result_id = totalItems?.map((drama: any) => drama?.id);
   const { data: episodes, isError } = useQuery({
     queryKey: ["episodes", result_id],
     queryFn: () => fetchEpisodeCount(result_id || []),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   if (isError) {
     return null;
   }
   return (
-    <div className="max-w-6xl mx-auto py-4">
-      {/* <div className="py-5">
+    <div className="max-w-6xl mx-auto py-4 px-4 md:px-6">
+      <div className="min-w-[1150px] mx-auto py-5">
         <AdBanner dataAdFormat="auto" dataAdSlot="8077904488" />
-      </div> */}
+      </div>
       <div className="mt-10">
         <div className="flex flex-col md:flex-row mt-10 w-full">
-          <div className="w-full md:w-[70%] px-1 md:px-3">
+          <div className="w-full md:w-4/6 pr-1 md:pr-3">
             <div className="flex items-center justify-between mb-5">
               <h1 className="text-2xl font-bold">{title}</h1>
               <p>{total_results} results</p>
@@ -170,6 +182,7 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                     <div className="pl-2 md:pl-3 w-[80%]">
                       <div className="flex items-center justify-between">
                         <Link
+                          prefetch={true}
                           href={`/tv/${drama?.id}`}
                           className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
                         >
@@ -262,10 +275,10 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                 );
               })}
           </div>
-          <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3">
-            {/* <div className="py-5 hidden md:block">
+          <div className="w-full md:w-2/6 pl-1 md:pl-3 lg:pl-3">
+            <div className="py-5 hidden md:block">
               <AdBanner dataAdFormat="auto" dataAdSlot="3527489220" />
-            </div> */}
+            </div>
             <div className="border bg-white dark:bg-[#242424] rounded-lg">
               <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:border-[#272727]">
                 Advanced Search
@@ -274,11 +287,11 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                 <DramaFilter />
               </Suspense>
             </div>
-            {/* <div className="hidden md:block relative bg-black mx-auto my-5">
+            <div className="hidden md:block relative bg-black mx-auto my-5">
               <div className="min-w-auto min-h-screen">
                 <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
               </div>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

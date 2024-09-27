@@ -247,3 +247,10 @@ export const CreatePersonDetails = z.object({
 });
 
 export type TCreatePersonDetails = z.infer<typeof CreatePersonDetails>;
+
+export const ProfileFeedsType = z.object({
+  like: z.string(),
+  likeby: z.string().array(),
+});
+
+export type TProfileFeeds = z.infer<typeof ProfileFeedsType>;

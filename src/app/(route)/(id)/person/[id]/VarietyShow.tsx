@@ -7,7 +7,6 @@ const Drama = ({ data, heading }: any) => {
     item?.genre_ids.includes(10764)
   );
   const castLength = filteredCast?.length || 0;
-  console.log(data);
 
   if (castLength === 0) {
     return (

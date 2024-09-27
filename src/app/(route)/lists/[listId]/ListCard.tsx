@@ -87,7 +87,6 @@ const ListCard: React.FC<Lists & listResultProps> = ({
     (rate: any) => rate?.rating?.userId === currentUser?.id?.toString()
   );
 
-  console.log(ratings);
   return (
     <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto py-3 px-4 md:px-6">
       <div className="w-full h-full bg-white dark:bg-[#272727] border-[1px] border-slate-200 dark:border-[#272727] rounded-md my-5">

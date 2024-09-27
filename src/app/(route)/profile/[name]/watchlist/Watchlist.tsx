@@ -122,6 +122,8 @@ const Watchlist: React.FC<WatchListProps & IList> = ({
       return sortedTvDetails;
     },
     enabled: !!sortby,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const selectBox = (key: any, value: any) => {

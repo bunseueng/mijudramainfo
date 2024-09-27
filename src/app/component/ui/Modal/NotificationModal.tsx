@@ -39,9 +39,18 @@ const NotificationModal: React.FC<Notification> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const acceptedRequests = friend.filter((item) => item.status === "accepted");
-  const rejectedRequests = friend.filter((item) => item.status === "rejected");
-  const pendingRequests = friend.filter((item) => item.status === "pending");
+  // Filter notifications based on their status
+  const acceptedRequests = friend.filter(
+    (item) => item.status === "accepted" && item.notification === "unread"
+  );
+  const rejectedRequests = friend.filter(
+    (item) => item.status === "rejected" && item.notification === "unread"
+  );
+  const pendingRequests = friend.filter(
+    (item) => item.status === "pending" && item.notification === "unread"
+  );
+
+  // Combine and sort notifications
   const status = [...acceptedRequests, ...rejectedRequests, ...pendingRequests];
   status.sort((a, b) => {
     return (
@@ -49,6 +58,7 @@ const NotificationModal: React.FC<Notification> = ({
       new Date(a.actionDatetime).getTime()
     );
   });
+
   const tv_id = comment.map((item) => item.postId);
 
   const {
@@ -58,6 +68,8 @@ const NotificationModal: React.FC<Notification> = ({
   } = useQuery({
     queryKey: ["allTvShows", tv_id],
     queryFn: () => fetchTv(tv_id.flat()),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const friendNoti = status.map((fri) => fri?.notification).flat();
@@ -66,15 +78,19 @@ const NotificationModal: React.FC<Notification> = ({
       com.replies?.filter((rp: any) => rp?.userId === currentUser?.id)
     )
     .flat();
+
   const findRpNoti = findReply.map(
     (item: any) => item?.notification === "unread"
   );
+
   const isRepliedItself = comment
     .map((com) =>
       com.replies?.filter((rp: any) => rp?.repliedUserId === currentUser?.id)
     )
     .flat();
+
   const hasUnreadReplies = findRpNoti.includes(true);
+
   // Check if there are any unread friend notifications
   const hasUnreadFriends = friendNoti.includes("unread");
 
@@ -168,13 +184,14 @@ const NotificationModal: React.FC<Notification> = ({
           damping: 50,
           duration: 1,
         }}
-        className="w-[410px] md:w-[440px] bg-white dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#3e4042] absolute left-3 md:left-auto md:right-[133px] top-[74px] shadow-md"
+        className="w-auto md:w-[440px] bg-white dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#3e4042] absolute right-2 md:left-auto md:right-[133px] top-[59px] shadow-md"
       >
         <div className="max-h-[660px] overflow-hidden overflow-y-auto">
           <div className="flex items-center justify-between">
             <Link
+              prefetch={true}
               href="/notifications"
-              className="text-black dark:text-[#ffffffde] font-bold p-4"
+              className="text-sm md:text-base text-black dark:text-[#ffffffde] font-bold p-4"
             >
               See All Notifications
             </Link>
@@ -205,6 +222,32 @@ const NotificationModal: React.FC<Notification> = ({
                   {status.map((req, idx) => {
                     const isRequester = req.friendRequestId === currentUser?.id;
                     const isResponder = req.friendRespondId === currentUser?.id;
+
+                    // Skip rendering if the current user is the requester for pending requests
+                    if (
+                      isRequester &&
+                      pendingRequests.find(
+                        (request) =>
+                          request.friendRequestId !== req.friendRespondId
+                      )
+                    ) {
+                      return (
+                        <div
+                          className="text-center border-t border-t-[#3e4042] py-10 px-4"
+                          key={req?.id}
+                        >
+                          <h1 className="text-black dark:text-[#ffffffde] font-bold mb-6">
+                            No Unread Notifications
+                          </h1>
+                          <Link
+                            href="/notifications"
+                            className="text-[#ffffffde] font-bold bg-[#1675b6] border border-[#1f6fa7] rounded-sm py-3 px-5 hover:bg-opacity-80"
+                          >
+                            See Past Notifications
+                          </Link>
+                        </div>
+                      ); // Skip this notification
+                    }
 
                     // Find the corresponding user
                     const user = isRequester
@@ -242,17 +285,12 @@ const NotificationModal: React.FC<Notification> = ({
                           <span className="text-[#1675b6]">{user?.name}</span>{" "}
                           has accepted your friend request
                         </>
-                      ) : isPending ? (
-                        <>
-                          You have sent a friend request to{" "}
-                          <span className="text-[#1675b6]">{user?.name}</span>
-                        </>
                       ) : isRejected ? (
                         <>
                           <span className="text-[#1675b6]">{user?.name}</span>{" "}
                           has rejected your friend request
                         </>
-                      ) : null;
+                      ) : null; // Removed pending case for current user
                     } else if (isResponder) {
                       notificationMessage = isAccepted ? (
                         <>

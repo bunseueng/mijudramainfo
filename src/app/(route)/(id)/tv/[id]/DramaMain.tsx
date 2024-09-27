@@ -73,50 +73,74 @@ const DramaMain = ({
   const { data: tv, isLoading } = useQuery({
     queryKey: ["tv"],
     queryFn: () => fetchTv(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: trailer } = useQuery({
     queryKey: ["trailer"],
     queryFn: () => fetchTrailer(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: cast } = useQuery({
     queryKey: ["cast"],
     queryFn: () => fetchCastCredit(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: language } = useQuery({
     queryKey: ["language"],
     queryFn: () => fetchLanguages(),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: content } = useQuery({
     queryKey: ["content"],
     queryFn: () => fetchContentRating(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: keyword } = useQuery({
     queryKey: ["keyword"],
     queryFn: () => fetchKeyword(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: title } = useQuery({
     queryKey: ["title"],
     queryFn: () => fetchTitle(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: review } = useQuery({
     queryKey: ["review"],
     queryFn: () => fetchReview(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: image } = useQuery({
     queryKey: ["image"],
     queryFn: () => fetchImages(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: video } = useQuery({
     queryKey: ["video"],
     queryFn: () => fetchVideos(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: recommend } = useQuery({
     queryKey: ["recommend"],
     queryFn: () => fetchRecommendation(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: allTvShows } = useQuery({
     queryKey: ["allTvShows"],
     queryFn: fetchRecommendation,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   // Getting Crew
   const castCredit = cast?.crew?.map((item: any) => item);
@@ -328,10 +352,11 @@ const DramaMain = ({
                     }`
                   }
                   alt={detail?.title || tv?.name}
-                  width={500}
-                  height={300}
+                  width={300}
+                  height={440}
+                  quality={100}
                   priority
-                  className="block align-middle !w-[350px] md:!min-w-[350px] !h-[480px] bg-cover object-cover rounded-lg md:pl-0"
+                  className="block align-middle !w-[300px] md:!min-w-[300px] !h-[440px] bg-cover object-cover rounded-lg md:pl-0"
                 />
 
                 <div className="md:pl-4 lg:pl-8 py-5">
@@ -548,6 +573,7 @@ const DramaMain = ({
                       <Link
                         href={`/tv/${tv?.id}/edit/detail`}
                         className="text-sm text-[#2490da] break-words"
+                        shallow
                         prefetch={true}
                       >
                         Edit Translation
@@ -750,9 +776,11 @@ const DramaMain = ({
                           className="text-sm pl-2 font-semibold text-[#1675b6]"
                           style={{ color: textColor }}
                         >
-                          {info?.broadcast
-                            ?.map((broad) => broad?.day)
-                            ?.join(", ")}
+                          {info?.broadcast?.length > 0
+                            ? info?.broadcast
+                                ?.map((broad) => broad?.day)
+                                ?.join(", ")
+                            : "?"}
                         </span>
                       </h1>
                     </div>
@@ -800,20 +828,18 @@ const DramaMain = ({
                           className="text-sm pl-2 font-semibold text-[#1675b6]"
                           style={{ color: textColor }}
                         >
-                          {getDrama?.details?.length > 0
-                            ? detail?.content_rating
-                            : `${
-                                content?.results?.length === 0
-                                  ? "Not Yet Rated"
-                                  : content?.results[0]?.rating
-                              }
-                          ${
-                            content?.results?.length !== 0 && (
+                          {getDrama?.details?.length > 0 ? (
+                            detail?.content_rating
+                          ) : content?.results?.length === 0 ? (
+                            "Not Yet Rated"
+                          ) : (
+                            <>
+                              {content?.results[0]?.rating}
                               <span>
                                 + - Teens {content?.results[0]?.rating} or older
                               </span>
-                            )
-                          }`}
+                            </>
+                          )}
                         </span>
                       </h1>
                     </div>

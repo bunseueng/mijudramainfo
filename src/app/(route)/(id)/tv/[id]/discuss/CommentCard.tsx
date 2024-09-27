@@ -40,6 +40,7 @@ const CommentCard = ({
   setRevealSpoiler,
   revealSpoiler = {},
   session,
+  type,
 }: any) => {
   const [showActions, setShowActions] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
@@ -61,7 +62,7 @@ const CommentCard = ({
   const updatingComment = async () => {
     setSaveLoading(true);
     try {
-      const res = await fetch(`/api/tv/${tv_id}/comment`, {
+      const res = await fetch(`/api/${type}/${tv_id}/comment`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -353,7 +354,7 @@ const CommentCard = ({
             className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-1 px-5"
             onClick={() => handleDelete(null, tv_id)}
           >
-            Delete
+            {loading ? "Deleting..." : "Delete"}
           </button>
         </div>
       )}

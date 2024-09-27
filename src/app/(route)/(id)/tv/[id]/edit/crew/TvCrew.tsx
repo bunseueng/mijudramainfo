@@ -34,6 +34,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: cast, isLoading } = useQuery({
     queryKey: ["tv_cast", tv_id],
     queryFn: () => fetchAllCast(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [open, setOpen] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -71,6 +73,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   } = useQuery({
     queryKey: ["searchPerson", searchQuery],
     queryFn: () => fetchPersonSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const person_ids =
@@ -80,6 +84,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryKey: ["crew", person_ids],
     queryFn: () => fetchPersons(person_ids),
     enabled: person_ids.length > 0, // only run query if there are person IDs
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: personResult = [], refetch: refetchData } = useQuery({
     queryKey: ["crewResult"],
@@ -90,6 +96,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       return [...personDetails];
     },
     enabled: true,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const filterDuplicates = (arr: any) => {
@@ -292,7 +300,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <thead>
             <tr>
               <th
-                className="border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-[1px] border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
+                className="w-full border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-[1px] border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"
                 colSpan={2}
               >
                 Person
@@ -503,13 +511,17 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   );
                 })
               ) : (
-                <tr>
+                <tr className="w-full">
                   <td
-                    className="text-center text-sm py-2 px-4 border-b-[1px] border-b-[#3e4042]"
+                    className="w-full text-center text-sm py-2 px-4 border-b-[1px] border-b-[#3e4042]"
                     colSpan={3}
                   >
                     No items found
                   </td>
+                  <td
+                    className="w-full text-center text-sm py-2 px-4 border-b-[1px] border-b-[#3e4042]"
+                    colSpan={3}
+                  ></td>
                 </tr>
               )}
             </AnimatePresence>

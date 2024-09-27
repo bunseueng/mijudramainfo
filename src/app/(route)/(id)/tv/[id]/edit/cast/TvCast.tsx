@@ -10,7 +10,6 @@ import { CastType, Drama, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -26,6 +25,8 @@ import { AnimatePresence, Reorder, motion } from "framer-motion";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
 import LazyImage from "@/components/ui/lazyimage";
+import { Button } from "@/components/ui/button";
+import { FaRegTrashAlt } from "react-icons/fa";
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
   { ssr: false }
@@ -45,6 +46,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: cast, isLoading } = useQuery({
     queryKey: ["tv_cast", tv_id],
     queryFn: () => fetchAllCast(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const [open, setOpen] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -53,6 +56,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [listSearch, setListSearch] = useState<string>("");
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [resetLoading, setResetLoading] = useState<boolean>(false);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
   const [character, setCharacter] = useState<string[]>(
     cast?.roles?.map((role: any) => role?.character) || []
@@ -89,6 +93,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   } = useQuery({
     queryKey: ["searchPerson", searchQuery],
     queryFn: () => fetchPersonSearch(searchQuery),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const person_ids =
@@ -98,6 +104,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryKey: ["persons", person_ids],
     queryFn: () => fetchPersons(person_ids),
     enabled: person_ids.length > 0, // only run query if there are person IDs
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
   const { data: personResult = [], refetch: refetchData } = useQuery({
     queryKey: ["personResult"],
@@ -108,6 +116,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       return [...personDetails];
     },
     enabled: true,
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const filterDuplicates = (arr: any) => {
@@ -325,7 +335,27 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     setInputFocused(null);
   };
 
-  const handleResetChanges = (ind: number) => {
+  const [originalItems, setOriginalItems] = useState([...item]); // Keep the original order
+  const [isDragging, setIsDragging] = useState(false); // Track drag state
+  const [hasReordered, setHasReordered] = useState(false); // Track if order has been changed
+
+  const handleReorder = (newOrder: any) => {
+    setItem(newOrder); // Update the reordered items
+  };
+
+  const handleDragStart = () => {
+    setIsDragging(true); // Set dragging state to true when any item starts dragging
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false); // Set dragging state to false after dragging ends
+    // Check if the current order is different from the original order
+    if (JSON.stringify(item) !== JSON.stringify(originalItems)) {
+      setHasReordered(true); // Set to true if items have been reordered
+    }
+  };
+
+  const handleResetChanges = async (ind: number) => {
     setIsItemChanging((prevIsItemChanging) => {
       const newIsItemChanging = [...prevIsItemChanging];
       newIsItemChanging[ind] = false;
@@ -350,6 +380,17 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       return newChanged;
     });
     setPrevCharacter([]);
+    try {
+      setResetLoading(true);
+      // Simulate a delay for the reset operation
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      setHasReordered(false);
+      setItem(originalItems);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -384,7 +425,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <Reorder.Group
             as="tbody"
             values={item}
-            onReorder={setItem}
+            onReorder={handleReorder}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -408,6 +449,8 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     }}
                     className="relative w-full"
                     style={{ display: "table-row" }}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
                   >
                     <td className="w-3 border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-2 py-3">
                       {!markedForDeletion[ind] && (
@@ -469,7 +512,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             name="cast_role"
                             readOnly
                             autoComplete="off"
-                            className="w-full text-[#606266] dark:text-white placeholder:text-black dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
+                            className="w-full text-[#606266] dark:text-white placeholder:text-black placeholder:text-sm dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
                             placeholder={
                               cast?.cast_role?.length > 0
                                 ? castRoles[ind] || cast?.cast_role
@@ -685,33 +728,58 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           </div>
         </div>
       </div>
-      <button
-        name="Submit"
-        onClick={handleSubmit(onSubmit)}
-        className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-          tvIds?.length > 0 ||
-          castRoles?.some((role) => role !== undefined) ||
-          character?.some((role) => role !== undefined) ||
-          markedForDeletion?.includes(true) ||
-          isItemChanging?.includes(true)
-            ? "cursor-pointer"
-            : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
-        }`}
-        disabled={
-          tvIds?.length > 0 ||
-          castRoles?.some((role) => role !== undefined) ||
-          character?.some((role) => role !== undefined) ||
-          markedForDeletion?.includes(true) ||
-          isItemChanging?.includes(true)
-            ? false
-            : true
-        }
-      >
-        <span className="mr-1 pt-1">
-          <ClipLoader color="#c3c3c3" loading={submitLoading} size={19} />
-        </span>
-        Submit
-      </button>
+      <div className="flex items-start">
+        <button
+          name="Submit"
+          onClick={handleSubmit(onSubmit)}
+          className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+            tvIds?.length > 0 ||
+            hasReordered ||
+            castRoles?.some((role) => role !== undefined) ||
+            character?.some((role) => role !== undefined) ||
+            markedForDeletion?.includes(true) ||
+            isItemChanging?.includes(true)
+              ? "cursor-pointer"
+              : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+          }`}
+          disabled={
+            tvIds?.length > 0 ||
+            hasReordered ||
+            castRoles?.some((role) => role !== undefined) ||
+            character?.some((role) => role !== undefined) ||
+            markedForDeletion?.includes(true) ||
+            isItemChanging?.includes(true)
+              ? false
+              : true
+          }
+        >
+          <span className="mr-1 pt-1">
+            <ClipLoader color="#c3c3c3" loading={submitLoading} size={19} />
+          </span>
+          Submit
+        </button>
+        <button
+          type="button"
+          className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-4 ${
+            hasReordered
+              ? "cursor-pointer"
+              : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
+          }`}
+          onClick={() => handleResetChanges(0)}
+          disabled={hasReordered ? false : true}
+        >
+          {resetLoading ? (
+            <span className="pt-1 mr-1">
+              <ClipLoader color="#dcdfe6" loading={!loading} size={17} />
+            </span>
+          ) : (
+            <span className="mr-1">
+              <FaRegTrashAlt />
+            </span>
+          )}
+          Reset
+        </button>
+      </div>
     </form>
   );
 };
