@@ -333,6 +333,7 @@ const Navbar: React.FC<Notification> = ({
                 height={50}
                 quality={100}
                 loading="lazy"
+                unoptimized
               />
             </Link>
 
@@ -583,6 +584,7 @@ const Navbar: React.FC<Notification> = ({
                     quality={100}
                     priority
                     className="w-[33px] h-[33px] bg-cover bg-center object-cover rounded-full"
+                    unoptimized
                   />
                   <IoMdArrowDropdown className="text-white" />
                 </div>

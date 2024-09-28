@@ -57,6 +57,7 @@ const LazyImage = ({
       blurDataURL={blurDataURL}
       onLoad={onLoad}
       sizes={sizes}
+      unoptimized
     />
   );
 };

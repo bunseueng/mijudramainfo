@@ -102,6 +102,7 @@ export default function YouTubeTrailer({ heading }: { heading: string }) {
                         style={{
                           objectFit: "cover",
                         }}
+                        unoptimized
                       />
                       {videoKey && (
                         <Button
