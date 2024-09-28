@@ -115,10 +115,10 @@ export default function YouTubeTrailer({ heading }: { heading: string }) {
                       )}
                     </div>
                     <div className="relative top-0 overflow-hidden px-2">
-                      <h3 className="text-white font-semibold text-lg truncate">
+                      <h3 className="text-white font-semibold text-sm truncate">
                         {result.title || result.name}
                       </h3>
-                      <p className="text-sm text-white opacity-50 dark:text-muted-foreground dark:opacity-100">
+                      <p className="text-sm text-white opacity-50 dark:text-gray-300 dark:opacity-100">
                         {result.release_date || result.first_air_date}
                       </p>
                     </div>

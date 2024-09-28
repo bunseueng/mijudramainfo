@@ -35,7 +35,7 @@ export interface currentUserProps {
   emailVerified: string | null;
   image: string | null;
   country: string | null;
-  gender: string;
+  gender: string | null;
   dateOfBirth: Date | null;
   biography: string | null;
   coverPhoto: string | null;
@@ -61,7 +61,7 @@ export interface UserProps {
   emailVerified: Date | null;
   image: string | null;
   country: string | null;
-  gender: string;
+  gender: string | null;
   role: string;
   dateOfBirth: Date | null;
   biography: string | null;
@@ -90,7 +90,7 @@ export interface findSpecificUserProps {
   emailVerified: Date | null;
   image: string | null;
   country: string | null;
-  gender: string;
+  gender: string | null;
   dateOfBirth: Date | null;
   biography: string | null;
   coverPhoto: string | null;

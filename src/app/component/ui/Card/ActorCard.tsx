@@ -43,7 +43,7 @@ const ActorCard = ({ result }: any) => {
         <Link
           prefetch={true}
           href={`/person/${person}`}
-          className="text-sm truncate min-h-[20px]"
+          className="text-xs truncate min-h-[20px]"
         >
           {actorName}
         </Link>

@@ -345,6 +345,10 @@
   background-repeat: no-repeat;
 }
 
+.tiptap div:last-child {
+  height: auto !important;
+}
+
 .truncates {
   margin: 0;
   display: -webkit-box;

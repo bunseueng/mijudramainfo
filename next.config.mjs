@@ -15,6 +15,7 @@ const nextConfig = {
       "static.wikia.nocookie.net",
     ],
     formats: ["image/avif", "image/webp"],
+    unoptimized: false,
   },
 };
 

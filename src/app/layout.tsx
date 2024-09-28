@@ -13,9 +13,6 @@ import Provider from "@/provider/Provider";
 import TanstackProvider from "@/provider/TanstackProvider";
 import { ScrollProvider } from "@/provider/UseScroll";
 const Loading = dynamic(() => import("./loading"), { ssr: false });
-const LenisScroll = dynamic(() => import("@/provider/LenisScroll"), {
-  ssr: false,
-});
 const Footer = dynamic(() => import("./component/ui/Main/Footer"), {
   ssr: false,
 });
@@ -102,14 +99,15 @@ export default function RootLayout({
               >
                 <ScrollProvider>
                   <Loading />
-                  <LenisScroll />
-                  <div className="flex flex-col top-0 sticky z-[9999]">
-                    <SessionAllPage />
-                  </div>
-                  <div className="parent-container min-h-screen flex flex-col">
-                    <main className="content-container flex-grow">
-                      {children}
-                    </main>
+                  <div className="relative">
+                    <div className="flex flex-col top-0 sticky z-[9999]">
+                      <SessionAllPage />
+                    </div>
+                    <div className="parent-container min-h-screen flex flex-col">
+                      <main className="content-container flex-grow">
+                        {children}
+                      </main>
+                    </div>
                     <Footer />
                   </div>
                 </ScrollProvider>

@@ -113,7 +113,7 @@ const ProfileSetting = ({ user }: any) => {
             Update your profile information here.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 px-6">
           {/* Profile Picture */}
           <div className="space-y-2">
             <Label htmlFor="profile-picture">Profile Picture</Label>

@@ -10,7 +10,7 @@ const ThemeSwitch = dynamic(() => import("@/components/ui/ThemeIcon"), {
 
 const Footer = () => {
   return (
-    <div className="bg-gradient-to-r from-sky-900 to-blue-800 dark:bg-[#ffffff05] dark:from-transparent dark:to-transparent w-full">
+    <footer className="bg-gradient-to-r from-sky-900 to-blue-800 dark:bg-[#ffffff05] dark:from-transparent dark:to-transparent w-full overflow-hidden !z-[9999]">
       <div className="max-w-6xl mx-auto py-4 px-4 md:px-6 z-50">
         <div className="w-full md:w-1/3 relative float-left text-white">
           <Link
@@ -117,7 +117,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </div>
+    </footer>
   );
 };
 

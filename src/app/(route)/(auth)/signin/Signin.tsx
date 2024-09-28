@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FaCheck, FaFacebookF, FaGithub, FaGoogle } from "react-icons/fa6";
+import { FaCheck, FaGithub, FaGoogle } from "react-icons/fa6";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 
@@ -91,19 +91,10 @@ const Signin = () => {
               <button
                 name="github"
                 type="button"
-                className=" mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
-                onClick={() => signIn("github")}
+                className="mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
+                onClick={() => signIn("github", { callbackUrl: "/" })}
               >
                 <FaGithub className="pl-[1.2px]" size={19} />
-              </button>
-
-              <button
-                name="facebook"
-                type="button"
-                className=" mx-1 inline-block h-9 w-9 rounded-full bg-white border-[1px] border-[#78828c21] fill-white p-2 uppercase leading-normal shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 dark:bg-[#1f6fa7] dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
-                onClick={() => signIn("facebook")}
-              >
-                <FaFacebookF className="pl-1" />
               </button>
             </div>
 

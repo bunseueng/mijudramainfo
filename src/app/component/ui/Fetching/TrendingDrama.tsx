@@ -52,7 +52,7 @@ const TrendingDrama = ({ heading }: any) => {
                         className="aspect-[150/200] rounded-xl bg-center object-cover"
                       />
                     </Link>
-                    <h2 className="mt-2 text-sm font-medium line-clamp-2">
+                    <h2 className="mt-2 text-xs font-medium line-clamp-2 truncate">
                       {result?.name || result?.title}
                     </h2>
                     <p className="text-xs text-muted-foreground mt-1">

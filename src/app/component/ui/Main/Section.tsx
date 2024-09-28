@@ -22,7 +22,10 @@ export default async function Section() {
 
   const personDB = await prisma.person.findMany({});
   return (
-    <section className="relative min-h-full bg-customLight dark:bg-customDark from-transparent to-customLight dark:to-customDark -mt-[157px] pt-[150px] overflow-hidden">
+    <section
+      className="relative z-50 bg-customLight dark:bg-customDark from-transparent to-customLight dark:to-customDark -mt-[157px] pt-[150px]"
+      style={{ transform: "translateZ(10px)" }}
+    >
       <div className="relative overflow-hidden max-w-6xl mx-auto">
         <div className="mb-10 min-h-[300px]">
           <TrendingDrama heading={trending} />

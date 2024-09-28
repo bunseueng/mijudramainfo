@@ -16,24 +16,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Generate sitemap entries for each TV show
     const sitemapEntries = tvShows.map((tvShow: ITmdbDrama) => ({
-        url: `${process.env.BASE_URL}/tv/${tvShow.id}`,
+        url: `${process.env.BASE_URL}tv/${tvShow.id}`,
     }));
 
     if(response.ok) {
         const tvPhotoEntries = tvShows.map((tv: ITmdbDrama) => ({
-            url: `${process.env.BASE_URL}/tv/${tv.id}/photos`,
+            url: `${process.env.BASE_URL}tv/${tv.id}/photos`,
         }));
         const tvMediaEntries = tvShows.map((tv: ITmdbDrama) => ({
-            url: `${process.env.BASE_URL}/tv/${tv.id}/media`,
+            url: `${process.env.BASE_URL}tv/${tv.id}/media`,
         }));
         const tvReviewEntries = tvShows.map((tv: ITmdbDrama) => ({
-            url: `${process.env.BASE_URL}/tv/${tv.id}/reviews`,
+            url: `${process.env.BASE_URL}tv/${tv.id}/reviews`,
         }));
         const tvSeasonEntries = tvShows.map((tv: ITmdbDrama) => ({
-            url: `${process.env.BASE_URL}/tv/${tv.id}/seasons`,
+            url: `${process.env.BASE_URL}tv/${tv.id}/seasons`,
         }));
         const tvCastEntries = tvShows.map((tv: ITmdbDrama) => ({
-            url: `${process.env.BASE_URL}/tv/${tv.id}/cast`,
+            url: `${process.env.BASE_URL}tv/${tv.id}/cast`,
         }));
 
         // Add movie entries to the sitemap
@@ -49,10 +49,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         // Generate sitemap entries for each movie
         const movieEntries = movies.map((movie: ITmdbDrama) => ({
-            url: `${process.env.BASE_URL}/movie/${movie.id}`,
+            url: `${process.env.BASE_URL}movie/${movie.id}`,
         }));
         const movieCastEntries = tvShows.map((movie: ITmdbDrama) => ({
-            url: `${process.env.BASE_URL}/movie/${movie.id}/cast`,
+            url: `${process.env.BASE_URL}movie/${movie.id}/cast`,
         }));
 
         // Add movie entries to the sitemap
@@ -70,7 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         // Generate sitemap entries for each person
         const personEntries = persons.map((person: PersonType) => ({
-            url: `${process.env.BASE_URL}/person/${person.id}`,
+            url: `${process.env.BASE_URL}person/${person.id}`,
         }));
 
         // Add person entries to the sitemap
@@ -84,7 +84,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const networkData = await networkResponse.json();
         // Generate sitemap entries for each person
         const networkEntries = {
-            url: `${process.env.BASE_URL}/network/${networkData?.id}`,
+            url: `${process.env.BASE_URL}network/${networkData?.id}`,
         };
 
         // Add person entries to the sitemap
@@ -94,24 +94,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     // Include any static pages as well
     sitemapEntries.push(
-        { url: `${process.env.BASE_URL}/drama/newest` },
-        { url: `${process.env.BASE_URL}/drama/top` },
-        { url: `${process.env.BASE_URL}/drama/upcoming` },
-        { url: `${process.env.BASE_URL}/drama/top_chinese_dramas` },
-        { url: `${process.env.BASE_URL}/drama/top_korean_dramas` },
-        { url: `${process.env.BASE_URL}/drama/top_japanese_dramas` },
-        { url: `${process.env.BASE_URL}/movie/newest` },
-        { url: `${process.env.BASE_URL}/movie/top` },
-        { url: `${process.env.BASE_URL}/movie/upcoming` },
-        { url: `${process.env.BASE_URL}/shows/variety` },
+        { url: `${process.env.BASE_URL}drama/newest` },
+        { url: `${process.env.BASE_URL}drama/top` },
+        { url: `${process.env.BASE_URL}drama/upcoming` },
+        { url: `${process.env.BASE_URL}drama/top_chinese_dramas` },
+        { url: `${process.env.BASE_URL}drama/top_korean_dramas` },
+        { url: `${process.env.BASE_URL}drama/top_japanese_dramas` },
+        { url: `${process.env.BASE_URL}movie/newest` },
+        { url: `${process.env.BASE_URL}movie/top` },
+        { url: `${process.env.BASE_URL}movie/upcoming` },
+        { url: `${process.env.BASE_URL}shows/variety` },
         { url: `${process.env.BASE_URL}/people/top` },
-        { url: `${process.env.BASE_URL}/coin` },
-        { url: `${process.env.BASE_URL}/signin` },
-        { url: `${process.env.BASE_URL}/signup` },
-        { url: `${process.env.BASE_URL}/faq` },
-        { url: `${process.env.BASE_URL}/about` },
-        { url: `${process.env.BASE_URL}/contact` },
-        { url: `${process.env.BASE_URL}/terms` },
+        { url: `${process.env.BASE_URL}coin` },
+        { url: `${process.env.BASE_URL}signin` },
+        { url: `${process.env.BASE_URL}signup` },
+        { url: `${process.env.BASE_URL}faq` },
+        { url: `${process.env.BASE_URL}about` },
+        { url: `${process.env.BASE_URL}contact` },
+        { url: `${process.env.BASE_URL}terms` },
     );
 
     return sitemapEntries;

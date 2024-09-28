@@ -323,7 +323,9 @@ const Navbar: React.FC<Notification> = ({
               href="/"
               onClick={() => setCurrentNav("")}
             >
-              <p className="text-lg md:text-2xl text-cyan-400">MijuDramaInfo</p>
+              <p className="text-sm md:text-lg lg:text-2xl text-cyan-400">
+                MijuDramaInfo
+              </p>
               <Image
                 src="/Untitled.svg"
                 alt="Mijudramainfo"
@@ -484,26 +486,37 @@ const Navbar: React.FC<Notification> = ({
               className="mx-2 relative pt-1.5"
               onClick={handleNotiDropClick}
             >
+              {/* Notification Badge for unread notifications */}
               <span className="relative inline-block">
                 <IoIosNotificationsOutline className="text-lg md:text-2xl text-white" />
-                {/* Notification Badge for unread notifications */}
-                {(hasUnreadFriends || findRpNoti) && (
-                  <span className="absolute top-0 right-0 transform translate-x-[50%] -translate-y-[50%]">
-                    <span
-                      className={`text-white text-xs px-2 py-[1px] rounded-full bg-[#f44455]`}
-                    >
-                      {/* Count only unread notifications */}
-                      {hasUnreadFriends
-                        ? // Total unread notifications from different statuses
-                          isPendingReceived.length + // Count only pending requests received
-                          isAccepted.length +
-                          isRejected.length
-                        : readRepliesCount}
-                    </span>
+                <span className="absolute top-1 right-1 transform translate-x-[50%] -translate-y-[50%]">
+                  <span
+                    className={`text-white text-[10px] px-1.5 py-[1px] rounded-full bg-[#f44455]`}
+                  >
+                    {(hasUnreadFriends || findRpNoti) && (
+                      <span>
+                        {/* Calculate the unread count */}
+                        {hasUnreadFriends
+                          ? // Total unread notifications from different statuses
+                            isPendingReceived.length +
+                              isAccepted.length +
+                              isRejected.length >
+                            0
+                            ? isPendingReceived.length +
+                              isAccepted.length +
+                              isRejected.length
+                            : null // Hide badge if count is 0
+                          : readRepliesCount > 0
+                          ? readRepliesCount
+                          : null}{" "}
+                        {/* Hide badge if readRepliesCount is 0 */}
+                      </span>
+                    )}
                   </span>
-                )}
+                </span>
               </span>
             </button>
+
             {notiDrop && (
               <NotificationModal
                 users={users}
