@@ -317,7 +317,7 @@ const ProfileItem: React.FC<
                       Location:{" "}
                       <span className="text-sm font-normal opacity-90">
                         {" "}
-                        {user?.country}
+                        {user?.country ? user?.country : "Unknown"}
                       </span>
                     </b>
                   </li>

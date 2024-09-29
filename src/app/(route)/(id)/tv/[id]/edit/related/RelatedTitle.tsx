@@ -73,6 +73,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryFn: () => fetchTvSearch(query),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const [storedData, setStoredData] = useState<any[]>([]);

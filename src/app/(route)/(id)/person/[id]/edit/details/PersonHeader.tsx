@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPerson } from "@/app/actions/fetchMovieApi";
 import { PersonDBType } from "@/helper/type";
@@ -20,13 +20,37 @@ const PersonHeader: React.FC<PersonHeader> = ({ person_id, personDB }) => {
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
+
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const color = await getColorFromImage(
+        `https://image.tmdb.org/t/p/w45/${person?.profile_path}`
+      );
+
+      if (color) {
+        // Use the color string directly
+        setDominantColor(color);
+      } else {
+        console.error("No valid color returned");
+      }
+    }
+  }, [person?.profile_path]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -38,7 +62,7 @@ const PersonHeader: React.FC<PersonHeader> = ({ person_id, personDB }) => {
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [person]);
+  }, [extractColor]);
 
   return (
     <div
@@ -60,7 +84,7 @@ const PersonHeader: React.FC<PersonHeader> = ({ person_id, personDB }) => {
             className="w-[60px] h-[70px] bg-center bg-cover object-cover rounded-md"
           />
           <div className="flex flex-col pl-5 py-3">
-            <h1 className="text-white text-4xl font-bold">{person?.name}</h1>
+            <h1 className="text-white text-xl font-bold">{person?.name}</h1>
           </div>
         </div>
       </div>

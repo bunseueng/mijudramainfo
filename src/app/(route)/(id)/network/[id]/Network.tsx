@@ -34,6 +34,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
     queryFn: () => fetchTvNetworks(network_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const [sortby, setSortby] = useState<string>();
   const [genre, setGenre] = useState<string>("18");
@@ -160,6 +161,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
     queryFn: () => fetchEpisodeCount(result_id || []),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   if (isError) {

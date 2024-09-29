@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 const Signin = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const {
     register,
     handleSubmit,
@@ -34,6 +35,7 @@ const Signin = () => {
           email: userData.email,
           password: userData.password,
           redirect: false,
+          rememberMe,
         });
 
         if (!signInData || signInData.ok !== true) {
@@ -51,7 +53,7 @@ const Signin = () => {
         setIsLoading(false);
       }
     },
-    [router]
+    [router, rememberMe]
   );
 
   return (
@@ -59,22 +61,9 @@ const Signin = () => {
       {/* Left Section */}
       <div className="w-full md:w-2/5 xl:w-1/4 bg-white dark:bg-[#242526] flex flex-col justify-start items-center md:items-start pt-16 md:py-16 xl:px-4">
         <div className="order-0 md:order-1 mb-12 md:mb-0 w-full px-4">
-          <Link
-            prefetch={true}
-            className="no-underline hover:no-underline font-bold text-2xl lg:text-4xl flex items-center mb-5"
-            href="/"
-          >
-            <p className="text-lg md:text-2xl text-cyan-400">MijuDramaInfo</p>
-            <Image
-              src="/Untitled.svg"
-              alt="Website logo"
-              width={25}
-              height={50}
-              quality={100}
-              loading="lazy"
-              className="w-[25px] h-[50px] md:w-[50px]"
-            />
-          </Link>
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white mb-4">
+            Welcome to MijuDramaInfo
+          </h2>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-row items-center justify-start lg:justify-start">
               <p className="mb-0 me-4 text-lg">Sign in with</p>
@@ -160,10 +149,11 @@ const Signin = () => {
             <div className="mb-6 flex items-center justify-between">
               <div className="mb-[0.125rem] block min-h-[1.5rem] ps-[1.5rem]">
                 <input
-                  className="relative float-left -ms-[1.5rem] me-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-secondary-500 outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-checkbox before:shadow-transparent before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:-mt-px checked:after:ms-[0.25rem] checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-black/60 focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-black/60 focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:content-[''] checked:focus:before:scale-100 checked:focus:before:shadow-checkbox checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:after:-mt-px checked:focus:after:ms-[0.25rem] checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-l-0 checked:focus:after:border-t-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-transparent rtl:float-right dark:border-neutral-400 dark:checked:border-primary dark:checked:bg-primary"
+                  className="relative float-left -ms-[1.5rem] me-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-secondary-500 outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-checkbox before:shadow-transparent before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:-mt-px checked:after:ms-[0.25rem] checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-black/60 focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-black/60 focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:content-[''] checked:focus:before:scale-100 checked:focus:before:shadow-checkbox checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:after:-mt-px checked:focus:after:ms-[0.25rem] checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-l-0 checked:focus:after:border-t-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-transparent rtl:float-right dark:border-neutral-400 dark:checked:border-primary dark:checked:bg-[#000]"
                   type="checkbox"
-                  value=""
                   id="remember"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <label
                   className="inline-block text-sm ps-[0.15rem] hover:cursor-pointer"
@@ -203,66 +193,71 @@ const Signin = () => {
       </div>
 
       {/* Right Section */}
-      <div className="w-full flex md:w-3/5 xl:w-3/4 relative text-white bg-[#242526] flex-col justify-center md:justify-start items-center md:items-start md:py-16 md:px-6 ">
-        {/* Background Image and Overlay only in Right Section */}
-        <div className="md:absolute md:inset-0 md:w-full md:bg-[url(/鞠婧祎.jpg)] md:bg-cover md:bg-center md:z-0"></div>
-        <div className="md:absolute md:inset-0 md:bg-black md:opacity-50 md:z-0"></div>
+      <div className="w-full h-screen">
+        <div className="relative overflow-hidden md:flex w-full h-full bg-gradient-to-tr from-blue-800 to-purple-700 i justify-start p-24 hidden">
+          <div className="relative text-white z-10 mb-12 md:mb-0 px-4">
+            <h1 className="text-xl font-bold pb-4">
+              Don&#39;t have an account?
+            </h1>
+            <h3 className="text-md font-bold pb-4">
+              Sign up for MijuDramaInfo and gain access to a world of Asian
+              dramas and movies. It&#39;s quick, easy, and completely free!
+            </h3>
+            <p className="pb-2">
+              By creating an account, you can enjoy the following features:
+            </p>
+            <ul className="flex flex-col pb-4">
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>Create your own personalized drama list</span>
+              </li>
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>Join in discussions with other fans</span>
+              </li>
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>
+                  Contribute to, and improve the information in our database
+                </span>
+              </li>
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>Rate and review dramas and movies</span>
+              </li>
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>Keep track of your favorite actors and actresses</span>
+              </li>
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>Discover new and exciting content</span>
+              </li>
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>Less advertisements</span>
+              </li>
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>Build custom mixed lists (movies and TV)</span>
+              </li>
+              <li className="inline-flex items-center pb-2 pl-4">
+                <FaCheck />
+                <span>Build and maintain a personal watchlist</span>
+              </li>
+            </ul>
+            <p>
+              Don&#39;t miss out - sign up now and start enjoying all the
+              benefits of MijuDramaInfo.
+            </p>
+          </div>
+          <div className="absolute -bottom-32 -left-40 w-80 h-80 border-4 dark:border-white rounded-full border-opacity-30 border-t-8"></div>
+          <div className="absolute -bottom-40 -left-20 w-80 h-80 border-4 dark:border-white rounded-full border-opacity-30 border-t-8"></div>
+          <div className="absolute -top-40 -right-0 w-80 h-80 border-4 dark:border-white rounded-full border-opacity-30 border-t-8"></div>
+          <div className="absolute -top-20 -right-20 w-80 h-80 border-4 dark:border-white rounded-full border-opacity-30 border-t-8"></div>
+        </div>
 
         {/* Content of the Right Section */}
-        <div className="relative z-10 mb-12 md:mb-0 px-4">
-          <h1 className="text-xl font-bold pb-4">Don&#39;t have an account?</h1>
-          <h3 className="text-md font-bold pb-4">
-            Sign up for MijuDramaInfo and gain access to a world of Asian dramas
-            and movies. It&#39;s quick, easy, and completely free!
-          </h3>
-          <p className="pb-2">
-            By creating an account, you can enjoy the following features:
-          </p>
-          <ul className="flex flex-col pb-4">
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>Create your own personalized drama list</span>
-            </li>
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>Join in discussions with other fans</span>
-            </li>
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>
-                Contribute to, and improve the information in our database
-              </span>
-            </li>
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>Rate and review dramas and movies</span>
-            </li>
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>Keep track of your favorite actors and actresses</span>
-            </li>
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>Discover new and exciting content</span>
-            </li>
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>Less advertisements</span>
-            </li>
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>Build custom mixed lists (movies and TV)</span>
-            </li>
-            <li className="inline-flex items-center pb-2 pl-4">
-              <FaCheck />
-              <span>Build and maintain a personal watchlist</span>
-            </li>
-          </ul>
-          <p>
-            Don&#39;t miss out - sign up now and start enjoying all the benefits
-            of MijuDramaInfo.
-          </p>
-        </div>
       </div>
     </div>
   );

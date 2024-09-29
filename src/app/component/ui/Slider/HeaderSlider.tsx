@@ -42,73 +42,77 @@ const HeaderSlider = () => {
     setHoveredIndex(null);
   };
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const imgElement = imgRef.current.querySelector(
-        "img"
-      ) as HTMLImageElement;
-      if (imgElement) {
-        const colorThief = new ColorThief();
-        const color = colorThief?.getColor(imgElement);
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
 
-        if (color) {
-          const [r, g, b] = color; // Destructure RGB values
-          // Create RGB color
-          const rgbColor = `rgb(${r}, ${g}, ${b})`;
-          // Create two RGBA colors with different alpha values
-          const startColor = `rgba(${r}, ${g}, ${b}, 0.9)`; // Start color with alpha 0.9
-          const endColor = `rgba(${r}, ${g}, ${b}, 0.7)`; // End color with alpha 0.7
-          const startColorBot = `rgba(${r}, ${g}, ${b}, 0.7)`; // Start color with alpha 0.9
-          const endColorBot = `rgba(${r}, ${g}, ${b}, 0)`; // End color with alpha 0.7
-
-          // Create a linear gradient with the extracted colors
-          const gradientBackground = `linear-gradient(${startColor}, ${endColor})`;
-          const gradientBackgroundBot = `linear-gradient(${startColorBot}, ${endColorBot})`;
-          const gradientBackground270 = `linear-gradient(270deg, rgb(${r}, ${g}, ${b}) 0%, transparent)`;
-
-          // Set the dominant color as the gradient
-          setRgbColor(rgbColor);
-          setDominantColor(gradientBackground);
-          setDominantColorBot(gradientBackgroundBot);
-          setExtractDeg(gradientBackground270);
-        }
-      }
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
+
+  const handleExtractColor = useCallback(async () => {
+    const currentItem = filteredData && filteredData[currentIndex];
+    if (currentItem?.backdrop_path) {
+      const averageColor = await getColorFromImage(
+        `https://image.tmdb.org/t/p/w300/${currentItem.backdrop_path}`
+      );
+      const [r, g, b] = averageColor && averageColor?.match(/\d+/g).map(Number);
+      setRgbColor(`rgb(${r}, ${g}, ${b})`);
+
+      // Create RGB color
+      const rgbColor = `rgb(${r}, ${g}, ${b})`;
+      // Create two RGBA colors with different alpha values
+      const startColor = `rgba(${r}, ${g}, ${b}, 0.9)`; // Start color with alpha 0.9
+      const endColor = `rgba(${r}, ${g}, ${b}, 0.7)`; // End color with alpha 0.7
+      const startColorBot = `rgba(${r}, ${g}, ${b}, 0.7)`; // Start color with alpha 0.9
+      const endColorBot = `rgba(${r}, ${g}, ${b}, 0)`; // End color with alpha 0.7
+
+      // Create a linear gradient with the extracted colors
+      const gradientBackground = `linear-gradient(${startColor}, ${endColor})`;
+      const gradientBackgroundBot = `linear-gradient(${startColorBot}, ${endColorBot})`;
+      const gradientBackground270 = `linear-gradient(270deg, rgb(${r}, ${g}, ${b}) 0%, transparent)`;
+
+      // Set the dominant color as the gradient
+      setRgbColor(rgbColor);
+      setDominantColor(gradientBackground);
+      setDominantColorBot(gradientBackgroundBot);
+      setExtractDeg(gradientBackground270);
+    }
+  }, [currentIndex, filteredData]);
 
   useEffect(() => {
     if (!isHovered) {
-      const interval = setInterval(nextSlide, 5000); // Auto-slide every 5 seconds
-      return () => clearInterval(interval); // Cleanup interval on unmount
+      const interval = setInterval(nextSlide, 5000);
+      return () => clearInterval(interval);
     }
   }, [isHovered, nextSlide]);
 
   useEffect(() => {
     if (!isHovered) {
+      handleExtractColor();
       const interval = setInterval(() => {
         setCurrentIndex((prevIndex) => prevIndex % filteredData?.length);
       }, 5000);
 
       return () => clearInterval(interval);
     }
-  }, [isHovered, filteredData]);
+  }, [isHovered, filteredData, handleExtractColor]);
 
   useEffect(() => {
-    if (imgRef.current) {
-      const imgElement = imgRef.current.querySelector(
-        "img"
-      ) as HTMLImageElement;
-      if (imgElement) {
-        imgElement.addEventListener("load", extractColor);
-        return () => {
-          imgElement.removeEventListener("load", extractColor);
-        };
-      }
-    }
-  }, [currentIndex]); // Trigger when the current slide changes
+    handleExtractColor(); // Call on mount or when currentIndex changes
+  }, [currentIndex, filteredData, handleExtractColor]);
 
   if (isLoading || !trending?.results) return <HeroSkeletonLoading />;
-  const currentItem = filteredData[currentIndex];
+  const currentItem = filteredData && filteredData[currentIndex];
 
   return (
     <div className="sticky top-0 z-0 h-[60vh] lg:h-[586px] overflow-hidden">

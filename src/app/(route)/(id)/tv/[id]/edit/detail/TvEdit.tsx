@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTv } from "@/app/actions/fetchMovieApi";
-import ColorThief from "colorthief";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import LazyImage from "@/components/ui/lazyimage";
+import Image from "next/image";
 interface tvId {
   tv_id: string;
 }
@@ -16,18 +15,43 @@ const TvEdit: React.FC<tvId> = ({ tv_id }) => {
     queryFn: () => fetchTv(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const color = await getColorFromImage(
+        `https://image.tmdb.org/t/p/${tv?.poster_path ? "w92" : "w300"}/${
+          tv?.poster_path || tv?.backdrop_path
+        }`
+      );
+      if (color) {
+        // Use the color string directly
+        setDominantColor(color);
+      } else {
+        console.error("No valid color returned");
+      }
+    }
+  }, [tv?.poster_path, tv?.backdrop_path]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -39,7 +63,7 @@ const TvEdit: React.FC<tvId> = ({ tv_id }) => {
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [tv]);
+  }, [extractColor]);
 
   return (
     <div
@@ -48,7 +72,7 @@ const TvEdit: React.FC<tvId> = ({ tv_id }) => {
     >
       <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
         <div className="flex items-center lg:items-start">
-          <LazyImage
+          <Image
             ref={imgRef} // Set the reference to the image
             src={`https://image.tmdb.org/t/p/${
               tv?.poster_path ? "w154" : "w300"
@@ -61,10 +85,10 @@ const TvEdit: React.FC<tvId> = ({ tv_id }) => {
             className="w-[80px] h-[90px] bg-center bg-cover object-cover rounded-md"
           />
           <div className="flex flex-col pl-5 py-3">
-            <h1 className="text-white text-2xl font-bold">
+            <h1 className="text-white text-xl font-bold">
               {tv?.title || tv?.name}
             </h1>
-            <h3 className="text-white text-2xl font-bold">
+            <h3 className="text-white text-lg font-bold">
               ({getYearFromDate(tv?.first_air_date || tv?.release_date)})
             </h3>
           </div>

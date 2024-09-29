@@ -149,7 +149,7 @@ const Discuss = ({ user, users, tv_id, getComment, type }: any) => {
   };
 
   return (
-    <div className={`${type === "feeds" ? "py-0" : "py-5"}`}>
+    <div className={`${type === "feeds" ? "py-0" : "py-5"}`} id="comment">
       <div
         className={`min-h-[100px] relative bg-white text-[#ffffffde] ${
           type === "feeds"

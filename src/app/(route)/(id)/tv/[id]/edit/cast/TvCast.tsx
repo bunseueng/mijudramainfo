@@ -48,6 +48,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryFn: () => fetchAllCast(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const [open, setOpen] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -95,6 +96,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryFn: () => fetchPersonSearch(searchQuery),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const person_ids =
@@ -106,6 +108,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     enabled: person_ids.length > 0, // only run query if there are person IDs
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: personResult = [], refetch: refetchData } = useQuery({
     queryKey: ["personResult"],
@@ -118,6 +121,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     enabled: true,
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const filterDuplicates = (arr: any) => {

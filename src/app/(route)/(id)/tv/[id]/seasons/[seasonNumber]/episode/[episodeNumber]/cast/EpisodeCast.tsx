@@ -27,6 +27,7 @@ const EpisodeCast = () => {
     queryFn: () => fetchEpCast(tv_id, season_number, episodes),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const { data: season } = useQuery({
@@ -34,6 +35,7 @@ const EpisodeCast = () => {
     queryFn: () => fetchSeasonEpisode(tv_id, season_number),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const { data: tv } = useQuery({
@@ -41,6 +43,7 @@ const EpisodeCast = () => {
     queryFn: () => fetchTv(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const getYearFromDate = (dateString: string) => {

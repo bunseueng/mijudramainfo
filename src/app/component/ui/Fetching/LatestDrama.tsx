@@ -29,7 +29,9 @@ const LatestDrama = ({ heading }: any) => {
               .filter((genre: any) => genre?.genre_ids.length > 0)
               .map((item: any, index: number) => (
                 <div
-                  className="block w-full h-full break-words mr-4"
+                  className={`block w-full h-full break-words ${
+                    index === data?.results?.length - 1 ? "mr-0" : "mr-4"
+                  }`}
                   key={index}
                 >
                   <div className="block w-[150px] h-[250px] bg-cover">

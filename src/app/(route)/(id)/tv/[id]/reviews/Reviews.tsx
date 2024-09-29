@@ -14,10 +14,15 @@ import {
   SearchParamsType,
 } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
-import ColorThief from "colorthief";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FaArrowLeft } from "react-icons/fa6";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
 import { IoIosArrowDown } from "react-icons/io";
@@ -56,24 +61,28 @@ const Reviews: React.FC<ReviewType> = ({
     queryFn: () => fetchTv(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: language } = useQuery({
     queryKey: ["tvLanguage", tv_id],
     queryFn: fetchLanguages,
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: content } = useQuery({
     queryKey: ["tvContent", tv_id],
     queryFn: () => fetchContentRating(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: allTvShows } = useQuery({
     queryKey: ["tvCast", tv_id],
     queryFn: fetchAllPopularTvShows,
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>("");
@@ -224,13 +233,36 @@ const Reviews: React.FC<ReviewType> = ({
     }
   };
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief?.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
+
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const color = await getColorFromImage(
+        `https://image.tmdb.org/t/p/w92/${tv?.poster_path}`
+      );
+      if (color) {
+        // Use the color string directly
+        setDominantColor(color);
+      } else {
+        console.error("No valid color returned");
+      }
+    }
+  }, [tv?.poster_path]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -242,7 +274,7 @@ const Reviews: React.FC<ReviewType> = ({
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [tv]);
+  }, [extractColor]);
 
   if (loading) {
     return <SearchLoading />;
@@ -263,7 +295,7 @@ const Reviews: React.FC<ReviewType> = ({
         <div className="max-w-6xl mx-auto flex items-center mt-0 py-2">
           <div className="flex items-center lg:items-start px-4 md:px-6 cursor-default">
             {tv?.poster_path || tv?.backdrop_path !== null ? (
-              <LazyImage
+              <Image
                 ref={imgRef}
                 onLoad={extractColor}
                 src={`https://image.tmdb.org/t/p/${
@@ -841,10 +873,10 @@ const Reviews: React.FC<ReviewType> = ({
             <div className="flex flex-col items-center content-center max-w-[97rem] mx-auto py-10 md:p-4 border rounded-md bg-white p-2 dark:bg-[#242424]">
               <LazyImage
                 src={`https://image.tmdb.org/t/p/${
-                  tv?.poster_path ? "w154" : "w300"
+                  tv?.poster_path ? "w342" : "w300"
                 }/${tv?.poster_path || tv?.backdrop_path}`}
                 alt={`${tv?.name}'s Poster`}
-                width={500}
+                width={350}
                 height={480}
                 quality={100}
                 priority

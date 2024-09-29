@@ -1,13 +1,29 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Copy } from "lucide-react";
 import Link from "next/link";
-import React, { useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
+import { toast } from "react-toastify";
 
 const PersonList = ({ personId }: any) => {
   const [hovered, setHovered] = useState<string | null>(null);
   const [currentItem, setCurrentItem] = useState<string>("Overview");
-
+  const [currentUrl, setCurrentUrl] = useState("");
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean[]>([]);
+  const [shareUrl, setShareUrl] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const pathname = usePathname();
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleNavbarMouseEnter = (label: string) => {
@@ -18,6 +34,42 @@ const PersonList = ({ personId }: any) => {
     hoverTimeout.current = setTimeout(() => {
       setHovered(null);
     }, 200);
+  };
+
+  useEffect(() => {
+    setCurrentUrl(`${window.location.origin}${pathname}`);
+  }, [pathname]);
+
+  const shareOnFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      currentUrl
+    )}`;
+    window.open(url, "_blank", "width=600,height=400");
+  };
+
+  const shareOnTwitter = () => {
+    const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+      currentUrl
+    )}`;
+    window.open(url, "_blank", "width=600,height=400");
+  };
+  const handleShare = (idx: number) => {
+    setIsShareModalOpen((prev) => {
+      const newShareModal = [...prev];
+      newShareModal[idx] = !newShareModal[idx];
+      // Toggle the specific item
+      return newShareModal;
+    });
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Copied to clipboard");
+      setIsShareModalOpen([]);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
   };
 
   return (
@@ -101,7 +153,7 @@ const PersonList = ({ personId }: any) => {
         </li>
         {hovered === "Media" && (
           <div
-            className="absolute top-7 left-16 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
+            className="absolute top-7 left-28 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
             onMouseEnter={() => handleNavbarMouseEnter("Media")}
             onMouseLeave={handleNavbarMouseLeave}
           >
@@ -125,12 +177,14 @@ const PersonList = ({ personId }: any) => {
         </li>{" "}
         {hovered === "Fandom" && (
           <div
-            className="absolute top-7 right-24 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
+            className="absolute top-7 right-16 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
             onMouseEnter={() => handleNavbarMouseEnter("Fandom")}
             onMouseLeave={handleNavbarMouseLeave}
           >
             <ul className="py-2 text-black">
-              <li className="text-sm my-2 mx-6 cursor-pointer">Discuss</li>
+              <Link href="#comment">
+                <li className="text-sm my-2 mx-6 cursor-pointer">Discuss</li>
+              </Link>
             </ul>
           </div>
         )}
@@ -149,14 +203,50 @@ const PersonList = ({ personId }: any) => {
         </li>
         {hovered === "Share" && (
           <div
-            className="absolute top-7 right-4 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
+            className="absolute top-7 -right-14 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
             onMouseEnter={() => handleNavbarMouseEnter("Share")}
             onMouseLeave={handleNavbarMouseLeave}
           >
             <ul className="text-black py-2">
-              <li className="text-sm my-2 mx-6 cursor-pointer">Share Links</li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">Facebook</li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">Tweet</li>
+              <li
+                className="text-sm hover:bg-[#f8f9fa]  py-1 px-6 cursor-pointer"
+                onClick={() => {
+                  handleShare(1);
+                }}
+              >
+                Share Links
+              </li>
+              <Dialog
+                open={isShareModalOpen[1]}
+                onOpenChange={() => handleShare(1)}
+              >
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Share Links</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex items-center space-x-2">
+                    <Input value={currentUrl} ref={inputRef} readOnly />
+                    <Button onClick={copyToClipboard} size="icon">
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={() => handleShare(1)}>Close</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <li
+                className="text-sm my-2 mx-6 cursor-pointer"
+                onClick={shareOnFacebook}
+              >
+                Facebook
+              </li>
+              <li
+                className="text-sm my-2 mx-6 cursor-pointer"
+                onClick={shareOnTwitter}
+              >
+                Tweet
+              </li>
             </ul>
           </div>
         )}

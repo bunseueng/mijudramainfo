@@ -2,8 +2,7 @@
 
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
-import ColorThief from "colorthief";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { currentUserProps } from "@/helper/type";
 import Rating from "@mui/material/Rating";
 import Box from "@mui/material/Box";
@@ -20,7 +19,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import LazyImage from "@/components/ui/lazyimage";
+import Image from "next/image";
 
 type RatingCategory = "story" | "acting" | "music" | "rewatchValue" | "overall";
 
@@ -35,6 +34,7 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
     queryFn: () => fetchTv(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const [ratings, setRatings] = useState<{
@@ -85,14 +85,32 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
       }));
     }
   };
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief?.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`);
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const color = await getColorFromImage(
+        `https://image.tmdb.org/t/p/${tv?.backdrop_path ? "w300" : "w92"}/${
+          tv?.backdrop_path || tv?.poster_path
+        }`
+      );
+      setDominantColor(color);
+    }
+  }, [tv?.backdrop_path, tv?.poster_path]);
 
   const handleDropdownToggle = (dropdown: string) => {
     setOpenDropdown((prev) => (prev === `${dropdown}` ? null : `${dropdown}`));
@@ -131,7 +149,7 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [tv]);
+  }, [extractColor]);
 
   // Convert the 1-10 rating scale to a 0-5 star scale with increments of 0.5
   const convertToStarValue = (rating: number) => {
@@ -208,7 +226,7 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
       >
         <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
           <div className="flex items-center lg:items-start">
-            <LazyImage
+            <Image
               ref={imgRef}
               src={`https://image.tmdb.org/t/p/original/${
                 tv?.poster_path || tv?.backdrops_path
@@ -234,7 +252,7 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
 
       <div className="w-full h-[100%] bg-white dark:bg-[#242526] border-2 border-slate-200 dark:border-[#232426] shadow-sm rounded-b-md">
         <div className="block">
-          <div className="relative float-left w-[50%] p-5">
+          <div className="relative float-left w-full md:w-[50%] p-2 md:p-5">
             <div className="px-3 mb-2">
               <h1 className="text-md font-semibold pt-3 mb-2">
                 Step 1: Read Guidelines
@@ -264,7 +282,7 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
           </div>
         </div>
         <div className="block">
-          <div className="relative float-left w-[50%] border-l-[1px] border-l-[#78828c21] p-5">
+          <div className="relative float-left w-full md:w-[50%] border-l-[1px] border-l-[#78828c21] p-2 md:p-5">
             <div className="px-3 mb-2">
               <h1 className="text-md font-semibold pt-3 mb-2">
                 Step 2: Ratings
@@ -385,7 +403,7 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
             </div>
           </div>
         </div>
-        <div className="block float-left w-full p-5">
+        <div className="block float-left w-full p-2 md:p-5">
           <div className="px-3 mb-2">
             <h1 className="text-md font-semibold pt-3 mb-2">
               Step 3: Write Your Review

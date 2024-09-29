@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   MdBookmarkAdd,
   MdFormatListBulletedAdd,
@@ -28,11 +28,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
 import { formatDate } from "@/app/actions/formatDate";
-import ColorThief from "colorthief";
 import { getTextColor } from "@/app/actions/getTextColor";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
-import LazyImage from "@/components/ui/lazyimage";
 import DramaCast from "./DramaCast";
 const RatingModal = dynamic(
   () => import("@/app/component/ui/CircleRating/RatingModal"),
@@ -71,76 +69,89 @@ const DramaMain = ({
   const [textColor, setTextColor] = useState("#FFFFFF"); // Default to white text
 
   const { data: tv, isLoading } = useQuery({
-    queryKey: ["tv"],
+    queryKey: ["tv", tv_id], // Include tv_id in the query key
     queryFn: () => fetchTv(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
+
   const { data: trailer } = useQuery({
-    queryKey: ["trailer"],
+    queryKey: ["trailer", tv_id],
     queryFn: () => fetchTrailer(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: cast } = useQuery({
-    queryKey: ["cast"],
+    queryKey: ["cast", tv_id],
     queryFn: () => fetchCastCredit(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: language } = useQuery({
-    queryKey: ["language"],
+    queryKey: ["language", tv_id],
     queryFn: () => fetchLanguages(),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: content } = useQuery({
-    queryKey: ["content"],
+    queryKey: ["content", tv_id],
     queryFn: () => fetchContentRating(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: keyword } = useQuery({
-    queryKey: ["keyword"],
+    queryKey: ["keyword", tv_id],
     queryFn: () => fetchKeyword(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: title } = useQuery({
-    queryKey: ["title"],
+    queryKey: ["title", tv_id],
     queryFn: () => fetchTitle(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: review } = useQuery({
-    queryKey: ["review"],
+    queryKey: ["review", tv_id],
     queryFn: () => fetchReview(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: image } = useQuery({
-    queryKey: ["image"],
+    queryKey: ["image", tv_id],
     queryFn: () => fetchImages(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: video } = useQuery({
-    queryKey: ["video"],
+    queryKey: ["video", tv_id],
     queryFn: () => fetchVideos(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: recommend } = useQuery({
-    queryKey: ["recommend"],
+    queryKey: ["recommend", tv_id],
     queryFn: () => fetchRecommendation(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: allTvShows } = useQuery({
-    queryKey: ["allTvShows"],
+    queryKey: ["allTvShows", tv_id],
     queryFn: fetchRecommendation,
     staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   // Getting Crew
   const castCredit = cast?.crew?.map((item: any) => item);
@@ -289,22 +300,50 @@ const DramaMain = ({
     }
   };
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief?.getColor(imgRef.current);
-      const rgbaColor = `rgba(${color.join(",")}, 1)`; // Convert to RGBA with full opacity
-      const gradientBackground = `linear-gradient(to right, ${rgbaColor} calc((50vw - 170px) - 340px), ${rgbaColor.replace(
-        "1)",
-        "0.84)"
-      )} 50%, ${rgbaColor.replace("1)", "0.84)")} 100%)`;
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
 
-      setDominantColor(gradientBackground);
-      const textColor = getTextColor(...color);
-      setTextColor(textColor);
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
 
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const colorString = await getColorFromImage(
+        `https://image.tmdb.org/t/p/${tv?.backdrop_path ? "w300" : "w92"}/${
+          tv.backdrop_path || tv?.poster_path
+        }`
+      );
+      // Parse the RGB values from the string
+      const regex = /rgb\((\d+), (\d+), (\d+)\)/;
+      const match = colorString && colorString?.match(regex);
+
+      if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const rgbaColor = `rgba(${r}, ${g}, ${b}, 1)`; // Full opacity
+        const gradientBackground = `linear-gradient(to right, ${rgbaColor}, rgba(${r}, ${g}, ${b}, 0.84) 50%, rgba(${r}, ${g}, ${b}, 0.84) 100%)`;
+        setDominantColor(gradientBackground);
+        const textColor = getTextColor(r, g, b);
+        setTextColor(textColor);
+      } else {
+        console.error("Failed to parse color string:", colorString);
+      }
+    }
+  }, [tv?.backdrop_path, tv?.poster_path]);
+
+  // Ensure the image element is referenced correctly
   useEffect(() => {
     if (imgRef.current) {
       const imgElement = imgRef.current; // Store the current value in a local variable
@@ -315,7 +354,7 @@ const DramaMain = ({
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [tv]);
+  }, [tv, extractColor]);
 
   if (isLoading) {
     return <SearchLoading />;
@@ -342,7 +381,7 @@ const DramaMain = ({
           >
             <div className="px-3">
               <div className="flex flex-col md:flex-row content-center max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5">
-                <LazyImage
+                <Image
                   ref={imgRef}
                   onLoad={extractColor}
                   src={

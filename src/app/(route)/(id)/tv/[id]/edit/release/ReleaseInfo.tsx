@@ -43,6 +43,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryFn: () => fetchSeasonEpisode(tv_id, tv?.number_of_seasons),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const [tvDatabase, setTvDatabase] = useState<JsonValue[] | any>(
     tvDetails?.released_information

@@ -52,7 +52,6 @@ const ReusedImage = ({
       loading={loading}
       blurDataURL={blurDataURL}
       onLoad={onLoad}
-      unoptimized
     />
   );
 };

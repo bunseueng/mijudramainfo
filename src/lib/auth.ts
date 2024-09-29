@@ -11,7 +11,8 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60, 
   },
   pages: {
       signIn: "/signin",
@@ -76,17 +77,19 @@ export const authOptions: NextAuthOptions = {
     async jwt({token, user, session, trigger}) {
 
       if(user) {
+        const sanitizedUsername = user.name ? user.name.replace(/\s+/g, '') : user.name;
         return {
           ...token,
           id: user.id,
-          name: user.name,
+          name:sanitizedUsername,
           image: user.image,
-          role: user.role
+          role: user.role,
+          rememberMe: session?.rememberMe || false,
         }
       }
         if(trigger === "update") {
           if(session?.name) {
-            token.name = session.name
+            token.name = session.name.replace(/\s+/g, '');
           } else if (session?.image) {
             token.image = session.image
           }
@@ -98,6 +101,7 @@ export const authOptions: NextAuthOptions = {
           data: {
             name: token.name as string,
             image: token.image as string,
+            lastLogin: new Date()
           }
         });
       return token
@@ -109,7 +113,11 @@ export const authOptions: NextAuthOptions = {
       session.user.name = token.name;
       session.user.image = token.image;
       session.user.role = token.role;
-      
+      if (token.rememberMe) {
+        session.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
+      } else {
+        session.expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 1 day (default)
+      }
       return session;
     },
   
@@ -134,7 +142,6 @@ export const authOptions: NextAuthOptions = {
                 gender: "-",
               },
             });
-    
             console.log("New user created:", profile.email);
           }
         }

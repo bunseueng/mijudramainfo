@@ -26,11 +26,14 @@ const PhotoAlbum = () => {
     queryKey: ["getImage"],
     queryFn: () => fetchImages(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: getTv } = useQuery({
     queryKey: ["tv"],
     queryFn: () => fetchTv(tv_id),
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const [dominantColor, setDominantColor] = useState<string | null>(null);

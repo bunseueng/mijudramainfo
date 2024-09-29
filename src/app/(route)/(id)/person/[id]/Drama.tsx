@@ -20,12 +20,17 @@ const Drama = ({ data, heading }: any) => {
   }
 
   return (
-    <div className="relative top-0 left-0 mt-5 overflow-hidden">
-      <h1 className="text-3xl font-bold my-5">{heading}</h1>
-      <div className="flex items-center w-full h-[300px] overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4">
+    <div className="relative top-0 left-0 overflow-hidden">
+      <h1 className="text-3xl font-bold">{heading}</h1>
+      <div className="flex items-center w-full h-[240px] overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4">
         {filteredCast.map((item: any, index: number) => (
-          <div className="w-[200px] h-[280px] mr-8" key={index}>
-            <div className="w-[200px] h-[280px] bg-cover">
+          <div
+            className={`w-[150px] h-[200px] ${
+              index === filteredCast.length - 1 ? "mr-0" : "mr-4"
+            }`}
+            key={index}
+          >
+            <div className="w-[150px] h-[200px] bg-cover">
               <Link
                 rel="preload"
                 href={`/tv/${item?.id}`}
@@ -40,12 +45,14 @@ const Drama = ({ data, heading }: any) => {
                   height={250}
                   quality={100}
                   priority
-                  className="rounded-xl w-[200px] h-[250px] object-cover"
+                  className="rounded-xl w-[150px] h-[200px] object-cover"
                 />
               </Link>
               <div className="flex items-center justify-between">
-                <p className="truncate">{item?.name || item?.title}</p>
-                <p>
+                <p className="text-sm pt-1 truncate">
+                  {item?.name || item?.title}
+                </p>
+                <p className="text-xs pt-1">
                   {item?.first_air_date !== "" ? (
                     item?.first_air_date?.split("-")[0]
                   ) : (

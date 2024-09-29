@@ -28,7 +28,12 @@ const Actor = ({ heading }: any) => {
                   item.profile_path !== "url(/placeholder-image.avif)"
               )
               ?.map((result: any, idx: any) => (
-                <div key={idx} className="block w-full h-full mr-4">
+                <div
+                  key={idx}
+                  className={`block w-full h-full break-words ${
+                    idx === data?.length - 1 ? "mr-0" : "mr-4"
+                  }`}
+                >
                   <ActorCard result={result} />
                 </div>
               ))}

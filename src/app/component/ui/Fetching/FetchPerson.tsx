@@ -85,30 +85,35 @@ const FetchPerson: React.FC<IFetchPerson> = ({
     queryFn: () => fetchPerson(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: personFullDetails } = useQuery({
     queryKey: ["personFullDetails", persons?.name],
     queryFn: () => fetchPersonSearch(persons?.name),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: getCredits } = useQuery({
     queryKey: ["getCredits", tv_id],
     queryFn: () => fetchPersonCombinedCredits(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: drama } = useQuery({
     queryKey: ["tv", tv_id],
     queryFn: () => fetchPersonTv(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const { data: movie } = useQuery({
     queryKey: ["movie", tv_id],
     queryFn: () => fetchPersonMovie(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const birthDate = new Date(persons?.birthday);
@@ -415,10 +420,8 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                           {persons?.name} currently has no biography.
                         </div>
                       ) : (
-                        // Use a span for the last paragraph to keep it inline with the link
                         <span>
                           {paragraph}
-                          {/* Render the "Edit Translation" link inline with the last paragraph */}
                           {index ===
                             persons?.biography.split("\n").length - 1 && (
                             <Link
@@ -432,7 +435,6 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                         </span>
                       )}
                       <br />{" "}
-                      {/* Add line breaks after each paragraph except the last one */}
                     </span>
                   ))}
               </div>
@@ -533,7 +535,11 @@ const FetchPerson: React.FC<IFetchPerson> = ({
               Support your favorite stars by sending virtual flowers to boost
               their popularity.
             </p>
-            <div className="relative mx-2 pb-8">
+            <div
+              className={`relative mx-2 ${
+                filteredPopularity?.length > 0 ? "pb-8" : "pb-0"
+              }`}
+            >
               <button
                 name="Popularity Button"
                 className="block w-full text-white font-bold bg-[#1675b6] border-[1px] border-[#1675b6] hover:bg-[#115889] hover:border-[#0f527f] rounded-md py-2 my-2 mx-auto max-w-xs transform duration-300"
@@ -604,65 +610,72 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 </div>
               )}
             </div>
-            <div className="border-y-[1px] border-y-[#06090c21] dark:border-y-[#3e4042] mt-4">
-              <div className="mx-2 py-5">
-                <h1 className="text-center lg:text-lg">
-                  Top Popularity Senders
-                </h1>
-                {sortedUsers?.map((user, idx: number) => (
-                  <div className="flex items-center mt-3" key={idx}>
-                    <Image
-                      src={`/${
-                        idx === 0
-                          ? `gold-medal.svg`
-                          : idx === 1
-                          ? `silver-medal.svg`
-                          : "bronze-medal.svg"
-                      }`}
-                      alt="medal"
-                      width={100}
-                      height={100}
-                      className="w-10 h-10 bg-cover object-cover"
-                      priority
-                    />
-                    <div className="flex items-center my-2">
-                      <Image
-                        src={
-                          user?.profileAvatar || user?.image || "/empty-pf.jpg"
-                        }
-                        alt={`${user?.name}'s Avartar`}
-                        width={100}
-                        height={100}
-                        quality={90}
-                        className="w-10 h-10 bg-cover object-cover rounded-full"
-                        priority
-                      />
-                      <div className="inline-block ml-2">
-                        <p className="inline-block text-md text-[#2490da] font-semibold px-1">
-                          {user?.displayName || user?.name}
-                        </p>
-                        <p className="text-xs text-[#00000099] dark:text-[#ffffff99] font-semibold px-1">
-                          {user?.totalPopularitySent
-                            ?.filter(
-                              (p: any) => p?.personId === getPersons?.personId
-                            )
-                            ?.map(
-                              (sent: UserTotalPopularity) =>
-                                sent?.totalPopularity
-                            )}{" "}
-                          <span>popularity</span>
-                        </p>
+            {filteredPopularity?.length > 0 && (
+              <>
+                <div className="border-y-[1px] border-y-[#06090c21] dark:border-y-[#3e4042] mt-4">
+                  <div className="mx-2 py-5">
+                    <h1 className="text-center lg:text-lg">
+                      Top Popularity Senders
+                    </h1>
+                    {sortedUsers?.map((user, idx: number) => (
+                      <div className="flex items-center mt-3" key={idx}>
+                        <Image
+                          src={`/${
+                            idx === 0
+                              ? `gold-medal.svg`
+                              : idx === 1
+                              ? `silver-medal.svg`
+                              : "bronze-medal.svg"
+                          }`}
+                          alt="medal"
+                          width={100}
+                          height={100}
+                          className="w-10 h-10 bg-cover object-cover"
+                          priority
+                        />
+                        <div className="flex items-center my-2">
+                          <Image
+                            src={
+                              user?.profileAvatar ||
+                              user?.image ||
+                              "/empty-pf.jpg"
+                            }
+                            alt={`${user?.name}'s Avartar`}
+                            width={100}
+                            height={100}
+                            quality={90}
+                            className="w-10 h-10 bg-cover object-cover rounded-full"
+                            priority
+                          />
+                          <div className="inline-block ml-2">
+                            <p className="inline-block text-md text-[#2490da] font-semibold px-1">
+                              {user?.displayName || user?.name}
+                            </p>
+                            <p className="text-xs text-[#00000099] dark:text-[#ffffff99] font-semibold px-1">
+                              {user?.totalPopularitySent
+                                ?.filter(
+                                  (p: any) =>
+                                    p?.personId === getPersons?.personId
+                                )
+                                ?.map(
+                                  (sent: UserTotalPopularity) =>
+                                    sent?.totalPopularity
+                                )}{" "}
+                              <span>popularity</span>
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-            <div className="w-full text-center p-3">
-              <Link href="" className="text-[#2196f3]">
-                See all
-              </Link>
-            </div>
+                </div>
+                <div className="w-full text-center p-3">
+                  <Link href="" className="text-[#2196f3]">
+                    See all
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
         <div className="w-full min-[560px]:w-[60%] lg:w-[70%] min-[560px]:px-8 mt-4 min-[560px]:mt-0">

@@ -32,6 +32,7 @@ const TvTeasers: React.FC<TvTrailerType> = ({ tv_id, tv }) => {
     queryFn: () => fetchTrailer(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
   const [thumbnails, setThumbnails] = useState<Youtube[]>([]);
