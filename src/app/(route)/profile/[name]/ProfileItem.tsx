@@ -446,7 +446,7 @@ const ProfileItem: React.FC<
                       />
                     </div>
                   </div>
-                  <div className="float-left w-[66.66667%] relative ml-5 text-end">
+                  <div className="float-left w-[66.66667%] relative ml-8 md:ml-5 text-start md:text-end">
                     <h1 className="text-xl font-bold mb-2">
                       {user?.displayName || user?.name}
                     </h1>
@@ -608,7 +608,7 @@ const ProfileItem: React.FC<
                 ))}
               </Tabs>
             </div>
-            <div className="overflow-hidden px-4 py-2">
+            <div className="overflow-hidden px-1 md:px-4 py-2">
               {pathname === `/profile/${user?.name}` && (
                 <div className="mt-5">
                   {user?.biography === null ? (

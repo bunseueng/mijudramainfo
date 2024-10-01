@@ -272,14 +272,14 @@ export default function Feeds({
         <CardHeader>
           <h2 className="text-2xl font-bold">Create a Post</h2>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-2 md:p-6">
           <Textarea
             placeholder="What's on your mind?"
             value={postText}
             onChange={(e) => setPostText(e.target.value)}
             className="mb-4"
           />
-          <div className="flex gap-4 mb-4">
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
             <Button
               type="button"
               variant="outline"
@@ -374,7 +374,7 @@ export default function Feeds({
             );
           })}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="!p-2">
           <Button type="button" onClick={createPost}>
             {loading["post"] ? (
               <ClipLoader color="#c3c3c3" loading={loading["post"]} size={14} />

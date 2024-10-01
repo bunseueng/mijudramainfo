@@ -1,7 +1,6 @@
 "use client";
 
-import { fetchTv } from "@/app/actions/fetchMovieApi";
-import { getNetworkLogo } from "@/app/actions/getNetworkLogo";
+import { fetchTv, fetchTvWatchProvider } from "@/app/actions/fetchMovieApi";
 import {
   Drama,
   EditDramaPage,
@@ -15,9 +14,10 @@ import { AnimatePresence, Reorder } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
+import { FaRegTrashAlt } from "react-icons/fa";
 import { GrPowerReset } from "react-icons/gr";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
@@ -29,7 +29,16 @@ const TvEditModal = dynamic(
   () => import("@/app/component/ui/Modal/TvEditModal"),
   { ssr: false }
 );
+interface Provider {
+  display_priority: number;
+  provider_name: string;
+  provider_id: number;
+  logo_path: string;
+}
 
+interface ProviderWithServiceType extends Provider {
+  service_type: string;
+}
 const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv, refetch } = useQuery({
     queryKey: ["tvEdit", tv_id],
@@ -38,23 +47,50 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     refetchOnWindowFocus: true, // Refetch when window is focused
     refetchOnMount: true, // Refetch on mount to get the latest data
   });
+  const { data: watchProvider } = useQuery({
+    queryKey: ["watchProvider", tv_id],
+    queryFn: () => fetchTvWatchProvider(tv_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
+  });
 
-  const extraData =
-    tv?.networks?.map((net: any, idx: number) => ({
-      ...tv,
-      service_name: net?.name,
-      service_url: `https://image.tmdb.org/t/p/original/${net?.logo_path}`,
-      page_link: tv?.homepage,
-      service_type: "Unknown",
-      availability: "",
-      subtitles: "English",
-    })) || [];
-
+  const [selectedProvider, setSelectedProvider] = useState<any>(null);
+  const combinedProviders: ProviderWithServiceType[] = useMemo(() => {
+    return [
+      ...(selectedProvider?.free?.map((provider: Provider) => ({
+        ...provider,
+        service_type: "Free",
+      })) || []),
+      ...(selectedProvider?.rent?.map((provider: Provider) => ({
+        ...provider,
+        service_type: "Pay Per View",
+      })) || []),
+      ...(selectedProvider?.ads?.map((provider: Provider) => ({
+        ...provider,
+        service_type: "Advertisement",
+      })) || []),
+      ...(selectedProvider?.buy?.map((provider: Provider) => ({
+        ...provider,
+        service_type: "Purchase",
+      })) || []),
+      ...(selectedProvider?.flatrate?.map((provider: Provider) => ({
+        ...provider,
+        service_type: "Subscription",
+      })) || []),
+    ];
+  }, [selectedProvider]);
   const [storedData, setStoredData] = useState<EditDramaPage[]>([]);
-  const [tvDatabase, setTvDatabase] = useState<EditDramaPage[]>(extraData);
+  const [tvDatabase, setTvDatabase] = useState<any>(
+    (tvDetails?.services?.length || 0) > 0
+      ? tvDetails?.services
+      : combinedProviders
+  );
+
   const [drama, setDrama] = useState<EditDramaPage[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [openEditModal, setOpenEditModal] = useState<boolean>(false);
+  const [resetLoading, setResetLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [defaultValues, setDefaultValues] = useState<EditPageDefaultvalue>();
@@ -64,61 +100,49 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
     Array(tvDetails?.services?.length || 0).fill(false)
   );
-
+  const [originalValue, setOriginalValue] = useState(null);
+  const [isDragging, setIsDragging] = useState(false); // Track drag state
+  const [hasReordered, setHasReordered] = useState(false); // Track if order has been changed
   const { handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
   });
   const router = useRouter();
+  useEffect(() => {
+    // Check if both tvDetails.services and combinedProviders have values before updating tvDatabase
+    if ((tvDetails?.services?.length || 0) > 0) {
+      setTvDatabase(tvDetails?.services || []);
+    } else {
+      setTvDatabase(combinedProviders);
+    }
+  }, [tvDetails?.services, combinedProviders]);
 
   useEffect(() => {
     if ((tvDetails?.services?.length || 0) < 0) {
       const combinedData = [
-        ...(tvDetails?.services || []),
+        ...(tvDatabase || []),
         ...storedData.filter((data) => data !== undefined),
       ];
-      const uniqueData = combinedData.reduce((acc: any, current: any) => {
-        const x = acc?.find(
-          (item: any) => item?.service_name === current?.service_name
-        );
-        if (!x) {
-          acc?.push(current);
-        }
-        return acc;
-      }, []);
-      setDrama(uniqueData);
+      setDrama(combinedData);
     } else {
       if (!tv) return;
-
       const combinedData = [
-        ...(tvDetails?.services || []),
-        ...tvDatabase,
+        ...(tvDatabase || []),
         ...storedData.filter((data) => data !== undefined),
       ];
-
-      const uniqueData = combinedData.reduce((acc: any, current: any) => {
-        const x = acc?.find(
-          (item: any) => item?.service_name === current?.service_name
-        );
-        if (!x) {
-          acc?.push(current);
-        }
-        return acc;
-      }, []);
-
-      setDrama(uniqueData);
+      setDrama(combinedData);
     }
-  }, [tv, tvDetails?.services, storedData, tvDatabase]);
+  }, [tv, tvDetails?.services, storedData, tvDatabase, selectedProvider]);
 
-  const onSubmit = async (data: TCreateDetails) => {
+  const onSubmit = async () => {
     try {
       setLoading(true);
       const requestData = {
         tv_id: tv_id.toString(),
         services: markedForDeletion.includes(true)
-          ? tvDetails?.services?.filter(
+          ? selectedProvider?.ads?.filter(
               (item: any, idx: number) =>
                 !markedForDeletion[idx] &&
-                item?.service_name !== defaultValues?.service_name
+                item?.provider_name !== defaultValues?.provider_name
             )
           : drama?.map((item) => ({
               ...item,
@@ -153,28 +177,24 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   };
 
   const handleOpenModal = (idx: number) => {
-    const item = drama[idx];
-
-    const filteredNetworks = item?.networks?.filter((network: any) =>
-      drama[idx]?.page_link
-        ?.toLowerCase()
-        ?.includes(network?.name?.toLowerCase())
-    );
-
-    const shouldRenderP = filteredNetworks?.some(
-      (item: any) => item?.name === drama[idx]?.service_name
-    );
     setDeleteIndex(idx);
     setOpenEditModal(true);
     setDefaultValues({
-      service_name: drama[idx]?.service_name,
+      provider_name: drama[idx]?.provider_name,
       service_type: drama[idx]?.service_type,
-      link: shouldRenderP && (drama[idx]?.page_link as any),
+      link: drama[idx]?.link || selectedProvider?.link,
       availability: drama[idx]?.availability,
-      subtitles: drama[idx]?.subtitles,
+      subtitles: drama[idx]?.subtitles || "English",
     });
   };
 
+  useEffect(() => {
+    if (tvDatabase?.length > 0) {
+      setOriginalValue(tvDatabase);
+    } else if (storedData?.length > 0) {
+      setOriginalValue(storedData as any);
+    }
+  }, [tvDatabase, combinedProviders, storedData]);
   const handleResetItem = (idx: number) => {
     setMarkedForDeletion((prev) =>
       prev.map((marked, index) => (index === idx ? false : marked))
@@ -182,7 +202,71 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     setIsItemDataChanged((prev) =>
       prev.map((changed, index) => (index === idx ? false : changed))
     );
+    setDrama(originalValue as any);
   };
+  // Function to get user country based on IP
+  const getUserCountry = async () => {
+    try {
+      const res = await fetch("https://ipinfo.io/json?token=80e3bb75bb316a", {
+        method: "GET",
+      });
+      const data = await res.json();
+      return data.country; // e.g., "US"
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+      return null;
+    }
+  };
+
+  const handleReorder = (newOrder: any) => {
+    setDrama(newOrder); // Update the reordered items
+  };
+
+  const handleDragStart = () => {
+    setIsDragging(true); // Set dragging state to true when any item starts dragging
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false); // Set dragging state to false after dragging ends
+    // Check if the current order is different from the original order
+    if (JSON.stringify(drama) !== JSON.stringify(originalValue)) {
+      setHasReordered(true); // Set to true if items have been reordered
+    }
+  };
+
+  const handleResetChanges = async (idx: number) => {
+    try {
+      setResetLoading(true);
+      // Simulate a delay for the reset operation
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      setMarkedForDeletion((prev) =>
+        prev.map((marked, index) => (index === idx ? false : marked))
+      );
+      setIsItemDataChanged((prev) =>
+        prev.map((changed, index) => (index === idx ? false : changed))
+      );
+      setHasReordered(false);
+      setDrama(originalValue as any);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  // Fetch user location and set the watch provider
+  useEffect(() => {
+    const fetchCountryAndSetProvider = async () => {
+      const country = await getUserCountry();
+      if (country && watchProvider && watchProvider[country]) {
+        setSelectedProvider(watchProvider[country]);
+      } else {
+        setSelectedProvider(watchProvider?.US); // Default to US if no match
+      }
+    };
+
+    fetchCountryAndSetProvider();
+  }, [watchProvider]);
 
   useEffect(() => {
     refetch();
@@ -225,45 +309,31 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               <th className="border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] border-[#06090c21] dark:border-[#3e4042] border-b-2 border-b-[#06090c21] dark:border-b-[#3e4042] align-bottom text-left py-2 px-4"></th>
             </tr>
           </thead>
-          <Reorder.Group as="tbody" values={drama} onReorder={setDrama}>
+          <Reorder.Group as="tbody" values={drama} onReorder={handleReorder}>
             <AnimatePresence>
               {drama?.map((show: any, idx: number) => {
                 const subtitle =
                   Array.isArray(show?.subtitles) &&
                   show?.subtitles?.map((sub: any) => sub?.label);
-                const filteredNetworks = show?.networks?.filter(
-                  (network: any) =>
-                    show?.page_link
-                      ?.toLowerCase()
-                      ?.includes(network?.name?.toLowerCase())
-                );
-                const shouldRenderP = filteredNetworks?.some(
-                  (item: any) => item?.name === show?.service_name
-                );
-                const networkId = show?.networks
-                  ?.filter((net: any) => net?.name !== show?.service_name)
-                  ?.map((item: any) => item.id);
-
-                const serviceImage = show?.service_logo
-                  ? `/channel${show?.service_logo}`
-                  : getNetworkLogo[show?.service_name] ||
-                    show?.service_url ||
-                    (show?.networks?.find(
-                      (net: any) => getNetworkLogo[net?.name]
-                    )?.name
-                      ? getNetworkLogo[
-                          show?.networks.find(
-                            (net: any) => getNetworkLogo[net?.name]
-                          )?.name
-                        ]
-                      : `/channel${show?.service_logo}`) ||
-                    `https://image.tmdb.org/t/p/w154/${show?.logo_path}`;
-                const tencent = show?.homepage;
+                const getServiceImage = () => {
+                  if (show?.service_logo) {
+                    return `/channel${show.service_logo}`; // Use service_logo if available
+                  } else if (show?.logo_path) {
+                    return `https://image.tmdb.org/t/p/w154/${show.logo_path}`; // Fallback to TMDB logo
+                  } else {
+                    return show?.service_url; // Last resort
+                  }
+                };
+                const serviceImage = getServiceImage();
                 return (
                   <Reorder.Item
                     as="tr"
                     value={show}
-                    key={networkId}
+                    key={
+                      (tvDetails?.services?.length || 0) > 0
+                        ? show?.id
+                        : show?.service_type
+                    }
                     className="relative w-full h-auto overflow-hidden"
                     whileDrag={{
                       scale: 1.0,
@@ -271,14 +341,14 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       backgroundColor: "#c2e7b0",
                     }}
                     style={{ display: "table-row" }}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
                   >
                     <td className="border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
                       <div className="flex items-start">
                         <Image
                           src={serviceImage}
-                          alt={
-                            show?.service_name ? show?.service_name : show?.name
-                          }
+                          alt={show?.provider_name}
                           width={40}
                           height={40}
                           quality={100}
@@ -294,7 +364,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             markedForDeletion[idx] ? "text-red-500" : ""
                           }`}
                         >
-                          {show?.service_name ? show?.service_name : show?.name}
+                          {show?.provider_name}
                         </p>
                       </div>
                     </td>
@@ -308,24 +378,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           markedForDeletion[idx] ? "text-red-500" : ""
                         }`}
                       >
-                        {" "}
-                        {shouldRenderP ? (
-                          <span>
-                            {show?.page_link
-                              ? show?.page_link
-                              : show?.link
-                              ? show?.link
-                              : show?.homepage}
-                          </span>
-                        ) : (
-                          <span>
-                            {show?.networks?.map(
-                              (net: any) =>
-                                show?.link?.includes(net?.name) ||
-                                (net?.name === "Tencent Video" && tencent)
-                            )}
-                          </span>
-                        )}
+                        {show?.link ? show?.link : selectedProvider?.link}
                       </p>
                     </td>
                     <td
@@ -337,7 +390,7 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         markedForDeletion[idx] ? "text-red-500" : ""
                       }`}
                     >
-                      {show?.service_type ? show?.service_type : "Unknown"}
+                      {show?.service_type}
                     </td>
                     <td
                       className={`border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3 ${
@@ -461,29 +514,54 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           />
         </div>
       )}
-      <button
-        name="Submit"
-        type="submit"
-        className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-          storedData?.length > 0 ||
-          markedForDeletion?.length > 0 ||
-          isItemDataChanged?.length > 0
-            ? "cursor-pointer"
-            : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
-        }`}
-        disabled={
-          storedData?.length > 0 ||
-          markedForDeletion?.length > 0 ||
-          isItemDataChanged?.length > 0
-            ? false
-            : true
-        }
-      >
-        <span className="mr-1 pt-1">
-          <ClipLoader color="#c3c3c3" loading={loading} size={19} />
-        </span>
-        Submit
-      </button>
+      <div className="flex items-start">
+        <button
+          name="Submit"
+          type="submit"
+          className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+            storedData?.length > 0 ||
+            markedForDeletion?.includes(true) ||
+            isItemDataChanged?.includes(true) ||
+            hasReordered
+              ? "cursor-pointer"
+              : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+          }`}
+          disabled={
+            storedData?.length > 0 ||
+            markedForDeletion?.includes(true) ||
+            isItemDataChanged?.includes(true) ||
+            hasReordered
+              ? false
+              : true
+          }
+        >
+          <span className="mr-1 pt-1">
+            <ClipLoader color="#c3c3c3" loading={loading} size={19} />
+          </span>
+          Submit
+        </button>
+        <button
+          type="button"
+          className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-4 ${
+            hasReordered
+              ? "cursor-pointer"
+              : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
+          }`}
+          onClick={() => handleResetChanges(0)}
+          disabled={hasReordered ? false : true}
+        >
+          {resetLoading ? (
+            <span className="pt-1 mr-1">
+              <ClipLoader color="#dcdfe6" loading={!loading} size={17} />
+            </span>
+          ) : (
+            <span className="mr-1">
+              <FaRegTrashAlt />
+            </span>
+          )}
+          Reset
+        </button>
+      </div>
     </form>
   );
 };

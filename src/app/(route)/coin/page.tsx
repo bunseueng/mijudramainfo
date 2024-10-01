@@ -2,6 +2,12 @@ import React from "react";
 import Coin from "./Coin";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Coin",
+  description: "Buying Coin to support your favorite Actor/Actress",
+};
 
 const CoinPage = async () => {
   const user = await getCurrentUser();
@@ -25,7 +31,7 @@ const CoinPage = async () => {
   console.log(paypalClientID);
 
   return (
-    <div className="mx-auto px-4">
+    <div className="mx-auto md:px-4">
       <Coin getCoin={getCoin} paypalClientID={paypalClientID} />
     </div>
   );

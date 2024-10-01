@@ -14,10 +14,11 @@ import { toast } from "react-toastify";
 
 const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
   const { data: tv, isLoading } = useQuery({
-    queryKey: ["tv"],
+    queryKey: ["tv", tv_id],
     queryFn: () => fetchTv(tv_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
     new Set()
@@ -94,7 +95,7 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
         );
         const isLongReview = review?.review?.length > 500;
         return (
-          <div id={review?.id} className="flex flex-col" key={idx}>
+          <div id={review?.id} className="flex flex-col" key={review?.id}>
             <div className=" bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
               <div className="flex justify-between">
                 <div className="flex items-center">
@@ -108,18 +109,18 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                     width={100}
                     height={100}
                     loading="lazy"
-                    className="size-[50px] object-cover rounded-full"
+                    className="size-[25px] md:size-[50px] object-cover rounded-full"
                   />
 
                   <div className="flex flex-col text-black pl-2">
                     <Link
                       prefetch={true}
                       href={`/person/${review?.userId}`}
-                      className="text-[#2490da] text-sm md:text-md"
+                      className="text-[#2490da] text-xs md:text-md"
                     >
                       {review?.userInfo?.displayName || review?.userInfo?.name}
                     </Link>
-                    <Link href="" className="text-[#2490da] text-sm md:text-md">
+                    <Link href="" className="text-[#2490da] text-xs md:text-md">
                       Other reviews by this user
                     </Link>{" "}
                   </div>
@@ -127,7 +128,7 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                 <div className="block">
                   <label
                     htmlFor="review_date"
-                    className="text-sm font-semibold"
+                    className="text-xs md:text-sm font-semibold"
                   >
                     Review Date:
                   </label>
@@ -140,42 +141,61 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
             <div className="px-4">
               <div className="-mx-4">
                 <div className="relative float-left w-full overflow-hidden break-words">
-                  <div className="flex items-center justify-center border-b border-b-slate-400  border-t border-t-slate-400 py-1">
-                    <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
-                      <label htmlFor="story" className="text-sm font-bold">
-                        Story
-                      </label>
-                      <p>{review?.rating_score?.story}</p>
-                    </div>
+                  <div className="grid grid-cols-2 md:flex md:justify-center md:items-center border border-slate-400 md:border-0 md:border-b md:border-b-slate-400  md:border-t md:border-t-slate-400 md:py-1">
                     <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
                       <label
+                        htmlFor="story"
+                        className="text-xs md:text-sm font-bold"
+                      >
+                        Story
+                      </label>
+                      <p className="text-xs md:text-base">
+                        {review?.rating_score?.story}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center md:border-r md:border-r-slate-400 px-5">
+                      <label
                         htmlFor="acting_cast"
-                        className="text-sm font-bold"
+                        className="text-xs md:text-sm font-bold"
                       >
                         Acting/Cast
                       </label>
-                      <p>{review?.rating_score?.acting}</p>
-                    </div>
-                    <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
-                      <label htmlFor="music" className="text-sm font-bold">
-                        Music
-                      </label>
-                      <p>{review?.rating_score?.music}</p>
+                      <p className="text-xs md:text-base">
+                        {review?.rating_score?.acting}
+                      </p>
                     </div>
                     <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
                       <label
+                        htmlFor="music"
+                        className="text-xs md:text-sm font-bold"
+                      >
+                        Music
+                      </label>
+                      <p className="text-xs md:text-base">
+                        {review?.rating_score?.music}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center md:border-r md:border-r-slate-400 px-5">
+                      <label
                         htmlFor="rewatch_value"
-                        className="text-sm font-bold"
+                        className="text-xs md:text-sm font-bold"
                       >
                         Rewatch Value
                       </label>
-                      <p>{review?.rating_score?.rewatchValue}</p>
+                      <p className="text-xs md:text-base">
+                        {review?.rating_score?.rewatchValue}
+                      </p>
                     </div>
                     <div className="flex flex-col items-center border-r border-r-slate-400 px-5">
-                      <label htmlFor="overall" className="text-sm font-bold">
+                      <label
+                        htmlFor="overall"
+                        className="text-xs md:text-sm font-bold"
+                      >
                         Overall
                       </label>
-                      <p>{review?.overall_score}</p>
+                      <p className="text-xs md:text-base">
+                        {review?.overall_score}
+                      </p>
                     </div>
 
                     <div className="flex flex-col items-center px-5">
@@ -215,11 +235,11 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                     </div>
                   </div>
                   <div className="flex items-center justify-between px-3 py-2">
-                    <p className="text-black dark:text-white text-sm font-semibold">
+                    <p className="text-black dark:text-white text-xs md:text-sm font-semibold">
                       {review?.reviewHelpful} people found this review helpful
                     </p>
                     {review?.spoiler === true && (
-                      <p className="text-sm text-[#cc3737] font-bold pb-1">
+                      <p className="text-xs md:text-sm text-[#cc3737] font-bold pb-1">
                         This review may contain spoilers
                       </p>
                     )}

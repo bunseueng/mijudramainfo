@@ -89,7 +89,7 @@ const TvEditModal: React.FC<EditModal> = ({
   useEffect(() => {
     if (show) {
       setValue("services.link", defaultValue?.link || ""); // Assuming "services.link" is the name of the form field
-      setValue("services.service", defaultValue?.service_name); // Populate other fields similarly
+      setValue("services.service", defaultValue?.provider_name); // Populate other fields similarly
       setValue("services.service_type", defaultValue?.service_type || "");
       setCountries(defaultValue?.availability || []);
       const formattedSubtitles = Array.isArray(defaultValue?.subtitles)
@@ -102,13 +102,13 @@ const TvEditModal: React.FC<EditModal> = ({
     if (storedData && storedData[idx]) {
       const data = storedData[idx];
       setService([
-        { label: data.service_name, logoPath: data.service, logo: data?.logo },
+        { label: data.provider_name, logoPath: data.service, logo: data?.logo },
       ]);
       setServicesType([data.service_type]);
       setCountries(data.availability);
       setSubtitle(data.subtitles);
       setValue("services.link", data.link);
-      setValue("services.service", data.service_name);
+      setValue("services.service", data.provider_name);
       setValue("services.service_type", data.service_type);
       reset(data as unknown as Drama);
     }
@@ -136,9 +136,10 @@ const TvEditModal: React.FC<EditModal> = ({
   const updatingItems = async (data: TCreateDetails) => {
     try {
       const updatedData = tvDatabase?.map((item: any, index: number) => {
-        if (item?.service_name === defaultValue?.service_name) {
+        if (item?.provider_name === defaultValue?.provider_name) {
           const newData = {
             ...item,
+            provider_name: service[idx]?.label || item?.provider_name,
             service: service[idx]?.logoPath,
             service_logo: service[idx]?.logo,
             link: data?.services?.link || item.link,
@@ -155,13 +156,14 @@ const TvEditModal: React.FC<EditModal> = ({
         }
         return item;
       });
+      console.log("ipd", updatedData);
       setTvDatabase(updatedData);
 
       const updatedStoredData = storedData.map((item: any, index: number) => {
-        if (item?.service_name === defaultValue?.service_name) {
+        if (item?.provider_name === defaultValue?.provider_name) {
           const newData = {
             ...item,
-            service_name: service[idx]?.label || item?.service_name,
+            provider_name: service[idx]?.label || item?.provider_name,
             service: service[idx]?.logoPath || item.service,
             service_logo: service[idx]?.logo || item.service_logo,
             link: data?.services?.link || item.link,
@@ -201,7 +203,7 @@ const TvEditModal: React.FC<EditModal> = ({
 
     // Remove the item at the specified index (idx) from the storedData array
     const updatedStoredData = storedData.filter(
-      (item, index) => item?.service_name !== defaultValue?.service_name
+      (item, index) => item?.provider_name !== defaultValue?.provider_name
     );
     console.log("Updated storedData:", updatedStoredData);
     setStoredData(updatedStoredData);
@@ -286,7 +288,7 @@ const TvEditModal: React.FC<EditModal> = ({
                               };
                               const isContentRating =
                                 service[idx]?.label === items?.label ||
-                                defaultValue?.service_name === items?.label;
+                                defaultValue?.provider_name === items?.label;
                               return (
                                 <li
                                   ref={(el) => {
@@ -344,7 +346,7 @@ const TvEditModal: React.FC<EditModal> = ({
                           name="service_type"
                           readOnly
                           autoComplete="off"
-                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
+                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-"
                           placeholder={
                             servicesType[idx]
                               ? servicesType[idx]
@@ -433,7 +435,7 @@ const TvEditModal: React.FC<EditModal> = ({
                         type="text"
                         name="services.link"
                         autoComplete="off"
-                        className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
+                        className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-"
                       />
                     </div>
                   </div>

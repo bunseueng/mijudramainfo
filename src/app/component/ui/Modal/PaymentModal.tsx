@@ -193,8 +193,8 @@ const PaymentModal: React.FC<PaymentType> = ({
       }}
       className="relative z-10"
     >
-      <div className="fixed inset-0 z-10 w-screen bg-black bg-opacity-10">
-        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <div className="fixed inset-0 z-10 w-screen bg-black bg-opacity-10 overflow-auto py-32">
+        <div className="flex h-screen items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <div className="relative w-[450px] transform rounded-lg bg-white text-left transition-all my-2">
             <div className="w-full bg-white dark:bg-[#242526] px-4 pb-4 pt-5 sm:p-6 sm:pb-4 rounded-md">
               <div className="flex items-center justify-between">

@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import React, { useState } from "react";
-import PaymentModal from "./PaymentModal";
 import { IoClose } from "react-icons/io5";
 import { currentUserProps } from "@/helper/type";
+import dynamic from "next/dynamic";
+const PaymentModal = dynamic(() => import("./PaymentModal"), { ssr: false });
 
 interface CoinType {
   setOpenModal: (open: boolean) => void;
@@ -22,8 +23,8 @@ const CoinModal: React.FC<CoinType> = ({
   const [openPayment, setOpenPayment] = useState<boolean>(false);
   return (
     <div className="fixed top-0 bottom-0 right-0 left-0 bg-black bg-opacity-75 overflow-auto z-[2005]">
-      <div className="w-[410px] max-w-full relative shadow-md mx-auto my-[50px] overflow-hidden mt-[15vh]">
-        <div className="w-[410px] flex flex-col items-center bg-gradient-to-br from-blue-100 via-orange-100 to-purple-100 p-8 rounded-lg shadow-lg relative border-8 border-orange-200 mt-10">
+      <div className="w-auto mx-1 md:mx-auto md:w-[410px] max-w-full relative shadow-md my-[50px] overflow-hidden mt-[15vh]">
+        <div className="w-auto mx-1 md:mx-auto md:w-[410px] flex flex-col items-center bg-gradient-to-br from-blue-100 via-orange-100 to-purple-100 p-3 md:p-8 rounded-lg shadow-lg relative border-8 border-orange-200 mt-10">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

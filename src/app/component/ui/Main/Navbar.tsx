@@ -377,7 +377,7 @@ const Navbar: React.FC<Notification> = ({
                       damping: 30,
                       duration: 1,
                     }}
-                    className="fixed bottom-0 right-0 w-[325px] h-screen bg-[#e9eaed] border-[#06090c21] p-5 lg:hidden dark:bg-[#242424] z-10"
+                    className="fixed bottom-0 right-0 w-[325px] h-screen bg-[#e9eaed] border-[#06090c21] p-5 lg:hidden dark:bg-[#242424] z-[9999]"
                   >
                     <IoCloseCircle
                       onClick={handleNavClick}

@@ -2,7 +2,13 @@ import React from "react";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import dynamic from "next/dynamic";
+import { Metadata } from "next";
 const UserSearch = dynamic(() => import("./UserSearch"), { ssr: false });
+
+export const metadata: Metadata = {
+  title: "Searching User",
+  description: "Searching for all users in this website.",
+};
 
 const SearchPag = async ({ params }: { params: { name: string } }) => {
   const currentUser = await getCurrentUser();

@@ -2,7 +2,13 @@ import React from "react";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
 import dynamic from "next/dynamic";
+import { Metadata } from "next";
 const Friend = dynamic(() => import("./Friend"), { ssr: false });
+
+export const metadata: Metadata = {
+  title: "Friends",
+  description: "All your friends lists",
+};
 
 const FriendPage = async ({ params }: { params: { name: string } }) => {
   const currentUser = await getCurrentUser();

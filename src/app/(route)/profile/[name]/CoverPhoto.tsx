@@ -105,7 +105,7 @@ const CoverPhoto: React.FC<User & currentUser> = ({ user, currentUser }) => {
             <div className="overflow-hidden relative">
               {cover ? (
                 <div className="flex items-center">
-                  <button className="flex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3 mr-2">
+                  <button className="flex items-center text-xs md:text-base bg-white border text-black border-slate-200 rounded-md py-2 px-3 mr-2">
                     <IoCamera />{" "}
                     <span className="pl-2">Change Cover Photo</span>
                   </button>
@@ -119,7 +119,7 @@ const CoverPhoto: React.FC<User & currentUser> = ({ user, currentUser }) => {
                   />
                   <button
                     type="submit"
-                    className="flex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3"
+                    className="flex items-center text-xs md:text-base bg-white border text-black border-slate-200 rounded-md py-2 px-3"
                   >
                     <ClipLoader color="#272727" size={25} loading={loading} />
                     <span className={`${loading && "ml-2"}`}>
@@ -129,7 +129,7 @@ const CoverPhoto: React.FC<User & currentUser> = ({ user, currentUser }) => {
                 </div>
               ) : (
                 <>
-                  <button className="flex items-center bg-white border text-black border-slate-200 rounded-md py-2 px-3">
+                  <button className="flex items-center text-xs md:text-base bg-white border text-black border-slate-200 rounded-md py-2 px-3">
                     <IoCamera /> <span className="pl-2">Edit Cover Photo</span>
                   </button>
 

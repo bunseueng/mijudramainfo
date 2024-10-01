@@ -76,7 +76,7 @@ const PersonList = ({ personId }: any) => {
     <div className="bg dark:bg-[#191a20] border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
       <ul className="relative inline-block m-0 p-0">
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-2 leading-[1px] -mb-[1px] ${
+          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-2 leading-[1px] -mb-[1px] ${
             currentItem === "Overview" && "border-b-[4px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Overview")}
@@ -139,7 +139,7 @@ const PersonList = ({ personId }: any) => {
           </div>
         )}
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
+          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
             currentItem === "Media" && "border-b-[4px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Media")}
@@ -163,7 +163,7 @@ const PersonList = ({ personId }: any) => {
           </div>
         )}
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
+          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
             currentItem === "Fandom" && "border-b-[4px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Fandom")}
@@ -189,7 +189,7 @@ const PersonList = ({ personId }: any) => {
           </div>
         )}
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-1 ${
+          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-1 ${
             currentItem === "Share" && "border-b-[4px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Share")}
@@ -203,7 +203,7 @@ const PersonList = ({ personId }: any) => {
         </li>
         {hovered === "Share" && (
           <div
-            className="absolute top-7 -right-14 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
+            className="absolute top-7 right-0 md:-right-14 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
             onMouseEnter={() => handleNavbarMouseEnter("Share")}
             onMouseLeave={handleNavbarMouseLeave}
           >

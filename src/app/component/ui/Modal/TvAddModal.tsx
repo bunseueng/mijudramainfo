@@ -84,13 +84,13 @@ const TvAddModal: React.FC<EditModal> = ({
     if (storedData && storedData[idx]) {
       const data = storedData[idx];
       setService([
-        { label: data.service_name, logoPath: data.service, logo: data?.logo },
+        { label: data.provider_name, logoPath: data.service, logo: data?.logo },
       ]);
       setServicesType([data.service_type]);
       setCountries(data.availability);
       setSubtitle(data.subtitles);
       setValue("services.link", data.link);
-      setValue("services.service", data.service_name);
+      setValue("services.service", data.provider_name);
       setValue("services.service_type", data.service_type);
       reset(data as unknown as Drama);
     }
@@ -127,7 +127,7 @@ const TvAddModal: React.FC<EditModal> = ({
           public_id: storedData[idx]?.public_id || "", // Use the existing public_id or provide a default
           service: service[idx]?.logoPath || "", // Ensure logoPath is defined
           service_logo: service[idx]?.logo || "", // Ensure logo is defined
-          service_name: service[idx]?.label || "", // Ensure label is defined
+          provider_name: service[idx]?.label || "", // Ensure label is defined
           link: data?.services?.link || "", // Ensure link is defined
           service_type: servicesType[idx] || "", // Ensure serviceType is defined
           availability: countries, // Use the selected countries
@@ -138,6 +138,11 @@ const TvAddModal: React.FC<EditModal> = ({
           page_link: "",
           networks: [{}],
           drama: [{}],
+          ads: [{}],
+          flatrate: [{}],
+          free: [{}],
+          rent: [{}],
+          buy: [{}],
         };
 
         const updatedItems = [...storedData]; // Copy existing items
@@ -151,7 +156,7 @@ const TvAddModal: React.FC<EditModal> = ({
           public_id: storedData[idx]?.public_id || "", // Use the existing public_id or provide a default
           service: service[idx]?.logoPath || "", // Ensure logoPath is defined
           service_logo: service[idx]?.logo || "", // Ensure logo is defined
-          service_name: service[idx]?.label || "", // Ensure label is defined
+          provider_name: service[idx]?.label || "", // Ensure label is defined
           link: data?.services?.link || "", // Ensure link is defined
           service_type: servicesType[idx] || "", // Ensure serviceType is defined
           availability: countries, // Use the selected countries
@@ -203,7 +208,7 @@ const TvAddModal: React.FC<EditModal> = ({
                           name="services.service"
                           readOnly
                           autoComplete="off"
-                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
+                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
                           placeholder={
                             service[idx]?.label
                               ? service[idx]?.label
@@ -307,7 +312,7 @@ const TvAddModal: React.FC<EditModal> = ({
                           name="services.service_type"
                           readOnly
                           autoComplete="off"
-                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
+                          className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
                           placeholder={
                             servicesType[idx]
                               ? servicesType[idx]
@@ -398,7 +403,7 @@ const TvAddModal: React.FC<EditModal> = ({
                         type="text"
                         name="services.link"
                         autoComplete="off"
-                        className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-text"
+                        className="w-full text-[#606266] dark:text-white placeholder:text-[#00000099] dark:placeholder:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-2 px-3 mt-1 cursor-pointer"
                       />
                       {errors.services?.link && (
                         <p className="text-xs italic text-red-500 mt-2">

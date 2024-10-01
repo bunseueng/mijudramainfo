@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
 import DramaMain from "./DramaMain";
+import React from "react";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }

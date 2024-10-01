@@ -37,7 +37,7 @@ const FetchRecentList: React.FC<FetchRecentListProps> = ({
   return (
     <li
       key={index}
-      className="w-[72px] h-[108px] md:-mr-[35px] lg:-mr-[15px] relative"
+      className="w-[72px] h-[108px] -mr-[40px] md:-mr-[35px] lg:-mr-[15px] relative"
       onMouseEnter={() => handleMouseEnter(listIndex, index)}
       onMouseLeave={() => handleMouseLeave(listIndex)}
       style={{

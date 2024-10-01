@@ -1,11 +1,20 @@
 import prisma from "@/lib/db";
 import { paypal } from "@/lib/paypal";
 import { NextRequest, NextResponse } from "next/server";
+interface PayPalOrder {
+    id: string;
+    email_address: string;
+    status: string;
+    pricePaid: string;
+}
+
+
 
 export async function POST(req: NextRequest, res: NextResponse) {
     const { action, id, price, orderId, value } = await req.json();
+
+    console.log('OrderId:', orderId);
     
-    console.log(orderId)
     try {
         if (action === "createOrder") {
             const order = await prisma.customers.findFirst({
@@ -38,14 +47,17 @@ export async function POST(req: NextRequest, res: NextResponse) {
             });
             if (!order) throw new Error("Order not found");
 
-            const captureData = await paypal.capturePayment(orderId);
+            const captureData = await paypal.capturePayment(orderId)
+            const orderPaypal = order.orderPaypal as unknown as PayPalOrder;
+
             if (
                 !captureData ||
-                captureData.id !== order.orderPaypal ||
+                captureData.id !== orderPaypal?.id || // Access id from the object
                 captureData.status !== "COMPLETED"
             ) {
                 throw new Error("Error in PayPal payment");
             }
+
 
             await prisma.checkoutSession.update({
                 where: { id },
@@ -55,8 +67,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                         id: captureData.id,
                         status: captureData.status,
                         email_address: captureData.payer.email_address,
-                        pricePaid:
-                            captureData.purchase_units[0]?.payments?.captures[0]?.amount?.value,
+                        pricePaid: captureData.purchase_units[0]?.payments?.captures[0]?.amount?.value,
                     },
                 },
             });

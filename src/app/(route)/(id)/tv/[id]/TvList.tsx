@@ -105,7 +105,7 @@ const TvList = ({ tv_id }: any) => {
       />
       <ul className="relative inline-block m-0 p-0 z-50">
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pb-2 leading-[1px] -mb-[1px] ${
+          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pb-2 leading-[1px] -mb-[1px] ${
             currentItem === "Overview" && "border-b-[2px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Overview")}
@@ -194,7 +194,7 @@ const TvList = ({ tv_id }: any) => {
           </div>
         )}
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
+          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
             currentItem === "Media" && "border-b-[3px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Media")}
@@ -308,7 +308,7 @@ const TvList = ({ tv_id }: any) => {
           </div>
         )}
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
+          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
             currentItem === "Fandom" && "border-b-[3px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Fandom")}
@@ -341,7 +341,7 @@ const TvList = ({ tv_id }: any) => {
           </div>
         )}
         <li
-          className={`inline-flex items-center justify-end mx-2 cursor-pointer pt-4 pb-1 ${
+          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-1 ${
             currentItem === "Share" && "border-b-[3px] border-b-[#01b4e4]"
           }`}
           onClick={() => setCurrentItem("Share")}
@@ -355,7 +355,7 @@ const TvList = ({ tv_id }: any) => {
         </li>
         {hovered === "Share" && (
           <div
-            className="absolute top-7 -right-[52px] bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
+            className="absolute top-7 right-0 md:-right-[52px] bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
             onMouseEnter={() => handleNavbarMouseEnter("Share")}
             onMouseLeave={handleNavbarMouseLeave}
           >

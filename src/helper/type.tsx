@@ -394,6 +394,7 @@ export interface DramaReleasedInfo {
 }
 
 export interface EditDramaPage {
+  provider_name: any;
   availability: {
     label: string;
     value: string;
@@ -403,7 +404,6 @@ export interface EditDramaPage {
   public_id: string;
   service: string;
   service_logo: string;
-  service_name: string;
   service_type: string;
   service_url: string;
   logo: string;
@@ -415,11 +415,16 @@ export interface EditDramaPage {
   page_link: string;
   drama: [{}];
   networks: [{}];
+  ads: [{}];
+  flatrate: [{}];
+  free: [{}];
+  rent: [{}];
+  buy: [{}];
 }
 [];
 
 export interface EditPageDefaultvalue {
-  service_name: string;
+  provider_name: string;
   service_type: string;
   link: string;
   availability: {

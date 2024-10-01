@@ -1180,6 +1180,19 @@ export const fetchMovieRecommendation = cache(async (movie_id: any) => {
   }
 })
 
+export const fetchTvWatchProvider = cache(async (tv_id: any) => {
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/tv/${tv_id}/watch/providers?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+    );
+    const provider = await res.json();
+
+    return provider?.results;
+  } catch (error) {
+    return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
+  }
+})
+
 // Function to get user country code (Geolocation or IP-based)
 const getUserCountryCode = cache(async () => {
   try {

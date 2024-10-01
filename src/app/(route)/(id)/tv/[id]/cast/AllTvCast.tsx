@@ -27,6 +27,7 @@ import MainRole from "@/app/component/ui/CastRole/MainRole";
 import SupportRole from "@/app/component/ui/CastRole/SupportRole";
 import GuestRole from "@/app/component/ui/CastRole/GuestRole";
 import TvInfo from "../TvInfo";
+import React from "react";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }

@@ -168,7 +168,6 @@ const ReviewCard = ({
                 Write Review
               </Link>
             </div>
-            <ReviewDBCard getReview={getReview} tv_id={tv_id} user={user} />
             {review?.results?.slice(0, 2)?.map((review: any, idx: number) => {
               const dateObject = new Date(review?.updated_at);
               const formattedDate = dateObject.toLocaleDateString("en-US", {
@@ -246,6 +245,12 @@ const ReviewCard = ({
                 </div>
               );
             })}
+            <ReviewDBCard
+              getReview={getReview}
+              tv_id={tv_id}
+              user={user}
+              review={review}
+            />
           </div>
         )}
       </div>

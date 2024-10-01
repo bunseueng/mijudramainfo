@@ -247,20 +247,20 @@ const Watchlist: React.FC<WatchListProps & IList> = ({
     return <SearchLoading />;
   }
   return (
-    <div className="mt-4 pl-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-black dark:text-white text-md md:text-xl font-bold">
+    <div className="mt-4 pl-0 md:pl-4">
+      <div className="flex flex-wrap items-center justify-between">
+        <h1 className="text-black dark:text-white text-xs md:text-sm lg:text-xl font-bold">
           My Watchlist
         </h1>
         {pathname === `/profile/${user?.name}/watchlist` && (
-          <div className="flex items-center flex-nowrap">
-            <label htmlFor="Filter" className="text-sm md:text-md">
+          <div className="flex items-center justify-between">
+            <label htmlFor="Filter" className="text-xs md:text-sm lg:text-md">
               Filter by:
             </label>
-            <div className="flex items-center flex-nowrap">
+            <div className="flex items-center flex-nowrap ">
               <div className="p-2 md:p-4">
                 <select
-                  className="bg-transparent text-black dark:text-white bg-gray-700 border-b-2 border-b-[#959595] rounded-t-sm relative top-0 left-0 z-2 pl-2 cursor-pointer"
+                  className="bg-transparent text-xs md:text-base text-black dark:text-white bg-gray-700 border-b-2 border-b-[#959595] rounded-t-sm relative top-0 left-0 z-2 md:pl-2 cursor-pointer"
                   name="sort"
                   id="sort"
                   onChange={(e) => selectBox("sortby", e.target.value)}
@@ -279,11 +279,11 @@ const Watchlist: React.FC<WatchListProps & IList> = ({
         tv?.map((item: any, idx: number) => (
           <div
             key={idx}
-            className="w-full h-auto flex bg-white dark:bg-[#1b1c1d] border border-slate-200 dark:border-[#272727] rounded-md overflow-hidden my-5 box-border"
+            className="w-full h-auto flex flex-col md:flex-row bg-white dark:bg-[#1b1c1d] border border-slate-200 dark:border-[#272727] rounded-md overflow-hidden my-5 box-border"
           >
-            <div className="w-[160px] min-w-[160px] h-[250px] box-border">
-              <div className="w-full h-auto flex items-center justify-center box-border">
-                <Link href={`/tv/${item?.id}`} className="box-border">
+            <div className="w-full md:w-[160px] h-[120px] md:h-[250px] box-border">
+              <div className="w-full h-full">
+                <Link href={`/tv/${item?.id}`}>
                   <Image
                     src={`https://image.tmdb.org/t/p/original/${
                       item?.poster_path || item?.backdrop_path
@@ -293,7 +293,7 @@ const Watchlist: React.FC<WatchListProps & IList> = ({
                     height={200}
                     quality={100}
                     priority
-                    className="block w-[160px] min-w-[160px] h-full outline-none box-border"
+                    className="block w-full md:w-[160px] min-w-[160px] h-full outline-none box-border bg-center object-cover"
                   />
                 </Link>
               </div>

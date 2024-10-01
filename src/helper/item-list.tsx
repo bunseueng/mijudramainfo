@@ -3338,6 +3338,13 @@ export const serviceLogo = [
     label: "Viki",
     value: "Viki",
   },
+  {
+    logo: "/viki.jpg",
+    logoPath:
+      "C:\\Users\\pc\\Documents\\NextJS\\mijudramainfo/public/channel/viki.jpg",
+    label: "Amazon Video",
+    value: "Amazon Video",
+  },
 ];
 
 export const serviceType = [
@@ -3356,6 +3363,10 @@ export const serviceType = [
   {
     label: "Pay Per View",
     value: "Pay Per View",
+  },
+  {
+    label: "Advertisement",
+    value: "Advertisement",
   },
 ];
 

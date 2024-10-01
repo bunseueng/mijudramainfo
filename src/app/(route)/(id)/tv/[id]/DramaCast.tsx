@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { FaArrowAltCircleRight } from "react-icons/fa";
 import Image from "next/image";
@@ -8,6 +10,9 @@ import AllSeason from "./AllSeason";
 import ReviewCard from "@/app/component/ui/Card/ReviewCard";
 import TvInfo from "./TvInfo";
 import TvListCard from "@/app/component/ui/Card/TvListCard";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTvWatchProvider } from "@/app/actions/fetchMovieApi";
+import { useEffect, useState } from "react";
 
 const WatchProvider = dynamic(() => import("./WatchProvider"), { ssr: false });
 
@@ -29,11 +34,16 @@ const DramaCast = ({
   content,
   lists,
 }: any) => {
+  const [selectedProvider, setSelectedProvider] = useState<any>(null);
+  const { data: watchProvider } = useQuery({
+    queryKey: ["watchProvider", tv?.id],
+    queryFn: () => fetchTvWatchProvider(tv?.id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
+  });
   const seasons = tv?.seasons?.map((drama: any) => drama);
 
-  if (!tv || !language || !allTvShows || !review || !image) {
-    return null;
-  }
   // Determine which season to display based on the number of seasons
   let displaySeason;
   if (seasons?.length === 1) {
@@ -70,6 +80,38 @@ const DramaCast = ({
     // Sort in descending order, i.e., users with more contributions come first
     return countB - countA;
   });
+
+  // Function to get user country based on IP
+  const getUserCountry = async () => {
+    try {
+      const res = await fetch("https://ipinfo.io/json?token=80e3bb75bb316a", {
+        method: "GET",
+      });
+      const data = await res.json();
+      return data.country; // e.g., "US"
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+      return null;
+    }
+  };
+
+  // Fetch user location and set the watch provider
+  useEffect(() => {
+    const fetchCountryAndSetProvider = async () => {
+      const country = await getUserCountry();
+
+      if (country && watchProvider && watchProvider[country]) {
+        setSelectedProvider(watchProvider[country]);
+      } else {
+        setSelectedProvider(watchProvider?.US); // Default to US if no match
+      }
+    };
+
+    fetchCountryAndSetProvider();
+  }, [watchProvider]);
+  if (!tv || !language || !allTvShows || !review || !image) {
+    return null;
+  }
   return (
     <div className="max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5 relative overflow-hidden">
       <div className="flex flex-col md:flex-row items-start">
@@ -94,15 +136,21 @@ const DramaCast = ({
             <CastCard getDrama={getDrama} cast={cast} />
           </div>
 
-          {tv?.homepage !== "" && (
+          {tv?.homepage !== "" && selectedProvider && (
             <div className="border-t-[1px] border-slate-400 mt-7 mx-2 md:mx-0">
               <h1 className="text-lg text-black dark:text-white font-bold my-5">
                 <span className="border border-l-yellow-500 border-l-4 rounded-md mr-4"></span>
                 Where to watch {tv?.name}
               </h1>
-              <WatchProvider tv={tv} getDrama={getDrama} />
+              <WatchProvider
+                tv={tv}
+                getDrama={getDrama}
+                watchProvider={watchProvider}
+                selectedProvider={selectedProvider}
+              />
             </div>
           )}
+
           <AllSeason
             displaySeason={displaySeason}
             firstSeason={firstSeason}
