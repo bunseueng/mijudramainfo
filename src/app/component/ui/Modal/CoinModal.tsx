@@ -85,7 +85,7 @@ const CoinModal: React.FC<CoinType> = ({
                         setOpenPayment(!openPayment);
                     }}
                   >
-                    $1.99
+                    $0.01
                   </button>
                 </div>
               </div>

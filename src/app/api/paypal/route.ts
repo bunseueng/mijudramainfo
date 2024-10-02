@@ -8,8 +8,6 @@ interface PayPalOrder {
     pricePaid: string;
 }
 
-
-
 export async function POST(req: NextRequest, res: NextResponse) {
     const { action, id, price, orderId, value } = await req.json();
 
@@ -21,7 +19,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 where: { id },
             });
             if (order) {
-                const paypalOrder = await paypal.createOrder(Number(price));
+                const paypalOrder = await paypal.createOrder(price);
                 await prisma.checkoutSession.update({
                     where: { id },
                     data: {
