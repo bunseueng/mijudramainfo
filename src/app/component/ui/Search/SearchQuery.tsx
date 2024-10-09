@@ -16,7 +16,13 @@ const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
   ssr: false,
 });
 
-const SearchQuery = ({ BASE_URL, currentUser }: any) => {
+const SearchQuery = ({
+  BASE_URL,
+  currentUser,
+  getMovie,
+  getDrama,
+  getPerson,
+}: any) => {
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams(); // Assuming you have this declared somewhere
   const currentPage = parseInt(searchParams?.get("page") || "1");
@@ -131,6 +137,9 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
             BASE_URL={BASE_URL}
             searchParams={searchParams}
             currentUser={currentUser}
+            getDrama={getDrama}
+            getMovie={getMovie}
+            getPerson={getPerson}
           />
           <div className="flex flex-wrap items-start justify-start max-w-6xl mx-auto px-1 md:px-2 pb-10">
             <SearchPagination

@@ -192,7 +192,7 @@ const TvAddModal: React.FC<EditModal> = ({
                 </button>
               </div>
               <div className="text-[#ffffff99] text-md break-words px-5 py-7">
-                <form action="">
+                <div>
                   <div className="mb-5">
                     <label
                       htmlFor="service"
@@ -481,7 +481,7 @@ const TvAddModal: React.FC<EditModal> = ({
                       </p>
                     </div>
                   </div>
-                </form>
+                </div>
               </div>
 
               <div className="flex items-end justify-end">

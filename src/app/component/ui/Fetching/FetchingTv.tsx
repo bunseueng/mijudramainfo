@@ -20,7 +20,7 @@ type FetchingTv = {
   openSearch: boolean;
   setStoredData: (data: any) => void;
   setItem: (item: any) => void;
-  setQuery: string;
+  query: string;
 };
 
 const FetchingTv: React.FC<FetchingTv> = ({
@@ -32,7 +32,7 @@ const FetchingTv: React.FC<FetchingTv> = ({
   openSearch,
   setStoredData,
   setItem,
-  setQuery,
+  query,
 }) => {
   const [listSearch, setListSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -65,7 +65,7 @@ const FetchingTv: React.FC<FetchingTv> = ({
       const params = new URLSearchParams(searchQuery as string | any);
 
       if (value) {
-        if (setQuery === "query") {
+        if (query === "query") {
           params.set("query", value);
           params.delete("q");
         } else {
@@ -73,7 +73,7 @@ const FetchingTv: React.FC<FetchingTv> = ({
           params.delete("query");
         }
       } else {
-        if (setQuery === "query") {
+        if (query === "query") {
           params.delete("query");
         } else {
           params.delete("q");
@@ -94,7 +94,7 @@ const FetchingTv: React.FC<FetchingTv> = ({
     }
     try {
       const tvDetail = await fetchTv(parsedId);
-      if (setQuery === "query") {
+      if (query === "query") {
         setStoredData((prevData: any) => [...prevData, tvDetail]);
       } else {
         setItem((prevItems: any) => [...prevItems, tvDetail]);

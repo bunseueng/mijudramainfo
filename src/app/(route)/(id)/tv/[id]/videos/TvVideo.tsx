@@ -1,7 +1,6 @@
 "use client";
 
-import ColorThief from "colorthief";
-import React, { useEffect, useRef, useState } from "react";
+import React, { lazy, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
@@ -11,21 +10,24 @@ import { tvVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
 import { DramaDB } from "@/helper/type";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import LazyImage from "@/components/ui/lazyimage";
-import TvTrailers from "./trailers/TvTrailers";
-import TvTeasers from "./teasers/TvTeasers";
-import Clips from "./clips/Clips";
-import BehindTheScenes from "./behind_the_scenes/BehindTheScenes";
-import Bloopers from "./bloopers/Bloopers";
-import Featurettes from "./featurettes/Featurettes";
-import OpeningCredits from "./opening_credits/OpeningCredits";
+const TvTrailers = lazy(() => import("./trailers/TvTrailers"));
+const TvTeasers = lazy(() => import("./teasers/TvTeasers"));
+const Clips = lazy(() => import("./clips/Clips"));
+const BehindTheScenes = lazy(
+  () => import("./behind_the_scenes/BehindTheScenes")
+);
+const Bloopers = lazy(() => import("./bloopers/Bloopers"));
+const Featurettes = lazy(() => import("./featurettes/Featurettes"));
+const OpeningCredits = lazy(() => import("./opening_credits/OpeningCredits"));
+import Image from "next/image";
 
 interface TvTrailerType {
   tv_id: string;
   tvDB: DramaDB | null;
+  getDrama: DramaDB[];
 }
 
-const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB }) => {
+const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB, getDrama }) => {
   const { data: tv, isLoading } = useQuery({
     queryKey: ["tvEdit", tv_id],
     queryFn: () => fetchTv(tv_id),
@@ -39,6 +41,7 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB }) => {
   const [currentPage, setCurrentPage] = useState("/trailers");
   const router = useRouter();
   const pathname = usePathname();
+  const coverFromDB = getDrama?.find((t) => t?.tv_id?.includes(tv_id));
 
   const handleNavigation = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -57,33 +60,47 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB }) => {
     }
   }, [pathname]);
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
 
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const color = await getColorFromImage(
+        coverFromDB
+          ? (coverFromDB?.cover as string)
+          : `https://image.tmdb.org/t/p/${tv?.poster_path ? "w500" : "w780"}/${
+              tv?.poster_path || tv?.backdrop_path
+            }`
+      );
+      setDominantColor(color); // Set the dominant color in RGB format
+    }
+  }, [coverFromDB, tv?.backdrop_path, tv?.poster_path]);
+  // Ensure the image element is referenced correctly
   useEffect(() => {
-    const imgElement = imgRef.current;
-    if (imgElement) {
-      const extractColor = () => {
-        const colorThief = new ColorThief();
-        const color = colorThief.getColor(imgElement);
-        if (color) {
-          setDominantColor(`rgb(${color.join(",")})`);
-        }
-      };
-
+    if (imgRef.current) {
+      const imgElement = imgRef.current; // Store the current value in a local variable
       imgElement.addEventListener("load", extractColor);
 
-      // Cleanup function to remove the event listener
+      // Cleanup function
       return () => {
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [tv]);
+  }, [tv, extractColor]);
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -94,13 +111,17 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB }) => {
         className="bg-cyan-600 dark:bg-[#242424]"
         style={{ backgroundColor: dominantColor as string | undefined }}
       >
-        <div className="max-w-6xl mx-auto flex items-center mt-0 px-2 py-2">
+        <div className="max-w-6xl mx-auto flex items-center mt-0 px-3 py-2">
           <div className="flex items-center lg:items-start px-2 cursor-default">
-            <LazyImage
+            <Image
               ref={imgRef} // Set the reference to the image
-              src={`https://image.tmdb.org/t/p/${
-                tv?.poster_path ? "w500" : "w780"
-              }/${tv?.poster_path || tv?.backdrop_path}`}
+              src={
+                coverFromDB
+                  ? (coverFromDB?.cover as string)
+                  : `https://image.tmdb.org/t/p/${
+                      tv?.poster_path ? "w500" : "w780"
+                    }/${tv?.poster_path || tv?.backdrop_path}`
+              }
               alt={`${tv?.name || tv?.title}'s Poster`}
               width={200}
               height={200}
@@ -136,7 +157,7 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB }) => {
               <VscQuestion />
             </div>
           </div>
-          <ul className="border-b-[1px] border-b-[#dcdfe6] rounded-b-md shadow-md pt-3">
+          <ul className="border border-slate-400 rounded-b-md shadow-md pt-3">
             {tvVideoList?.map((item, idx) => (
               <li
                 key={idx}

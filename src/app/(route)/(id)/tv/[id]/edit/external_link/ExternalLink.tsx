@@ -11,10 +11,10 @@ import { useForm } from "react-hook-form";
 import { FaShare } from "react-icons/fa6";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdDelete, MdEdit } from "react-icons/md";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
 const ExternalEditModal = dynamic(
   () => import("@/app/component/ui/Modal/ExternalEditModal"),
   { ssr: false }
@@ -521,10 +521,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               : true
           }
         >
-          <span className="mr-1 pt-1">
-            <ClipLoader color="#c3c3c3" loading={loading} size={19} />
-          </span>
-          Submit
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
         </button>
       </div>
     </form>

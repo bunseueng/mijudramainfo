@@ -1,8 +1,17 @@
+"use client";
+
 import CastCard from "@/app/component/ui/Card/CastCard";
-import ReviewCard from "@/app/component/ui/Card/ReviewCard";
+import TvListCard from "@/app/component/ui/Card/TvListCard";
+import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
+import { DramaDB, UserProps } from "@/helper/type";
+import { useQuery } from "@tanstack/react-query";
+import { fetchMovieWatchProvider } from "@/app/actions/fetchMovieApi";
+import MovieInfo from "./MovieInfo";
+import WatchProvider from "../../tv/[id]/WatchProvider";
+import MovieReviewCard from "@/app/component/ui/Card/MovieReviewCard";
 
 const MovieCast = ({
   cast,
@@ -17,31 +26,85 @@ const MovieCast = ({
   user,
   users,
   getComment,
+  getReview,
+  getMovie,
+  lists,
+  keyword,
+  certification,
 }: any) => {
-  const allTvShowsArray = Array.isArray(allTvShows) ? allTvShows : [];
+  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+  const { data: watchProvider } = useQuery({
+    queryKey: ["watchProvider", movie_id],
+    queryFn: () => fetchMovieWatchProvider(movie_id),
+    staleTime: 3600000, // Cache data for 1 hour
+    refetchOnWindowFocus: true,
+    refetchOnMount: true, // Refetch on mount to get the latest data
+  });
 
-  // Find the index of the matched TV show in allTvShows array
-  const matchedIndex = allTvShowsArray.findIndex(
-    (show: any) => show.id === movie.id
+  const uniqueChanges = Array.from(
+    new Map(
+      getMovie?.changes.map((change: DramaDB) => [change.userId, change])
+    ).values()
   );
-  // Calculate the rank by adding 1 to the index
-  const rank = matchedIndex !== -1 ? matchedIndex + 1 : null;
+  const userContributions = getMovie?.changes?.reduce(
+    (acc: number[], change: any) => {
+      // Increment the count of changes for each userId
+      acc[change.userId] = (acc[change.userId] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
-  if (!movie || !language || !allTvShows || !review || !image) {
+  // Step 2: Sort the uniqueChanges based on the number of contributions for each userId
+  const sortedChanges = uniqueChanges?.sort((a: any, b: any) => {
+    // Get the count of contributions for userId in `a` and `b`
+    const countA = userContributions[a.userId] || 0;
+    const countB = userContributions[b.userId] || 0;
+
+    // Sort in descending order, i.e., users with more contributions come first
+    return countB - countA;
+  });
+
+  // Function to get user country based on IP
+  const getUserCountry = async () => {
+    try {
+      const res = await fetch("https://ipinfo.io/json?token=80e3bb75bb316a", {
+        method: "GET",
+      });
+      const data = await res.json();
+      return data.country; // e.g., "US"
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+      return null;
+    }
+  };
+
+  // Fetch user location and set the watch provider
+  useEffect(() => {
+    const fetchCountryAndSetProvider = async () => {
+      const country = await getUserCountry();
+
+      if (country && watchProvider && watchProvider[country]) {
+        setSelectedProvider(watchProvider[country]);
+      } else {
+        setSelectedProvider(watchProvider?.US); // Default to US if no match
+      }
+    };
+
+    fetchCountryAndSetProvider();
+  }, [watchProvider]);
+
+  if (!movie || !language || !review || !image) {
     return null;
   }
-  const hours = Math.floor(movie?.runtime / 60);
-  const minutes = movie?.runtime % 60;
-
-  const formattedRuntime = `${hours}h ${minutes}mn`;
 
   return (
-    <div className="max-w-[97rem] mx-auto md:py-8 md:px-10 mt-5 relative overflow-hidden">
-      <div className="flex flex-col lg:flex-row items-start">
-        <div className="w-full lg:w-[70%]">
+    <div className="max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5 relative overflow-hidden">
+      <div className="flex flex-col md:flex-row items-start">
+        <div className="relative float-left w-full md:w-2/3 md:px-5 lg:px-0">
           <div className="lg:w-[92%] flex items-center justify-between content-center px-2 lg:px-0">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-lg md:text-2xl font-bold">
                 <span className="border border-l-yellow-500 border-l-4 rounded-md mr-4"></span>
                 Cast & Credits
               </h1>
@@ -50,99 +113,121 @@ const MovieCast = ({
             <Link
               prefetch={true}
               href={`/movie/${movie_id}/cast`}
-              className="text-lg font-bold"
+              className="text-md md:text-lg font-bold"
             >
               View All
             </Link>
           </div>
           <div className="grid grid-cols-1 min-[649px]:grid-cols-2 min-[1350px]:grid-cols-3 ml-5 md:ml-0">
-            <CastCard cast={cast} />
+            <CastCard getDrama={getMovie} cast={cast} />
           </div>
-          <div className="border-b-2 border-b-slate-500 pb-5 mt-5 mx-2 md:mx-0"></div>
-          <div className="py-5 mx-2 md:mx-0">
-            <ReviewCard
+
+          {movie?.homepage !== "" && selectedProvider && (
+            <div className="border-t-[1px] border-slate-400 mt-7 mx-2 md:mx-0">
+              <h1 className="text-lg text-black dark:text-white font-bold my-5">
+                <span className="border border-l-yellow-500 border-l-4 rounded-md mr-4"></span>
+                Where to watch {movie?.title}
+              </h1>
+              <WatchProvider
+                tv={movie}
+                getDrama={getMovie}
+                watchProvider={watchProvider}
+                selectedProvider={selectedProvider}
+              />
+            </div>
+          )}
+          <div className="border-b-[1px] border-b-slate-400 pb-5 mt-5 mx-2 md:mx-0"></div>
+          <div className="pb-5 mx-2 md:mx-0">
+            <MovieReviewCard
               user={user}
               users={users}
               review={review}
               image={image}
               video={video}
-              tv_id={movie_id}
+              movie_id={movie_id}
               recommend={recommend}
               movie={movie}
               getComment={getComment}
+              getReview={getReview}
             />
           </div>
         </div>
-        <div className="w-full px-2 lg:w-[30%] my-5 md:my-0 lg:ml-5">
-          <div className="border border-slate-400 h-full rounded-md">
-            <h1 className="text-white text-2xl font-bold bg-cyan-600 p-4">
-              Details:
-            </h1>
-            <div className="flex flex-col p-4 pb-1">
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">
-                  Drama:{" "}
-                  <span className="text-md font-semibold">
-                    {movie?.title || movie?.name}
-                  </span>
-                </h1>
-              </div>
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Country:</h1>
-                <p className="font-semibold">
-                  {movie?.production_countries?.map((item: any) => item?.name)}
-                </p>
-              </div>
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Budget:</h1>
-                <p className="font-semibold">${movie?.budget}</p>
-              </div>
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Revenue:</h1>
-                <p className="font-semibold">${movie?.revenue}</p>
-              </div>
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Released Date:</h1>
-                <p className="font-semibold">{movie?.release_date}</p>
-              </div>
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Duration:</h1>
-                <p className="font-semibold">{formattedRuntime}</p>
-              </div>
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Status:</h1>
-                <p className="font-semibold">
-                  {movie?.status === "Returning Series"
-                    ? "Ongoing"
-                    : movie?.status}
-                </p>
+        <div className="hidden md:block float-left relative md:w-1/3 px-2 md:px-0 lg:px-2 my-5 md:my-0 lg:ml-5">
+          <MovieInfo
+            getMovie={getMovie}
+            language={language}
+            movie={movie}
+            allTvShows={allTvShows}
+            certification={certification}
+          />
+          {keyword?.keywords?.length > 0 && (
+            <div className="my-5">
+              <h1 className="font-bold text-lg">Keywords</h1>
+              <div className="flex flex-wrap w-full">
+                {keyword?.keywords?.map((k: any, idx: number) => {
+                  return (
+                    <div
+                      className="text-sm bg-[#d7d7d7] text-black border border-[#d7d7d7] rounded-sm px-1 my-1 mr-1"
+                      key={idx}
+                    >
+                      <ul>
+                        <li>
+                          <Link href={`/keyword/${k?.id}/movie`}>
+                            {k?.name}
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
-          <div className="border border-slate-400 h-full mt-5 rounded-md">
-            <h1 className="text-white text-2xl font-bold bg-cyan-600 p-4">
-              Statistics:
-            </h1>
-            <div className="flex flex-col p-4 pb-1">
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Score:</h1>
-                <p className="font-semibold">
-                  {movie?.vote_average?.toFixed(1)}{" "}
-                  {movie?.vote_average === 0
-                    ? ""
-                    : `(scored by ${movie?.vote_count} ${
-                        movie?.vote_count < 2 ? " user" : " users"
-                      })`}
-                </p>
-              </div>
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Ranked:</h1>
-                <p className="font-semibold">#{!rank ? "10000+" : rank}</p>
-              </div>
-              <div className="flex items-center pb-1">
-                <h1 className="text-lg font-bold pr-2">Popularity:</h1>
-                <p className="font-semibold">#{movie?.popularity}</p>
-              </div>
+          )}
+          {sortedChanges?.length > 0 && (
+            <div className="my-5">
+              <h1 className="font-bold text-lg">Top Contributors</h1>
+              {sortedChanges?.slice(0, 4)?.map((drama: any, idx) => {
+                const getUser = users?.find((users: UserProps) =>
+                  users?.id?.includes(drama?.userId)
+                );
+                const userContributions = getMovie?.changes?.reduce(
+                  (acc: number[], change: any) => {
+                    // If userId exists in the accumulator, increment the count, otherwise set it to 1
+                    acc[change.userId] = (acc[change.userId] || 0) + 1;
+                    return acc;
+                  },
+                  {}
+                );
+                const userContributeCount =
+                  userContributions[drama.userId] || 0;
+
+                return (
+                  <div className="flex items-center py-2" key={idx}>
+                    <div className="block">
+                      <Image
+                        src={getUser?.profileAvatar || getUser?.image}
+                        alt={getUser?.displayName || getUser?.name}
+                        width={100}
+                        height={100}
+                        loading="lazy"
+                        className="size-[40px] object-cover rounded-full"
+                      />
+                    </div>
+                    <div className="flex flex-col pl-2">
+                      <p className="text-[#2196f3]">
+                        {getUser?.displayName || getUser?.name}
+                      </p>
+                      <p className="text-sm">{userContributeCount} edits</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div className="my-5">
+            <h1 className="font-bold text-lg">Popular Lists</h1>
+            <div className="mt-5">
+              <TvListCard list={lists} movieId={movie_id} tvId={[]} />
             </div>
           </div>
         </div>

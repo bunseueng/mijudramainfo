@@ -252,6 +252,7 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                       alt={`${tv?.name || tv?.title}`}
                       width={100}
                       height={100}
+                      style={{ width: "100%", height: "100%" }}
                       priority
                       className="w-[100px] h-[150px] object-cover rounded-md"
                     />

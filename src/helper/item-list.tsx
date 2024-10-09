@@ -3655,27 +3655,34 @@ export const episodePerDay = [
 export const production_language = [
   {
     value: "Cantonese",
+    original: "yue",
   },
   {
     value: "English",
+    original: "en",
   },
   {
     value: "Filipino",
+    original: "fil",
   },
   {
     value: "Japanese",
+    original: "ja",
   },
   {
     value: "Korean",
+    original: "ko",
   },
   {
     value: "Mandarin",
-  },
-  {
-    value: "Other",
+    original: "zh",
   },
   {
     value: "Thai",
+    original: "th",
+  },
+  {
+    value: "Other",
   },
 ];
 
@@ -4591,4 +4598,13 @@ export const reviewStatus = [
     label: "Hide Spoiler",
     value: "spoiler",
   },
+];
+
+export const countryFilter = [
+  { value: "CN", label: "Chinese" },
+  { value: "KR", label: "Korean" },
+  { value: "JP", label: "Japanese" },
+  { value: "TH", label: "Thailand" },
+  { value: "TW", label: "Taiwan" },
+  { value: "HK", label: "Hong Kong" },
 ];

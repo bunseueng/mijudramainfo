@@ -70,7 +70,7 @@ const TvListCard: React.FC<IList> = ({ list }) => {
                   </span>
                   <CiHeart className="ml-3" size={20} />
                   <span className="text-black dark:text-[#ffffff99] pl-1 pt-[1px]">
-                    {listItem?.love} loves
+                    {listItem?.love ? listItem?.love : 0} loves
                   </span>
                 </div>
               </div>

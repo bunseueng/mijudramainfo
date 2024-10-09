@@ -41,7 +41,8 @@ model Session {
 
 model User {
   id                       String      @id @default(auto()) @map("_id") @db.ObjectId
-  public_id                String?
+  public_cover_id          String?
+  public_avatar_id         String?
   name                     String      @unique
   displayName              String?
   email                    String      @unique
@@ -110,7 +111,8 @@ model Drama {
   id                     String  @id @default(auto()) @map("_id") @db.ObjectId
   tv_id                  String  @unique
   userId                 String
-  public_id              String?
+  public_cover_id        String?
+  public_photo_id        String?
   details                Json[]
   cover                  String?
   related_title          Json[]
@@ -120,6 +122,8 @@ model Drama {
   external_links         Json[]
   released_information   Json[]
   production_information Json[]
+  photo                  Json[]
+  report                 Json[]
   genres_tags            Json[]
   changes                Json[]  @default([])
   changeCount            Int     @default(0)
@@ -132,7 +136,8 @@ model Movie {
   id                     String        @id @default(auto()) @map("_id") @db.ObjectId
   movie_id               String        @unique
   userId                 String
-  public_id              String?
+  public_cover_id        String?
+  public_photo_id        String?
   details                Json[]
   cover                  String?
   related_title          Json[]
@@ -142,6 +147,8 @@ model Movie {
   external_links         Json[]
   released_information   Json[]
   production_information Json[]
+  photo                  Json[]
+  report                 Json[]
   genres_tags            Json[]
   changes                Json[]        @default([])
   changeCount            Int           @default(0)
@@ -161,12 +168,15 @@ model Person {
   popularity      Json[]
   totalPopularity Int      @default(0)
   sentBy          Json[]
-  public_id       String?
+  public_cover_id String?
+  public_photo_id String?
   cover           String?
   details         Json[]
   cast            Json[]
   crew            Json[]
   external_links  Json[]
+  photo           Json[]
+  report          Json[]
   changes         Json[]   @default([])
   changeCount     Int      @default(0)
 
@@ -292,9 +302,6 @@ model MovieReview {
   rating_score     Json?
   overall_score    String?
   spoiler          Boolean?
-  finishedWatching Boolean?
-  dropping         Boolean?
-  episode          Int?
   review_language  String?
   headline         String?
   review           String?

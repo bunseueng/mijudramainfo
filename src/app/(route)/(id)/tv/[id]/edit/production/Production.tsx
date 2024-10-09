@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
+import { Loader2 } from "lucide-react";
 
 const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv = [] } = useQuery({
@@ -30,36 +31,22 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [language, setLanguage] = useState<string[]>([]);
   const [countries, setCountries] = useState<{ value: string }[]>([]);
+  const [originalLanguage, setOriginalLanguage] = useState<string[]>([]);
+  const [originalCountries, setOriginalCountries] = useState<
+    { value: string }[]
+  >([]);
+  const [originalNetwork, setOriginalNetwork] = useState<{ value: string }[]>(
+    []
+  );
   const [network, setNetwork] = useState<{ value: string }[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [openCountries, setOpenCountries] = useState<boolean>(false);
   const [openNetwork, setOpenNetwork] = useState<boolean>(false);
+  const [isItemDataChanged, setIsItemDataChanged] = useState<boolean[]>(
+    Array(tvDetails?.production_information?.length).fill(false)
+  );
   const { resolvedTheme } = useTheme();
   const router = useRouter();
-
-  useEffect(() => {
-    if (
-      tvDetails?.production_information &&
-      tvDetails?.production_information.length > 0
-    ) {
-      setDatabase(tvDetails?.production_information);
-      setLanguage(
-        tvDetails?.production_information.map((info: any) => info?.language)
-      );
-      setCountries(
-        tvDetails?.production_information.flatMap(
-          (info: any) => info?.country || []
-        )
-      );
-      setNetwork(
-        tvDetails?.production_information.flatMap(
-          (info: any) => info?.network || []
-        )
-      );
-    } else {
-      setDatabase([tv]);
-    }
-  }, [tv, tvDetails?.production_information]);
 
   const handleDropdownToggle = (dropdown: string, idx: number) => {
     setOpenDropdown((prev) =>
@@ -96,7 +83,14 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           tv_id: tv_id.toString(),
           production_information: [
             {
-              language: language,
+              language:
+                language?.length > 0
+                  ? language
+                  : production_language?.find((p) =>
+                      database?.some(
+                        (i) => p?.original === i?.original_language
+                      )
+                    )?.value,
               country: countries,
               network: network,
             },
@@ -114,6 +108,77 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (
+      tvDetails?.production_information &&
+      tvDetails?.production_information.length > 0
+    ) {
+      setDatabase(tvDetails?.production_information);
+      setCountries(
+        tvDetails?.production_information.flatMap(
+          (info: any) => info?.country || []
+        )
+      );
+      setNetwork(
+        tvDetails?.production_information.flatMap(
+          (info: any) => info?.network || []
+        )
+      );
+      setOriginalNetwork(
+        tvDetails?.production_information.flatMap(
+          (info: any) => info?.network || []
+        )
+      );
+    } else {
+      setDatabase([tv]);
+    }
+  }, [tv, tvDetails?.production_information]);
+
+  useEffect(() => {
+    // Check if production_information exists in movieDetails
+    const combinedData = tvDetails?.production_information || [];
+
+    if (combinedData.length > 0) {
+      const countriesArray = combinedData.flatMap(
+        (info: any) =>
+          info?.country?.map((c: any) => ({
+            label: c.label,
+            value: c.value,
+          })) || []
+      );
+      setOriginalCountries(countriesArray);
+      // Only set state if there's new data
+      if (countriesArray.length > 0) {
+        setCountries(countriesArray);
+        setDatabase(combinedData);
+      }
+    } else {
+      const initialNetwork = tv?.networks?.map((net: any) => ({
+        label: net.name,
+        value: net.name,
+      }));
+      // Use existing database to get countries if no new data
+      const countriesArray = database?.flatMap(
+        (d: any) =>
+          d?.production_countries?.map((c: any) => {
+            const countryObj = production_country?.find(
+              (p) => c?.name === p?.value
+            );
+            return countryObj
+              ? { label: countryObj.value, value: countryObj.value }
+              : null; // Return null if not found
+          }) || [] // Provide an empty array if production_countries is undefined
+      );
+      setNetwork(initialNetwork);
+      setOriginalNetwork(initialNetwork);
+      // Set countries array only if it has valid values
+      if (countriesArray.filter(Boolean).length > 0) {
+        setOriginalCountries(countriesArray.filter(Boolean));
+        setCountries(countriesArray.filter(Boolean));
+      }
+    }
+  }, [tvDetails, database, tv.networks]);
 
   return (
     <form className="py-3 px-4" onSubmit={onSubmit}>
@@ -135,10 +200,16 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     readOnly
                     autoComplete="off"
                     className="w-full placeholder:text-sm placeholder:text-black dark:placeholder:text-[#606266] dark:placeholder:opacity-60 text-black dark:text-white bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
-                    placeholder={
-                      data?.language
-                        ? language[idx] || data?.language
-                        : language[idx] || data?.language
+                    value={
+                      language[idx] // If the user has selected a language, show the selected language
+                        ? language[idx]
+                        : data?.language?.length > 0
+                        ? production_language?.find((i) =>
+                            i?.value?.includes(data?.language[0])
+                          )?.value
+                        : production_language?.find(
+                            (i) => i?.original === data?.original_language
+                          )?.value
                     }
                     onClick={() => handleDropdownToggle("language", idx)}
                   />
@@ -150,7 +221,7 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className={`w-full h-[250px] absolute text-black bg-white dark:bg-[#242424] border-[1px] border-[#c0c4cc] dark:border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
+                      className={`w-full h-[250px] absolute text-black dark:text-white bg-white dark:bg-[#242424] border-[1px] border-[#c0c4cc] dark:border-[#242424] py-1 mt-2 rounded-md z-10  custom-scroll`}
                     >
                       {production_language?.map((items, index) => {
                         const scrollIntoViewIfNeeded = (element: any) => {
@@ -175,7 +246,9 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         };
                         const isContentRating = language[idx]
                           ? language[idx] === items?.value
-                          : data?.language?.join(" ") === items?.value;
+                          : data?.language?.length > 0
+                          ? items?.value?.includes(data?.language[0]) // Check if the selected language matches the item's value
+                          : items?.original === data?.original_language;
                         return (
                           <li
                             ref={(el) => {
@@ -273,20 +346,23 @@ const Production: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           name="submit"
           type="submit"
           className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-            language?.length > 0 || countries?.length > 0 || network?.length > 0
+            language?.length > 0 ||
+            countries?.length !== originalCountries?.length ||
+            network?.length !== originalNetwork?.length ||
+            isItemDataChanged?.includes(true)
               ? "cursor-pointer"
               : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
           }`}
           disabled={
-            language?.length > 0 || countries?.length > 0 || network?.length > 0
+            language?.length > 0 ||
+            countries?.length !== originalCountries?.length ||
+            network?.length !== originalNetwork?.length ||
+            isItemDataChanged?.includes(true)
               ? false
               : true
           }
         >
-          <span className="mr-1 pt-1">
-            <ClipLoader color="#c3c3c3" loading={loading} size={19} />
-          </span>
-          Submit
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
         </button>
       </div>
     </form>

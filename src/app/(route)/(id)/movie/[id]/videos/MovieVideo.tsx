@@ -1,7 +1,7 @@
 "use client";
 
 import ColorThief from "colorthief";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa6";
 import Image from "next/image";
@@ -10,8 +10,7 @@ import { fetchMovie } from "@/app/actions/fetchMovieApi";
 import { VscQuestion } from "react-icons/vsc";
 import { movieVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
-import { DramaDB } from "@/helper/type";
-import { getYearFromDate } from "../MovieMain";
+import { MovieDB } from "@/helper/type";
 import MovieTrailers from "./trailers/MovieTrailers";
 import MovieTeasers from "./teasers/MovieTeasers";
 import MovieClips from "./clips/Clips";
@@ -19,13 +18,19 @@ import MovieBehindTheScenes from "./behind_the_scenes/BehindTheScenes";
 import MovieBloopers from "./bloopers/Bloopers";
 import MovieFeaturettes from "./featurettes/Featurettes";
 import LazyImage from "@/components/ui/lazyimage";
+import { getYearFromDate } from "@/app/actions/getYearFromDate";
 
 interface TvTrailerType {
   movie_id: string;
-  movieDB: DramaDB | null;
+  movieDB: MovieDB | null;
+  getMovie: MovieDB[];
 }
 
-const MovieVideo: React.FC<TvTrailerType> = ({ movie_id, movieDB }) => {
+const MovieVideo: React.FC<TvTrailerType> = ({
+  movie_id,
+  movieDB,
+  getMovie,
+}) => {
   const { data: movie, isLoading } = useQuery({
     queryKey: ["movie", movie_id],
     queryFn: () => fetchMovie(movie_id),
@@ -36,6 +41,7 @@ const MovieVideo: React.FC<TvTrailerType> = ({ movie_id, movieDB }) => {
   const [currentPage, setCurrentPage] = useState("/trailers");
   const router = useRouter();
   const pathname = usePathname();
+  const coverFromDB = getMovie?.find((g) => g?.movie_id?.includes(movie_id));
 
   const handleNavigation = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -54,33 +60,47 @@ const MovieVideo: React.FC<TvTrailerType> = ({ movie_id, movieDB }) => {
     }
   }, [pathname]);
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
 
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const color = await getColorFromImage(
+        coverFromDB
+          ? (coverFromDB?.cover as string)
+          : `https://image.tmdb.org/t/p/${
+              movie?.poster_path ? "w500" : "w780"
+            }/${movie?.poster_path || movie?.backdrop_path}`
+      );
+      setDominantColor(color); // Set the dominant color in RGB format
+    }
+  }, [coverFromDB, movie?.backdrop_path, movie?.poster_path]);
+  // Ensure the image element is referenced correctly
   useEffect(() => {
-    const imgElement = imgRef.current;
-    if (imgElement) {
-      const extractColor = () => {
-        const colorThief = new ColorThief();
-        const color = colorThief.getColor(imgElement);
-        if (color) {
-          setDominantColor(`rgb(${color.join(",")})`);
-        }
-      };
-
+    if (imgRef.current) {
+      const imgElement = imgRef.current; // Store the current value in a local variable
       imgElement.addEventListener("load", extractColor);
 
-      // Cleanup function to remove the event listener
+      // Cleanup function
       return () => {
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [movie]);
+  }, [movie, extractColor]);
 
   if (isLoading) {
     return <p>Loading...</p>;

@@ -20,7 +20,7 @@ export async function PUT(request: Request, {params} : {params: {name: string}})
         })
 
         if(coverPhoto) {
-            const imgId = user?.public_id
+            const imgId = user?.public_cover_id
             if(imgId) {
                 await cloudinary.uploader.destroy(imgId)
             }
@@ -37,7 +37,7 @@ export async function PUT(request: Request, {params} : {params: {name: string}})
                 },
                 data: {
                     coverPhoto: uploadRes.url,
-                    public_id: uploadRes.public_id,
+                    public_cover_id: uploadRes.public_id,
                 }
             })
             return NextResponse.json(uploadCover, {status:200})

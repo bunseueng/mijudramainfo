@@ -29,7 +29,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     let changeCount = 0;
     
     if(cover) {
-        const imgId = existingPerson?.public_id
+        const imgId = existingPerson?.public_cover_id
         if(imgId) {
             await cloudinary.uploader.destroy(imgId)
         }
@@ -63,7 +63,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
               data: {
                 details,
                 cover: uploadRes.url,
-                public_id: uploadRes.public_id,
+                public_cover_id: uploadRes.public_id,
                 cast,
                 crew,
                 changes: {
@@ -83,7 +83,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                       personId,
                       details,
                       cover: uploadRes.url,
-                      public_id: uploadRes.public_id,
+                      public_cover_id: uploadRes.public_id,
                       cast,
                       crew,
                       changes: [

@@ -2,6 +2,7 @@
 
 import { fetchTrailer } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
+import React from "react";
 import { useState } from "react";
 import { FaPlay } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";

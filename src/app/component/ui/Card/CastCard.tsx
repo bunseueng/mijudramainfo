@@ -41,11 +41,11 @@ const CastCard = ({ getDrama, cast }: any) => {
                   <Link
                     prefetch={true}
                     href={`/person/${item?.id}`}
-                    className="text-md md:text-lg font-bold truncate text-[#2196f3] hover:opacity-75 transform duration-300 cursor-pointer"
+                    className="md:inline-block md:max-w-[145px] text-semibold text-sm md:text-md md:overflow-hidden md:whitespace-nowrap md:text-ellipsis truncate text-[#2196f3] hover:opacity-75 transform duraiton-300 font-bold"
                   >
                     {item?.name}
                   </Link>
-                  <h4 className="text-semibold text-sm md:text-md">
+                  <h4 className="text-semibold text-xs md:text-sm">
                     {item?.roles[0]?.character}
                   </h4>
 
@@ -91,11 +91,11 @@ const CastCard = ({ getDrama, cast }: any) => {
                   <Link
                     prefetch={true}
                     href={`/person/${item?.id}`}
-                    className="text-md md:text-lg font-bold truncate text-[#2196f3] hover:opacity-75 transform duration-300 cursor-pointer"
+                    className="md:inline-block md:max-w-[145px] text-semibold text-sm md:text-md md:overflow-hidden md:whitespace-nowrap md:text-ellipsis truncate text-[#2196f3] hover:opacity-75 transform duraiton-300 font-bold"
                   >
                     {item?.name}
                   </Link>
-                  <p className="md:inline-block md:max-w-[145px] text-semibold text-sm md:text-md md:overflow-hidden md:whitespace-nowrap md:text-ellipsis">
+                  <p className="md:inline-block md:max-w-[145px] text-semibold text-xs md:text-sm md:overflow-hidden md:whitespace-nowrap md:text-ellipsis">
                     {item?.character}
                   </p>
 

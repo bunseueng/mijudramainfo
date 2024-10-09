@@ -27,6 +27,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { mergeAndRemoveDuplicates } from "@/app/actions/mergeAndRemove";
+import { Loader2 } from "lucide-react";
 
 const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { data: tv } = useQuery({
@@ -813,7 +814,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   ? counter
                   : detail?.duration
                   ? detail?.duration
-                  : tv?.episode_run_time?.[0]
+                  : tv?.episode_run_time?.[0] || ""
               }
               onChange={(e) => setCurrentDuration(Number(e.target.value))}
             />
@@ -869,7 +870,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 ? epCounter
                 : detail?.episode
                 ? detail?.episode
-                : tv?.number_of_episodes
+                : tv?.number_of_episodes || ""
             }
             onChange={(e) => setCurrentEpisode(Number(e.target.value))}
           />
@@ -915,10 +916,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             }`}
             disabled={isSubmitEnabled || results?.length > 0 ? false : true}
           >
-            <span className="mr-1 pt-1">
-              <ClipLoader color="#c3c3c3" loading={loading} size={19} />
-            </span>
-            Submit
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
           </button>
           <button
             name="Reset"
@@ -931,9 +929,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             disabled={isSubmitEnabled || results?.length > 0 ? false : true}
           >
             {resetLoading ? (
-              <span className="pt-1 mr-1">
-                <ClipLoader color="#c3c3c3" loading={!loading} size={19} />
-              </span>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <span className="mr-1">
                 <FaRegTrashAlt />

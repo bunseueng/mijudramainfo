@@ -34,7 +34,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     let changeCount = 0;
     
     if(cover) {
-        const imgId = existingDrama?.public_id
+        const imgId = existingDrama?.public_cover_id
         if(imgId) {
             await cloudinary.uploader.destroy(imgId)
         }
@@ -68,7 +68,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
               data: {
                 details,
                 cover: uploadRes.url,
-                public_id: uploadRes.public_id,
+                public_cover_id: uploadRes.public_id,
                 related_title,
                 cast,
                 crew,
@@ -100,7 +100,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                       tv_id,
                       details,
                       cover: uploadRes.url,
-                      public_id: uploadRes.public_id,
+                      public_cover_id: uploadRes.public_id,
                       related_title,
                       cast,
                       crew,

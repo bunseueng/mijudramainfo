@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
 import VarietyShow from "./VarietyShow";
+import prisma from "@/lib/db";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
@@ -14,11 +15,12 @@ export const metadata: Metadata = {
   description: "Find Variety Show.",
 };
 
-const VarietyShowPage = () => {
+const VarietyShowPage = async () => {
+  const getDrama = await prisma.drama.findMany();
   return (
     <div className="mt-10">
       <Suspense fallback={<SearchLoading />}>
-        <VarietyShow />
+        <VarietyShow getDrama={getDrama} />
       </Suspense>
     </div>
   );

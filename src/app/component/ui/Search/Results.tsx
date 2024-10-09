@@ -15,6 +15,9 @@ export default function Results({
   fetchCollection,
   fetchPersons,
   currentUser,
+  getDrama,
+  getMovie,
+  getPerson,
 }: any) {
   const path = BASE_URL.split("/").pop();
   return (
@@ -38,6 +41,8 @@ export default function Results({
                       result={result}
                       searchQuery={searchQuery}
                       BASE_URL={BASE_URL}
+                      getDrama={getDrama}
+                      getMovie={getMovie}
                     />
                   </Suspense>
                 ) : (
@@ -48,6 +53,7 @@ export default function Results({
                       searchQuery={searchQuery}
                       BASE_URL={BASE_URL}
                       currentUser={currentUser}
+                      getPerson={getPerson}
                     />
                   </Suspense>
                 )}

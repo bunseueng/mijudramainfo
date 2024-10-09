@@ -38,12 +38,14 @@ const WatchProvider = ({ getDrama, tv, selectedProvider }: any) => {
                 <div className="flex flex-col items-start ml-2">
                   <Link
                     href={`${show?.link}`}
-                    className="text-md md:text-lg font-bold truncate text-[#2196f3] hover:opacity-75 transform duration-300 cursor-pointer"
+                    className="text-sm md:text-md font-bold truncate text-[#2196f3] hover:opacity-75 transform duration-300 cursor-pointer"
                   >
                     {show?.provider_name}
                   </Link>
 
-                  <p className="dark:text-[#818a91]">{show?.service_type}</p>
+                  <p className="text-xs dark:text-[#818a91]">
+                    {show?.service_type}
+                  </p>
                 </div>
               </div>
             </div>

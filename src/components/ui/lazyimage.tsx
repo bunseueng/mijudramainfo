@@ -15,6 +15,7 @@ const LazyImage = ({
   onLoad,
   quality,
   sizes,
+  coverFromDB,
   ref,
 }: any) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -40,14 +41,20 @@ const LazyImage = ({
     };
   }, []);
 
-  const imageSrc = isVisible
-    ? `https://image.tmdb.org/t/p/${w}${src}`
-    : "/placeholder-image.avif";
+  // Check if the source is undefined, null, or contains 'undefined'
+  const isSrcInvalid =
+    !src || src === "undefined" || src === null || src.includes("undefined");
 
+  // Set imageSrc based on visibility and validity of the source
+  const imageSrc = isVisible
+    ? isSrcInvalid
+      ? "/placeholder-image.avif" // Placeholder image for invalid src
+      : `https://image.tmdb.org/t/p/${w}${src}`
+    : "/placeholder-image.avif"; // Placeholder while image is not visible
   return (
     <Image
       ref={imgRef}
-      src={imageSrc}
+      src={coverFromDB ? coverFromDB : imageSrc}
       alt={alt}
       width={width}
       height={height}

@@ -72,7 +72,7 @@ const Bloopers: React.FC<TvTrailerType> = ({ tv_id, tv }) => {
     <>
       {tvTrailer?.results?.filter((type: any) => type?.type === "Bloopers")
         ?.length === 0 ? (
-        <p className="relative float-left w-full md:w-[75%] -px-3 py-3 my-10">
+        <p className="relative float-left w-full md:w-[75%] text-center md:text-start -px-3 py-3 my-10">
           There no Bloopers for {tv?.title || tv?.name} yet!
         </p>
       ) : (

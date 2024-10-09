@@ -20,7 +20,7 @@ const PersonExternalLink = dynamic(
 
 export interface PersonEditList {
   person_id: string;
-  personDB: PersonDBType | null;
+  personDB: PersonDBType | any;
 }
 
 const PersonEditList: React.FC<PersonEditList> = ({ person_id, personDB }) => {

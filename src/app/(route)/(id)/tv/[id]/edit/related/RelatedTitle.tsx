@@ -9,6 +9,7 @@ import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -29,6 +30,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [tvIds, setTvIds] = useState<number[]>(tv_id ? [] : []);
   const [prevStories, setPrevStories] = useState<string[]>([]);
@@ -41,7 +43,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchResultRef = useRef<HTMLDivElement>(null);
   const searchQuery = useSearchParams();
-  const query = searchQuery?.get("query") || "";
+  const query = searchQuery?.get("q") || "";
   const router = useRouter();
   const { register, handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
@@ -60,8 +62,6 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       return [...tvDetails];
     },
     enabled: true,
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
   const {
@@ -71,9 +71,6 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   } = useQuery({
     queryKey: ["tvSearch"],
     queryFn: () => fetchTvSearch(query),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const [storedData, setStoredData] = useState<any[]>([]);
@@ -116,6 +113,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const onSubmit = async () => {
     try {
+      setLoading(true);
       // Create a map of updated stories by matching indices
       const updatedStoriesMap = itemRelatedStories.reduce(
         (map: any, story, index) => {
@@ -169,6 +167,8 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     } catch (error: any) {
       console.error("Error:", error.message);
       throw new Error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -474,7 +474,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               setStoredData={setStoredData}
               openSearch={openSearch}
               setItem={setItem}
-              setQuery={""}
+              query={query}
             />
           </div>
         </div>
@@ -497,7 +497,7 @@ const RelatedTitle: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             : true
         }
       >
-        Submit
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
       </button>
     </form>
   );

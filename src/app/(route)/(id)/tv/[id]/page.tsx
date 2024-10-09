@@ -10,7 +10,6 @@ const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
-const TvList = dynamic(() => import("./TvList"), { ssr: false });
 
 export const maxDuration = 60;
 export const revalidate = 3600;
@@ -75,23 +74,18 @@ export default async function tvPage({ params }: { params: { id: string } }) {
     where: { userId: user?.id },
   });
   const lists = await prisma.dramaList.findMany({});
-
   const existedWatchlist = watchlist.find((item: any) =>
     item.tvId.some((tv: any) => tv.id === parseInt(tv_id))
   );
-
   const existedFavorite = watchlist.find((item: any) =>
     item.favoriteIds.some((movie: any) => movie.id === parseInt(tv_id))
   );
-
   const userRating = await prisma.rating.findMany({
     where: { userId: user?.id, tvId: tv_id },
   });
-
   const existingRatings = await prisma.rating.findMany({
     where: { tvId: tv_id },
   });
-
   const getComment = await prisma.comment.findMany({
     where: {
       postId: tv_id,
@@ -105,23 +99,20 @@ export default async function tvPage({ params }: { params: { id: string } }) {
   const getDrama = await prisma.drama.findUnique({ where: { tv_id: tv_id } });
 
   return (
-    <>
-      <TvList tv_id={tv_id} />
-      <Suspense key={tv_id} fallback={<SearchLoading />}>
-        <DramaMain
-          tv_id={tv_id}
-          existedWatchlist={existedWatchlist}
-          existedFavorite={existedFavorite}
-          user={user}
-          users={users}
-          existingRatings={existingRatings}
-          userRating={userRating}
-          getComment={getComment}
-          getDrama={getDrama}
-          getReview={getReview}
-          lists={lists}
-        />
-      </Suspense>
-    </>
+    <Suspense key={tv_id} fallback={<SearchLoading />}>
+      <DramaMain
+        tv_id={tv_id}
+        existedWatchlist={existedWatchlist}
+        existedFavorite={existedFavorite}
+        user={user}
+        users={users}
+        existingRatings={existingRatings}
+        userRating={userRating}
+        getComment={getComment}
+        getDrama={getDrama}
+        getReview={getReview}
+        lists={lists}
+      />
+    </Suspense>
   );
 }

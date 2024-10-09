@@ -11,7 +11,7 @@ import { ShareButton } from "@/app/component/ui/Button/ShareButton";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import ColorThief from "colorthief";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
@@ -107,13 +107,33 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
     (item: any) => item?.known_for_department === "Art"
   );
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
     }
+
+    return data.averageColor;
   };
+
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const color = await getColorFromImage(
+        `https://image.tmdb.org/t/p/${tv?.poster_path ? "w154" : "w300"}/${
+          tv?.poster_path || tv?.backdrop_path
+        }`
+      );
+      setDominantColor(color); // Set the dominant color in RGB format
+    }
+  }, [tv?.backdrop_path, tv?.poster_path]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -125,7 +145,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [tv]);
+  }, [extractColor]);
 
   if (!tv || !cast) {
     return <SearchLoading />; // Add loading state if data is being fetched
@@ -140,7 +160,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
         <div className="max-w-6xl mx-auto flex items-center mt-0 py-2">
           <div className="flex items-center lg:items-start px-4 md:px-6 cursor-default">
             {tv?.poster_path || tv?.backdrop_path !== null ? (
-              <LazyImage
+              <Image
                 ref={imgRef}
                 onLoad={extractColor}
                 src={`https://image.tmdb.org/t/p/${
@@ -182,7 +202,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
         </div>
       </div>
       <div className="max-w-6xl mx-auto mt-0 py-2 lg:py-6 relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row items-start px-2">
+        <div className="flex flex-col md:flex-row items-start px-2">
           <div className="w-full h-full md:w-[66.66667%] px-3">
             <div className=" bg-white dark:bg-[#242424] border rounded-md ">
               <div className="w-full bg-sky-300 dark:bg-[#242424] border-b boder-b-bg-slate-200 dark:border-b-[#272727] rounded-md p-5">
@@ -279,11 +299,11 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
               </div>
             </div>
           </div>
-          <div className="w-full h-full md:w-[33.33333%] px-3">
-            <div className="flex flex-col items-center content-center max-w-[97rem] mx-auto py-10 md:p-4 border rounded-md bg-white p-2 dark:bg-[#242424]">
+          <div className="w-full h-full md:w-[33.33333%] my-5 md:my-0">
+            <div className="hidden md:flex flex-col items-center content-center max-w-[97rem] mx-auto py-10 md:p-4 border rounded-md bg-white p-2 dark:bg-[#242424]">
               <LazyImage
                 src={`https://image.tmdb.org/t/p/${
-                  tv?.poster_path ? "w154" : "w300"
+                  tv?.poster_path ? "h632" : "w780"
                 }/${tv?.poster_path || tv?.backdrop_path}`}
                 alt={`${tv?.name}'s Poster`}
                 width={350}
@@ -291,7 +311,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
                 quality={100}
                 className="block align-middle w-[350px] h-[480px]"
               />
-              <div className="mt-2 flex items-center justify-between">
+              <div className="mt-2 flex items-center justify-between hide">
                 <ShareButton
                   tv={`https://image.tmdb.org/t/p/original/${
                     tv?.poster_path || tv?.backdrop_path
@@ -299,7 +319,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
                 />
               </div>
             </div>
-            <div className="mt-5">
+            <div className="mt-5 px-3 md:px-0">
               <TvInfo
                 getDrama={getDrama}
                 language={language}

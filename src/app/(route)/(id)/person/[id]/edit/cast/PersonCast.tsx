@@ -28,6 +28,7 @@ import { AnimatePresence, Reorder, motion } from "framer-motion";
 import { GrPowerReset } from "react-icons/gr";
 import { PersonEditList } from "../details/PersonEditList";
 import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
 
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
@@ -849,10 +850,11 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
             : true
         }
       >
-        <span className="mr-1 pt-1">
-          <ClipLoader color="#242526" loading={submitLoading} size={19} />
-        </span>
-        Submit
+        {submitLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          "Submit"
+        )}
       </button>
     </form>
   );

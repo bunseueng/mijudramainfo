@@ -53,7 +53,7 @@ const ExternalEditModal: React.FC<ExternalType> = ({
             url: data?.url,
             link_url:
               external_link.find((item) => item.label === selectedExternal)
-                ?.link_url || "",
+                ?.link_url || item?.link_url,
             link_text: data.link_text,
             additional_text: data.additional_text,
           };

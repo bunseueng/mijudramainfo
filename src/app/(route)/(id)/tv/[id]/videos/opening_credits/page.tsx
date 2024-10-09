@@ -5,7 +5,8 @@ import TvVideo from "../TvVideo";
 const OpeningCreditPage = async ({ params }: any) => {
   const tv_id = params.id;
   const tvDB = await prisma.drama.findUnique({ where: { tv_id: tv_id } });
-  return <TvVideo tv_id={tv_id} tvDB={tvDB} />;
+  const getDrama = await prisma.drama.findMany();
+  return <TvVideo tv_id={tv_id} tvDB={tvDB} getDrama={getDrama} />;
 };
 
 export default OpeningCreditPage;

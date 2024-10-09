@@ -181,18 +181,12 @@ export const externalLink = z.object({
   id: z.string().min(3, { message: "is required." }).optional(),
   url: z.string().min(3, { message: "is required." }).optional(),
   link_text: z.string().optional(),
+  link_url: z.string().optional(),
   additional_text: z.string().optional(),
   selectedExternal: any(),
 });
 
 export type TExternalLink = z.infer<typeof externalLink>;
-
-export const coin = z.object({
-  email: z.any(),
-  items: z.any(),
-});
-
-export type TCoin = z.infer<typeof externalLink>;
 
 export const CreatePersonDetails = z.object({
   userId: z.string().optional(),

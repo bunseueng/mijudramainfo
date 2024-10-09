@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
+import React from "react";
 
 interface Notification {
   users: UserProps[] | undefined;
@@ -70,6 +71,7 @@ const NotificationModal: React.FC<Notification> = ({
     queryFn: () => fetchTv(tv_id.flat()),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
+    refetchOnMount: true, // Refetch on mount to get the latest data
   });
 
   const friendNoti = status.map((fri) => fri?.notification).flat();
@@ -216,7 +218,7 @@ const NotificationModal: React.FC<Notification> = ({
           </div>
           {(isRepliedItself?.length < 1 && hasUnreadReplies) ||
           hasUnreadFriends ? (
-            <div className="">
+            <>
               {hasUnreadFriends && (
                 <>
                   {status.map((req, idx) => {
@@ -384,7 +386,7 @@ const NotificationModal: React.FC<Notification> = ({
                   })}
                 </>
               )}
-            </div>
+            </>
           ) : (
             <div className="text-center border-t border-t-[#3e4042] py-10 px-4">
               <h1 className="text-black dark:text-[#ffffffde] font-bold mb-6">

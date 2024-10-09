@@ -30,7 +30,7 @@ const Director = ({ directors, directorsDB }: any) => {
                 <Link href={`/person/${item?.id}`} className="cursor-pointer">
                   {item.profile_path === null ? (
                     <Image
-                      src="/empty-pf.jpg"
+                      src="/default-pf.jpg"
                       alt={`${item?.name}'s Profile`}
                       width={200}
                       height={200}
@@ -72,7 +72,7 @@ const Director = ({ directors, directorsDB }: any) => {
                 <Link href={`/person/${item?.id}`} className="cursor-pointer">
                   {item.profile_path === null ? (
                     <Image
-                      src="/empty-pf.jpg"
+                      src="/default-pf.jpg"
                       alt={`${item?.name}'s Profile`}
                       width={200}
                       height={200}

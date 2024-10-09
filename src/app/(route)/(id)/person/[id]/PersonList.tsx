@@ -1,5 +1,6 @@
 "use client";
 
+import ReportModal from "@/app/component/ui/Modal/ReportModal";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,6 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Copy } from "lucide-react";
@@ -21,7 +23,7 @@ const PersonList = ({ personId }: any) => {
   const [currentItem, setCurrentItem] = useState<string>("Overview");
   const [currentUrl, setCurrentUrl] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean[]>([]);
-  const [shareUrl, setShareUrl] = useState("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -35,10 +37,6 @@ const PersonList = ({ personId }: any) => {
       setHovered(null);
     }, 200);
   };
-
-  useEffect(() => {
-    setCurrentUrl(`${window.location.origin}${pathname}`);
-  }, [pathname]);
 
   const shareOnFacebook = () => {
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
@@ -64,7 +62,7 @@ const PersonList = ({ personId }: any) => {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(currentUrl);
       toast.success("Copied to clipboard");
       setIsShareModalOpen([]);
     } catch (err) {
@@ -72,6 +70,9 @@ const PersonList = ({ personId }: any) => {
     }
   };
 
+  useEffect(() => {
+    setCurrentUrl(`${window.location.origin}${pathname}`);
+  }, [pathname]);
   return (
     <div className="bg dark:bg-[#191a20] border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
       <ul className="relative inline-block m-0 p-0">
@@ -130,11 +131,14 @@ const PersonList = ({ personId }: any) => {
                   External_Links Credits
                 </Link>
               </li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link prefetch={true} href={`/person/${personId}/edit/details`}>
-                  Report
-                </Link>
-              </li>
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger asChild>
+                  <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
+                    Report a Problem
+                  </li>
+                </DialogTrigger>
+                {isOpen && <ReportModal route="person" id={personId} />}
+              </Dialog>
             </ul>
           </div>
         )}
@@ -158,7 +162,9 @@ const PersonList = ({ personId }: any) => {
             onMouseLeave={handleNavbarMouseLeave}
           >
             <ul className="text-black py-2">
-              <li className="text-sm my-2 mx-6 cursor-pointer">Profiles</li>
+              <Link href={`/person/${personId}/photos`}>
+                <li className="text-sm my-2 mx-6 cursor-pointer">Profiles</li>
+              </Link>
             </ul>
           </div>
         )}

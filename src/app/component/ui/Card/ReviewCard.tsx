@@ -1,7 +1,6 @@
 "use client";
 
 import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
-import MediaPage from "@/app/(route)/(id)/tv/[id]/media/page";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -11,6 +10,7 @@ import { IoHeartSharp } from "react-icons/io5";
 import { LuCalendarClock } from "react-icons/lu";
 import { TiStar } from "react-icons/ti";
 import ReviewDBCard from "./ReviewDBCard";
+import MediaPhoto from "@/app/(route)/(id)/tv/[id]/Media";
 
 const ReviewCard = ({
   review,
@@ -74,7 +74,7 @@ const ReviewCard = ({
 
   return (
     <div>
-      <MediaPage
+      <MediaPhoto
         tv={tv}
         mediaActive={mediaActive}
         setMediaActive={setMediaActive}

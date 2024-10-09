@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import ExploreMovieCard from "@/app/component/ui/Card/ExploreMovieCard";
+import { MovieDB } from "@/helper/type";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
@@ -13,7 +14,7 @@ const SearchLoading = dynamic(
 
 export const revalidate = 0;
 
-const UpcomingMovie = () => {
+const UpcomingMovie = ({ getMovie }: MovieDB | any) => {
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams?.get("page") || "1");
   const title = "Upcoming Drama";
@@ -26,7 +27,12 @@ const UpcomingMovie = () => {
 
   return (
     <Suspense fallback={<SearchLoading />}>
-      <ExploreMovieCard title={title} movie={upcomingMovie} />;
+      <ExploreMovieCard
+        title={title}
+        movie={upcomingMovie}
+        getMoive={getMovie}
+      />
+      ;
     </Suspense>
   );
 };

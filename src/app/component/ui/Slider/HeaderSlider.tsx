@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTrending } from "@/app/actions/fetchMovieApi";
-import ColorThief from "colorthief";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { ITmdbDrama } from "@/helper/type";
@@ -58,34 +57,41 @@ const HeaderSlider = () => {
 
     return data.averageColor;
   };
-
   const handleExtractColor = useCallback(async () => {
     const currentItem = filteredData && filteredData[currentIndex];
     if (currentItem?.backdrop_path) {
       const averageColor = await getColorFromImage(
         `https://image.tmdb.org/t/p/w300/${currentItem.backdrop_path}`
       );
-      const [r, g, b] = averageColor && averageColor?.match(/\d+/g).map(Number);
-      setRgbColor(`rgb(${r}, ${g}, ${b})`);
 
-      // Create RGB color
-      const rgbColor = `rgb(${r}, ${g}, ${b})`;
-      // Create two RGBA colors with different alpha values
-      const startColor = `rgba(${r}, ${g}, ${b}, 0.9)`; // Start color with alpha 0.9
-      const endColor = `rgba(${r}, ${g}, ${b}, 0.7)`; // End color with alpha 0.7
-      const startColorBot = `rgba(${r}, ${g}, ${b}, 0.7)`; // Start color with alpha 0.9
-      const endColorBot = `rgba(${r}, ${g}, ${b}, 0)`; // End color with alpha 0.7
+      // Check if averageColor is valid and matches the regex pattern
+      const colorMatch = averageColor && averageColor.match(/\d+/g);
+      if (colorMatch && colorMatch.length >= 3) {
+        const [r, g, b] = colorMatch.map(Number);
 
-      // Create a linear gradient with the extracted colors
-      const gradientBackground = `linear-gradient(${startColor}, ${endColor})`;
-      const gradientBackgroundBot = `linear-gradient(${startColorBot}, ${endColorBot})`;
-      const gradientBackground270 = `linear-gradient(270deg, rgb(${r}, ${g}, ${b}) 0%, transparent)`;
+        setRgbColor(`rgb(${r}, ${g}, ${b})`);
 
-      // Set the dominant color as the gradient
-      setRgbColor(rgbColor);
-      setDominantColor(gradientBackground);
-      setDominantColorBot(gradientBackgroundBot);
-      setExtractDeg(gradientBackground270);
+        // Create RGB color
+        const rgbColor = `rgb(${r}, ${g}, ${b})`;
+        // Create two RGBA colors with different alpha values
+        const startColor = `rgba(${r}, ${g}, ${b}, 0.9)`; // Start color with alpha 0.9
+        const endColor = `rgba(${r}, ${g}, ${b}, 0.7)`; // End color with alpha 0.7
+        const startColorBot = `rgba(${r}, ${g}, ${b}, 0.7)`; // Start color with alpha 0.9
+        const endColorBot = `rgba(${r}, ${g}, ${b}, 0)`; // End color with alpha 0.7
+
+        // Create a linear gradient with the extracted colors
+        const gradientBackground = `linear-gradient(${startColor}, ${endColor})`;
+        const gradientBackgroundBot = `linear-gradient(${startColorBot}, ${endColorBot})`;
+        const gradientBackground270 = `linear-gradient(270deg, rgb(${r}, ${g}, ${b}) 0%, transparent)`;
+
+        // Set the dominant color as the gradient
+        setRgbColor(rgbColor);
+        setDominantColor(gradientBackground);
+        setDominantColorBot(gradientBackgroundBot);
+        setExtractDeg(gradientBackground270);
+      } else {
+        console.error("Failed to extract valid RGB colors from the image");
+      }
     }
   }, [currentIndex, filteredData]);
 

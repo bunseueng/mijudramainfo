@@ -5,11 +5,17 @@ import { fetchTvByNetwork, fetchTvNetworks } from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { StyledRating } from "@/app/actions/StyleRating";
 import { useQuery } from "@tanstack/react-query";
-import ColorThief from "colorthief";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import React, { cache, Suspense, useEffect, useRef, useState } from "react";
+import React, {
+  cache,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { BsGlobeAsiaAustralia } from "react-icons/bs";
 import { CiLocationOn } from "react-icons/ci";
 import { PiShareNetworkBold } from "react-icons/pi";
@@ -64,17 +70,34 @@ const Network: React.FC<Network> = ({ network_id }) => {
   const items = networks?.total_results;
   const totalItems = networks?.results?.slice(start, end) || []; // Use slice on results
 
-  const extractColor = () => {
+  const getColorFromImage = async (imageUrl: string) => {
+    const response = await fetch("/api/extracting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.error || "Failed to get color");
+    }
+
+    return data.averageColor;
+  };
+  const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief?.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`);
+      const color = await getColorFromImage(
+        `https://image.tmdb.org/t/p/w300/${networksDetail?.logo_path}`
+      );
+      setDominantColor(color);
 
       // Calculate brightness
       const brightness = color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114;
       setIsBright(brightness > 186); // Adjust this threshold as needed
     }
-  };
+  }, [networksDetail?.logo_path]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -85,7 +108,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [networksDetail]);
+  }, [extractColor]);
 
   const [tvRating, setTvRating] = useState<any>();
 
@@ -176,7 +199,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
       >
         <div className="max-w-[1520px] mx-auto py-4 px-4 md:px-6">
           <div className="w-full">
-            <LazyImage
+            <Image
               ref={imgRef}
               src={`https://image.tmdb.org/t/p/w300/${networksDetail?.logo_path}`}
               alt={`${networksDetail?.name}'s Logo`}

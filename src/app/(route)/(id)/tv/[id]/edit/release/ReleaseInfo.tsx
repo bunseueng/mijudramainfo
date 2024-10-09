@@ -24,6 +24,7 @@ import moment from "moment";
 import { AnimatePresence, motion } from "framer-motion";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
 const AddSeasonModal = dynamic(
   () => import("@/app/component/ui/Modal/AddSeasonModal")
 );
@@ -1105,10 +1106,7 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               : true
           }
         >
-          <span className="mr-1 pt-1">
-            <ClipLoader color="#c3c3c3" loading={loading} size={19} />
-          </span>
-          Submit
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
         </button>
       </div>
     </form>

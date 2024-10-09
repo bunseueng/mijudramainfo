@@ -6,9 +6,6 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { loadStripe } from "@stripe/stripe-js";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { coin, TCoin } from "@/helper/zod";
 import { toast } from "react-toastify";
 import {
   PayPalButtons,
@@ -38,9 +35,7 @@ const PaymentModal: React.FC<PaymentType> = ({
   const [linkToStripe, setLinkToStripe] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<string>("Credit");
   const { data: session } = useSession();
-  const { handleSubmit, register } = useForm<TCoin>({
-    resolver: zodResolver(coin),
-  });
+
   const route = useRouter();
 
   const checkout = async () => {
@@ -205,6 +200,7 @@ const PaymentModal: React.FC<PaymentType> = ({
                   </button>
                 </div>
               </div>
+
               <div className="text-center mb-6">
                 <div
                   className={`w-[40%] inline-block text-center h-20 border-[1px] rounded-md align-top py-3 m-3 cursor-pointer ${
@@ -224,24 +220,26 @@ const PaymentModal: React.FC<PaymentType> = ({
                   </div>
                   <div className="text-center">PayPal</div>
                 </div>
-                <div
-                  className={`w-[40%] inline-block text-center h-20 border-[1px] rounded-md align-top py-3 m-3 cursor-pointer ${
-                    paymentMethod === "Credit" &&
-                    "bg-[#ecf5ff] border-[#06090c21] dark:text-black"
-                  }`}
-                  onClick={() => setPaymentMethod("Credit")}
-                >
-                  <div className="inline-block pb-1">
-                    <Image
-                      src="/credit.png"
-                      alt="Credit Card Image"
-                      width={100}
-                      height={100}
-                      className="w-8 h-8 bg-center object-cover"
-                    />
+                {process.env.NODE_ENV === "development" && (
+                  <div
+                    className={`w-[40%] inline-block text-center h-20 border-[1px] rounded-md align-top py-3 m-3 cursor-pointer ${
+                      paymentMethod === "Credit" &&
+                      "bg-[#ecf5ff] border-[#06090c21] dark:text-black"
+                    }`}
+                    onClick={() => setPaymentMethod("Credit")}
+                  >
+                    <div className="inline-block pb-1">
+                      <Image
+                        src="/credit.png"
+                        alt="Credit Card Image"
+                        width={100}
+                        height={100}
+                        className="w-8 h-8 bg-center object-cover"
+                      />
+                    </div>
+                    <div className="text-center">Credit Card</div>
                   </div>
-                  <div className="text-center">Credit Card</div>
-                </div>
+                )}
               </div>
               <div className="text-center text-[#00000099] dark:text-white font-semibold m-6">
                 Total: <span>${price}</span>

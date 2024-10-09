@@ -3,6 +3,7 @@ import Link from "next/link";
 import React from "react";
 
 const SupportRole = ({ cast, getDrama }: any) => {
+  console?.log(cast);
   return (
     <div className="md:grid grid-cols-1 md:grid-cols-2 px-5">
       {getDrama?.cast?.length > 0
@@ -25,7 +26,7 @@ const SupportRole = ({ cast, getDrama }: any) => {
                     >
                       {item.profile_path === null ? (
                         <Image
-                          src="/empty-pf.jpg"
+                          src="/default-pf.jpg"
                           alt={`${item?.name}'s Profile`}
                           width={200}
                           height={200}
@@ -82,7 +83,7 @@ const SupportRole = ({ cast, getDrama }: any) => {
                     >
                       {item.profile_path === null ? (
                         <Image
-                          src="/empty-pf.jpg"
+                          src="/default-pf.jpg"
                           alt={`${item?.name}'s Profile`}
                           width={200}
                           height={200}

@@ -27,6 +27,7 @@ import dynamic from "next/dynamic";
 import LazyImage from "@/components/ui/lazyimage";
 import { Button } from "@/components/ui/button";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
   { ssr: false }
@@ -757,10 +758,11 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               : true
           }
         >
-          <span className="mr-1 pt-1">
-            <ClipLoader color="#c3c3c3" loading={submitLoading} size={19} />
-          </span>
-          Submit
+          {submitLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Submit"
+          )}
         </button>
         <button
           type="button"
@@ -773,9 +775,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           disabled={hasReordered ? false : true}
         >
           {resetLoading ? (
-            <span className="pt-1 mr-1">
-              <ClipLoader color="#dcdfe6" loading={!loading} size={17} />
-            </span>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <span className="mr-1">
               <FaRegTrashAlt />

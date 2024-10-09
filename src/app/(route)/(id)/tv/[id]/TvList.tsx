@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchImages, fetchTv } from "@/app/actions/fetchMovieApi";
+import ReportModal from "@/app/component/ui/Modal/ReportModal";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,18 +9,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import LazyImage from "@/components/ui/lazyimage";
+import { tvId } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Copy } from "lucide-react";
+import { Copy } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import { toast } from "react-toastify";
 
-const TvList = ({ tv_id }: any) => {
+const TvList = ({ tv_id }: tvId) => {
   const { data: tv } = useQuery({
     queryKey: ["tv"],
     queryFn: () => fetchTv(tv_id),
@@ -38,7 +41,7 @@ const TvList = ({ tv_id }: any) => {
   const [currentItem, setCurrentItem] = useState<string>("Overview");
   const [currentUrl, setCurrentUrl] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean[]>([]);
-  const [shareUrl, setShareUrl] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -52,10 +55,6 @@ const TvList = ({ tv_id }: any) => {
       setHovered(null);
     }, 200);
   };
-
-  useEffect(() => {
-    setCurrentUrl(`${window.location.origin}${pathname}`);
-  }, [pathname]);
 
   const shareOnFacebook = () => {
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
@@ -82,13 +81,17 @@ const TvList = ({ tv_id }: any) => {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(currentUrl);
       toast.success("Copied to clipboard");
       setIsShareModalOpen([]);
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
   };
+
+  useEffect(() => {
+    setCurrentUrl(`${window.location.origin}${pathname}`);
+  }, [pathname]);
 
   return (
     <div className="bg-[#191a20] text-white border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
@@ -185,11 +188,14 @@ const TvList = ({ tv_id }: any) => {
                   Production Information
                 </Link>
               </li>
-              <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
-                <Link prefetch={true} href={`/tv/${tv_id}/edit/details`}>
-                  Report
-                </Link>
-              </li>
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger asChild>
+                  <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
+                    Report a Problem
+                  </li>
+                </DialogTrigger>
+                {isOpen && <ReportModal route="tv" id={tv_id} />}
+              </Dialog>
             </ul>
           </div>
         )}
@@ -208,32 +214,16 @@ const TvList = ({ tv_id }: any) => {
         </li>
         {(hovered === "Media" || hovered === "Videos") && (
           <div
-            className="absolute top-7 left-28 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
+            className="absolute top-7 left-14 lg:left-[116px] bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
             onMouseEnter={() => handleNavbarMouseEnter("Media")}
             onMouseLeave={handleNavbarMouseLeave}
           >
             <ul className="relative text-black py-2">
               <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
-                <Link prefetch={true} href={`/tv/${tv_id}/media`}>
-                  Backdrops{" "}
-                  <span className="text-[#00000099] pl-2">
-                    {image?.backdrops?.length}
-                  </span>
-                </Link>
-              </li>
-              <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
-                <Link prefetch={true} href={`/tv/${tv_id}/media`}>
-                  Logos{" "}
-                  <span className="text-[#00000099] pl-2">
-                    {image?.logos?.length}
-                  </span>
-                </Link>
-              </li>
-              <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
-                <Link prefetch={true} href={`/tv/${tv_id}/media`}>
-                  Posters{" "}
-                  <span className="text-[#00000099] pl-2">
-                    {image?.posters?.length}
+                <Link prefetch={true} href={`/tv/${tv_id}/photos`}>
+                  Photos{" "}
+                  <span className="inline-block align-middle pl-2 pb-1">
+                    <IoIosArrowForward />
                   </span>
                 </Link>
               </li>
@@ -253,13 +243,13 @@ const TvList = ({ tv_id }: any) => {
                   </span>
                 </li>
                 {hovered === "Videos" && (
-                  <div className="w-[200px] absolute -top-10 left-full bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2">
+                  <div className="w-[150px] md:w-[200px] absolute top-7 left-6 md:-top-10 md:left-full bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2">
                     <ul className="py-2">
                       <Link
                         prefetch={true}
                         href={`/tv/${tv_id}/videos/trailers`}
                       >
-                        <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
+                        <li className="text-xs md:text-basehover:bg-[#f8f9fa] py-1 px-2 md:px-6 cursor-pointer">
                           Trailers
                         </li>
                       </Link>
@@ -267,7 +257,7 @@ const TvList = ({ tv_id }: any) => {
                         prefetch={true}
                         href={`/tv/${tv_id}/videos/behind_the_scenes`}
                       >
-                        <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
+                        <li className="text-xs md:text-basehover:bg-[#f8f9fa] py-1 px-2 md:px-6 cursor-pointer">
                           Behind The Scenes
                         </li>
                       </Link>
@@ -275,7 +265,7 @@ const TvList = ({ tv_id }: any) => {
                         prefetch={true}
                         href={`/tv/${tv_id}/videos/featurettes`}
                       >
-                        <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
+                        <li className="text-xs md:text-basehover:bg-[#f8f9fa] py-1 px-2 md:px-6 cursor-pointer">
                           Featurettes
                         </li>
                       </Link>
@@ -283,7 +273,7 @@ const TvList = ({ tv_id }: any) => {
                         prefetch={true}
                         href={`/tv/${tv_id}/videos/teasers`}
                       >
-                        <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
+                        <li className="text-xs md:text-basehover:bg-[#f8f9fa] py-1 px-2 md:px-6 cursor-pointer">
                           Teasers
                         </li>
                       </Link>
@@ -291,12 +281,12 @@ const TvList = ({ tv_id }: any) => {
                         prefetch={true}
                         href={`/tv/${tv_id}/videos/opening_credits`}
                       >
-                        <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
+                        <li className="text-xs md:text-basehover:bg-[#f8f9fa] py-1 px-2 md:px-6 cursor-pointer">
                           Opening Credits
                         </li>
                       </Link>
                       <Link prefetch={true} href={`/tv/${tv_id}/videos/clips`}>
-                        <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
+                        <li className="text-xs md:text-basehover:bg-[#f8f9fa] py-1 px-2 md:px-6 cursor-pointer">
                           Clips
                         </li>
                       </Link>

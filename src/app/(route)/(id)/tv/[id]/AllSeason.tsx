@@ -16,23 +16,24 @@ const AllSeason = ({
         {displaySeason?.name || firstSeason?.name}
       </h1>
       <div className="w-full h-full md:flex-row">
-        <div className="flex flex-row border border-slate-400 rounded-lg">
+        <div className="flex flex-col md:flex-row border border-slate-400 rounded-lg">
           <Link
             prefetch={true}
             href={`${tv.id}/seasons/${
               displaySeason?.season_number || firstSeason?.season_number
             }`}
-            className="w-[20%] cursor-pointer"
+            className="w-full md:w-[20%] h-[200px] md:h-auto cursor-pointer"
           >
             <LazyImage
-              src={`https://image.tmdb.org/t/p/w500/${
-                displaySeason?.poster_path ||
+              src={
                 displaySeason?.backdrop_path ||
-                firstSeason?.poster_path ||
+                displaySeason?.poster_path ||
                 firstSeason?.backdrop_path ||
-                tv?.poster_path ||
-                tv?.backdrop_path
-              }`}
+                firstSeason?.poster_path ||
+                tv?.backdrop_path ||
+                tv?.poster_path
+              }
+              w="w780"
               alt={`${
                 displaySeason?.name ||
                 displaySeason?.title ||
@@ -45,10 +46,10 @@ const AllSeason = ({
               height={300}
               quality={100}
               priority
-              className="block align-middle w-full h-auto rounded-lg"
+              className="block align-middle w-full h-[200px] md:h-auto object-cover rounded-lg"
             />
           </Link>
-          <div className="w-full md:w-[80%] flex flex-col items-start px-5 pt-5 pb-3">
+          <div className="w-full md:w-[80%] flex flex-col items-start px-5 pt-5 pb-3 md:pb-0 md:pt-2">
             <Link
               prefetch={true}
               href={`${tv.id}/seasons/${

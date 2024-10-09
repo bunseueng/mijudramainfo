@@ -45,6 +45,7 @@
     "@tiptap/pm": "^2.3.0",
     "@tiptap/react": "^2.3.0",
     "@tiptap/starter-kit": "^2.3.0",
+    "animated-backgrounds": "^1.0.11",
     "antd": "^5.18.3",
     "bcrypt": "^5.1.1",
     "canvas": "^2.11.2",

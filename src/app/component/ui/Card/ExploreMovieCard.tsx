@@ -19,7 +19,7 @@ const DramaFilter = dynamic(
   { ssr: false }
 );
 
-const ExploreMovieCard = ({ title, movie }: any) => {
+const ExploreMovieCard = ({ title, movie, getMovie }: any) => {
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") || "1");
   const [page, setPage] = useState(1);
@@ -43,6 +43,9 @@ const ExploreMovieCard = ({ title, movie }: any) => {
               ?.map((movie: any, idx: number) => {
                 const startCal = (currentPage - 1) * per_page;
                 const overallIndex = startCal + idx + 1;
+                const coverFromDB = getMovie?.find((m: any) =>
+                  m?.movie_id?.includes(movie?.id)
+                );
                 return (
                   <div
                     className="flex border-2 bg-white dark:bg-[#242424] dark:border-[#272727] rounded-lg p-4 mb-10"
@@ -50,13 +53,17 @@ const ExploreMovieCard = ({ title, movie }: any) => {
                   >
                     <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
                       <div className="relative">
-                        <Link href={`/tv/${movie?.id}`}>
+                        <Link href={`/movie/${movie?.id}`}>
                           {movie?.poster_path ||
                           movie?.backdrop_path !== null ? (
                             <Image
-                              src={`https://image.tmdb.org/t/p/original/${
-                                movie.poster_path || movie.backdrop_path
-                              }`}
+                              src={
+                                coverFromDB
+                                  ? coverFromDB?.cover
+                                  : `https://image.tmdb.org/t/p/original/${
+                                      movie.poster_path || movie.backdrop_path
+                                    }`
+                              }
                               alt={movie?.name || movie?.title}
                               width={200}
                               height={200}
@@ -80,9 +87,12 @@ const ExploreMovieCard = ({ title, movie }: any) => {
                     </div>
                     <div className="pl-2 md:pl-3 w-[80%]">
                       <div className="flex items-center justify-between">
-                        <h1 className="text-xl text-sky-700 dark:text-[#2196f3] font-bold">
+                        <Link
+                          href={`/movie/${movie?.id}`}
+                          className="text-xl text-sky-700 dark:text-[#2196f3] font-bold"
+                        >
                           {movie?.name || movie?.title}
-                        </h1>
+                        </Link>
                         <p>#{overallIndex}</p>
                       </div>
                       <p className="text-slate-400 py-1">

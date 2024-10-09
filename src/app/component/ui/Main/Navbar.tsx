@@ -213,15 +213,6 @@ const Navbar: React.FC<Notification> = ({
   // Check for unread friend notifications
   const hasUnreadFriends = friendNoti.includes("unread");
 
-  // Log for debugging
-  console.log({
-    friendNoti,
-    findRpNoti,
-    readRepliesCount,
-    hasUnreadFriends,
-    isRepliedItself,
-  });
-
   const handleNavClick = () => {
     setNav(!nav);
     if (!nav) {
@@ -262,9 +253,7 @@ const Navbar: React.FC<Notification> = ({
       if (progress <= 0.1) {
         setBackgroundColor("transparent");
       } else {
-        setBackgroundColor(
-          "bg-gradient-to-r from-sky-900 to-blue-800 dark:bg-gradient-to-r dark:from-[#191a20] dark:to-[#191a20]"
-        );
+        setBackgroundColor("!bg-[#191a20] from-[#191a20] to-[#191a20]");
       }
     });
 
@@ -305,11 +294,11 @@ const Navbar: React.FC<Notification> = ({
 
   const isHomePage = pathname === "/";
   return (
-    <nav className="relative">
+    <nav className="flex flex-col top-0 sticky z-[9999]">
       <motion.div
         className={`${
           !isHomePage
-            ? "bg-gradient-to-r from-sky-900 to-blue-800 dark:!bg-[#191a20] dark:from-transparent dark:to-transparent"
+            ? "!bg-[#191a20] from-transparent to-transparent"
             : `fixed top-0 w-full z-10 ${backgroundColor}`
         }`}
         style={{ backgroundColor }}
@@ -377,7 +366,7 @@ const Navbar: React.FC<Notification> = ({
                       damping: 30,
                       duration: 1,
                     }}
-                    className="fixed bottom-0 right-0 w-[325px] h-screen bg-[#e9eaed] border-[#06090c21] p-5 lg:hidden dark:bg-[#242424] z-[9999]"
+                    className="fixed bottom-0 right-0 w-[325px] h-screen bg-[#e9eaed] border-[#06090c21] p-5 pt-10 lg:hidden dark:bg-[#242424] z-[9999]"
                   >
                     <IoCloseCircle
                       onClick={handleNavClick}
@@ -574,17 +563,14 @@ const Navbar: React.FC<Notification> = ({
                 <div className="flex items-center cursor-pointer">
                   <Image
                     src={
-                      user?.profileAvatar ||
-                      session?.user?.image ||
-                      "/placeholder-image.avif"
+                      user?.profileAvatar || (session?.user?.image as string)
                     }
                     alt={`${user?.displayName || user?.name}'s Profile`}
                     width={33}
                     height={33}
                     quality={100}
                     priority
-                    className="w-[33px] h-[33px] bg-cover bg-center object-cover rounded-full"
-                    unoptimized
+                    className="w-[25px] md:w-[33px] h-[25px] md:h-[33px] bg-cover bg-center object-cover rounded-full"
                   />
                   <IoMdArrowDropdown className="text-white" />
                 </div>
@@ -656,24 +642,24 @@ const Navbar: React.FC<Notification> = ({
               action="search"
               initial={{ opacity: 0, y: "100%" }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 50,
-                duration: 1,
+                stiffness: 200,
+                damping: 30,
+                duration: 0.5,
               }}
               className="w-full fixed bg-white"
               onSubmit={onSearch}
             >
               <div className="border-b-2 border-b-slate-300">
-                <div className="max-w-[1520px] mx-auto relative">
+                <div className="max-w-6xl mx-auto relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pl-3 pointer-events-none">
                     <IoSearchSharp size={20} className="dark:text-black" />
                   </div>
                   <input
                     type="text"
-                    className="w-full bg-white text-[#acacac] placeholder:font-semibold font-semibold italic outline-none px-14 py-3"
+                    className="w-full bg-white text-[#acacac] placeholder:font-semibold font-semibold outline-none px-14 py-3"
                     name="navSearch"
                     placeholder="Search for a movie, tv show, person..."
                     onChange={onInput}

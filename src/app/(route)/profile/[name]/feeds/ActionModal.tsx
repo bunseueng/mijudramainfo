@@ -110,11 +110,6 @@ const ActionModal = ({
     setIsReportModalOpen(true);
   };
 
-  const confirmReport = () => {
-    // Here you would typically send the report to your backend
-    setIsReportModalOpen(false);
-  };
-
   const updatingFeed = async () => {
     setIsLoading(true);
     try {
@@ -285,7 +280,7 @@ const ActionModal = ({
                 setTvIds={setTvIds}
                 setStoredData={setStoredData}
                 setItem={setItem}
-                setQuery={setQuery}
+                query={query}
               />
             </div>
           )}

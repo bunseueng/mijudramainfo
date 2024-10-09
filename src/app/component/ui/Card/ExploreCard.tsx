@@ -25,7 +25,7 @@ const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
   ssr: false,
 });
 
-const ExploreCard = ({ title, topDramas, total_results }: any) => {
+const ExploreCard = ({ title, topDramas, total_results, getDrama }: any) => {
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") || "1");
   const [page, setPage] = useState(1);
@@ -144,6 +144,9 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
               ?.map((drama: any, idx: number) => {
                 const startCal = (currentPage - 1) * per_page;
                 const overallIndex = startCal + idx + 1;
+                const coverFromDB = getDrama?.find((d: any) =>
+                  d?.tv_id?.includes(drama?.id)
+                );
                 return (
                   <div
                     className="flex border-2 bg-white dark:bg-[#242424] dark:border-[#272727] rounded-lg p-4 mb-10"
@@ -155,9 +158,13 @@ const ExploreCard = ({ title, topDramas, total_results }: any) => {
                           {drama?.poster_path ||
                           drama?.backdrop_path !== null ? (
                             <Image
-                              src={`https://image.tmdb.org/t/p/original/${
-                                drama.poster_path || drama.backdrop_path
-                              }`}
+                              src={
+                                coverFromDB
+                                  ? coverFromDB?.cover
+                                  : `https://image.tmdb.org/t/p/original/${
+                                      drama.poster_path || drama.backdrop_path
+                                    }`
+                              }
                               alt={drama?.name || drama?.title}
                               width={200}
                               height={200}

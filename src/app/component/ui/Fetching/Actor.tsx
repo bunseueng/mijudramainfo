@@ -5,7 +5,14 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchActor } from "@/app/actions/fetchMovieApi";
 import { SkeletonCard } from "../Loading/HomeLoading";
 import ActorCard from "../Card/ActorCard";
-const Actor = ({ heading }: any) => {
+import { PersonDBType } from "@/helper/type";
+
+type ActorT = {
+  heading: string;
+  personDB: PersonDBType[] | any;
+};
+
+const Actor = ({ heading, personDB }: ActorT) => {
   const { data, isLoading } = useQuery({
     queryKey: ["actor"],
     queryFn: fetchActor,
@@ -27,16 +34,25 @@ const Actor = ({ heading }: any) => {
                 (item: any) =>
                   item.profile_path !== "url(/placeholder-image.avif)"
               )
-              ?.map((result: any, idx: any) => (
-                <div
-                  key={idx}
-                  className={`block w-full h-full break-words ${
-                    idx === data?.length - 1 ? "mr-0" : "mr-4"
-                  }`}
-                >
-                  <ActorCard result={result} />
-                </div>
-              ))}
+              ?.map((result: any, idx: any) => {
+                const coverFromDB = personDB?.find((p: any) =>
+                  p?.person_id?.includes(result?.id)
+                );
+                return (
+                  <div
+                    key={idx}
+                    className={`block w-full h-full break-words ${
+                      idx === data?.length - 1 ? "mr-0" : "mr-4"
+                    }`}
+                  >
+                    <ActorCard
+                      result={result}
+                      coverFromDB={coverFromDB}
+                      idx={idx}
+                    />
+                  </div>
+                );
+              })}
       </div>
     </div>
   );

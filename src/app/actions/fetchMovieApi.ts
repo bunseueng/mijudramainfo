@@ -589,6 +589,29 @@ export const fetchPersonExternalID = cache(async (tv_id: any) => {
   }
 })
 
+// fetch person images
+export const fetchPersonImages = cache(async (person_id: any) => {
+  try {
+    const url = `https://api.themoviedb.org/3/person/${person_id}/images?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.log("Failed to fetch", error)
+    return null
+  }
+})
+
 // fetch multifor searching 
 export const fetchMultiSearch = cache(async (searchQuery: any) => {
   const url = `https://api.themoviedb.org/3/search/multi?api_key=${process.env.NEXT_PUBLIC_API_KEY}&query=${searchQuery}&language=en-US&with_original_language=zh&region=CN&season`;
@@ -1023,7 +1046,7 @@ export const fetchUpcomingMovie = cache(async (pages  = 1) => {
 
 // fetch movie
 export const fetchMovie = cache(async (movie_id: any) => {
-  const url = `https://api.themoviedb.org/3/movie/${movie_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+  const url = `https://api.themoviedb.org/3/movie/${movie_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&append_to_response=releases&language=en-US`
   const options = {
     method: 'GET',
     headers,
@@ -1042,24 +1065,6 @@ export const fetchMovie = cache(async (movie_id: any) => {
 // fetch movie cast credit
 export const fetchMovieCastCredit = cache(async (movie_id: any) => {
     const url = `https://api.themoviedb.org/3/movie/${movie_id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
-    const options = {
-      method: 'GET',
-      headers,
-    };
-    
-    const res = await fetch(url, options);
-  
-    if (!res.ok) {
-      throw new Error('Failed to fetch movies');
-    }
-  
-    const json = await res.json();
-    return json;
-})
-
-// fetch languages
-export const fetchMovieLanguages = cache(async () => {
-    const url = `https://api.themoviedb.org/3/configuration/languages?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
     const options = {
       method: 'GET',
       headers,
@@ -1193,15 +1198,41 @@ export const fetchTvWatchProvider = cache(async (tv_id: any) => {
   }
 })
 
-// Function to get user country code (Geolocation or IP-based)
-const getUserCountryCode = cache(async () => {
+export const fetchMovieWatchProvider = cache(async (movie_id: any) => {
   try {
-    // Using a third-party API to get the country code
-    const response = await fetch("https://ipapi.co/json/");
-    const data = await response.json();
-    return data.country_code; // e.g., "US", "CA", etc.
+    const res = await fetch(
+      `https://api.themoviedb.org/3/movie/${movie_id}/watch/providers?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+    );
+    const provider = await res.json();
+
+    return provider?.results;
   } catch (error) {
-    console.error("Failed to fetch country code: ", error);
-    return "US"; // Default to "US" as a fallback
+    return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
   }
-});
+})
+
+export const fetchTvKeyword = cache(async (pages  = 1, keyword_id: string, sortby: string | undefined, genre: string | undefined, without_genre: string | undefined, country: string) => {
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&page=${pages}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_keywords=${keyword_id}&with_genres=${genre}&without_genres=${without_genre}&sort_by=${sortby}&with_origin_country=${country}`
+    );
+    const keyword = await res.json();
+
+    return keyword;
+  } catch (error) {
+    return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
+  }
+})
+
+export const fetchMovieKeywords = cache(async (pages  = 1, keyword_id: string, sortby: string | undefined, without_genre: string | undefined, country: string) => {
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.NEXT_PUBLIC_API_KEY}&page=${pages}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_keywords=${keyword_id}&without_genres=${without_genre}&sort_by=${sortby}&with_origin_country=${country}`
+    );
+    const keyword = await res.json();
+
+    return keyword;
+  } catch (error) {
+    return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
+  }
+})

@@ -69,7 +69,7 @@ const MovieFeaturettes: React.FC<TvTrailerType> = ({ movie_id, movie }) => {
     <>
       {movieTrailer?.results?.filter((type: any) => type?.type === "Featurette")
         ?.length === 0 ? (
-        <p className="relative float-left w-full md:w-[75%] -px-3 py-3 my-10">
+        <p className="relative float-left w-full md:w-[75%] text-center md:text-start -px-3 py-3 my-10">
           There no Featurette for {movie?.title || movie?.name} yet!
         </p>
       ) : (

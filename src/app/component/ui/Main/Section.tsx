@@ -21,6 +21,7 @@ export default async function Section() {
   const actor = "Actor Leaderboard";
 
   const personDB = await prisma.person.findMany({});
+  const getDrama = await prisma.drama.findMany({});
   return (
     <section
       className="relative z-50 bg-customLight dark:bg-customDark from-transparent to-customLight dark:to-customDark -mt-[157px] pt-[150px]"
@@ -28,14 +29,14 @@ export default async function Section() {
     >
       <div className="relative overflow-hidden max-w-6xl mx-auto">
         <div className="mb-10 min-h-[300px]">
-          <TrendingDrama heading={trending} />
+          <TrendingDrama heading={trending} getDrama={getDrama} />
         </div>
 
         <div className="mb-10 min-h-[300px]">
-          <Actor heading={actress} />
+          <Actor heading={actress} personDB={personDB} />
         </div>
         <div className="mb-10 min-h-[300px]">
-          <LatestDrama heading={latestDrama} />
+          <LatestDrama heading={latestDrama} getDrama={getDrama} />
         </div>
         <div className="mb-10 min-h-[300px]">
           <Trailer heading={trailer} />

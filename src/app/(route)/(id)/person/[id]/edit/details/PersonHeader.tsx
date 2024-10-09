@@ -5,11 +5,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPerson } from "@/app/actions/fetchMovieApi";
 import { PersonDBType } from "@/helper/type";
-import ColorThief from "colorthief";
 
 interface PersonHeader {
   person_id: string;
-  personDB: PersonDBType | null;
+  personDB: PersonDBType | any;
 }
 
 const PersonHeader: React.FC<PersonHeader> = ({ person_id, personDB }) => {

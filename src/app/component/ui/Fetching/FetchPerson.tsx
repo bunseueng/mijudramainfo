@@ -41,6 +41,7 @@ import Drama from "@/app/(route)/(id)/person/[id]/Drama";
 import VarietyShow from "@/app/(route)/(id)/person/[id]/VarietyShow";
 import PersonMovie from "@/app/(route)/(id)/person/[id]/PersonMovie";
 import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
+import { PersonDb } from "./Person";
 const PopularityModal = dynamic(() => import("../Modal/PopularityModal"), {
   ssr: false,
 });
@@ -59,6 +60,7 @@ interface IFetchPerson {
   getComment: CommentProps[] | null;
   getPersons: PersonDBType | null;
   sortedUsers: UserProps[] | null;
+  getPersonDB: PersonDBType[] | any;
 }
 
 const FetchPerson: React.FC<IFetchPerson> = ({
@@ -68,6 +70,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
   getComment,
   getPersons,
   sortedUsers,
+  getPersonDB,
 }) => {
   const [more, setMore] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -115,7 +118,9 @@ const FetchPerson: React.FC<IFetchPerson> = ({
     refetchOnWindowFocus: true, // Refetch when window is focused
     refetchOnMount: true, // Refetch on mount to get the latest data
   });
-
+  const coverFromDB = getPersonDB?.find((p: any) =>
+    p?.personId?.includes(tv_id)
+  );
   const birthDate = new Date(persons?.birthday);
   const ageDiffMs = Date.now() - birthDate.getTime();
   const ageDate = new Date(ageDiffMs);
@@ -127,6 +132,33 @@ const FetchPerson: React.FC<IFetchPerson> = ({
         new Date(a.first_air_date).getTime()
     )
     .map((item: any) => item.character);
+
+  const uniqueChanges = Array.from(
+    new Map(
+      getPersons?.changes?.map((change) => [change.userId, change])
+    ).values()
+  );
+
+  // Fix: Initialize `userContributions` as an object, not an array
+  const userContributions =
+    getPersons?.changes?.reduce(
+      (acc: Record<string, number>, change) => {
+        // Increment the count of changes for each userId
+        acc[change.userId] = (acc[change.userId] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number> // Initial value as an empty object
+    ) || {}; // Default to an empty object if `getPersons?.changes` is undefined
+
+  // Step 2: Sort the uniqueChanges based on the number of contributions for each userId
+  const sortedChanges = uniqueChanges?.sort((a, b) => {
+    // Get the count of contributions for userId in `a` and `b`
+    const countA = userContributions[a.userId] || 0;
+    const countB = userContributions[b.userId] || 0;
+
+    // Sort in descending order, i.e., users with more contributions come first
+    return countB - countA;
+  });
 
   const isCurrentUserLoved = getPersons?.lovedBy.find((item: any) =>
     item.includes(currentUser?.id)
@@ -166,13 +198,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
         throw new Error("Error fetching random person");
       }
       const data = await response.json();
-      // Log the raw data to see its structure
-      console.log("Raw fetched data:", data);
       if (data && typeof data === "object") {
-        // Log each popularitySent item to see what's inside before filtering
-        data.popularitySent?.forEach((popularityItem: any, index: number) => {
-          console.log(`Popularity Sent Data ${index}:`, popularityItem);
-        });
         // Proceed with filtering
         const filteredPopularitySent = data.popularitySent
           ?.filter((array: any) => Array.isArray(array) && array.length > 0)
@@ -269,9 +295,6 @@ const FetchPerson: React.FC<IFetchPerson> = ({
       console.log("error");
       return;
     }
-    validItems.forEach((item) => {
-      console.log("Popularity Sent Data:", item);
-    });
   }, [currentPopularityItem]);
 
   useEffect(() => {
@@ -284,18 +307,19 @@ const FetchPerson: React.FC<IFetchPerson> = ({
   }, [openModal]);
 
   return (
-    <div className="max-w-7xl mx-auto pt-0 pb-4 px-2 md:px-5 my-10 md:my-20 overflow-hidden">
+    <div className="max-w-6xl mx-auto pt-0 pb-4 px-2 md:px-5 my-10 overflow-hidden">
       <div className="min-w-[80%] h-full flex flex-col min-[560px]:flex-row justify-between">
         <div className="w-full min-[560px]:w-[40%] lg:w-[30%] h-full">
           <div className="block bg-white dark:bg-[#242526] border-[1px] border-[#00000024] dark:border-[#232425] rounded-md">
             <div className="lg:w-full h-full min-h-full flex items-center justify-center md:justify-start p-4">
               <LazyImage
+                coverFromDB={coverFromDB?.cover}
                 src={`https://image.tmdb.org/t/p/h632/${persons?.profile_path}`}
                 alt={`${persons?.name}'s Avartar`}
                 width={600}
                 height={600}
                 quality={100}
-                className="rounded-md bg-center bg-cover object-cover w-full h-[500px] md:w-full min-[560px]:h-[300px] lg:w-full min-[900px]:h-[500px]"
+                className="rounded-md bg-center bg-cover object-cover w-full "
                 priority
               />
             </div>
@@ -362,13 +386,13 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 <h1 className="text-md font-semibold px-3 md:px-6">
                   Native Name
                 </h1>
-                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                   {personFullDetails?.results[0]?.original_name}
                 </p>
               </div>
               <div className="my-2">
                 <h1 className="text-md font-semibold px-3 md:px-6">Career</h1>
-                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                   {persons?.known_for_department}
                 </p>
               </div>
@@ -376,19 +400,19 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 <h1 className="text-md font-semibold px-3 md:px-6">
                   Known Credits
                 </h1>
-                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                   {getCredits?.cast?.length + getCredits?.crew?.length}
                 </p>
               </div>
               <div className="my-2">
                 <h1 className="text-md font-semibold px-3 md:px-6">Gender</h1>
-                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                   {persons?.gender === 1 ? "Female" : "Male"}
                 </p>
               </div>
               <div className="my-2">
                 <h1 className="text-md font-semibold px-3 md:px-6">Birthday</h1>
-                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                   {persons?.birthday} ({calculatedAge} years old)
                 </p>
               </div>
@@ -396,7 +420,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 <h1 className="text-md font-semibold px-3 md:px-6">
                   Place of Birth
                 </h1>
-                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                   {persons?.place_of_birth}
                 </p>
               </div>
@@ -404,7 +428,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 <h1 className="text-md font-semibold px-3 md:px-6">
                   Also Known As
                 </h1>
-                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+                <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                   {persons?.also_known_as?.join(" , ")}
                 </p>
               </div>
@@ -414,7 +438,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 {persons?.biography
                   ?.split("\n")
                   ?.map((paragraph: string, index: number) => (
-                    <span key={index}>
+                    <span key={index} className="text-sm">
                       {persons?.biography === "" ? (
                         <div className="text-md font-semibold text-center py-5">
                           {persons?.name} currently has no biography.
@@ -445,13 +469,13 @@ const FetchPerson: React.FC<IFetchPerson> = ({
               <h1 className="text-md font-semibold px-3 md:px-6">
                 Native Name
               </h1>
-              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                 {personFullDetails?.results[0]?.original_name}
               </p>
             </div>
             <div className="my-2">
               <h1 className="text-md font-semibold px-3 md:px-6">Career</h1>
-              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                 {persons?.known_for_department}
               </p>
             </div>
@@ -459,20 +483,20 @@ const FetchPerson: React.FC<IFetchPerson> = ({
               <h1 className="text-md font-semibold px-3 md:px-6">
                 Known Credits
               </h1>
-              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                 {getCredits?.cast?.length + getCredits?.crew?.length}
               </p>
             </div>
             <div className="my-2">
               <h1 className="text-md font-semibold px-3 md:px-6">Gender</h1>
-              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                 {persons?.gender === 1 ? "Female" : "Male"}
               </p>
             </div>
 
             <div className="my-2">
               <h1 className="text-md font-semibold px-3 md:px-6">Birthday</h1>
-              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                 {persons?.birthday} ({calculatedAge} years old)
               </p>
             </div>
@@ -480,7 +504,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
               <h1 className="text-md font-semibold px-3 md:px-6">
                 Place of Birth
               </h1>
-              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                 {persons?.place_of_birth}
               </p>
             </div>
@@ -488,12 +512,11 @@ const FetchPerson: React.FC<IFetchPerson> = ({
               <h1 className="text-md font-semibold px-3 md:px-6">
                 Also Known As
               </h1>
-              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-sm font-normal px-3 md:px-6">
+              <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
                 {persons?.also_known_as?.join(" , ")}
               </p>
             </div>
           </div>
-
           <div className="w-full bg-white dark:bg-[#242526] border-[1px] border-[#00000024] dark:border-[#232425] rounded-md mt-5 overflow-hidden">
             <div className="flex items-center justify-center py-5">
               <LazyImage
@@ -676,13 +699,57 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 </div>
               </>
             )}
-          </div>
+          </div>{" "}
+          {sortedChanges?.length > 0 && (
+            <div className="my-5">
+              <h1 className="font-bold text-lg">Top Contributors</h1>
+              {sortedChanges?.slice(0, 4)?.map((drama: any, idx) => {
+                const getUser = users?.find((users: UserProps) =>
+                  users?.id?.includes(drama?.userId)
+                );
+                const userContributions =
+                  getPersons?.changes?.reduce(
+                    (acc: Record<string, number>, change) => {
+                      // Increment the count of changes for each userId
+                      acc[change.userId] = (acc[change.userId] || 0) + 1;
+                      return acc;
+                    },
+                    {} as Record<string, number> // Initial value as an empty object
+                  ) || {};
+                const userContributeCount =
+                  userContributions[drama.userId] || 0;
+
+                return (
+                  <div className="flex items-center py-2" key={idx}>
+                    <div className="block">
+                      <Image
+                        src={
+                          getUser?.profileAvatar || (getUser?.image as string)
+                        }
+                        alt={getUser?.displayName || (getUser?.name as string)}
+                        width={100}
+                        height={100}
+                        loading="lazy"
+                        className="size-[40px] object-cover rounded-full"
+                      />
+                    </div>
+                    <div className="flex flex-col pl-2">
+                      <p className="text-[#2196f3]">
+                        {getUser?.displayName || getUser?.name}
+                      </p>
+                      <p className="text-sm">{userContributeCount} edits</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div className="w-full min-[560px]:w-[60%] lg:w-[70%] min-[560px]:px-8 mt-4 min-[560px]:mt-0">
           <div className="w-full h-full">
             <div className="hidden min-[560px]:block">
               <div className="flex items-center justify-between">
-                <h1 className="text-3xl text-[#2490da] font-bold">
+                <h1 className="text-xl md:text-2xl text-[#2490da] font-bold">
                   {persons?.displayName || persons?.name}
                 </h1>
                 <button name="Love icon" onClick={handleSubmit(handleLove)}>
@@ -701,14 +768,14 @@ const FetchPerson: React.FC<IFetchPerson> = ({
               </div>
 
               <div className="inline-block mt-5">
-                <p className="text-xl font-bold">Biography: </p>
+                <p className="text-md md:text-lg font-semibold">Biography: </p>
                 {/* Render biography paragraphs */}
                 {persons?.biography
                   ?.split("\n")
                   ?.map((paragraph: string, index: number) => (
-                    <span key={index}>
+                    <span key={index} className="text-sm">
                       {persons?.biography === "" ? (
-                        <div className="text-lg font-bold text-center py-5">
+                        <div className="text-sm text-center">
                           {persons?.name} currently has no biography.
                         </div>
                       ) : (
@@ -736,15 +803,15 @@ const FetchPerson: React.FC<IFetchPerson> = ({
             </div>
             <div className="mt-5">
               <div className="mb-10">
-                <h1 className="text-2xl font-bold">Drama: </h1>
+                <h1 className="text-md md:text-lg font-bold">Drama: </h1>
                 {getCast === "" ? <Drama /> : <Drama data={drama} />}
               </div>
               <div className="mb-10">
-                <h1 className="text-2xl font-bold">Movie: </h1>
+                <h1 className="text-md md:text-lg font-bold">Movie: </h1>
                 {getCast === "" ? <Drama /> : <PersonMovie data={movie} />}
               </div>
               <div className="mb-10">
-                <h1 className="text-2xl font-bold">Variety Show: </h1>
+                <h1 className="text-md md:text-lg font-bold">Variety Show: </h1>
                 {getCast === "" ? <Drama /> : <VarietyShow data={drama} />}
               </div>
             </div>

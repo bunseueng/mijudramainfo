@@ -15,7 +15,7 @@ export async function PUT(request: Request) {
         
         const { profileAvatar } = body;
         if(profileAvatar) {
-            const imgId = user?.public_id
+            const imgId = user?.public_avatar_id
             if(imgId) {
                 await cloudinary.uploader.destroy(imgId)
             }
@@ -32,7 +32,7 @@ export async function PUT(request: Request) {
                 },
                 data: {
                     profileAvatar: uploadRes.url,
-                    public_id: uploadRes.public_id
+                    public_avatar_id: uploadRes.public_id
                 }
             });
 

@@ -23,7 +23,7 @@ const MainRole = ({ cast, getDrama }: any) => {
                     >
                       {item.profile_path === null ? (
                         <Image
-                          src="/empty-pf.jpg"
+                          src="/default-pf.jpg"
                           alt={`${item?.name}'s Profile`}
                           width={200}
                           height={200}
@@ -78,7 +78,7 @@ const MainRole = ({ cast, getDrama }: any) => {
                     >
                       {item.profile_path === null ? (
                         <Image
-                          src="/empty-pf.jpg"
+                          src="/default-pf.jpg"
                           alt={`${item?.name}'s Profile`}
                           width={200}
                           height={200}

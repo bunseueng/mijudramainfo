@@ -33,6 +33,7 @@ const DramaCast = ({
   getReview,
   content,
   lists,
+  keyword,
 }: any) => {
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
   const { data: watchProvider } = useQuery({
@@ -181,6 +182,27 @@ const DramaCast = ({
             content={content}
             allTvShows={allTvShows}
           />
+          {keyword?.results?.length > 0 && (
+            <div className="my-5">
+              <h1 className="font-bold text-lg">Keywords</h1>
+              <div className="flex flex-wrap w-full">
+                {keyword?.results?.map((k: any) => {
+                  return (
+                    <div
+                      className="text-sm bg-[#d7d7d7] text-black border border-[#d7d7d7] rounded-sm px-1 my-1 mr-1"
+                      key={k?.id}
+                    >
+                      <ul>
+                        <li>
+                          <Link href={`/keyword/${k?.id}/tv`}>{k?.name}</Link>
+                        </li>
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {tv?.networks?.length > 0 && (
             <div className="my-5">
               <h1 className="font-bold text-lg">Networks</h1>

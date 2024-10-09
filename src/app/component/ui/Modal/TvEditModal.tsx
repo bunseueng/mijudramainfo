@@ -12,7 +12,6 @@ import { createDetails, TCreateDetails } from "@/helper/zod";
 import { useForm } from "react-hook-form";
 import { customStyles, lightTheme } from "@/helper/MuiStyling";
 import { Drama, EditDramaPage, EditPageDefaultvalue } from "@/helper/type";
-import { JsonValue } from "@prisma/client/runtime/library";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 
@@ -156,7 +155,6 @@ const TvEditModal: React.FC<EditModal> = ({
         }
         return item;
       });
-      console.log("ipd", updatedData);
       setTvDatabase(updatedData);
 
       const updatedStoredData = storedData.map((item: any, index: number) => {
@@ -199,13 +197,10 @@ const TvEditModal: React.FC<EditModal> = ({
 
   const handleDeleteStoredData = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log("Deleting item at index:", idx);
-
     // Remove the item at the specified index (idx) from the storedData array
     const updatedStoredData = storedData.filter(
       (item, index) => item?.provider_name !== defaultValue?.provider_name
     );
-    console.log("Updated storedData:", updatedStoredData);
     setStoredData(updatedStoredData);
     // Close the modal after deletion
     setOpenEditModal(false);
@@ -226,7 +221,7 @@ const TvEditModal: React.FC<EditModal> = ({
                 </button>
               </div>
               <div className="text-[#ffffff99] text-md break-words px-5 py-7">
-                <form action="">
+                <div>
                   <div className="mb-5">
                     <label
                       htmlFor="service"
@@ -508,7 +503,7 @@ const TvEditModal: React.FC<EditModal> = ({
                       </p>
                     </div>
                   </div>
-                </form>
+                </div>
               </div>
 
               <div className="flex items-end justify-between">

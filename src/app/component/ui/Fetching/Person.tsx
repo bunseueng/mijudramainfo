@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import LazyImage from "@/components/ui/lazyimage";
 export type PersonDb = {
   id: string;
+  userID: string;
   personId: string;
   name: string | null;
   love: number | null;
@@ -26,19 +27,22 @@ export type PersonDb = {
   updatedAt: Date;
 };
 
-export default function Person({ result, currentUser }: any) {
-  const [getPerson, setGetPerson] = useState<PersonDb>();
-  const tv_id = result?.id;
+export default function Person({ result, currentUser, getPerson }: any) {
+  const [getPersons, setGetPersons] = useState<PersonDb>();
+  const person_id = result?.id;
   const router = useRouter();
   const { register, handleSubmit } = useForm<TPersonLove>({
     resolver: zodResolver(personLove),
   });
   const { data: person } = useQuery({
-    queryKey: ["person", tv_id],
-    queryFn: () => fetchPerson(tv_id),
+    queryKey: ["person", person_id],
+    queryFn: () => fetchPerson(person_id),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
   });
+  const coverFromDB = getPerson?.find((p: any) =>
+    p?.personId?.includes(person_id)
+  );
 
   useEffect(() => {
     const fetchPerson = async () => {
@@ -49,7 +53,7 @@ export default function Person({ result, currentUser }: any) {
         if (res.ok) {
           const data = await res.json();
           router.refresh();
-          setGetPerson(data);
+          setGetPersons(data);
         } else {
           console.error("Failed to fetch person from API");
         }
@@ -60,7 +64,7 @@ export default function Person({ result, currentUser }: any) {
     fetchPerson();
   }, [result?.id, router]);
 
-  const isCurrentUserLoved = getPerson?.lovedBy.find((item) =>
+  const isCurrentUserLoved = getPersons?.lovedBy.find((item) =>
     item.includes(currentUser?.id)
   );
   const handleLove = async (data: TPersonLove) => {
@@ -96,6 +100,7 @@ export default function Person({ result, currentUser }: any) {
             className="block box-content"
           >
             <LazyImage
+              coverFromDB={coverFromDB?.cover}
               src={`https://image.tmdb.org/t/p/w185/${result.profile_path}`}
               alt={`${result?.name}'s Profile`}
               width={200}

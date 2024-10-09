@@ -12,10 +12,8 @@ import { PHProvider } from "@/provider/PostHogProvider";
 import Provider from "@/provider/Provider";
 import TanstackProvider from "@/provider/TanstackProvider";
 import { ScrollProvider } from "@/provider/UseScroll";
-const Loading = dynamic(() => import("./loading"), { ssr: false });
-const Footer = dynamic(() => import("./component/ui/Main/Footer"), {
-  ssr: false,
-});
+const Loading = dynamic(() => import("./loading"));
+const Footer = dynamic(() => import("./component/ui/Main/Footer"));
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],
@@ -87,7 +85,10 @@ export default function RootLayout({
         <meta name="google-adsense-account" content="ca-pub-3369705912051027" />
         <Adsense pId="3369705912051027" />
       </head>
-      <body className="bg-white dark:bg-[#14161a]">
+      <body
+        className="bg-white dark:bg-[#14161a]"
+        suppressHydrationWarning={true}
+      >
         <PHProvider>
           <Provider>
             <TanstackProvider>
@@ -100,17 +101,16 @@ export default function RootLayout({
                 <ScrollProvider>
                   <Loading />
                   <div className="relative">
-                    <div className="flex flex-col top-0 sticky z-[9999]">
-                      <SessionAllPage />
-                    </div>
-                    <div className="parent-container min-h-screen flex flex-col">
-                      <main className="content-container flex-grow">
+                    <SessionAllPage />
+                    <main className="parent-container min-h-screen flex flex-col">
+                      <div className="content-container flex-grow">
                         {children}
-                      </main>
-                    </div>
+                      </div>
+                    </main>
                     <Footer />
                   </div>
                 </ScrollProvider>
+
                 <ToastContainer position="top-right" />
               </ThemeProvider>
             </TanstackProvider>

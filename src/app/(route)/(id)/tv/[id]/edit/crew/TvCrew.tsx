@@ -12,6 +12,7 @@ import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -650,10 +651,11 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             : true
         }
       >
-        <span className="mr-1 pt-1">
-          <ClipLoader color="#c3c3c3" loading={submitLoading} size={19} />
-        </span>
-        Submit
+        {submitLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          "Submit"
+        )}
       </button>
     </form>
   );

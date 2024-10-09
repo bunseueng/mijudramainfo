@@ -6,7 +6,13 @@ import { fetchLatest } from "@/app/actions/fetchMovieApi";
 import Link from "next/link";
 import { SkeletonCard } from "../Loading/HomeLoading";
 import LazyImage from "@/components/ui/lazyimage";
-const LatestDrama = ({ heading }: any) => {
+import { DramaDB } from "@/helper/type";
+
+type LatestDramaT = {
+  heading: string;
+  getDrama: DramaDB[];
+};
+const LatestDrama = ({ heading, getDrama }: LatestDramaT) => {
   const { data, isLoading } = useQuery({
     queryKey: ["latestDrama"],
     queryFn: fetchLatest,
@@ -27,48 +33,54 @@ const LatestDrama = ({ heading }: any) => {
                 (item: any) => item?.poster_path || item?.backdrop_path !== null
               )
               .filter((genre: any) => genre?.genre_ids.length > 0)
-              .map((item: any, index: number) => (
-                <div
-                  className={`block w-full h-full break-words ${
-                    index === data?.results?.length - 1 ? "mr-0" : "mr-4"
-                  }`}
-                  key={index}
-                >
-                  <div className="block w-[150px] h-[250px] bg-cover">
-                    <Link
-                      className="block hover:relative transform duration-100 group"
-                      href={`/tv/${item?.id}`}
-                      style={{ width: "auto", height: "auto" }}
-                    >
-                      <LazyImage
-                        src={item?.poster_path || item?.backdrop_path}
-                        w={item?.poster_path ? "w500" : "w780"}
-                        alt={item?.name || item?.title}
-                        width={150}
-                        height={200}
-                        quality={75}
-                        sizes="(max-width: 768px) 100vw, (min-width: 1024px) 50vw, 150px"
-                        style={{
-                          width: "auto",
-                          height: "auto",
-                        }}
-                        priority
-                        className="aspect-[150/200] rounded-xl bg-center object-cover"
-                      />
-                    </Link>
-                    <h2 className="mt-2 text-xs font-medium line-clamp-2 truncate">
-                      {item?.name || item?.title}
-                    </h2>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {item?.first_air_date ? (
-                        item.first_air_date.split("-")[0]
-                      ) : (
-                        <span className="text-[#2490da]">Upcoming</span>
-                      )}
-                    </p>
+              .map((item: any, index: number) => {
+                const coverFromDB = getDrama?.find((d: any) =>
+                  d?.tv_id?.includes(item?.id)
+                );
+                return (
+                  <div
+                    className={`block w-full h-full break-words ${
+                      index === data?.results?.length - 1 ? "mr-0" : "mr-4"
+                    }`}
+                    key={index}
+                  >
+                    <div className="block w-[150px] h-[250px] bg-cover">
+                      <Link
+                        className="block hover:relative transform duration-100 group"
+                        href={`/tv/${item?.id}`}
+                        style={{ width: "auto", height: "auto" }}
+                      >
+                        <LazyImage
+                          coverFromDB={coverFromDB}
+                          src={item?.poster_path || item?.backdrop_path}
+                          w={item?.poster_path ? "w500" : "w780"}
+                          alt={item?.name || item?.title}
+                          width={150}
+                          height={200}
+                          quality={75}
+                          sizes="(max-width: 768px) 100vw, (min-width: 1024px) 150px"
+                          priority={index < 2} // Prioritize loading first two images
+                          style={{
+                            width: "auto",
+                            height: "auto",
+                          }}
+                          className="aspect-[150/200] rounded-xl bg-center object-cover"
+                        />
+                      </Link>
+                      <h2 className="mt-2 text-xs font-medium line-clamp-2 truncate">
+                        {item?.name || item?.title}
+                      </h2>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {item?.first_air_date ? (
+                          item.first_air_date.split("-")[0]
+                        ) : (
+                          <span className="text-[#2490da]">Upcoming</span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
       </div>
     </div>
   );

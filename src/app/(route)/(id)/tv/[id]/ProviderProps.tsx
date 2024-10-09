@@ -20,11 +20,11 @@ const ProviderBlock = ({ provider, type, label }: any) => {
           <div className="flex flex-col items-start ml-2">
             <Link
               href={`${provider[0]?.link}`}
-              className="text-md md:text-lg font-bold truncate text-[#2196f3] hover:opacity-75 transform duration-300 cursor-pointer"
+              className="text-sm md:text-md font-bold truncate text-[#2196f3] hover:opacity-75 transform duration-300 cursor-pointer"
             >
               {provider[0]?.provider_name}
             </Link>
-            <p className="dark:text-[#818a91]">{label}</p>
+            <p className="text-xs dark:text-[#818a91]">{label}</p>
           </div>
         </div>
       </div>

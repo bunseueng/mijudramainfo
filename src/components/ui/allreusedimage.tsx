@@ -37,7 +37,15 @@ const ReusedImage = ({
     };
   }, []);
 
-  const imageSrc = isVisible ? `${src}` : "/placeholder-image.avif";
+  // Check if the source is undefined, null, or contains 'undefined'
+  const isSrcInvalid =
+    !src || src === "undefined" || src === null || src.includes("undefined");
+
+  const imageSrc = isVisible
+    ? isSrcInvalid
+      ? "/placeholder-image.avif"
+      : `${src}`
+    : "/placeholder-image.avif";
 
   return (
     <Image

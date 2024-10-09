@@ -9,16 +9,15 @@ import { PersonDBType } from "@/helper/type";
 import TopActorSkeleton from "../Loading/TopActorLoading";
 
 type TopActorType = {
-  personDB: PersonDBType[];
+  personDB: PersonDBType[] | any;
   heading: string;
 };
 
 export default function TopActor({ heading, personDB }: TopActorType) {
-  const person_ids = personDB.map((person) => person.personId); // Extract all personIds
-
+  const person_ids = personDB.map((person: any) => person.personId); // Extract all personIds
   const fetchAllPersons = async () => {
     const allPersons = await Promise.all(
-      person_ids.map((id) => fetchPerson(id)) // Fetch all persons' data
+      person_ids.map((id: any) => fetchPerson(id)) // Fetch all persons' data
     );
     return allPersons;
   };
@@ -30,18 +29,18 @@ export default function TopActor({ heading, personDB }: TopActorType) {
     refetchOnWindowFocus: true, // Refetch when window is focused
   });
 
-  const filteredPerson = personDB?.filter((db) =>
+  const filteredPerson = personDB?.filter((db: any) =>
     persons?.find((p) => db?.personId?.includes(p?.id))
   );
 
-  const sortedUsers = filteredPerson?.sort((a, b) => {
+  const sortedUsers = filteredPerson?.sort((a: any, b: any) => {
     const totalA = a.totalPopularity;
     const totalB = b.totalPopularity;
     return totalB - totalA; // Sort descending by starCount
   });
 
   const getPersonData = persons?.filter((data) =>
-    sortedUsers?.find((p) => p?.popularity[0]?.actorName === data?.name)
+    sortedUsers?.find((p: any) => p?.popularity[0]?.actorName === data?.name)
   );
 
   if (isLoading) {

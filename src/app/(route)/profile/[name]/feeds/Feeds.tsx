@@ -326,7 +326,7 @@ export default function Feeds({
                 setItem={function (item: any): void {
                   throw new Error("Function not implemented.");
                 }}
-                setQuery={setQuery}
+                query={query}
               />
             </div>
           )}

@@ -109,7 +109,7 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           ) : currentPage === "/production" ? (
             <Production tv_id={tv_id} tvDetails={tvDetails} />
           ) : currentPage === "/genres" ? (
-            <Genres tv_id={tv_id} tvDetails={tvDetails} />
+            <Genres tv_id={tv_id} tvDetails={tvDetails as Drama | null} />
           ) : currentPage === "/external_link" ? (
             <ExternalLink tv_id={tv_id} tvDetails={tvDetails} />
           ) : null}

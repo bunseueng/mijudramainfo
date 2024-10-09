@@ -14,8 +14,12 @@ const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
   ssr: false,
 });
 
-export default function Card({ result, BASE_URL }: any) {
+export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
   const [tvRating, setTvRating] = useState<any>();
+  const tvCover = getDrama?.find((d: any) => d?.tv_id?.includes(result.id));
+  const movieCover = getMovie?.find((d: any) =>
+    d?.movie_id?.includes(result.id)
+  );
 
   useEffect(() => {
     const fetchRating = async () => {
@@ -128,9 +132,15 @@ export default function Card({ result, BASE_URL }: any) {
             className="block box-content"
           >
             <ReusedImage
-              src={`https://image.tmdb.org/t/p/w780/${
-                result.poster_path || result.backdrop_path
-              }`}
+              src={
+                movieCover || tvCover
+                  ? movieCover?.cover || tvCover?.cover
+                  : result?.poster_path !== null
+                  ? `https://image.tmdb.org/t/p/w780/${
+                      result.poster_path || result.backdrop_path
+                    }`
+                  : "/placeholder-image.avif"
+              }
               alt={result?.name || result?.title}
               width={200}
               height={200}

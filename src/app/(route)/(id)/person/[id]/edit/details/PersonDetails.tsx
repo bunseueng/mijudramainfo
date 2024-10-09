@@ -17,6 +17,7 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { mergeAndRemoveDuplicates } from "@/app/actions/mergeAndRemove";
 import { toast } from "react-toastify";
 import { PersonDetail } from "@/helper/type";
+import { Loader2 } from "lucide-react";
 
 const PersonDetails: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   const { data: person } = useQuery({
@@ -670,10 +671,7 @@ const PersonDetails: React.FC<PersonEditList> = ({ person_id, personDB }) => {
             }`}
             disabled={isSubmitEnabled || results?.length > 0 ? false : true}
           >
-            <span className="mr-1 pt-1">
-              <ClipLoader color="#fff" loading={loading} size={19} />
-            </span>
-            Submit
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
           </button>
           <button
             className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
@@ -685,9 +683,7 @@ const PersonDetails: React.FC<PersonEditList> = ({ person_id, personDB }) => {
             disabled={isSubmitEnabled || results?.length > 0 ? false : true}
           >
             {resetLoading ? (
-              <span className="pt-1 mr-1">
-                <ClipLoader color="#fff" loading={!loading} size={19} />
-              </span>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <span className="mr-1">
                 <FaRegTrashAlt />

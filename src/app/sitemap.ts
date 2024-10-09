@@ -18,6 +18,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const sitemapEntries = tvShows.map((tvShow: ITmdbDrama) => ({
         url: `${process.env.BASE_URL}/tv/${tvShow.id}`,
     }));
+    
+    const tvIds = tvShows.map((show: any) => show.id);
+     // Fetch keywords for each TV show using their tv_id
+     const keywordPromises = tvIds.map(async (tv_id: number) => {
+        const keywordResponse = await fetch(
+          `https://api.themoviedb.org/3/tv/${tv_id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+        );
+
+        if (!keywordResponse.ok) {
+          throw new Error(`Failed to fetch keywords for TV show with id ${tv_id}`);
+        }
+
+        const keywordData = await keywordResponse.json();
+        return {
+          tv_id,
+          keywords: keywordData.results,
+        };
+    });
+
+    const tvShowsWithKeywords = await Promise.all(keywordPromises);
+
+    // Map keywords to sitemap entries
+    const tvKeywordsEntries = tvShowsWithKeywords.flatMap(({ keywords }) => {
+        return keywords.map((keyword: any) => ({
+            url: `${process.env.BASE_URL}/keyword/${keyword.id}/tv`,
+        }));
+    });
+
+    // Push keyword-related URLs to the sitemap
+    sitemapEntries.push(...tvKeywordsEntries);
 
     if(response.ok) {
         const tvPhotoEntries = tvShows.map((tv: ITmdbDrama) => ({
@@ -45,18 +75,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     
     if (movieResponse.ok) {
         const movieData = await movieResponse.json();
-        const movies = movieData.results;
+        const movies = movieData.results;    
+        const movieId = movies.map((show: any) => show.id);
+        // Fetch keywords for each TV show using their movie_id
+        const keywordPromises = movieId.map(async (movie_id: number) => {
+           const keywordResponse = await fetch(
+             `https://api.themoviedb.org/3/movie/${movie_id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+           );
+   
+           if (!keywordResponse.ok) {
+             throw new Error(`Failed to fetch keywords for movie with id ${movie_id}`);
+           }
+   
+           const keywordData = await keywordResponse.json();
+           return {
+             movie_id,
+             keywords: keywordData.keywords,
+           };
+       });
+   
+       const movieWithKeywords = await Promise.all(keywordPromises);
+   
+       // Map keywords to sitemap entries
+       const tvKeywordsEntries = movieWithKeywords.flatMap(({ keywords }) => {
+           return keywords.map((keyword: any) => ({
+               url: `${process.env.BASE_URL}/keyword/${keyword.id}/movie`,
+           }));
+       });
 
         // Generate sitemap entries for each movie
         const movieEntries = movies.map((movie: ITmdbDrama) => ({
             url: `${process.env.BASE_URL}/movie/${movie.id}`,
         }));
-        const movieCastEntries = tvShows.map((movie: ITmdbDrama) => ({
+        const movieCastEntries = movies.map((movie: ITmdbDrama) => ({
             url: `${process.env.BASE_URL}/movie/${movie.id}/cast`,
         }));
 
         // Add movie entries to the sitemap
-        sitemapEntries.push(...movieEntries, ...movieCastEntries);
+        sitemapEntries.push(...movieEntries, ...movieCastEntries, ...tvKeywordsEntries);
     } else {
         console.error("Failed to fetch movies");
     }

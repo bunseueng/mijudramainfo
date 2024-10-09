@@ -7,7 +7,10 @@ const TrailerPage = async ({ params }: { params: { id: string } }) => {
   const movieDB = await prisma.movie.findUnique({
     where: { movie_id: movie_id },
   });
-  return <MovieVideo movie_id={movie_id} movieDB={movieDB} />;
+  const getMovie = await prisma.movie.findMany();
+  return (
+    <MovieVideo movie_id={movie_id} movieDB={movieDB} getMovie={getMovie} />
+  );
 };
 
 export default TrailerPage;

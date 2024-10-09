@@ -28,7 +28,8 @@ export interface IFriend {
 
 export interface currentUserProps {
   id: string;
-  public_id: string | null;
+  public_cover_id: string | null;
+  public_avatar_id: string | null;
   name: string;
   displayName: string | null;
   email: string;
@@ -54,7 +55,8 @@ export interface ICurrentUser {
 
 export interface UserProps {
   id: string;
-  public_id: string | null;
+  public_cover_id: string | null;
+  public_avatar_id: string | null;
   name: string;
   displayName: string | null;
   email: string;
@@ -83,7 +85,8 @@ export interface UserProps {
 
 export interface findSpecificUserProps {
   id: string;
-  public_id: string | null;
+  public_cover_id: string | null;
+  public_avatar_id: string | null;
   name: string;
   displayName: string | null;
   email: string;
@@ -265,9 +268,34 @@ export interface tvId {
   tv_id: string;
 }
 
+export interface movieId {
+  movie_id: string;
+}
+
 export interface Drama {
   tv_id: string;
   tvDetails: {
+    id: string;
+    userId: string;
+    details: Prisma.JsonValue[];
+    cover: string | null;
+    related_title: Prisma.JsonValue[];
+    cast: Prisma.JsonValue[];
+    crew: Prisma.JsonValue[];
+    services: Prisma.JsonValue[];
+    external_links: Prisma.JsonValue[];
+    released_information: Prisma.JsonValue[];
+    production_information: Prisma.JsonValue[];
+    genres_tags: Prisma.JsonValue[];
+    changes: Prisma.JsonValue[];
+    changeCount: Number;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
+}
+export interface Movie {
+  movie_id: string;
+  movieDetails: {
     id: string;
     userId: string;
     details: Prisma.JsonValue[];
@@ -290,6 +318,7 @@ export interface Drama {
 export interface DramaDB {
   id: string;
   userId: string;
+  tv_id: string;
   details: Prisma.JsonValue[];
   cover: string | null;
   related_title: Prisma.JsonValue[];
@@ -306,24 +335,25 @@ export interface DramaDB {
   updatedAt: Date;
 }
 
-// export interface MovieDB {
-//   id: string;
-//   userId: string;
-//   details: Prisma.JsonValue[];
-//   cover: string | null;
-//   related_title: Prisma.JsonValue[];
-//   cast: Prisma.JsonValue[];
-//   crew: Prisma.JsonValue[];
-//   services: Prisma.JsonValue[];
-//   external_links: Prisma.JsonValue[];
-//   released_information: Prisma.JsonValue[];
-//   production_information: Prisma.JsonValue[];
-//   genres_tags: Prisma.JsonValue[];
-//   changes: Prisma.JsonValue[];
-//   changeCount: Number;
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
+export interface MovieDB {
+  id: string;
+  userId: string;
+  movie_id: string;
+  details: Prisma.JsonValue[];
+  cover: string | null;
+  related_title: Prisma.JsonValue[];
+  cast: Prisma.JsonValue[];
+  crew: Prisma.JsonValue[];
+  services: Prisma.JsonValue[];
+  external_links: Prisma.JsonValue[];
+  released_information: Prisma.JsonValue[];
+  production_information: Prisma.JsonValue[];
+  genres_tags: Prisma.JsonValue[];
+  changes: Prisma.JsonValue[];
+  changeCount: Number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export interface DramaDetails {
   title: string;
@@ -575,6 +605,15 @@ export interface PersonDBType {
   cast: Prisma.JsonValue[];
   crew: Prisma.JsonValue[];
   external_links: Prisma.JsonValue[];
+  changes:
+    | {
+        userId: string;
+        timestamp: string;
+        field: string;
+        oldValue: string | null;
+        newValue: string;
+      }[]
+    | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -642,6 +681,43 @@ export interface ITvReview {
   createdAt: Date;
 }
 
+export interface IMovieReview {
+  id: string;
+  movie_id: string;
+  userId: string;
+  rating_score: {
+    acting: number;
+    music: number;
+    overall: number;
+    rewatchValue: number;
+    story: number;
+  };
+  userInfo: {
+    name: string;
+    displayName: string;
+    profileAvatar: string | null;
+    image: string | null;
+  };
+  spoiler: boolean | null;
+  finishedWatching: boolean | null;
+  dropping: boolean | null;
+  episode: number | null;
+  review_language: string | null;
+  headline: string | null;
+  review: string;
+  overall_score: number;
+  reviewHelpful: number;
+  reviewNotHelpful: number;
+  reviewBy: [
+    {
+      userId: string;
+      action: string;
+    }
+  ];
+  updatedAt: string;
+  createdAt: Date;
+}
+
 type TProfileFeeds = {
   id: string;
   userId: string;
@@ -670,4 +746,51 @@ type TProfileFeeds = {
 export interface IProfileFeeds {
   getFeeds: TProfileFeeds[];
   currentUser: currentUserProps | null;
+}
+
+export interface IActor {
+  cast: {
+    adult: boolean;
+    character: string;
+    credit_id: string;
+    gender: number;
+    id: number;
+    known_for_department: string;
+    name: string;
+    order: number;
+    original_name: string;
+    popularity: number;
+    profile_path: string;
+  }[];
+  tvShow: {
+    adult: boolean;
+    backdrop_path: string;
+    first_air_date: string;
+    genre_ids: number[];
+    id: number;
+    name: string;
+    origin_country: string[];
+    original_language: string;
+    original_name: string;
+    overview: string;
+    popularity: number;
+    poster_path: string;
+    vote_average: number;
+    vote_count: number;
+    cast: [
+      {
+        adult: boolean;
+        character: string;
+        credit_id: string;
+        gender: number;
+        id: number;
+        known_for_department: string;
+        name: string;
+        order: number;
+        original_name: string;
+        popularity: number;
+        profile_path: string;
+      }
+    ];
+  };
 }

@@ -23,8 +23,8 @@ export const ShareButton = ({ tv }: any) => {
       >
         <FacebookIcon
           round={true}
-          size={50}
-          className="w-10 md:w-auto mx-1 md:mx-4"
+          size={30}
+          className="w-8 md:w-auto mx-1 md:mx-4"
         />
       </FacebookShareButton>
       <TwitterShareButton
@@ -34,8 +34,8 @@ export const ShareButton = ({ tv }: any) => {
       >
         <TwitterIcon
           round={true}
-          size={50}
-          className="w-10 md:w-auto mx-1 md:mx-4"
+          size={30}
+          className="w-8 md:w-auto mx-1 md:mx-4"
         />
       </TwitterShareButton>
       <RedditShareButton
@@ -44,8 +44,8 @@ export const ShareButton = ({ tv }: any) => {
       >
         <RedditIcon
           round={true}
-          size={50}
-          className="w-10 md:w-auto mx-1 md:mx-4"
+          size={30}
+          className="w-8 md:w-auto mx-1 md:mx-4"
         />
       </RedditShareButton>
       <PinterestShareButton
@@ -55,8 +55,8 @@ export const ShareButton = ({ tv }: any) => {
       >
         <PinterestIcon
           round={true}
-          size={50}
-          className="w-10 md:w-auto mx-1 md:mx-4"
+          size={30}
+          className="w-8 md:w-auto mx-1 md:mx-4"
         />
       </PinterestShareButton>
     </>

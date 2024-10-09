@@ -28,16 +28,18 @@ export const sendEmail = async (
 }
 
 export const sendEmailFromReport = async (
-    from: string,
-    subject: string,
-    html: string
-  ): Promise<string | null> => {
-    const info = await transporter.sendMail({
-      from: from,
-      to: process.env.EMAIL_FROM,
-      subject: subject,
-      html: html,
-    });
-  
-    return info?.messageId;
+  from: string,
+  subject: string,
+  html: string,
+  replyTo: string
+): Promise<string | null> => {
+  const info = await transporter.sendMail({
+    from: from,
+    to: process.env.EMAIL_FROM,
+    subject: subject,
+    html: html,
+    replyTo: replyTo,
+  });
+
+  return info?.messageId;
 }

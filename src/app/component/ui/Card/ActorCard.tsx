@@ -1,10 +1,16 @@
 import LazyImage from "@/components/ui/lazyimage";
+import { IActor } from "@/helper/type";
 import Link from "next/link";
 import React from "react";
-const ActorCard = ({ result }: any) => {
+
+type ActorCardT = {
+  result: IActor;
+  coverFromDB: any;
+  idx: number;
+};
+const ActorCard = ({ result, coverFromDB, idx }: ActorCardT) => {
   // Extracting relevant data from the result object
   const { cast } = result;
-
   // Filter out actors with undefined names or image paths
   const validActors = cast.filter(
     (actor: any) => actor.name && actor.profile_path !== null
@@ -28,13 +34,15 @@ const ActorCard = ({ result }: any) => {
         style={{ width: "auto", height: "auto" }}
       >
         <LazyImage
+          coverFromDB={coverFromDB?.cover}
           src={backgroundImage?.profile_path}
           w={"h632"}
           alt={`${actorName}'s avatar`}
           width={150}
           height={200}
           quality={100}
-          priority
+          sizes="(max-width: 768px) 100vw, (min-width: 1024px) 150px"
+          priority={idx < 2} // Prioritize loading first two images
           style={{ width: "auto", height: "auto" }}
           className="w-[150px] h-[200px] rounded-xl bg-center object-cover"
         />

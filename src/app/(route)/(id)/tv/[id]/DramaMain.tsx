@@ -32,6 +32,7 @@ import { getTextColor } from "@/app/actions/getTextColor";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
 import DramaCast from "./DramaCast";
+import TvList from "./TvList";
 const RatingModal = dynamic(
   () => import("@/app/component/ui/CircleRating/RatingModal"),
   { ssr: false }
@@ -320,9 +321,10 @@ const DramaMain = ({
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
       const colorString = await getColorFromImage(
-        `https://image.tmdb.org/t/p/${tv?.backdrop_path ? "w300" : "w92"}/${
-          tv.backdrop_path || tv?.poster_path
-        }`
+        getDrama?.cover ||
+          `https://image.tmdb.org/t/p/${tv?.backdrop_path ? "w300" : "w92"}/${
+            tv.backdrop_path || tv?.poster_path
+          }`
       );
       // Parse the RGB values from the string
       const regex = /rgb\((\d+), (\d+), (\d+)\)/;
@@ -341,7 +343,7 @@ const DramaMain = ({
         console.error("Failed to parse color string:", colorString);
       }
     }
-  }, [tv?.backdrop_path, tv?.poster_path]);
+  }, [tv?.backdrop_path, tv?.poster_path, getDrama]);
 
   // Ensure the image element is referenced correctly
   useEffect(() => {
@@ -360,8 +362,9 @@ const DramaMain = ({
     return <SearchLoading />;
   }
   return (
-    <>
+    <section className="w-full relative z-50">
       <div className="w-full h-full">
+        <TvList tv_id={tv_id} />
         <div
           className="relative overflow-hidden bg-cover bg-no-repeat h-auto"
           style={{
@@ -416,11 +419,22 @@ const DramaMain = ({
                       className="cursor-pointer hover:opacity-50 duration-300"
                       style={{ color: textColor }}
                     >
-                      {tv?.genres?.map((genre: any, index: number) => {
-                        return index === genres.length - 1
-                          ? genre.name
-                          : genre.name + ", ";
-                      })}
+                      {getDrama?.genres_tags?.length > 0
+                        ? getDrama?.genres_tags
+                            ?.map(
+                              (tag: any) =>
+                                tag?.genre
+                                  ?.map((gen: any) => gen?.value)
+                                  .join(", ") // Join genres with commas
+                            )
+                            .join(", ")
+                        : tv?.genres?.length > 0
+                        ? tv?.genres?.map((genre: any, index: number) => {
+                            return index === genres.length - 1
+                              ? genre.name
+                              : genre.name + ", ";
+                          })
+                        : null}
                     </span>
                   </div>
                   <div className="flex flex-col md:flex-row items-start md:items-center py-5">
@@ -722,7 +736,7 @@ const DramaMain = ({
                               ?.map(
                                 (tag: any) =>
                                   tag?.genre
-                                    ?.map((gen: any, idx: number) => gen?.name)
+                                    ?.map((gen: any) => gen?.value)
                                     .join(", ") // Join genres with commas
                               )
                               .join(", ")
@@ -974,9 +988,10 @@ const DramaMain = ({
           getComment={getComment}
           getReview={getReview}
           lists={lists}
+          keyword={keyword}
         />
       </div>
-    </>
+    </section>
   );
 };
 

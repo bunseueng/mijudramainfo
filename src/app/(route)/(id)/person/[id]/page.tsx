@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { Metadata } from "next";
 import PersonList from "./PersonList";
 import { CommentProps } from "@/helper/type";
+import { Prisma } from "@prisma/client";
 
 export const revalidate = 3600;
 export async function generateMetadata({ params }: any): Promise<Metadata> {
@@ -49,26 +50,23 @@ export default async function PersonPage({ params }: any) {
   const person_id = params.id;
   const currentUser = await getCurrentUser();
   const users = await prisma.user.findMany({});
-
   const getPersons = await prisma.person.findUnique({
     where: {
       personId: person_id,
     },
   });
-
+  const getPersonDB = await prisma.person.findMany();
   const getComment = await prisma.comment.findMany({
     where: {
       postId: person_id,
     },
   });
-
   const findSpecificPerson = users?.filter((user) =>
     user?.totalPopularitySent?.some((sent) => {
       const popularitySentItem = sent as PopularitySentItem;
       return params.id === popularitySentItem.personId;
     })
   );
-
   const sortedUsers = findSpecificPerson?.sort((a, b) => {
     const totalA = a.totalPopularitySent.reduce(
       (sum: number, item: any) => sum + item.totalPopularity,
@@ -80,6 +78,21 @@ export default async function PersonPage({ params }: any) {
     );
     return totalB - totalA; // Sort descending by starCount
   });
+  // If getPersons is not null, map its changes field
+  const mappedPersons = getPersons
+    ? {
+        ...getPersons,
+        changes: (getPersons.changes as Prisma.JsonValue[]).map(
+          (change: any) => ({
+            userId: change.userId,
+            timestamp: change.timestamp,
+            field: change.field,
+            oldValue: change.oldValue,
+            newValue: change.newValue,
+          })
+        ),
+      }
+    : null;
 
   return (
     <>
@@ -89,8 +102,9 @@ export default async function PersonPage({ params }: any) {
         currentUser={currentUser}
         users={users}
         getComment={getComment as CommentProps | any}
-        getPersons={getPersons}
+        getPersons={mappedPersons}
         sortedUsers={sortedUsers}
+        getPersonDB={getPersonDB}
       />
     </>
   );

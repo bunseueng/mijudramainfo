@@ -28,7 +28,7 @@ const RecentLists: React.FC<IList> = ({ list }) => {
 
   return (
     <div className="mt-1">
-      <div className="">
+      <div>
         {list?.map((listItem: any, listIndex: number) => (
           <div className="flex flex-col items-start" key={listIndex}>
             <div className="float-left w-[48.3333%] px-1 h-[108px]">
