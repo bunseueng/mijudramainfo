@@ -12,6 +12,7 @@ import { PHProvider } from "@/provider/PostHogProvider";
 import Provider from "@/provider/Provider";
 import TanstackProvider from "@/provider/TanstackProvider";
 import { ScrollProvider } from "@/provider/UseScroll";
+import { Analytics } from "@vercel/analytics/react";
 const Loading = dynamic(() => import("./loading"));
 const Footer = dynamic(() => import("./component/ui/Main/Footer"));
 
@@ -122,6 +123,7 @@ export default function RootLayout({
           strategy="afterInteractive"
           src="https://pagead2.googlesyndication.com"
         />
+        <Analytics />
       </body>
     </html>
   );
