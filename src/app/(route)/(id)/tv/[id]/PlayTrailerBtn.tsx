@@ -1,12 +1,21 @@
 "use client";
 
-import React from "react";
+import { useSearchParams } from "next/navigation";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { FaPlay } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 
 const PlayTrailerBtn = ({ trailer, textColor }: any) => {
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const success = searchParams.get("success");
+    if (success === "true") {
+      setOpenTrailer(false);
+    }
+  }, [searchParams]);
 
   return (
     <>

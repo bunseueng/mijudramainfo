@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { AnimatedBackground } from "animated-backgrounds";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { Input } from "../signin/AuthInput";
 
 const Signup = () => {
   const router = useRouter();
@@ -71,7 +72,7 @@ const Signup = () => {
         animationName="starryNight"
         style={{ position: "absolute", zIndex: "0" }}
       />
-      <div className="max-w-md w-full space-y-8 p-10 bg-white bg-opacity-10 rounded-xl shadow-lg backdrop-filter backdrop-blur-lg">
+      <div className="max-w-md w-full space-y-8 p-10 bg-white bg-opacity-10 rounded-xl shadow-lg backdrop-filter backdrop-blur-lg mt-20 mb-36 mx-4 md:mx-0">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-white">
             Welcome to MijuDramaInfo
@@ -111,13 +112,12 @@ const Signup = () => {
               >
                 Username
               </label>
-              <input
+              <Input
                 {...register("name", { required: "Username is required" })}
                 id="name"
                 name="name"
                 type="text"
                 autoComplete="username"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white bg-opacity-20"
                 placeholder="Username"
               />
               {errors.name && (
@@ -133,13 +133,12 @@ const Signup = () => {
               >
                 Email address
               </label>
-              <input
+              <Input
                 {...register("email", { required: "Email is required" })}
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white bg-opacity-20"
                 placeholder="Email address"
               />
               {errors.email && (
@@ -155,13 +154,12 @@ const Signup = () => {
               >
                 Password
               </label>
-              <input
+              <Input
                 {...register("password", { required: "Password is required" })}
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="new-password"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white bg-opacity-20"
                 placeholder="Password"
               />
               {errors.password && (
@@ -173,7 +171,7 @@ const Signup = () => {
           </div>
 
           <div className="flex items-center">
-            <input
+            <Input
               {...register("terms", {
                 required: "You must agree to the terms",
               })}

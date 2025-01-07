@@ -144,11 +144,6 @@ const Navbar: React.FC<Notification> = ({
   const rejectedRequests = friend.filter((item) => item.status === "rejected");
   const pendingRequests = friend.filter((item) => item.status === "pending");
 
-  // Filter pending requests made by the current user
-  const isPending = pendingRequests
-    .filter((req) => req.friendRequestId === currentUser?.id)
-    .filter((req) => req.notification === "unread"); // Ensure only unread are counted
-
   // Count unread requests received (where current user is the responder)
   const isPendingReceived = pendingRequests
     .filter((req) => req.friendRespondId === currentUser?.id)
@@ -197,13 +192,6 @@ const Navbar: React.FC<Notification> = ({
   const findRpNoti = findReply.filter(
     (item: any) => item?.notification === "unread"
   ).length;
-
-  // Find replies by the user (replied themselves)
-  const isRepliedItself = comment
-    .map((com) =>
-      com.replies?.filter((rp: any) => rp?.repliedUserId === currentUser?.id)
-    )
-    .flat();
 
   // Count unread replies
   const readRepliesCount = findReply.filter(
@@ -652,20 +640,18 @@ const Navbar: React.FC<Notification> = ({
               className="w-full fixed bg-white"
               onSubmit={onSearch}
             >
-              <div className="border-b-2 border-b-slate-300">
-                <div className="max-w-6xl mx-auto relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pl-3 pointer-events-none">
-                    <IoSearchSharp size={20} className="dark:text-black" />
-                  </div>
-                  <input
-                    type="text"
-                    className="w-full bg-white text-[#acacac] placeholder:font-semibold font-semibold outline-none px-14 py-3"
-                    name="navSearch"
-                    placeholder="Search for a movie, tv show, person..."
-                    onChange={onInput}
-                    value={navSearch}
-                  />
+              <div className="max-w-6xl mx-auto relative">
+                <div className="absolute inset-y-0 left-3 flex items-center pl-3 pointer-events-none">
+                  <IoSearchSharp size={20} className="dark:text-black" />
                 </div>
+                <input
+                  type="text"
+                  className="w-full bg-white text-[#acacac] placeholder:font-semibold font-semibold outline-none px-14 py-3"
+                  name="navSearch"
+                  placeholder="Search for a movie, tv show, person..."
+                  onChange={onInput}
+                  value={navSearch}
+                />
               </div>
               {showResults && <SearchResult />}
             </motion.form>

@@ -76,7 +76,6 @@ const DramaMain = ({
     refetchOnWindowFocus: true,
     refetchOnMount: true, // Refetch on mount to get the latest data
   });
-
   const { data: trailer } = useQuery({
     queryKey: ["trailer", tv_id],
     queryFn: () => fetchTrailer(tv_id),
@@ -389,7 +388,7 @@ const DramaMain = ({
                   onLoad={extractColor}
                   src={
                     getDrama?.cover ||
-                    `https://image.tmdb.org/t/p/w500/${
+                    `https://image.tmdb.org/t/p/w780/${
                       tv?.poster_path || tv?.backdrop_path
                     }`
                   }

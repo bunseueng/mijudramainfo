@@ -4,7 +4,7 @@ import { FiSun } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import { GiMoonBats } from "react-icons/gi";
+import { GiMoonClaws } from "react-icons/gi";
 
 // Loading SVG placeholder
 const LoadingPlaceholder = () => (
@@ -42,7 +42,7 @@ export default function ThemeSwitch() {
 
   if (resolvedTheme === "light") {
     return (
-      <GiMoonBats
+      <GiMoonClaws
         onClick={() => setTheme("dark")}
         className="cursor-pointer text-white text-xl"
       />

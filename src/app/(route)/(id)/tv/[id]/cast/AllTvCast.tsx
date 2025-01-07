@@ -154,7 +154,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
   return (
     <div className="bg-slate-100 dark:bg-[#1e1e1e]">
       <div
-        className="bg-cyan-600 dark:bg-[#242424]"
+        className="bg-cyan-600 dark:bg-[#242424] w-[50%]"
         style={{ backgroundColor: dominantColor as string | undefined }}
       >
         <div className="max-w-6xl mx-auto flex items-center mt-0 py-2">

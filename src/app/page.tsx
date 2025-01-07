@@ -3,7 +3,7 @@ import HeaderSlider from "./component/ui/Slider/HeaderSlider";
 
 export default function Home() {
   return (
-    <div className="relative">
+    <div className="relative bg-customLight dark:bg-customDark">
       <HeaderSlider />
       <Section />
     </div>

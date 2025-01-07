@@ -86,7 +86,7 @@ export default function RootLayout({
         <Adsense pId="3369705912051027" />
       </head>
       <body
-        className="bg-white dark:bg-[#14161a]"
+        className="bg-white dark:bg-[#14161a] h-screen"
         suppressHydrationWarning={true}
       >
         <PHProvider>

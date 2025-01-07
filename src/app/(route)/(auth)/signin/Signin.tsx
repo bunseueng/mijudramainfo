@@ -11,6 +11,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 // @ts-ignore
 import { AnimatedBackground } from "animated-backgrounds";
+import { Input } from "./AuthInput";
 const Signin = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -63,7 +64,7 @@ const Signin = () => {
         style={{ position: "absolute", zIndex: "0" }}
       />
       {/* Left Section */}
-      <div className="max-w-md w-full space-y-8 p-10 bg-white bg-opacity-10 rounded-xl shadow-lg backdrop-filter backdrop-blur-lg z-50">
+      <div className="max-w-md w-full space-y-8 p-10 bg-white bg-opacity-10 rounded-xl shadow-lg backdrop-filter backdrop-blur-lg z-50 mt-20 mb-36 mx-4: md:mx-0">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-white">
             Welcome to MijuDramaInfo
@@ -104,13 +105,12 @@ const Signin = () => {
               >
                 Email
               </label>
-              <input
+              <Input
                 {...register("email", { required: "Email is required" })}
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white bg-opacity-20"
                 placeholder="Email address"
               />
               {errors.email && (
@@ -126,13 +126,12 @@ const Signin = () => {
               >
                 Password
               </label>
-              <input
+              <Input
                 {...register("password", { required: "Password is required" })}
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-whitefocus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white bg-opacity-20"
                 placeholder="Password"
               />
               {errors.password && (

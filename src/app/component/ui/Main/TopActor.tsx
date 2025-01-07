@@ -54,37 +54,8 @@ export default function TopActor({ heading, personDB }: TopActorType) {
 
       <CardContent className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          {/* 2nd Place */}
-          <Card className="w-full md:w-1/3 bg-gradient-to-b from-gray-100 to-gray-200">
-            <CardContent className="p-4 text-center">
-              <div className="relative inline-block">
-                <Medal className="w-8 h-8 text-gray-400 absolute -top-4 left-1/2 transform -translate-x-1/2" />
-                <Image
-                  src={`https://image.tmdb.org/t/p/w185/${getPersonData?.[1]?.profile_path}`}
-                  alt={getPersonData?.[1]?.name}
-                  loading="lazy"
-                  width={96}
-                  height={96}
-                  className="w-24 h-24 rounded-full mx-auto mb-2 object-cover"
-                />
-              </div>
-              <h3 className="text-black font-semibold text-xl">
-                {getPersonData?.[1]?.name}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {getPersonData?.[1]?.place_of_birth}
-              </p>
-              <div className="inline-flex">
-                <Image src="/gift.svg" alt="gift" width={40} height={40} />{" "}
-                <span className="text-black font-bold mt-2">
-                  {sortedUsers?.[1]?.totalPopularity}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 1st Place */}
-          <Card className="w-full md:w-1/3 bg-gradient-to-b from-yellow-100 to-yellow-200">
+          {/* 1st Place (will appear first on small screens) */}
+          <Card className="w-full md:w-1/3 bg-gradient-to-b from-yellow-100 to-yellow-200 order-1 md:order-2">
             <CardContent className="p-4 text-center">
               <div className="relative inline-block">
                 <Crown className="w-10 h-10 text-yellow-500 absolute -top-5 left-1/2 transform -translate-x-1/2" />
@@ -112,16 +83,42 @@ export default function TopActor({ heading, personDB }: TopActorType) {
             </CardContent>
           </Card>
 
+          {/* 2nd Place */}
+          <Card className="w-full md:w-1/3 bg-gradient-to-b from-gray-100 to-gray-200 order-2 md:order-1">
+            <CardContent className="p-4 text-center">
+              <div className="relative inline-block">
+                <Medal className="w-8 h-8 text-gray-400 absolute -top-4 left-1/2 transform -translate-x-1/2" />
+                <Image
+                  src={`https://image.tmdb.org/t/p/w185/${getPersonData?.[1]?.profile_path}`}
+                  alt={getPersonData?.[1]?.name}
+                  loading="lazy"
+                  width={96}
+                  height={96}
+                  className="w-24 h-24 rounded-full mx-auto mb-2 object-cover"
+                />
+              </div>
+              <h3 className="text-black font-semibold text-xl">
+                {getPersonData?.[1]?.name}
+              </h3>
+              <p className="text-sm text-gray-600">
+                {getPersonData?.[1]?.place_of_birth}
+              </p>
+              <div className="inline-flex">
+                <Image src="/gift.svg" alt="gift" width={40} height={40} />{" "}
+                <span className="text-black font-bold mt-2">
+                  {sortedUsers?.[1]?.totalPopularity}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* 3rd Place */}
-          <Card className="w-full md:w-1/3 bg-gradient-to-b from-orange-100 to-orange-200">
+          <Card className="w-full md:w-1/3 bg-gradient-to-b from-orange-100 to-orange-200 order-3">
             <CardContent className="p-4 text-center">
               <div className="relative inline-block">
                 <Medal className="w-8 h-8 text-orange-400 absolute -top-4 left-1/2 transform -translate-x-1/2" />
                 <Image
-                  src={
-                    `https://image.tmdb.org/t/p/w185/${getPersonData?.[2]?.profile_path}` ||
-                    "/placeholder-image.avf"
-                  }
+                  src={`https://image.tmdb.org/t/p/w185/${getPersonData?.[2]?.profile_path}`}
                   alt={getPersonData?.[2]?.name}
                   loading="lazy"
                   width={96}

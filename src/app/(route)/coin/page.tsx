@@ -31,7 +31,7 @@ const CoinPage = async () => {
   console.log(paypalClientID);
 
   return (
-    <div className="mx-auto md:px-4">
+    <div className="mx-auto overflow-hidden">
       <Coin getCoin={getCoin} paypalClientID={paypalClientID} />
     </div>
   );

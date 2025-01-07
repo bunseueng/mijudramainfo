@@ -33,7 +33,7 @@ const PaymentModal: React.FC<PaymentType> = ({
   paypalClientID,
 }) => {
   const [linkToStripe, setLinkToStripe] = useState<string>("");
-  const [paymentMethod, setPaymentMethod] = useState<string>("Credit");
+  const [paymentMethod, setPaymentMethod] = useState<string>("Paypal");
   const { data: session } = useSession();
 
   const route = useRouter();

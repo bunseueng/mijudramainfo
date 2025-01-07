@@ -28,54 +28,58 @@ const SearchResult = () => {
   const handleClick = () => {
     setShowResults(false); // Hide search results when clicking on a result
   };
-  console.log(results);
   return (
     <>
       {results?.length === 0 ? (
-        <div className="w-full bg-white">
-          <div className="border-b-2 border-b-slate-300 hover:bg-[#e0e0e040]">
-            <div className="max-w-6xl mx-auto relative">
-              <div className="h-screen bg-white p-8">
-                <p className="text-slate-400 text-center text-3xl uppercase font-semibold px-14 py-1 cursor-pointer hover:opacity-70 duration-300 truncate">
-                  No Results
-                </p>
+        <div className="absolute w-full bg-white bg-opacity-20 shadow-lg max-h-96 overflow-y-auto backdrop-blur-lg custom-scrollbar">
+          <div className="relative">
+            <div className="absolute inset-0 bg-white opacity-10 blur-xl rounded-2xl"></div>
+            <div className="relative z-10">
+              <div className="max-w-6xl mx-auto relative">
+                <div className="h-screen p-8">
+                  <p className="text-black text-center text-3xl uppercase font-semibold px-14 py-1 cursor-pointer hover:opacity-70 duration-300 truncate">
+                    No Results
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="w-full bg-white">
-          {showResults &&
-            results?.map((item: any, idx: number) => (
-              <div
-                className="border-b-2 border-b-slate-300 hover:bg-[#e0e0e040]"
-                key={idx}
-              >
-                <div className="max-w-6xl mx-auto relative">
-                  <div className="absolute inset-y-0 left-3.5 flex items-center pl-3 pointer-events-none">
-                    {item?.media_type === "person" ? (
-                      <FaUser size={13} className="dark:text-black" />
-                    ) : item?.media_type === "tv" ? (
-                      <PiTelevisionDuotone
-                        size={13}
-                        className="dark:text-black"
-                      />
-                    ) : item?.media_type === "movie" ? (
-                      <MdLocalMovies size={13} className="dark:text-black" />
-                    ) : (
-                      <RiHistoryFill size={20} className="dark:text-black" />
-                    )}
-                  </div>
-                  <Link
-                    href={`/search/?${params.toString()}`}
-                    className="text-black font-semibold px-14 py-1 cursor-pointer hover:opacity-70 duration-300 truncate"
-                    onClick={handleClick}
+        <div className="absolute w-full bg-white bg-opacity-10 shadow-lg max-h-96 overflow-y-auto backdrop-blur-lg custom-scrollbar">
+          <div className="relative">
+            <div className="absolute inset-0 bg-white opacity-5 blur-xl "></div>
+            <div className="relative z-10">
+              {showResults &&
+                results?.map((item: any, idx: number) => (
+                  <div
+                    className="px-6 py-4 hover:bg-white hover:bg-opacity-30 cursor-pointer transition-colors duration-150"
+                    key={idx}
                   >
-                    {item?.name || item?.title}
-                  </Link>
-                </div>
-              </div>
-            ))}
+                    <div className="max-w-6xl mx-auto relative">
+                      <div className="absolute inset-y-0 left-3.5 flex items-center pl-3 pointer-events-none">
+                        {item?.media_type === "person" ? (
+                          <FaUser size={13} />
+                        ) : item?.media_type === "tv" ? (
+                          <PiTelevisionDuotone size={13} />
+                        ) : item?.media_type === "movie" ? (
+                          <MdLocalMovies size={13} />
+                        ) : (
+                          <RiHistoryFill size={20} />
+                        )}
+                      </div>
+                      <Link
+                        href={`/search/?${params.toString()}`}
+                        className="text-white font-semibold px-14 py-1 cursor-pointer hover:opacity-70 duration-300 truncate"
+                        onClick={handleClick}
+                      >
+                        {item?.name || item?.title}
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
         </div>
       )}
     </>

@@ -2,6 +2,7 @@
 
 import { fetchMovie } from "@/app/actions/fetchMovieApi";
 import { formatDate } from "@/app/actions/formatDate";
+import LazyImage from "@/components/ui/lazyimage";
 import { ITvReview } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -245,13 +246,14 @@ const MovieReviewDBCard = ({ getReview, movie_id, user }: any) => {
                     )}
                   </div>
                   <div className="relative float-right border border-[#00000024] rounded-sm m-2">
-                    <Image
-                      src={`https://image.tmdb.org/t/p/original/${
-                        movie.poster_path || movie.backdrop_path
-                      }`}
+                    <LazyImage
+                      src={`https://image.tmdb.org/t/p/${
+                        movie?.poster_path ? "w154" : "w300"
+                      }/${movie.poster_path || movie.backdrop_path}`}
                       alt={`${movie?.name || movie?.title}`}
                       width={100}
-                      height={100}
+                      height={150}
+                      quality={100}
                       priority
                       className="w-[100px] h-[150px] object-cover rounded-md"
                     />

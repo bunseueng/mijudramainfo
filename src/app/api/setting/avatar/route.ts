@@ -12,35 +12,65 @@ export async function PUT(request: Request) {
         }
         
         const body = await request.json();
-        
         const { profileAvatar } = body;
-        if(profileAvatar) {
-            const imgId = user?.public_avatar_id
-            if(imgId) {
-                await cloudinary.uploader.destroy(imgId)
+
+        if (profileAvatar) {
+            const imgId = user?.public_avatar_id;
+            if (imgId) {
+                await cloudinary.uploader.destroy(imgId);
             }
         }
 
         const uploadRes = await cloudinary.uploader.upload(profileAvatar, {
             upload_preset: "mijudrama_avatar"
-        })
+        });
 
-        if(uploadRes) {
+        if (uploadRes) {
+            // Update user's avatar in the user table
             const updateUserInfo = await prisma.user.update({
-                where: {
-                    id: user.id
-                },
+                where: { id: user.id },
                 data: {
                     profileAvatar: uploadRes.url,
                     public_avatar_id: uploadRes.public_id
                 }
             });
 
-            if (updateUserInfo) {
-                return NextResponse.json({ updateUserInfo }, { status: 200 });
+            // Fetch existing userInfo for tvReview and movieReview
+            const existingTvReview = await prisma.tvReview.findUnique({
+                where: { userId: user.id }
+            });
+            const existingMovieReview = await prisma.movieReview.findUnique({
+                where: { userId: user.id }
+            });
+
+            if (existingTvReview && existingMovieReview) {
+                // Ensure userInfo is an object before spreading
+                const updatingTvReview = await prisma.tvReview.update({
+                    where: { userId: user.id },
+                    data: {
+                        userInfo: {
+                            ...(typeof existingTvReview.userInfo === 'object' && existingTvReview.userInfo !== null ? existingTvReview.userInfo : {}),
+                            profileAvatar: uploadRes.url
+                        }
+                    }
+                });
+
+                const updatingMovieReview = await prisma.movieReview.update({
+                    where: { userId: user.id },
+                    data: {
+                        userInfo: {
+                            ...(typeof existingMovieReview.userInfo === 'object' && existingMovieReview.userInfo !== null ? existingMovieReview.userInfo : {}),
+                            profileAvatar: uploadRes.url
+                        }
+                    }
+                });
+
+                return NextResponse.json({ updatingTvReview, updatingMovieReview,updateUserInfo, message: "Success" }, { status: 200 });
             }
         }
-        return NextResponse.json({message: "Profile Avatar added successfully" }, { status: 200})
+
+        return NextResponse.json({ message: "Profile Avatar added successfully" }, { status: 200 });
+
     } catch (error) {
         console.log(error);
         return NextResponse.json(error, { status: 500 });

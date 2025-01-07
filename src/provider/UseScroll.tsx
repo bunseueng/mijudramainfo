@@ -30,7 +30,9 @@ export const ScrollProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <ScrollContext.Provider value={{ scrollYProgress, smoothScrollProgress }}>
       {/* Apply ref to a div element */}
-      <div ref={ref}>{children}</div>
+      <div ref={ref} className="h-screen">
+        {children}
+      </div>
     </ScrollContext.Provider>
   );
 };

@@ -24,7 +24,7 @@ const Coin: React.FC<UserI> = ({ getCoin, paypalClientID }) => {
     };
   }, [openModal]);
   return (
-    <div className="h-screen px-6">
+    <div className="h-full">
       <div className="relative -mx-4 pt-16 pb-10 overflow-hidden">
         {/* Blurred Background with Black Overlay */}
         <div className="absolute inset-0 z-0">

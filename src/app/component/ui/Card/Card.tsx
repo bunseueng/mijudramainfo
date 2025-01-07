@@ -122,6 +122,7 @@ export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
   if (isError) {
     console.log("Failed to fetch");
   }
+
   return (
     <div className="p-5 relative box-border h-[90%]">
       <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
@@ -135,7 +136,7 @@ export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
               src={
                 movieCover || tvCover
                   ? movieCover?.cover || tvCover?.cover
-                  : result?.poster_path !== null
+                  : result?.poster_path || result.backdrop_path !== null
                   ? `https://image.tmdb.org/t/p/w780/${
                       result.poster_path || result.backdrop_path
                     }`
@@ -146,7 +147,9 @@ export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
               height={200}
               style={{ width: "100%", height: "100%" }}
               loading="lazy"
-              className="w-full object-cover align-middle overflow-clip"
+              className={`w-full object-cover align-middle overflow-clip ${
+                result?.poster_path === null && "h-[155px] md:h-[175px]"
+              }`}
             />
           </Link>
         </div>
