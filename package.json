@@ -69,7 +69,7 @@
     "nextjs-toploader": "^1.6.12",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.13",
-    "posthog-js": "^1.139.1",
+    "posthog-js": "^1.203.1",
     "react": "^18",
     "react-circular-progressbar": "^2.1.0",
     "react-datepicker": "^6.8.0",
