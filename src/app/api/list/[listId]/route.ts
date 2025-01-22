@@ -2,7 +2,8 @@ import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function PUT(request: Request, { params }: { params: { listId: string } }) {
+export async function PUT(request: Request, props: { params: Promise<{ listId: string }> }) {
+  const params = await props.params;
   try {
     // Fetch the current user
     const currentUser = await getCurrentUser();
@@ -59,7 +60,76 @@ export async function PUT(request: Request, { params }: { params: { listId: stri
   }
 }
 
-export async function DELETE(request: Request, { params, body }: { params: { listId: string }, body: { movieId?: string, tvId?: string } }) {
+
+export async function PATCH(request: Request, props: { params: Promise<{ listId: string }> }) {
+  const params = await props.params;
+  try {
+    // Fetch the current user
+    const currentUser = await getCurrentUser();
+
+    // If the user is not valid, return a 400 error
+    if (!currentUser) {
+      return NextResponse.json({ message: "Invalid User" }, { status: 400 });
+    }
+
+    const findList = await prisma.dramaList.findUnique({
+      where: {
+        listId: params.listId
+      }
+    });
+
+    if (!findList) {
+      return NextResponse.json({ message: "List not found" }, { status: 404 });
+    }
+
+    const { movieId, tvId, type, listTitle, privacy, description, thumbnail, list_userId } = await request.json();
+
+    const updatedLovedBy = findList.lovedBy?.includes(currentUser.id)
+      ? findList.lovedBy?.filter((id) => id !== currentUser.id)
+      : [...(findList.lovedBy || []), currentUser.id];
+
+    const updatedLove = findList.love || 0;
+
+    const list = await prisma.dramaList.update({
+      where: {
+        listId: findList.listId,
+      },
+      data: {
+        userId: list_userId,
+        type,
+        listTitle,
+        privacy,
+        description,
+        movieId: movieId,
+        tvId: tvId,
+        thumbnail: thumbnail,
+        love: findList.love ? updatedLove - 1 : updatedLove + 1,
+        lovedBy: updatedLovedBy
+      },
+      include: { user: true }
+    });
+
+    if (list) {
+      return NextResponse.json({ message: "List updated successfully" }, { status: 200 });
+    }
+
+    return NextResponse.json({ message: "List update failed" }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json(error, { status: 500 });
+  }
+}
+
+
+export async function DELETE(
+  request: Request,
+  props: { params: Promise<{ listId: string }>, body: { movieId?: string, tvId?: string } }
+) {
+  const params = await props.params;
+
+  const {
+    body
+  } = props;
+
   try {
     // Fetch the current user
     const currentUser = await getCurrentUser();

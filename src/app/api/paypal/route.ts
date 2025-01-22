@@ -8,7 +8,7 @@ interface PayPalOrder {
     pricePaid: string;
 }
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
     const { action, id, price, orderId, value } = await req.json();
 
     console.log('OrderId:', orderId);

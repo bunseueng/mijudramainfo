@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Box, Slider } from "@mui/material";
 import { starLabels } from "@/helper/item-list";
 import Image from "next/image";
@@ -18,7 +18,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { usePathname, useRouter } from "next/navigation";
+import { ITmdbDrama, UserProps } from "@/helper/type";
 
+type RatingModalProps = {
+  setModal: Dispatch<SetStateAction<boolean>>;
+  modal: boolean;
+  id: string;
+  user: UserProps | null;
+  userRating: any;
+  tv: ITmdbDrama;
+  tvName: string;
+  tvItems: any;
+};
 const RatingModal = ({
   setModal,
   modal,
@@ -28,9 +39,10 @@ const RatingModal = ({
   tv,
   tvName,
   tvItems,
-}: any) => {
+}: RatingModalProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const [loading, setLoading] = useState<boolean>(false);
   const [selectedRating, setSelectedRating] = useState<number>(
     pathname === `/tv/${id}`
       ? userRating[0]?.rating
@@ -153,6 +165,7 @@ const RatingModal = ({
   ];
 
   const onSubmit = async (data: TCreateRating) => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/rating/${id}`, {
         method: "PUT",
@@ -172,6 +185,7 @@ const RatingModal = ({
         }),
       });
       if (res.status == 200) {
+        setModal(false);
         toast.success("Successfully rating");
         router.refresh();
       } else if (res.status === 500) {
@@ -179,10 +193,13 @@ const RatingModal = ({
       }
     } catch (error: any) {
       throw new Error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const allPagesSubmit = async (data: TCreateRating) => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/rating`, {
         method: "PUT",
@@ -195,13 +212,14 @@ const RatingModal = ({
           mood: emoji,
           emojiImg: emojiImg,
           movieId: data?.movieId,
-          tvId: tv,
+          tvId: id,
           status: status,
           episode: episode.toString(),
           notes: notes,
         }),
       });
       if (res.status == 200) {
+        setModal(false);
         toast.success("Successfully rating");
         router.refresh();
       } else if (res.status === 500) {
@@ -209,6 +227,8 @@ const RatingModal = ({
       }
     } catch (error: any) {
       throw new Error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -221,6 +241,7 @@ const RatingModal = ({
   };
 
   const deleteRating = async (data: TCreateRating) => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/rating/${id}`, {
         method: "DELETE",
@@ -240,6 +261,7 @@ const RatingModal = ({
         }),
       });
       if (res.status == 200) {
+        setModal(false);
         toast.success("Successfully deleted");
         router.refresh();
       } else if (res.status === 500) {
@@ -247,10 +269,13 @@ const RatingModal = ({
       }
     } catch (error: any) {
       throw new Error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const deleteRatingAllPages = async (data: TCreateRating) => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/rating`, {
         method: "DELETE",
@@ -277,6 +302,8 @@ const RatingModal = ({
       }
     } catch (error: any) {
       throw new Error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -613,7 +640,7 @@ const RatingModal = ({
             >
               <span className="bg-glyphicons_v2 glyphicons_v2 md:flex mr-1 align-text-top text-xl"></span>
               <span className="text-white font-sans text-lg md:text-xl font-semibold md:font-bold">
-                Im Done
+                {!loading ? "Im Done" : "Submitting..."}
               </span>
             </button>
           </div>

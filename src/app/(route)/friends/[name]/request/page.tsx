@@ -3,14 +3,17 @@ import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
-const FriendRequest = dynamic(() => import("./FriendRequest"), { ssr: false });
+const FriendRequest = dynamic(() => import("./FriendRequest"));
 
 export const metadata: Metadata = {
   title: "Friend Request",
   description: "All of your friends request in this website.",
 };
 
-const FriendRequestPage = async ({ params }: { params: { name: string } }) => {
+const FriendRequestPage = async (props: {
+  params: Promise<{ name: string }>;
+}) => {
+  const params = await props.params;
   const currentUser = await getCurrentUser();
   const user = await prisma.user.findUnique({ where: { name: params.name } });
   const friend = await prisma.friend.findMany({});

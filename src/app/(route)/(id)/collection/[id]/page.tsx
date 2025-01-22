@@ -1,6 +1,7 @@
 import Image from "next/image";
 
-export default async function MoviePage({ params }: any) {
+export default async function MoviePage(props: any) {
+  const params = await props.params;
   const tv_id = params.id;
   const res = await fetch(
     // `https://api.themoviedb.org/3/person/2440951?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
@@ -8,6 +9,8 @@ export default async function MoviePage({ params }: any) {
   );
   const movie = await res.json();
 
+  // Add an artificial delay
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   return (
     <div className="w-full">
       <div className="p-4 md:pt-8 flex flex-col md:flex-row content-center max-w-6xl mx-auto md:space-x-6">

@@ -3,7 +3,8 @@ import React from "react";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import Lists from "./Lists";
 
-const ListsPage = async ({ params }: { params: { listId: string } }) => {
+const ListsPage = async (props: { params: Promise<{ listId: string }> }) => {
+  const params = await props.params;
   const list = await prisma.dramaList?.findUnique({
     where: {
       listId: params.listId,
@@ -44,14 +45,10 @@ const ListsPage = async ({ params }: { params: { listId: string } }) => {
     }) || [];
 
   const userRating = await prisma.rating?.findMany({
-    where: { userId: user?.id },
+    where: { userId: currentUser?.id },
   });
 
-  const yourRating = await prisma.rating?.findMany({
-    where: {
-      userId: currentUser?.id,
-    },
-  });
+  const yourRating = await prisma.rating?.findMany();
 
   return (
     <Lists

@@ -1,3 +1,4 @@
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -19,7 +20,7 @@ const MovieSupportRole = ({ cast, getMovie }: any) => {
                 <div className="w-full h-full flex flex-row">
                   <div className="box-content w-[90px]">
                     <Link
-                      href={`/person/${item?.id}`}
+                      href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                       className="block outline-none box-content w-[110px] h-full"
                     >
                       {item.profile_path === null ? (
@@ -45,7 +46,7 @@ const MovieSupportRole = ({ cast, getMovie }: any) => {
                   </div>
                   <div className="flex flex-col items-start ml-2 w-full">
                     <Link
-                      href={`/person/${item?.id}`}
+                      href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                       className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                     >
                       {item?.name}
@@ -74,7 +75,7 @@ const MovieSupportRole = ({ cast, getMovie }: any) => {
                 <div className="w-full h-full flex flex-row">
                   <div className="box-content w-[90px]">
                     <Link
-                      href={`/person/${item?.id}`}
+                      href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                       className="block outline-none box-content w-[110px] h-full"
                     >
                       {item.profile_path === null ? (
@@ -100,7 +101,7 @@ const MovieSupportRole = ({ cast, getMovie }: any) => {
                   </div>
                   <div className="flex flex-col items-start ml-2 w-full">
                     <Link
-                      href={`/person/${item?.id}`}
+                      href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                       className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                     >
                       {item?.name}

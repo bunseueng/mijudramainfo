@@ -7,7 +7,8 @@ export const metadata: Metadata = {
   description: "Reset your password  to continue to explore our website.",
 };
 
-const ResetPasswordPage = ({ params }: { params: { email: string } }) => {
+const ResetPasswordPage = async (props: { params: Promise<{ email: string }> }) => {
+  const params = await props.params;
   return <ResetPassword params={params} />;
 };
 

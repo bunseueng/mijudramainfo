@@ -2,12 +2,17 @@ import React from "react";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import EditList from "./EditList";
+import { notFound } from "next/navigation";
 
-const EditListPage = async ({ params }: { params: { listId: string } }) => {
+const EditListPage = async (props: { params: Promise<{ listId: string }> }) => {
+  const params = await props.params;
   const user = await getCurrentUser();
   const list = await prisma.dramaList.findUnique({
     where: { listId: params.listId },
   });
+  if (list?.userId !== user?.id) {
+    notFound();
+  }
 
   const ratings = await prisma.rating.findMany({
     where: {

@@ -2,7 +2,8 @@ import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function PUT(req: Request, {params} : {params: {id: string}})  {
+export async function PUT(req: Request, props: {params: Promise<{id: string}>}) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
     
@@ -52,7 +53,8 @@ export async function PUT(req: Request, {params} : {params: {id: string}})  {
     }
 }
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
       const person = await prisma.person.findUnique({
         where: {
@@ -68,4 +70,4 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     } catch (error) {
       return NextResponse.json(error, { status: 500 });
     }
-  }
+}

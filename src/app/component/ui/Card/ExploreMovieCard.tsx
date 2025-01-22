@@ -1,50 +1,123 @@
 "use client";
 
+const AdBanner = dynamic(() => import("../Adsense/AdBanner"), { ssr: false });
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Link from "next/link";
 import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import dynamic from "next/dynamic";
-const PlayMovieTrailer = dynamic(
-  () => import("@/app/(route)/(drama)/movie/top/PlayMovieTrailer"),
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import TopActor from "../Main/TopActor";
+import { MovieDB, PersonDBType } from "@/helper/type";
+import PlayMovieTrailer from "@/app/(route)/(drama)/movie/top/PlayMovieTrailer";
+const PlayTrailer = dynamic(
+  () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
   { ssr: false }
 );
 const DramaFilter = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/DramaFilter"),
   { ssr: false }
 );
+const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
+  ssr: false,
+});
 
-const ExploreMovieCard = ({ title, movie, getMovie }: any) => {
+type ExploreMovieCardProps = {
+  title: string;
+  movie: any;
+  total_results: number;
+  getMovie: MovieDB[];
+  personDB: PersonDBType[];
+};
+
+const ExploreMovieCard = ({
+  title,
+  movie,
+  total_results,
+  getMovie,
+  personDB,
+}: ExploreMovieCardProps) => {
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") || "1");
   const [page, setPage] = useState(1);
   const per_page = searchParams?.get("per_page") || (20 as any);
   const start = (page - 1) * per_page;
-  const end = start + Number(per_page);
+  const end = start + per_page;
   const items = movie?.total_results;
-  const totalItems = movie?.results?.slice(start, end);
+  const totalItems = movie?.results?.slice(start, end) || []; // Use slice on results
+  const [tvRating, setTvRating] = useState<any>();
+
+  useEffect(() => {
+    const fetchRating = async () => {
+      try {
+        if (!movie || !movie.results || movie.results.length === 0) {
+          console.log("No items to fetch ratings for.");
+          return;
+        }
+
+        const tvIds = movie.results.map((item: any) => item.id.toString());
+        const averageRatings: { [key: string]: number } = {};
+
+        for (const id of tvIds) {
+          const getRatings = await fetch(`/api/rating/${id}`);
+          const data = await getRatings.json();
+          const ratings = data?.ratings || [];
+
+          // Filter ratings by tvId
+          const filteredRatings = ratings.filter(
+            (rating: any) => rating.tvId === id.toString()
+          );
+
+          // Get the number of ratings
+          const numberOfRatings = filteredRatings.length;
+
+          // Sum up all the ratings
+          const sumOfRatings = filteredRatings.reduce(
+            (sum: number, rating: any) => sum + rating.rating,
+            0
+          );
+
+          // Calculate the average rating
+          const averageRating =
+            numberOfRatings > 0 ? sumOfRatings / numberOfRatings : 0;
+
+          averageRatings[id] = averageRating;
+          console.log(numberOfRatings);
+        }
+
+        setTvRating(averageRatings);
+      } catch (error) {
+        console.error("Error fetching rating:", error);
+      }
+    };
+
+    fetchRating();
+  }, [movie]);
 
   return (
-    <div className="max-w-6xl mx-auto py-4 px-4 md:px-6">
-      <div className="mt-10">
+    <div className="flex flex-col max-w-6xl mx-auto py-4 px-4 lg:px-0 overflow-hidden">
+      <div className="w-full md:max-w-[1150px] mx-auto py-5 order-last md:order-first">
+        <TopActor heading="Top Actors" personDB={personDB} />
+      </div>
+      <div className="flex flex-col mt-10 order-first md:order-last">
         <div className="flex flex-col md:flex-row mt-10 w-full">
-          <div className="w-full md:w-4/6">
+          <div className="w-full md:w-4/6 pr-1 md:pr-3">
             <div className="flex items-center justify-between mb-5">
               <h1 className="text-2xl font-bold">{title}</h1>
-              <p>{movie?.total_results} results</p>
+              <p>{total_results} results</p>
             </div>
             {totalItems
               ?.filter((genre: any) => genre?.genre_ids.length > 0)
               ?.map((movie: any, idx: number) => {
                 const startCal = (currentPage - 1) * per_page;
                 const overallIndex = startCal + idx + 1;
-                const coverFromDB = getMovie?.find((m: any) =>
-                  m?.movie_id?.includes(movie?.id)
+                const coverFromDB = getMovie?.find((d: any) =>
+                  d?.tv_id?.includes(movie?.id)
                 );
                 return (
                   <div
@@ -53,13 +126,17 @@ const ExploreMovieCard = ({ title, movie, getMovie }: any) => {
                   >
                     <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
                       <div className="relative">
-                        <Link href={`/movie/${movie?.id}`}>
+                        <Link
+                          href={`/tv/${movie?.id}-${spaceToHyphen(
+                            movie?.title || movie?.name
+                          )}`}
+                        >
                           {movie?.poster_path ||
                           movie?.backdrop_path !== null ? (
                             <Image
                               src={
                                 coverFromDB
-                                  ? coverFromDB?.cover
+                                  ? (coverFromDB?.cover as string)
                                   : `https://image.tmdb.org/t/p/original/${
                                       movie.poster_path || movie.backdrop_path
                                     }`
@@ -88,8 +165,11 @@ const ExploreMovieCard = ({ title, movie, getMovie }: any) => {
                     <div className="pl-2 md:pl-3 w-[80%]">
                       <div className="flex items-center justify-between">
                         <Link
-                          href={`/movie/${movie?.id}`}
-                          className="text-xl text-sky-700 dark:text-[#2196f3] font-bold"
+                          prefetch={true}
+                          href={`/movie/${movie?.id}-${spaceToHyphen(
+                            movie?.title || movie?.name
+                          )}`}
+                          className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
                         >
                           {movie?.name || movie?.title}
                         </Link>
@@ -110,14 +190,37 @@ const ExploreMovieCard = ({ title, movie, getMovie }: any) => {
                       <div className="flex items-center">
                         <StyledRating
                           name="customized-color"
-                          value={convertToFiveStars(movie?.vote_average, 10)}
+                          value={convertToFiveStars(
+                            movie &&
+                              movie.vote_average &&
+                              tvRating &&
+                              tvRating[idx]
+                              ? (movie.vote_average + tvRating[idx]) / 2
+                              : tvRating && tvRating[idx]
+                              ? tvRating[idx] / 2
+                              : movie && movie.vote_average,
+                            10
+                          )}
                           readOnly
                           icon={<FavoriteIcon fontSize="inherit" />}
                           emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
                           precision={0.5}
                         />
                         <p className="pl-2 pt-1">
-                          {movie?.vote_average.toFixed(1)}
+                          {movie &&
+                          movie.vote_average &&
+                          tvRating &&
+                          tvRating[movie.id]
+                            ? (
+                                (movie.vote_average * (movie.vote_count || 0) +
+                                  (tvRating[movie.id] || 0) * 10) /
+                                ((movie.vote_count || 0) + 10)
+                              ).toFixed(1)
+                            : tvRating && tvRating[movie.id]
+                            ? tvRating[movie.id].toFixed(1)
+                            : movie && movie.vote_average
+                            ? movie.vote_average.toFixed(1)
+                            : "0.0"}
                         </p>
                       </div>
                       <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
@@ -133,22 +236,30 @@ const ExploreMovieCard = ({ title, movie, getMovie }: any) => {
                 );
               })}
           </div>
-          <div className="w-full md:w-2/6">
-            <div className="border bg-white dark:bg-[#242424] rounded-lg ml-4 lg:ml-10">
-              <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:bg-[#272727]">
+          <div className="w-full md:w-2/6 pl-1 md:pl-3 lg:pl-3">
+            <div className="py-5 hidden md:block">
+              <AdBanner dataAdFormat="auto" dataAdSlot="3527489220" />
+            </div>
+            <div className="border bg-white dark:bg-[#242424] rounded-lg">
+              <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:border-[#272727]">
                 Advanced Search
               </h1>
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<SearchLoading />}>
                 <DramaFilter />
               </Suspense>
             </div>
+            <div className="hidden md:block relative bg-black mx-auto my-5">
+              <div className="min-w-auto min-h-screen">
+                <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="my-5">
-        <Suspense fallback={<div>Loading...</div>}>
-          <DramaPagination setPage={setPage} totalItems={items} />
-        </Suspense>
+        <div className="my-5">
+          <Suspense fallback={<div>Loading...</div>}>
+            <DramaPagination setPage={setPage} totalItems={items} />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

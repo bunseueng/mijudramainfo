@@ -256,9 +256,12 @@ export interface CommentProps {
   userId: string;
   postId: string;
   type: string;
+  spoiler: boolean;
   replies: Prisma.JsonValue[] | undefined; // Adjust this to match the type of replies in comment
   parentId: string | null;
   repliedUserId: string | null;
+  love: number;
+  lovedBy: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -322,8 +325,8 @@ export interface DramaDB {
   details: Prisma.JsonValue[];
   cover: string | null;
   related_title: Prisma.JsonValue[];
-  cast: Prisma.JsonValue[];
-  crew: Prisma.JsonValue[];
+  cast: CrewRole[];
+  crew: CrewRole[];
   services: Prisma.JsonValue[];
   external_links: Prisma.JsonValue[];
   released_information: Prisma.JsonValue[];
@@ -486,6 +489,7 @@ export interface ITmdbDrama {
   last_air_date: string;
   last_episode_to_air: any;
   name: string;
+  title: string | null;
   networks: any[];
   next_episode_to_air: any;
   number_of_episodes: number;
@@ -718,7 +722,7 @@ export interface IMovieReview {
   createdAt: Date;
 }
 
-type TProfileFeeds = {
+export type ProfileFeedsTypes = {
   id: string;
   userId: string;
   username: string;
@@ -744,7 +748,7 @@ type TProfileFeeds = {
 };
 
 export interface IProfileFeeds {
-  getFeeds: TProfileFeeds[];
+  getFeeds: ProfileFeedsTypes[];
   currentUser: currentUserProps | null;
 }
 
@@ -793,4 +797,47 @@ export interface IActor {
       }
     ];
   };
+}
+
+export interface TrailerResult {
+  id: string;
+  iso_639_1: string;
+  iso_3166_1: string;
+  key: string;
+  name: string;
+  official: boolean;
+  published_at: string;
+  site: string;
+  size: number;
+  type: string;
+}
+
+export interface TrailerResponse {
+  id: number;
+  results: TrailerResult[];
+}
+
+export interface CrewRole {
+  adult: boolean; // Indicates if the crew member is categorized as an adult
+  credit_id: string; // Unique credit identifier
+  department: string; // Department the crew member works in (e.g., "Directing")
+  gender: number | null; // Gender of the crew member (2 = Male, 1 = Female, 0 = Not specified)
+  id: number; // Unique identifier for the crew member
+  job: string; // Specific job title (e.g., "Director")
+  known_for_department: string; // Department the crew member is most known for
+  name: string; // Name of the crew member
+  original_name: string; // Original name of the crew member
+  popularity: number; // Popularity rating of the crew member
+  profile_path: string | null; // Path to the profile image or null if not available
+}
+
+interface TitleInfo {
+  iso_3166_1: string; // Country code (e.g., "TW" for Taiwan, "US" for the United States)
+  title: string; // Title of the content
+  type: string; // Type of the title (e.g., movie, show, etc., can be empty)
+}
+
+export interface TitleData {
+  id: number; // Unique identifier for the title
+  results: TitleInfo[]; // Array of title information
 }

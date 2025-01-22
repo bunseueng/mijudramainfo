@@ -116,14 +116,20 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                   <div className="flex flex-col text-black pl-2">
                     <Link
                       prefetch={true}
-                      href={`/person/${review?.userId}`}
+                      href={`/profile/${review?.userInfo?.name}`}
                       className="text-[#2490da] text-xs md:text-md"
                     >
                       {review?.userInfo?.displayName || review?.userInfo?.name}
                     </Link>
-                    <Link href="" className="text-[#2490da] text-xs md:text-md">
-                      Other reviews by this user
-                    </Link>{" "}
+                    <div className="text-[#2490da]">
+                      <span className="text-xs">Other reviews by </span>
+                      <Link
+                        href={`/profile/${review?.userInfo?.name}/reviews`}
+                        className="text-xs md:text-md border-b border-b-orange-400"
+                      >
+                        this user
+                      </Link>
+                    </div>{" "}
                   </div>
                 </div>
                 <div className="block">

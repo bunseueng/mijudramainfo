@@ -3,7 +3,8 @@ import cloudinary from "@/lib/cloundinary";
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request, { params }: { params: { name: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ name: string }> }) {
+    const params = await props.params;
     try {
       const currentUser = await getCurrentUser();
   
@@ -55,10 +56,11 @@ export async function POST(req: Request, { params }: { params: { name: string } 
       console.error(error);
       return NextResponse.json({ message: "Error occurred" }, { status: 500 });
     }
-  }
+}
   
 
-export async function PATCH(req: Request, {params} : {params : {name : string}}) {
+export async function PATCH(req: Request, props: {params : Promise<{name : string}>}) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser()
 
@@ -94,7 +96,8 @@ export async function PATCH(req: Request, {params} : {params : {name : string}})
     }
 }
 
-export async function DELETE(req: Request, {params} : {params : {name : string}}) {
+export async function DELETE(req: Request, props: {params : Promise<{name : string}>}) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser()
 

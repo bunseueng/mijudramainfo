@@ -2,7 +2,7 @@ import React from "react";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
 import dynamic from "next/dynamic";
-const Notifications = dynamic(() => import("./Notifications"), { ssr: false });
+const Notifications = dynamic(() => import("./Notifications"));
 
 const NotificaitonsPage = async () => {
   const currentUser = await getCurrentUser();

@@ -46,7 +46,8 @@ async function uploadAndMergeServices(existingServices:any, newServices:any) {
   }));
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const currentUser = await getCurrentUser();
 
@@ -166,7 +167,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const currentUser = await getCurrentUser();
 

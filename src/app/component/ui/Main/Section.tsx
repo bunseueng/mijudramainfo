@@ -1,50 +1,48 @@
-import TrendingDrama from "../Fetching/TrendingDrama";
-import Actor from "../Fetching/Actor";
-import LatestDrama from "../Fetching/LatestDrama";
-import Trailer from "../Fetching/Trailer";
-import TopActor from "./TopActor";
+import { cache } from "react";
 import prisma from "@/lib/db";
+import SectionContent from "./SectionContent";
+import { DramaDB } from "@/helper/type";
 
-export async function generateStaticParams() {
-  const person = await prisma.person.findMany({});
+export type HomeDramaT = {
+  heading: string;
+  getDrama: DramaDB[];
+  existingRatings: any;
+  categoryData: any;
+  categoryDataDetails: any;
+  isDataLoading: boolean;
+  isDataDetailsLoading: boolean;
+  path: string;
+};
 
-  return person?.map((p) => ({
-    params: { id: p?.id?.toString() },
-  }));
-}
+const getInitialData = cache(async () => {
+  const [personDB, getDrama, existingRatings] = await Promise.all([
+    prisma.person.findMany(),
+    prisma.drama.findMany(),
+    prisma.rating.findMany(),
+  ]);
+
+  return {
+    personDB,
+    getDrama,
+    existingRatings,
+    sections: {
+      trending: "Trending",
+      latestDrama: "Latest Drama",
+      youkuSelection: "YOUKU Selection",
+      wetvDrama: "WeTV Selection",
+      iqiyiSelection: "iQIYI Selection",
+      mongoTVDrama: "MongoTV Selection",
+      actress: "Actor & Actress",
+      koreanDrama: "Korean Drama",
+      japaneseDrama: "Japanese Drama",
+      chineseAnime: "Chinese Anime",
+      japaneseAnime: "Japanese Anime",
+    },
+  };
+});
 
 export default async function Section() {
-  const trending = "Trending";
-  const latestDrama = "Latest Drama";
-  const actress = "Actor & Actress";
-  const trailer = "Latest Trailer";
-  const actor = "Actor Leaderboard";
+  const data = await getInitialData();
 
-  const personDB = await prisma.person.findMany({});
-  const getDrama = await prisma.drama.findMany({});
-  return (
-    <section
-      className="relative z-50 bg-customLight dark:bg-customDark from-transparent to-customLight dark:to-customDark -mt-[157px] pt-[150px]"
-      style={{ transform: "translateZ(10px)" }}
-    >
-      <div className="relative overflow-hidden max-w-6xl mx-auto">
-        <div className="mb-10 min-h-[300px]">
-          <TrendingDrama heading={trending} getDrama={getDrama} />
-        </div>
-
-        <div className="mb-10 min-h-[300px]">
-          <Actor heading={actress} personDB={personDB} />
-        </div>
-        <div className="mb-10 min-h-[300px]">
-          <LatestDrama heading={latestDrama} getDrama={getDrama} />
-        </div>
-        <div className="mb-10 min-h-[300px]">
-          <Trailer heading={trailer} />
-        </div>
-        <div className="mb-10 min-h-[300px]">
-          <TopActor heading={actor} personDB={personDB} />
-        </div>
-      </div>
-    </section>
-  );
+  return <SectionContent {...data} />;
 }

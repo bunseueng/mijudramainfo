@@ -2,7 +2,8 @@ import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function PATCH(req: Request, {params} : {params : {name : string}}) {
+export async function PATCH(req: Request, props: {params : Promise<{name : string}>}) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser()
 

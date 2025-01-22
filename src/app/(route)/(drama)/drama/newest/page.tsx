@@ -3,10 +3,7 @@ import { Metadata } from "next";
 import dynamic from "next/dynamic";
 import NewestDrama from "./NewestDrama";
 import prisma from "@/lib/db";
-const SearchLoading = dynamic(
-  () => import("@/app/component/ui/Loading/SearchLoading"),
-  { ssr: false }
-);
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 export const metadata: Metadata = {
   title: "Newest Drama",
@@ -15,10 +12,11 @@ export const metadata: Metadata = {
 
 const NewestDramaPage = async () => {
   const getDrama = await prisma.drama.findMany();
+  const personDB = await prisma.person.findMany();
   return (
     <div className="mt-10">
       <Suspense fallback={<SearchLoading />}>
-        <NewestDrama getDrama={getDrama} />
+        <NewestDrama getDrama={getDrama} personDB={personDB} />
       </Suspense>
     </div>
   );

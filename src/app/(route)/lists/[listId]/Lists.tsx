@@ -59,7 +59,9 @@ const Lists: React.FC<Lists> = ({
         <div
           className="relative overflow-hidden bg-cover object-center bg-no-repeat w-full h-auto"
           style={{
-            backgroundImage: `url(https://image.tmdb.org/t/p/original${list?.thumbnail})`,
+            backgroundImage:
+              `url(https://image.tmdb.org/t/p/original${list?.thumbnail})` ||
+              `url(/placeholder-image.avif)`,
             backgroundPosition: "center",
             backgroundSize: "cover", // Ensure the image covers the area
           }}
@@ -106,14 +108,16 @@ const Lists: React.FC<Lists> = ({
             </div>
             <div className="w-full flex justify-center bg-black/40 py-2">
               <div className="w-full max-w-6xl mx-auto flex px-5 gap-3">
-                <button className="flex items-center text-md text-white/50">
-                  <Link
-                    href={`/lists/${list?.listId}/edit`}
-                    className="font-semibold"
-                  >
-                    Edit
-                  </Link>
-                </button>
+                {list?.userId === currentUser?.id && (
+                  <button className="flex items-center text-md text-white/50">
+                    <Link
+                      href={`/lists/${list?.listId}/edit`}
+                      className="font-semibold"
+                    >
+                      Edit
+                    </Link>
+                  </button>
+                )}
                 <button className="flex items-center text-md text-white/50 font-semibold">
                   Share
                 </button>
@@ -125,34 +129,12 @@ const Lists: React.FC<Lists> = ({
             <div className="w-full flex justify-center bg-black/70">
               <div className="w-full max-w-6xl max-auto flex px-5 gap-3">
                 <div className="flex flex-wrap items-center justify-start md:gap-8 text-white font-bold md:w-full md:max-w-[1400px] py-4">
-                  <div className="w-1/2 md:w-fit flex flex-col pb-3 md:pb-0">
+                  <div className="w-1/2 md:w-fit flex items-start flex-col pb-3 md:pb-0">
                     <h3 className="text-2xl md:text-4xl/8 leading-5 p-0">
                       {list?.tvId?.length || list?.movieId?.length}
                     </h3>
                     <span className="text-base md:text-lg font-semibold">
                       Items on this list
-                    </span>
-                  </div>
-                  <div className="w-1/2 md:w-fit flex flex-col pb-3 md:pb-0">
-                    <h3 className="text-2xl md:text-4xl/8 leading-5 p-0">
-                      68%
-                    </h3>
-                    <span className="text-base md:text-lg font-semibold">
-                      Average Rating
-                    </span>
-                  </div>
-                  <div className="w-1/2 md:w-fit flex flex-col">
-                    <h3 className="text-2xl md:text-4xl/8 leading-5 p-0">
-                      0h 0m
-                    </h3>
-                    <span className="text-base md:text-lg font-semibold">
-                      Total Runtime
-                    </span>
-                  </div>
-                  <div className="w-1/2 md:w-fit flex flex-col">
-                    <h3 className="text-2xl md:text-4xl/8 leading-5 p-0">$0</h3>
-                    <span className="text-base md:text-lg font-semibold">
-                      Total Revenue
                     </span>
                   </div>
                 </div>

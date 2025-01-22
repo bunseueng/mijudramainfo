@@ -153,11 +153,7 @@ const MovieResult: React.FC<MovieResultProps> = ({
                       {item?.name || item?.title}
                     </p>
                     <p>
-                      <DramaListRating
-                        item={item}
-                        findSpecificRating={findSpecificRating}
-                        yourRating={yourRating}
-                      />
+                      <DramaListRating item={item} yourRating={yourRating} />
                     </p>
                     <p className="text-sm  mt-2 overflow-hidden">
                       {list?.dramaComment

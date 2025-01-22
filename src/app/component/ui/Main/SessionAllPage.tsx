@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import React, { lazy } from "react";
 import prisma from "@/lib/db";
-const Navbar = lazy(() => import("./Navbar"));
+const Navbar = lazy(() => import("../Navbar/Navbar"));
 
 export const maxDuration = 60;
 

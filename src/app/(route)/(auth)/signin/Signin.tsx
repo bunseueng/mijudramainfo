@@ -57,6 +57,15 @@ const Signin = () => {
     [router, rememberMe]
   );
 
+  const handleSignIn = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    type: string,
+    callback: { callbackUrl: string | undefined }
+  ) => {
+    e.preventDefault();
+    signIn(`${type}`, callback);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <AnimatedBackground
@@ -76,14 +85,16 @@ const Signin = () => {
             <button
               type="button"
               className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200"
-              onClick={() => signIn("google")}
+              onClick={(e) =>
+                handleSignIn(e, "google", { callbackUrl: undefined })
+              }
             >
               <FaGoogle className="text-white" size={20} />
             </button>
             <button
               type="button"
               className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200"
-              onClick={() => signIn("github", { callbackUrl: "/" })}
+              onClick={(e) => handleSignIn(e, "github", { callbackUrl: "/" })}
             >
               <FaGithub className="text-white" size={20} />
             </button>

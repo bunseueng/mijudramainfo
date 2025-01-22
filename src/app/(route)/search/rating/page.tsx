@@ -4,8 +4,7 @@ const FilterQuery = dynamic(
   () => import("@/app/component/ui/Search/FilterQuery")
 );
 const SearchLoading = dynamic(
-  () => import("@/app/component/ui/Loading/SearchLoading"),
-  { ssr: false }
+  () => import("@/app/component/ui/Loading/SearchLoading")
 );
 export const revalidate = 0;
 const Rating = () => {

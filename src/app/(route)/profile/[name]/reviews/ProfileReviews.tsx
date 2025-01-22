@@ -16,8 +16,9 @@ import { formatDate } from "@/app/actions/formatDate";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
-import { ReviewType } from "@/app/(route)/(id)/tv/[id]/reviews/Reviews";
+import { ReviewType } from "@/app/(route)/(id)/tv/[id]-[slug]/reviews/Reviews";
 import dynamic from "next/dynamic";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
@@ -457,7 +458,9 @@ const ProfileReviews: React.FC<ReviewType> = ({
 
                           <div className="flex flex-col text-black pl-2">
                             <Link
-                              href={`/tv/${findDrama?.id}`}
+                              href={`/tv/${findDrama?.id}-${spaceToHyphen(
+                                findDrama?.title || findDrama?.name
+                              )}`}
                               className="text-black dark:text-white text-xs md:text-sm md:text-md mb-1"
                             >
                               Reviewed{" "}

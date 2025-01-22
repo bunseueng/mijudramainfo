@@ -1,3 +1,4 @@
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -13,7 +14,10 @@ const CastCard = ({ getDrama, cast }: any) => {
             >
               <div className="flex flex-row items-center justify-between">
                 {item?.profile_path !== null ? (
-                  <Link prefetch={true} href={`/person/${item?.id}`}>
+                  <Link
+                    prefetch={true}
+                    href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
+                  >
                     <Image
                       src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
                       alt={`${item?.name || item?.title}'s Profile`}
@@ -25,7 +29,10 @@ const CastCard = ({ getDrama, cast }: any) => {
                     />
                   </Link>
                 ) : (
-                  <Link prefetch={true} href={`/person/${item?.id}`}>
+                  <Link
+                    prefetch={true}
+                    href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
+                  >
                     <Image
                       src="/placeholder-image.avif"
                       alt={`${item?.name || item?.title}'s Profile`}
@@ -40,7 +47,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                 <div className="flex flex-col items-start ml-2">
                   <Link
                     prefetch={true}
-                    href={`/person/${item?.id}`}
+                    href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="md:inline-block md:max-w-[145px] text-semibold text-sm md:text-md md:overflow-hidden md:whitespace-nowrap md:text-ellipsis truncate text-[#2196f3] hover:opacity-75 transform duraiton-300 font-bold"
                   >
                     {item?.name}
@@ -63,7 +70,10 @@ const CastCard = ({ getDrama, cast }: any) => {
             >
               <div className="flex flex-row items-center justify-between">
                 {item?.profile_path !== null ? (
-                  <Link prefetch={true} href={`/person/${item?.id}`}>
+                  <Link
+                    prefetch={true}
+                    href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
+                  >
                     <Image
                       src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
                       alt={`${item?.name || item?.title}'s Profile`}
@@ -75,7 +85,10 @@ const CastCard = ({ getDrama, cast }: any) => {
                     />
                   </Link>
                 ) : (
-                  <Link prefetch={true} href={`/person/${item?.id}`}>
+                  <Link
+                    prefetch={true}
+                    href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
+                  >
                     <Image
                       src="/placeholder-image.avif"
                       alt={`${item?.name || item?.title}'s Profile`}
@@ -90,7 +103,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                 <div className="flex flex-col items-start ml-2">
                   <Link
                     prefetch={true}
-                    href={`/person/${item?.id}`}
+                    href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="md:inline-block md:max-w-[145px] text-semibold text-sm md:text-md md:overflow-hidden md:whitespace-nowrap md:text-ellipsis truncate text-[#2196f3] hover:opacity-75 transform duraiton-300 font-bold"
                   >
                     {item?.name}

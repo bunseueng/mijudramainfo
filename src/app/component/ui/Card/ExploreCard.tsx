@@ -13,6 +13,9 @@ import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import TopActor from "../Main/TopActor";
+import { DramaDB, PersonDBType } from "@/helper/type";
 const PlayTrailer = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
   { ssr: false }
@@ -24,8 +27,20 @@ const DramaFilter = dynamic(
 const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
   ssr: false,
 });
-
-const ExploreCard = ({ title, topDramas, total_results, getDrama }: any) => {
+type ExploreDramaCardProps = {
+  title: string;
+  topDramas: any;
+  total_results: number;
+  getDrama: DramaDB[];
+  personDB: PersonDBType[];
+};
+const ExploreCard = ({
+  title,
+  topDramas,
+  total_results,
+  getDrama,
+  personDB,
+}: ExploreDramaCardProps) => {
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") || "1");
   const [page, setPage] = useState(1);
@@ -128,11 +143,11 @@ const ExploreCard = ({ title, topDramas, total_results, getDrama }: any) => {
     return null;
   }
   return (
-    <div className="max-w-6xl mx-auto py-4 px-4 md:px-6">
-      <div className="min-w-[1150px] mx-auto py-5">
-        <AdBanner dataAdFormat="auto" dataAdSlot="8077904488" />
+    <div className="flex flex-col max-w-6xl mx-auto py-4 px-4 lg:px-0 overflow-hidden">
+      <div className="w-full md:max-w-[1150px] mx-auto py-5 order-last md:order-first">
+        <TopActor heading="Top Actors" personDB={personDB} />
       </div>
-      <div className="mt-10">
+      <div className="flex flex-col mt-10 order-first md:order-last">
         <div className="flex flex-col md:flex-row mt-10 w-full">
           <div className="w-full md:w-4/6 pr-1 md:pr-3">
             <div className="flex items-center justify-between mb-5">
@@ -154,13 +169,17 @@ const ExploreCard = ({ title, topDramas, total_results, getDrama }: any) => {
                   >
                     <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
                       <div className="relative">
-                        <Link href={`/tv/${drama?.id}`}>
+                        <Link
+                          href={`/tv/${drama?.id}-${spaceToHyphen(
+                            drama?.title || drama?.name
+                          )}`}
+                        >
                           {drama?.poster_path ||
                           drama?.backdrop_path !== null ? (
                             <Image
                               src={
                                 coverFromDB
-                                  ? coverFromDB?.cover
+                                  ? (coverFromDB?.cover as string)
                                   : `https://image.tmdb.org/t/p/original/${
                                       drama.poster_path || drama.backdrop_path
                                     }`
@@ -190,7 +209,9 @@ const ExploreCard = ({ title, topDramas, total_results, getDrama }: any) => {
                       <div className="flex items-center justify-between">
                         <Link
                           prefetch={true}
-                          href={`/tv/${drama?.id}`}
+                          href={`/tv/${drama?.id}-${spaceToHyphen(
+                            drama?.title || drama?.name
+                          )}`}
                           className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
                         >
                           {drama?.name || drama?.title}
@@ -301,11 +322,11 @@ const ExploreCard = ({ title, topDramas, total_results, getDrama }: any) => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="my-5">
-        <Suspense fallback={<div>Loading...</div>}>
-          <DramaPagination setPage={setPage} totalItems={items} />
-        </Suspense>
+        <div className="my-5">
+          <Suspense fallback={<div>Loading...</div>}>
+            <DramaPagination setPage={setPage} totalItems={items} />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

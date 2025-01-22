@@ -5,11 +5,11 @@ import { ObjectId } from 'mongodb';
 import { findCommentById } from "@/app/actions/findCommentById";
 
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
         if (!currentUser) {
-            console.error("Invalid User");
             return NextResponse.json({ message: "Invalid User" }, { status: 400 });
         }
 
@@ -79,7 +79,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             });
 
 
-            return NextResponse.json({ message: "Reply created successfully and first reply's userId modified", updatedParentComment }, { status: 200 });
+            return NextResponse.json({ message, updatedParentComment }, { status: 200 });
         } else {
             const creatingComment = await prisma.comment.create({
                 data: {
@@ -91,14 +91,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                     type: "tv"
                 },
             });
-            console.log("Created new comment:", creatingComment);
 
             if (!creatingComment) {
                 console.error("Failed to create comment");
                 return NextResponse.json({ message: "Failed to create comment" }, { status: 403 });
             }
 
-            return NextResponse.json({ message: "Comment created successfully", creatingComment }, { status: 200 });
+            return NextResponse.json({ message, creatingComment }, { status: 200 });
         }
     } catch (error) {
         console.error("Error creating comment:", error);
@@ -107,7 +106,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 }
 
 async function updateNestedReply(commentId: string, comments: any[], updatedData: any): Promise<any | null> {
-
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+        return NextResponse.json({ message: "Invalid User" }, { status: 400 });
+    }
     for (const comment of comments) {
         if (comment.replies) {
             const replyIndex = comment.replies.findIndex((reply: any) => reply.id === commentId);
@@ -137,12 +139,12 @@ async function updateNestedReply(commentId: string, comments: any[], updatedData
     return null;
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
 
         if (!currentUser) {
-            console.error("Invalid User");
             return NextResponse.json({ message: "Invalid User" }, { status: 400 });
         }
 
@@ -201,12 +203,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
 
         if (!currentUser) {
-            console.error("Invalid User");
             return NextResponse.json({ message: "Invalid User" }, { status: 400 });
         }
 
@@ -262,6 +264,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 async function deleteNestedReply(commentId: string, comments: any[]): Promise<boolean> {
+
+    const currentUser = await getCurrentUser();
+        if (!currentUser) {
+            throw new Error("Invalid User")
+        }
     for (const comment of comments) {
         if (comment.replies) {
             const replyIndex = comment.replies.findIndex((reply: any) => reply.id === commentId);
@@ -287,12 +294,12 @@ async function deleteNestedReply(commentId: string, comments: any[]): Promise<bo
     return false;
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
 
         if (!currentUser) {
-            console.error("Invalid User");
             return NextResponse.json({ message: "Invalid User" }, { status: 400 });
         }
 

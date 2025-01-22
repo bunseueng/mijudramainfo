@@ -1,12 +1,17 @@
 "use client";
 
-import { Crown, Medal } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Image from "next/image";
+import { Trophy, MapPin, TrendingUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPerson } from "@/app/actions/fetchMovieApi";
 import { PersonDBType } from "@/helper/type";
-import TopActorSkeleton from "../Loading/TopActorLoading";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import Link from "next/link";
+import Image from "next/image";
 
 type TopActorType = {
   personDB: PersonDBType[] | any;
@@ -14,145 +19,174 @@ type TopActorType = {
 };
 
 export default function TopActor({ heading, personDB }: TopActorType) {
-  const person_ids = personDB.map((person: any) => person.personId); // Extract all personIds
+  const person_ids = personDB.map((person: PersonDBType) => person.personId);
+
   const fetchAllPersons = async () => {
     const allPersons = await Promise.all(
-      person_ids.map((id: any) => fetchPerson(id)) // Fetch all persons' data
+      person_ids.map((id: PersonDBType) => fetchPerson(id))
     );
     return allPersons;
   };
 
   const { data: persons, isLoading } = useQuery({
-    queryKey: ["persons", person_ids], // Use person_ids to ensure query is unique
-    queryFn: fetchAllPersons, // Fetch data for all personIds
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+    queryKey: ["persons", person_ids],
+    queryFn: fetchAllPersons,
+    staleTime: 3600000,
+    refetchOnWindowFocus: true,
   });
 
-  const filteredPerson = personDB?.filter((db: any) =>
+  const filteredPerson = personDB?.filter((db: PersonDBType) =>
     persons?.find((p) => db?.personId?.includes(p?.id))
   );
 
-  const sortedUsers = filteredPerson?.sort((a: any, b: any) => {
-    const totalA = a.totalPopularity;
-    const totalB = b.totalPopularity;
-    return totalB - totalA; // Sort descending by starCount
-  });
+  const sortedUsers = filteredPerson?.sort(
+    (a: PersonDBType, b: PersonDBType) => {
+      const totalA = a.totalPopularity;
+      const totalB = b.totalPopularity;
+      return totalB - totalA;
+    }
+  );
 
   const getPersonData = persons?.filter((data) =>
-    sortedUsers?.find((p: any) => p?.popularity[0]?.actorName === data?.name)
+    sortedUsers?.find(
+      (p: PersonDBType) => p?.popularity[0]?.actorName === data?.name
+    )
   );
 
   if (isLoading) {
     return <TopActorSkeleton />;
   }
+
   return (
-    <Card className="w-full !bg-transparent !border-0 !rounded-none px-4">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">{heading}</CardTitle>
-      </CardHeader>
+    <div className="w-full max-w-[1808px] mx-auto">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-xl flex items-center justify-center gap-2">
+        <Trophy className="w-6 h-6 text-yellow-300" />
+        <h2 className="text-xl font-bold text-white">{heading}</h2>
+      </div>
 
-      <CardContent className="space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          {/* 1st Place (will appear first on small screens) */}
-          <Card className="w-full md:w-1/3 bg-gradient-to-b from-yellow-100 to-yellow-200 order-1 md:order-2">
-            <CardContent className="p-4 text-center">
-              <div className="relative inline-block">
-                <Crown className="w-10 h-10 text-yellow-500 absolute -top-5 left-1/2 transform -translate-x-1/2" />
-                <Image
-                  src={`https://image.tmdb.org/t/p/w185/${getPersonData?.[0]?.profile_path}`}
-                  alt={getPersonData?.[0]?.name}
-                  loading="lazy"
-                  width={96}
-                  height={96}
-                  className="w-24 h-24 rounded-full mx-auto mb-2 object-cover"
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-[#1a1d24] rounded-b-xl">
+        {[0, 1, 2].map((index) => (
+          <ActorCard
+            key={index}
+            actor={getPersonData?.[index]}
+            rank={index + 1}
+            popularity={sortedUsers?.[index]?.totalPopularity}
+          />
+        ))}
+      </div>
+
+      <TrendingSection />
+    </div>
+  );
+}
+
+function ActorCard({
+  actor,
+  rank,
+  popularity,
+}: {
+  actor: any;
+  rank: number;
+  popularity: number;
+}) {
+  const bgColor =
+    rank === 1 ? "bg-[#8B4513]" : rank === 2 ? "bg-[#1a2332]" : "bg-[#8B2513]";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className={`${bgColor} border-0 w-full`}>
+        <CardContent className="p-3 flex items-center flex-wrap gap-3">
+          <div className="relative">
+            <Badge
+              variant="secondary"
+              className="absolute -top-2 -left-2 z-10 bg-yellow-500/80 text-white text-xs px-1.5"
+            >
+              #{rank}
+            </Badge>
+            <Link
+              href={`/person/${actor?.id}-${spaceToHyphen(actor?.name)}`}
+              className="block"
+            >
+              <Avatar className="w-16 h-16 border-2 border-white/10">
+                <AvatarImage
+                  src={`https://image.tmdb.org/t/p/w185/${actor?.profile_path}`}
+                  alt={actor?.name}
+                  className="object-cover"
                 />
-              </div>
-              <h3 className="text-black font-semibold text-xl">
-                {getPersonData?.[0]?.name}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {getPersonData?.[0]?.place_of_birth}
-              </p>
-              <div className="inline-flex">
-                <Image src="/gift.svg" alt="gift" width={40} height={40} />{" "}
-                <span className="text-black font-bold mt-2">
-                  {sortedUsers?.[0]?.totalPopularity}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 2nd Place */}
-          <Card className="w-full md:w-1/3 bg-gradient-to-b from-gray-100 to-gray-200 order-2 md:order-1">
-            <CardContent className="p-4 text-center">
-              <div className="relative inline-block">
-                <Medal className="w-8 h-8 text-gray-400 absolute -top-4 left-1/2 transform -translate-x-1/2" />
-                <Image
-                  src={`https://image.tmdb.org/t/p/w185/${getPersonData?.[1]?.profile_path}`}
-                  alt={getPersonData?.[1]?.name}
-                  loading="lazy"
-                  width={96}
-                  height={96}
-                  className="w-24 h-24 rounded-full mx-auto mb-2 object-cover"
-                />
-              </div>
-              <h3 className="text-black font-semibold text-xl">
-                {getPersonData?.[1]?.name}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {getPersonData?.[1]?.place_of_birth}
-              </p>
-              <div className="inline-flex">
-                <Image src="/gift.svg" alt="gift" width={40} height={40} />{" "}
-                <span className="text-black font-bold mt-2">
-                  {sortedUsers?.[1]?.totalPopularity}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 3rd Place */}
-          <Card className="w-full md:w-1/3 bg-gradient-to-b from-orange-100 to-orange-200 order-3">
-            <CardContent className="p-4 text-center">
-              <div className="relative inline-block">
-                <Medal className="w-8 h-8 text-orange-400 absolute -top-4 left-1/2 transform -translate-x-1/2" />
-                <Image
-                  src={`https://image.tmdb.org/t/p/w185/${getPersonData?.[2]?.profile_path}`}
-                  alt={getPersonData?.[2]?.name}
-                  loading="lazy"
-                  width={96}
-                  height={96}
-                  className="w-24 h-24 rounded-full mx-auto mb-2 object-cover"
-                />
-              </div>
-              <h3 className="text-black font-semibold text-xl">
-                {getPersonData?.[2]?.name}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {getPersonData?.[2]?.place_of_birth}
-              </p>
-              <div className="inline-flex">
-                <Image src="/gift.svg" alt="gift" width={40} height={40} />{" "}
-                <span className="text-black font-bold mt-2">
-                  {sortedUsers?.[2]?.totalPopularity}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mt-6 bg-primary/10 p-4 rounded-lg">
-          <div className="flex items-center justify-between">
-            <h4 className="text-lg font-semibold">
-              Who&apos;s the most loved Actor on MDI?
-            </h4>
-            <span className="bg-yellow-400 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-              Wanted
-            </span>
+                <AvatarFallback>{actor?.name?.charAt(0)}</AvatarFallback>
+              </Avatar>
+            </Link>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          <div className="flex-1 min-w-0">
+            <Link
+              href={`/person/${actor?.id}-${spaceToHyphen(actor?.name)}`}
+              className="block"
+            >
+              <h3 className="text-lg font-semibold text-white truncate">
+                {actor?.name}
+              </h3>
+            </Link>
+            <div className="flex items-center gap-1 text-white/60 text-sm">
+              <MapPin className="w-3 h-3" />
+              <span className="truncate">
+                {actor?.place_of_birth || "Unknown"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 mt-1">
+              <Image src="/gift.svg" alt="gift" width={16} height={16} />
+              <span className="text-pink-500 font-semibold">{popularity}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+function TrendingSection() {
+  return (
+    <div className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-xl flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <TrendingUp className="w-5 h-5 text-white" />
+        <h4 className="text-lg font-semibold text-white">
+          Who&apos;s the most loved Actor on MDI?
+        </h4>
+      </div>
+      <Badge variant="secondary" className="bg-white text-blue-700">
+        Trending Now
+      </Badge>
+    </div>
+  );
+}
+
+function TopActorSkeleton() {
+  return (
+    <div className="w-full max-w-[1808px] mx-auto">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-xl">
+        <Skeleton className="h-6 w-40 mx-auto bg-white/20" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-[#1a1d24] rounded-b-xl">
+        {[1, 2, 3].map((index) => (
+          <Card key={index} className="bg-gray-800 border-0">
+            <CardContent className="p-3 flex items-center gap-3">
+              <Skeleton className="w-16 h-16 rounded-full" />
+              <div className="flex-1">
+                <Skeleton className="h-5 w-24 mb-2" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-16 mt-2" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="mt-4">
+        <Skeleton className="h-14 w-full rounded-xl" />
+      </div>
+    </div>
   );
 }

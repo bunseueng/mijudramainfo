@@ -16,7 +16,7 @@ import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { MutableRefObject, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import React from "react";
 
@@ -27,6 +27,7 @@ interface Notification {
   findSpecificUser: findSpecificUserProps[] | null[];
   yourFriend: findSpecificUserProps[] | null[];
   comment: CommentProps[];
+  outsideRef: MutableRefObject<null>;
 }
 
 const NotificationModal: React.FC<Notification> = ({
@@ -36,6 +37,7 @@ const NotificationModal: React.FC<Notification> = ({
   friend,
   findSpecificUser,
   comment,
+  outsideRef,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -187,6 +189,7 @@ const NotificationModal: React.FC<Notification> = ({
           duration: 1,
         }}
         className="w-auto md:w-[440px] bg-white dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#3e4042] absolute right-2 md:left-auto md:right-[133px] top-[59px] shadow-md"
+        ref={outsideRef}
       >
         <div className="max-h-[660px] overflow-hidden overflow-y-auto">
           <div className="flex items-center justify-between">

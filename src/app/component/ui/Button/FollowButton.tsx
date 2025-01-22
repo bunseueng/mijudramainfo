@@ -1,18 +1,19 @@
 "use client";
 
 import { User } from "@/app/(route)/profile/[name]/ProfileItem";
-import { currentUserProps } from "@/helper/type";
+import { currentUserProps, UserProps } from "@/helper/type";
 import React, { useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { FaExclamation } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 
-interface ICurrentUser {
+interface FollowButtonProps {
   currentUser: currentUserProps | null;
+  user: UserProps
 }
 
-const FollowButton: React.FC<User & ICurrentUser> = ({ user, currentUser }) => {
+const FollowButton: React.FC<FollowButtonProps> = ({ user, currentUser }) => {
   const [followLoading, setFollowLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
   const router = useRouter();

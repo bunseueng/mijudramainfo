@@ -5,23 +5,32 @@ import { FaRegRectangleList } from "react-icons/fa6";
 import { CiSettings } from "react-icons/ci";
 import { TiArrowForward } from "react-icons/ti";
 import { TbCoins } from "react-icons/tb";
-import { GiMoonBats } from "react-icons/gi";
+import { PiMoonStarsFill } from "react-icons/pi";
+import { IoMdSunny } from "react-icons/io";
 
 export const navbar_items = [
   {
-    id: 1,
-    label: "Explore",
+    id: 0,
+    label: "For You",
     link: "/",
   },
   {
+    id: 1,
+    label: "Explore",
+    link: "",
+  },
+  {
+    id: 2,
     label: "Top Drama",
     link: "/drama/top",
   },
   {
+    id: 3,
     label: "Popular Drama",
     link: "/drama/popular",
   },
   {
+    id: 4,
     label: "Newest",
     link: "/drama/newest",
   },
@@ -76,6 +85,40 @@ export const people_subitems = [
   },
 ];
 
+export const sidebar_items = [
+  {
+    label: "Newest Dramas",
+    link: "/drama/newest",
+  },
+  {
+    label: "Popular Dramas",
+    link: "/drama/popular",
+  },
+  {
+    label: "Upcoming Dramas",
+    link: "/drama/upcoming",
+  },
+  {
+    label: "Variety Shows",
+    link: "/shows/variety",
+  },
+  {
+    label: "Top Actors",
+    link: "/people/top",
+  },
+  {
+    label: "Top 100 Chinese Dramas",
+    link: "/drama/top_chinese_dramas",
+  },
+  {
+    label: "Top 100 Korean Dramas",
+    link: "/drama/top_korean_dramas",
+  },
+  {
+    label: "Top 100 Japanese Dramas",
+    link: "/drama/top_japanese_dramas",
+  },
+];
 export const typeCheckbox1 = [
   {
     label: "Dramas",
@@ -367,8 +410,11 @@ export const sessionItems = [
     label: "My Watchlist",
   },
   {
-    icon: <GiMoonBats />,
+    iconMoon: <PiMoonStarsFill />,
+    iconSun: <IoMdSunny />,
     link: "",
+    labelDark: "Dark Mode",
+    labelLight: "Light Mode",
     label: "Dark Mode",
   },
   {

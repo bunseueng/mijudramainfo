@@ -1,63 +1,92 @@
 "use client";
 
-import { fetchMultiSearch } from "@/app/actions/fetchMovieApi";
-import { SearchParamsType } from "@/helper/type";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import React from "react";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import {
+  fetchMultiSearch,
+  fetchPopularSearch,
+} from "@/app/actions/fetchMovieApi";
+import { SearchResultItem } from "./SearchInput";
 import { FaUser } from "react-icons/fa6";
-import { MdLocalMovies } from "react-icons/md";
 import { PiTelevisionDuotone } from "react-icons/pi";
+import { MdLocalMovies } from "react-icons/md";
 import { RiHistoryFill } from "react-icons/ri";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-const SearchResult = () => {
-  const [showResults, setShowResults] = useState(true); // State to manage visibility of search results
-  const searchParams = useSearchParams();
-  let searchQuery = searchParams?.get("query") ?? "";
-  const params = new URLSearchParams(
-    searchParams as unknown as SearchParamsType
-  );
-  const { data: results } = useQuery({
-    queryKey: ["searchResults", searchQuery],
-    queryFn: () => fetchMultiSearch(searchQuery),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
+interface SearchResultProps {
+  query: string;
+  debouncedSearchQuery: string;
+  onResultSelect: (item: SearchResultItem) => void;
+}
+
+const SearchResult: React.FC<SearchResultProps> = ({
+  query,
+  debouncedSearchQuery,
+  onResultSelect,
+}) => {
+  const {
+    data: results,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["searchResults", debouncedSearchQuery],
+    queryFn: () => fetchMultiSearch(debouncedSearchQuery),
+    staleTime: 3600000,
+    refetchOnWindowFocus: true,
+    enabled: debouncedSearchQuery.length > 0,
   });
-  const handleClick = () => {
-    setShowResults(false); // Hide search results when clicking on a result
-  };
+
+  const { data: popular_search } = useQuery({
+    queryKey: ["popular_search"],
+    queryFn: () => fetchPopularSearch(),
+    staleTime: 3600000,
+    refetchOnWindowFocus: true,
+    enabled: debouncedSearchQuery.length === 0,
+  });
+
+  const displayResults = query ? results : popular_search;
   return (
-    <>
-      {results?.length === 0 ? (
-        <div className="absolute w-full bg-white bg-opacity-20 shadow-lg max-h-96 overflow-y-auto backdrop-blur-lg custom-scrollbar">
-          <div className="relative">
-            <div className="absolute inset-0 bg-white opacity-10 blur-xl rounded-2xl"></div>
-            <div className="relative z-10">
-              <div className="max-w-6xl mx-auto relative">
-                <div className="h-screen p-8">
-                  <p className="text-black text-center text-3xl uppercase font-semibold px-14 py-1 cursor-pointer hover:opacity-70 duration-300 truncate">
-                    No Results
-                  </p>
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
+      className="absolute inset-x-0 top-full"
+    >
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="bg-gray-900/95 backdrop-blur-md rounded-md shadow-lg overflow-hidden">
+          <div className="py-2">
+            <h3 className="text-gray-400 text-sm px-4 py-2">
+              {query ? "Search Results" : "Popular Searches"}
+            </h3>
+            <ScrollArea className="divide-y divide-gray-800 h-[90vh]">
+              {isLoading ? (
+                <div className="px-4 py-3 text-gray-400">Searching...</div>
+              ) : isError ? (
+                <div className="px-4 py-3 text-gray-400">
+                  Error fetching results
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="absolute w-full bg-white bg-opacity-10 shadow-lg max-h-96 overflow-y-auto backdrop-blur-lg custom-scrollbar">
-          <div className="relative">
-            <div className="absolute inset-0 bg-white opacity-5 blur-xl "></div>
-            <div className="relative z-10">
-              {showResults &&
-                results?.map((item: any, idx: number) => (
-                  <div
-                    className="px-6 py-4 hover:bg-white hover:bg-opacity-30 cursor-pointer transition-colors duration-150"
-                    key={idx}
+              ) : displayResults && displayResults.length > 0 ? (
+                displayResults.map((item: SearchResultItem, index: number) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group"
                   >
-                    <div className="max-w-6xl mx-auto relative">
-                      <div className="absolute inset-y-0 left-3.5 flex items-center pl-3 pointer-events-none">
+                    <button
+                      className="flex items-center px-4 py-3 hover:bg-gray-800/50 transition-colors w-full text-left"
+                      onClick={() => onResultSelect(item)}
+                    >
+                      <span className="text-green-500 text-sm font-medium w-6">
+                        {index + 1}
+                      </span>
+                      <span className="text-white group-hover:text-green-500 transition-colors">
+                        {item.title || item.name}
+                      </span>
+                      <span className="text-gray-400 text-sm ml-auto">
                         {item?.media_type === "person" ? (
                           <FaUser size={13} />
                         ) : item?.media_type === "tv" ? (
@@ -67,22 +96,18 @@ const SearchResult = () => {
                         ) : (
                           <RiHistoryFill size={20} />
                         )}
-                      </div>
-                      <Link
-                        href={`/search/?${params.toString()}`}
-                        className="text-white font-semibold px-14 py-1 cursor-pointer hover:opacity-70 duration-300 truncate"
-                        onClick={handleClick}
-                      >
-                        {item?.name || item?.title}
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-            </div>
+                      </span>
+                    </button>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-gray-400">No results found</div>
+              )}
+            </ScrollArea>
           </div>
         </div>
-      )}
-    </>
+      </div>
+    </motion.div>
   );
 };
 

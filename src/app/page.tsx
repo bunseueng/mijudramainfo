@@ -1,11 +1,39 @@
+import { Suspense } from "react";
+import prisma from "@/lib/db";
 import Section from "./component/ui/Main/Section";
-import HeaderSlider from "./component/ui/Slider/HeaderSlider";
+import SearchLoading from "./component/ui/Loading/SearchLoading";
+import dynamic from "next/dynamic";
+import { connection } from "next/server";
+const HeaderSlider = dynamic(
+  () => import("./component/ui/Slider/HeaderSlider")
+);
 
-export default function Home() {
+export default async function Home() {
+  await connection();
+  const existingRatings = await prisma.rating.findMany();
+
   return (
-    <div className="relative bg-customLight dark:bg-customDark">
-      <HeaderSlider />
-      <Section />
+    <div className="flex flex-col bg-customLight dark:bg-customDark overflow-hidden">
+      <Suspense fallback={<SearchLoading />}>
+        <div className="relative h-[56vw] max-h-[1012px] overflow-hidden mb-4 xl:-mb-[198px]">
+          <HeaderSlider existingRatings={existingRatings} />
+        </div>
+      </Suspense>
+      <Suspense fallback={<SearchLoading />}>
+        <Section />
+      </Suspense>
     </div>
   );
 }
+
+// export default async function Home() {
+//   const existingRatings = await prisma.rating.findMany({});
+//   return (
+//     <div className="relative min-h-screen bg-customLight dark:bg-customDark">
+//       <div className="relative h-[56vw] max-h-[1012px] overflow-hidden mb-4 xl:-mb-[198px]">
+//         <HeaderSlider existingRatings={existingRatings} />
+//       </div>
+//       <Section />
+//     </div>
+//   );
+// }

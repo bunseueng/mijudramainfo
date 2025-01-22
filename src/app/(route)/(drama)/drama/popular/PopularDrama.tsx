@@ -6,13 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import ExploreCard from "@/app/component/ui/Card/ExploreCard";
-import { DramaDB } from "@/helper/type";
+import { Drama } from "../top/TopDrama";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
 
-const PopularDrama = ({ getDrama }: DramaDB | any) => {
+const PopularDrama = ({ getDrama, personDB }: Drama) => {
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams?.get("page") || "1");
   const title = "Popular Drama";
@@ -32,6 +32,7 @@ const PopularDrama = ({ getDrama }: DramaDB | any) => {
         topDramas={topDramas}
         total_results={total_results}
         getDrama={getDrama}
+        personDB={personDB}
       />
     </Suspense>
   );

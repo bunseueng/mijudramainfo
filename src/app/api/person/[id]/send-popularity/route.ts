@@ -18,15 +18,13 @@ const isPopularityItem = (item: any): item is PopularityItem => {
   );
 };
 
-// Type guard to check if an array contains only PopularityItems
-const isPopularityItemArray = (arr: any): arr is PopularityItem[] => {
-  return Array.isArray(arr) && arr.every(isPopularityItem);
-};
+// // Type guard to check if an array contains only PopularityItems
+// const isPopularityItemArray = (arr: any): arr is PopularityItem[] => {
+//   return Array.isArray(arr) && arr.every(isPopularityItem);
+// };
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const currentUser = await getCurrentUser();
 
@@ -213,7 +211,7 @@ export async function PATCH(
 
 
 let currentIndex = 0;
-export async function GET() {
+export async function GET(req: Request) {
   try {
     // Fetch all people from the database who have non-empty popularity and sentBy arrays
     const people = await prisma.person.findMany({

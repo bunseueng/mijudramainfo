@@ -18,6 +18,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { EditListProps } from "@/helper/type";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 const DramaRegion = dynamic(() => import("./DramaRegion"), { ssr: false });
 const MovieResult = dynamic(() => import("./MovieResult"), { ssr: false });
 const ListThumbnail = dynamic(() => import("./ListThumbnail"), { ssr: false });
@@ -163,9 +164,12 @@ const EditList: React.FC<EditListProps> = ({
             </h1>
             <div className="flex items-center">
               <FaRegEyeSlash size={25} className="mr-3" />
-              <button className="text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#282828] py-3 px-5 mx-2 rounded-md">
+              <Link
+                href={`/lists/${list?.listId}`}
+                className="text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#282828] py-3 px-5 mx-2 rounded-md"
+              >
                 Cancel
-              </button>
+              </Link>
               <button
                 className="text-white bg-[#409effcc] border-[1px] border-[#409effcc] py-3 px-5 rounded-md mx-2"
                 onClick={handleSubmit(onSubmit)}
@@ -398,9 +402,12 @@ const EditList: React.FC<EditListProps> = ({
 
             <div className="flex items-center">
               <FaRegEyeSlash size={25} className="mr-3" />
-              <button className="text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#282828] py-3 px-5 mx-2 rounded-md">
+              <Link
+                href={`/lists/${list?.listId}`}
+                className="text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#00000011] dark:border-[#282828] py-3 px-5 mx-2 rounded-md"
+              >
                 Cancel
-              </button>
+              </Link>
               <div onClick={() => setSubmitLoading(!submitLoading)}>
                 <button
                   className="text-white bg-[#409effcc] border-[1px] border-[#409effcc] py-3 px-5 rounded-md mx-2"

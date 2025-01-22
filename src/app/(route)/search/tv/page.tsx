@@ -4,8 +4,7 @@ const SearchQuery = dynamic(
   () => import("../../../component/ui/Search/SearchQuery")
 );
 const SearchLoading = dynamic(
-  () => import("@/app/component/ui/Loading/SearchLoading"),
-  { ssr: false }
+  () => import("@/app/component/ui/Loading/SearchLoading")
 );
 export const revalidate = 0;
 const TvPage = () => {

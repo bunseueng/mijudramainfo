@@ -24,6 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { IList, SearchParamsType, WatchListProps } from "@/helper/type";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -283,7 +284,11 @@ const Watchlist: React.FC<WatchListProps & IList> = ({
           >
             <div className="w-full md:w-[160px] h-[120px] md:h-[250px] box-border">
               <div className="w-full h-full">
-                <Link href={`/tv/${item?.id}`}>
+                <Link
+                  href={`/tv/${item?.id}-${spaceToHyphen(
+                    item?.title || item?.name
+                  )}`}
+                >
                   <Image
                     src={`https://image.tmdb.org/t/p/original/${
                       item?.poster_path || item?.backdrop_path

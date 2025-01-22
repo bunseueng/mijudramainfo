@@ -37,11 +37,10 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import LazyImage from "@/components/ui/lazyimage";
-import Drama from "@/app/(route)/(id)/person/[id]/Drama";
-import VarietyShow from "@/app/(route)/(id)/person/[id]/VarietyShow";
-import PersonMovie from "@/app/(route)/(id)/person/[id]/PersonMovie";
-import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
-import { PersonDb } from "./Person";
+import Drama from "@/app/(route)/(id)/person/[id]-[slug]/Drama";
+import VarietyShow from "@/app/(route)/(id)/person/[id]-[slug]/VarietyShow";
+import PersonMovie from "@/app/(route)/(id)/person/[id]-[slug]/PersonMovie";
+import Discuss from "@/app/(route)/(id)/tv/[id]-[slug]/discuss/Discuss";
 const PopularityModal = dynamic(() => import("../Modal/PopularityModal"), {
   ssr: false,
 });
@@ -57,7 +56,7 @@ interface IFetchPerson {
   tv_id: number;
   currentUser: currentUserProps | null;
   users: UserProps[];
-  getComment: CommentProps[] | null;
+  getComment: CommentProps[] | any;
   getPersons: PersonDBType | null;
   sortedUsers: UserProps[] | null;
   getPersonDB: PersonDBType[] | any;
@@ -81,7 +80,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
   const { register, handleSubmit } = useForm<TPersonLove>({
     resolver: zodResolver(personLove),
   });
-  const currentPage = "https://mijudramalist.com";
+  const currentPage = `https://mijudramalist.com/person/${tv_id}`;
 
   const { data: persons } = useQuery({
     queryKey: ["personId", tv_id],
@@ -124,7 +123,19 @@ const FetchPerson: React.FC<IFetchPerson> = ({
   const birthDate = new Date(persons?.birthday);
   const ageDiffMs = Date.now() - birthDate.getTime();
   const ageDate = new Date(ageDiffMs);
-  const calculatedAge = Math.abs(ageDate.getUTCFullYear() - 1970);
+  // For known credits calculation
+  const knownCredits =
+    (getCredits?.cast?.length || 0) + (getCredits?.crew?.length || 0);
+
+  // For age calculation
+  const calculatedAge = persons?.birthday
+    ? Math.abs(
+        new Date(
+          Date.now() - new Date(persons.birthday).getTime()
+        ).getUTCFullYear() - 1970
+      )
+    : 0;
+
   const getCast = drama?.cast
     ?.sort(
       (a: any, b: any) =>
@@ -165,6 +176,11 @@ const FetchPerson: React.FC<IFetchPerson> = ({
   );
 
   const handleLove = async (data: TPersonLove) => {
+    if (!currentUser) {
+      toast.error("Please login to love this person");
+      return;
+    }
+
     try {
       const res = await fetch(`/api/person/${persons?.id}/love`, {
         method: "PUT",
@@ -177,12 +193,13 @@ const FetchPerson: React.FC<IFetchPerson> = ({
           ...data, // Include other data here
         }),
       });
+
       if (res.ok) {
         router.refresh();
       } else {
         toast.error("Failed to love");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error:", error);
       toast.error("Failed to love");
     }
@@ -305,7 +322,6 @@ const FetchPerson: React.FC<IFetchPerson> = ({
       document.body.style.overflow = "auto";
     };
   }, [openModal]);
-
   return (
     <div className="max-w-6xl mx-auto pt-0 pb-4 px-2 md:px-5 my-10 overflow-hidden">
       <div className="min-w-[80%] h-full flex flex-col min-[560px]:flex-row justify-between">
@@ -369,14 +385,17 @@ const FetchPerson: React.FC<IFetchPerson> = ({
 
                 <button name="Love icon" onClick={handleSubmit(handleLove)}>
                   {isCurrentUserLoved ? (
-                    <span className="flex items-center text-red-600">
-                      <GoHeart {...register("love")} className="text-2xl" />
-                      <span className="pl-1">{getPersons?.love}</span>
+                    <span
+                      className="flex items-center text-red-600"
+                      {...register("love")}
+                    >
+                      <GoHeart className="text-2xl" />
+                      <span className="pl-1">{getPersons?.love || 0}</span>
                     </span>
                   ) : (
-                    <span className="flex items-center">
-                      <GoHeart {...register("love")} className="text-2xl" />
-                      <span className="pl-1">{getPersons?.love}</span>
+                    <span className="flex items-center" {...register("love")}>
+                      <GoHeart className="text-2xl" />
+                      <span className="pl-1">{getPersons?.love || 0}</span>
                     </span>
                   )}
                 </button>
@@ -401,7 +420,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   Known Credits
                 </h1>
                 <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
-                  {getCredits?.cast?.length + getCredits?.crew?.length}
+                  {String(knownCredits)}
                 </p>
               </div>
               <div className="my-2">
@@ -429,7 +448,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   Also Known As
                 </h1>
                 <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
-                  {persons?.also_known_as?.join(" , ")}
+                  {(persons?.also_known_as || []).join(" , ")}
                 </p>
               </div>
               <div className="inline-block px-3 mt-5">
@@ -484,7 +503,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 Known Credits
               </h1>
               <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
-                {getCredits?.cast?.length + getCredits?.crew?.length}
+                {getCredits?.cast?.length + (getCredits?.crew?.length || 0)}
               </p>
             </div>
             <div className="my-2">
@@ -520,10 +539,11 @@ const FetchPerson: React.FC<IFetchPerson> = ({
           <div className="w-full bg-white dark:bg-[#242526] border-[1px] border-[#00000024] dark:border-[#232425] rounded-md mt-5 overflow-hidden">
             <div className="flex items-center justify-center py-5">
               <LazyImage
-                src={`https://image.tmdb.org/t/p/w185/${persons?.profile_path}`}
+                coverFromDB={coverFromDB?.cover}
+                src={`https://image.tmdb.org/t/p/h632/${persons?.profile_path}`}
                 alt={`${persons?.name}'s Avartar`}
-                width={80}
-                height={80}
+                width={600}
+                height={600}
                 quality={100}
                 className="w-20 h-20 rounded-full bg-center bg-cover object-cover"
                 priority
@@ -543,9 +563,11 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                   />
                   <div>
                     <div className="font-bold text-md text-black dark:text-white">
-                      {getPersons?.popularity?.find(
-                        (pop: any) => pop?.itemId === item?.name
-                      )?.starCount || 0}
+                      {String(
+                        getPersons?.popularity?.find(
+                          (pop: any) => pop?.itemId === item?.name
+                        )?.starCount || 0
+                      ).toString()}
                     </div>
                     <div className="font-bold text-sm text-[#00000099] dark:text-[#ffffff99] uppercase">
                       {item?.name}
@@ -616,12 +638,14 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                               <p className="text-xs">
                                 Sent{" "}
                                 <span>
-                                  {filteredPopularity &&
-                                    filteredPopularity[currentIndex]?.starCount}
+                                  {String(
+                                    filteredPopularity?.[currentIndex]
+                                      ?.starCount || 0
+                                  )}
                                 </span>{" "}
                                 <span>
-                                  {filteredPopularity &&
-                                    filteredPopularity[currentIndex]?.itemId}
+                                  {filteredPopularity?.[currentIndex]?.itemId ||
+                                    ""}
                                 </span>
                               </p>
                             </div>
@@ -675,15 +699,17 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                               {user?.displayName || user?.name}
                             </p>
                             <p className="text-xs text-[#00000099] dark:text-[#ffffff99] font-semibold px-1">
-                              {user?.totalPopularitySent
-                                ?.filter(
-                                  (p: any) =>
-                                    p?.personId === getPersons?.personId
-                                )
-                                ?.map(
-                                  (sent: UserTotalPopularity) =>
-                                    sent?.totalPopularity
-                                )}{" "}
+                              {String(
+                                user?.totalPopularitySent
+                                  ?.filter(
+                                    (p: any) =>
+                                      p?.personId === getPersons?.personId
+                                  )
+                                  ?.map(
+                                    (sent: UserTotalPopularity) =>
+                                      sent?.totalPopularity || 0
+                                  )[0] || 0
+                              )}{" "}
                               <span>popularity</span>
                             </p>
                           </div>
@@ -737,7 +763,9 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                       <p className="text-[#2196f3]">
                         {getUser?.displayName || getUser?.name}
                       </p>
-                      <p className="text-sm">{userContributeCount} edits</p>
+                      <p className="text-sm">
+                        {String(userContributeCount)} edits
+                      </p>
                     </div>
                   </div>
                 );
@@ -752,16 +780,25 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 <h1 className="text-xl md:text-2xl text-[#2490da] font-bold">
                   {persons?.displayName || persons?.name}
                 </h1>
-                <button name="Love icon" onClick={handleSubmit(handleLove)}>
+                <button
+                  {...register("love")}
+                  className="flex items-center"
+                  name="Love icon"
+                  onClick={handleSubmit(handleLove)}
+                >
                   {isCurrentUserLoved ? (
                     <span className="flex items-center text-red-600">
-                      <GoHeart {...register("love")} className="text-2xl" />
-                      <span className="pl-1">{getPersons?.love}</span>
+                      <GoHeart className="text-2xl" />
+                      <span className="pl-1">
+                        {String(getPersons?.love || 0)}
+                      </span>
                     </span>
                   ) : (
                     <span className="flex items-center">
-                      <GoHeart {...register("love")} className="text-2xl" />
-                      <span className="pl-1">{getPersons?.love}</span>
+                      <GoHeart className="text-2xl" />
+                      <span className="pl-1">
+                        {String(getPersons?.love || 0)}
+                      </span>
                     </span>
                   )}
                 </button>
@@ -818,10 +855,10 @@ const FetchPerson: React.FC<IFetchPerson> = ({
             <div className="w-full float-right">
               <Suspense fallback={<div>Loading...</div>}>
                 <Discuss
-                  user={currentUser}
+                  user={currentUser as UserProps | any}
                   users={users}
                   getComment={getComment}
-                  tv_id={tv_id}
+                  tv_id={tv_id.toString()}
                   type="person"
                 />
               </Suspense>

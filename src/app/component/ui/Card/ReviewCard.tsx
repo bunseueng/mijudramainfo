@@ -1,6 +1,6 @@
 "use client";
 
-import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
+import Discuss from "@/app/(route)/(id)/tv/[id]-[slug]/discuss/Discuss";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -10,7 +10,9 @@ import { IoHeartSharp } from "react-icons/io5";
 import { LuCalendarClock } from "react-icons/lu";
 import { TiStar } from "react-icons/ti";
 import ReviewDBCard from "./ReviewDBCard";
-import MediaPhoto from "@/app/(route)/(id)/tv/[id]/Media";
+import MediaPhoto from "@/app/(route)/(id)/tv/[id]-[slug]/Media";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import { handleProfileClick } from "@/app/actions/handleProfileClick";
 
 const ReviewCard = ({
   review,
@@ -71,7 +73,6 @@ const ReviewCard = ({
       console.error("Error fetching thumbnails:", error);
     }
   }, [video]);
-
   return (
     <div>
       <MediaPhoto
@@ -103,7 +104,9 @@ const ReviewCard = ({
                   <div className="w-[270px] h-[180px] bg-cover">
                     <Link
                       prefetch={true}
-                      href={`/tv/${item?.id}`}
+                      href={`/tv/${item?.id}-${spaceToHyphen(
+                        item?.title || item?.name
+                      )}`}
                       className="hover:relative transform duration-100 group"
                     >
                       <Image
@@ -178,41 +181,63 @@ const ReviewCard = ({
               return (
                 <div className="flex flex-col" key={idx}>
                   <div className="flex bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
-                    {review?.author_details?.avatar_path === null ? (
-                      <Image
-                        src="/placeholder-image.avif"
-                        alt={
-                          `${review?.name || review?.title}'s Profile` ||
-                          "Person Profile"
-                        }
-                        width={100}
-                        height={100}
-                        priority
-                        className="size-[50px] object-cover rounded-full border-2 border-slate-500"
-                      />
-                    ) : (
-                      <Image
-                        src={
-                          `https://image.tmdb.org/t/p/original/${review.author_details?.avatar_path}` ||
-                          `${
-                            review?.author_details?.profileAvatar ||
-                            review?.author_details?.image
-                          }`
-                        }
-                        alt={
-                          `${review?.name || review?.title}'s Profile` ||
-                          "Person Profile"
-                        }
-                        width={100}
-                        height={100}
-                        priority
-                        className="size-[50px] object-cover rounded-full"
-                      />
-                    )}
+                    <Link
+                      href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) =>
+                        handleProfileClick(e, review?.author_details?.username)
+                      }
+                    >
+                      {review?.author_details?.avatar_path === null ? (
+                        <Image
+                          src="/placeholder-image.avif"
+                          alt={
+                            `${review?.name || review?.title}'s Profile` ||
+                            "Person Profile"
+                          }
+                          width={100}
+                          height={100}
+                          priority
+                          className="size-[50px] object-cover rounded-full border-2 border-slate-500"
+                        />
+                      ) : (
+                        <Image
+                          src={
+                            `https://image.tmdb.org/t/p/original/${review.author_details?.avatar_path}` ||
+                            `${
+                              review?.author_details?.profileAvatar ||
+                              review?.author_details?.image
+                            }`
+                          }
+                          alt={
+                            `${review?.name || review?.title}'s Profile` ||
+                            "Person Profile"
+                          }
+                          width={100}
+                          height={100}
+                          priority
+                          className="size-[50px] object-cover rounded-full"
+                        />
+                      )}
+                    </Link>
 
                     <div className="flex flex-col text-black pl-5">
                       <h1 className="text-black dark:text-white text-sm md:text-md">
-                        Review by {review?.author_details?.username}
+                        Review by{" "}
+                        <Link
+                          href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) =>
+                            handleProfileClick(
+                              e,
+                              review?.author_details?.username
+                            )
+                          }
+                        >
+                          {review?.author_details?.username}
+                        </Link>
                       </h1>
                       <div className="flex flex-col md:flex-row md:items-center md:pt-2">
                         {review?.author_details?.rating && (
@@ -225,8 +250,21 @@ const ReviewCard = ({
                         )}
 
                         <p className="text-black dark:text-white text-sm font-semibold">
-                          Written by {review?.author_details?.username} on{" "}
-                          {formattedDate}
+                          Written by{" "}
+                          <Link
+                            href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) =>
+                              handleProfileClick(
+                                e,
+                                review?.author_details?.username
+                              )
+                            }
+                          >
+                            {review?.author_details?.username} on{" "}
+                            {formattedDate}
+                          </Link>
                         </p>
                       </div>
                     </div>

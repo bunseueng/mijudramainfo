@@ -3,6 +3,39 @@ import Card from "../Card/Card";
 import Person from "../Fetching/Person";
 import { Suspense } from "react";
 import SearchLoading from "../Loading/SearchLoading";
+import DramaFilter from "@/app/(route)/(drama)/drama/top/DramaFilter";
+import AdBanner from "../Adsense/AdBanner";
+
+function getLevenshteinDistance(a: string, b: string) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  const matrix = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
 
 export default function Results({
   results,
@@ -20,6 +53,19 @@ export default function Results({
   getPerson,
 }: any) {
   const path = BASE_URL.split("/").pop();
+
+  // Sort results by name similarity
+  const sortedResults = [...(results || [])].sort((a, b) => {
+    const nameA = (a.title || a.name || "").toLowerCase();
+    const nameB = (b.title || b.name || "").toLowerCase();
+    const query = searchQuery.toLowerCase();
+
+    const distanceA = getLevenshteinDistance(nameA, query);
+    const distanceB = getLevenshteinDistance(nameB, query);
+
+    return distanceA - distanceB;
+  });
+
   return (
     <div className="max-w-6xl relative flex flex-wrap items-center justify-between mx-auto px-4 my-7">
       <div className="w-full h-full flex flex-col md:flex-row justify-between">
@@ -29,7 +75,7 @@ export default function Results({
             <p>{items} results</p>
           </div>
           <div className="h-full w-full py-2 overflow-hidden">
-            {results?.map((result: any, idx: number) => (
+            {sortedResults?.map((result: any, idx: number) => (
               <div
                 className="grid grid-cols-1 bg-white dark:bg-[#242424] border-2 dark:border-[#272727] rounded-lg mb-4"
                 key={idx}
@@ -61,128 +107,22 @@ export default function Results({
             ))}
           </div>
         </div>
-        <div className="w-full md:w-[33.3333%] float-right px-1 md:px-2">
-          <div className="border rounded-lg border-slate-400 dark:border-[#272727]">
-            <div className="px-10 py-5 bg-cyan-400 dark:bg-[#272727] rounded-t-lg">
-              <h2 className="text-center font-bold uppercase text-white">
-                Search Results
-              </h2>
-            </div>
-            <div className="flex flex-col items-center dark:bg-[#242424]">
-              <ul className="list w-full">
-                <li className="py-2 relative nav text-start">
-                  <Link
-                    href={`/search/tv/?query=${searchQuery}`}
-                    className={`pl-2 pt-3 ${path ? "item" : ""}`}
-                  >
-                    <div className="flex items-center justify-between dark:text-white">
-                      Tv Show
-                      {path === "tv" ? (
-                        <div className="bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2">
-                          {items}
-                        </div>
-                      ) : null}
-                      {searchParams ? (
-                        <div className="bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2">
-                          {fetchTv?.total_results}
-                        </div>
-                      ) : (
-                        <div
-                          className={`bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2 ${
-                            path === "tv" ? "hidden" : "block"
-                          }`}
-                        >
-                          0
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                </li>
-                <li className="py-2 relative nav text-start">
-                  <Link
-                    href={`/search/movie/?query=${searchQuery}`}
-                    className="item pl-2 pt-3"
-                  >
-                    <div className="flex items-center justify-between dark:text-white">
-                      Movie
-                      {path === "movie" ? (
-                        <div className="bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2">
-                          {items}
-                        </div>
-                      ) : null}
-                      {searchParams ? (
-                        <div className="bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2">
-                          {fetchMovie?.total_results}
-                        </div>
-                      ) : (
-                        <div
-                          className={`bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2 ${
-                            path === "movie" ? "hidden" : "block"
-                          }`}
-                        >
-                          0
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                </li>
-                <li className="py-2 relative nav text-start">
-                  <Link
-                    href={`/search/collection/?query=${searchQuery}`}
-                    className="item pl-2 pt-3"
-                  >
-                    <div className="flex items-center justify-between dark:text-white">
-                      Collection
-                      {path === "collection" ? (
-                        <div className="bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2">
-                          {items}
-                        </div>
-                      ) : null}
-                      {searchParams ? (
-                        <div className="bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2">
-                          {fetchCollection?.total_results}
-                        </div>
-                      ) : (
-                        <div
-                          className={`bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2 ${
-                            path === "collection" ? "hidden" : "block"
-                          }`}
-                        >
-                          0
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                </li>
-                <li className="py-2 relative nav text-start">
-                  <Link
-                    href={`/search/person/?query=${searchQuery}`}
-                    className="item pl-2 pt-3"
-                  >
-                    <div className="flex items-center justify-between dark:text-white">
-                      Person
-                      {path === "person" ? (
-                        <div className="bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2">
-                          {items}
-                        </div>
-                      ) : null}
-                      {searchParams ? (
-                        <div className="bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2">
-                          {fetchPersons?.total_results}
-                        </div>
-                      ) : (
-                        <div
-                          className={`bg-cyan-400 text-white text-sm border border-cyan-400 rounded-lg py-0 px-2 mx-2 ${
-                            path === "person" ? "hidden" : "block"
-                          }`}
-                        >
-                          0
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                </li>
-              </ul>
+
+        <div className="w-full md:w-2/6 pl-1 md:pl-3 lg:pl-3">
+          <div className="py-3 hidden md:block">
+            <AdBanner dataAdFormat="auto" dataAdSlot="3527489220" />
+          </div>
+          <div className="border bg-white dark:bg-[#242424] rounded-lg">
+            <h1 className="text-lg font-bold p-4 border-b-2 border-b-slate-400 dark:border-[#272727]">
+              Advanced Search
+            </h1>
+            <Suspense fallback={<SearchLoading />}>
+              <DramaFilter />
+            </Suspense>
+          </div>
+          <div className="hidden md:block relative bg-black mx-auto my-5">
+            <div className="min-w-auto min-h-screen">
+              <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
             </div>
           </div>
         </div>

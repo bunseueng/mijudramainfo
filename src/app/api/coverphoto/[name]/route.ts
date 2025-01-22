@@ -3,7 +3,8 @@ import cloudinary from "@/lib/cloundinary";
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function PUT(request: Request, {params} : {params: {name: string}}) {
+export async function PUT(request: Request, props: {params: Promise<{name: string}>}) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
         

@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import LazyImage from "@/components/ui/lazyimage";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 export type PersonDb = {
   id: string;
   userID: string;
@@ -54,6 +55,7 @@ export default function Person({ result, currentUser, getPerson }: any) {
           const data = await res.json();
           router.refresh();
           setGetPersons(data);
+          console.log(data);
         } else {
           console.error("Failed to fetch person from API");
         }
@@ -96,7 +98,7 @@ export default function Person({ result, currentUser, getPerson }: any) {
         <div className="relative">
           <Link
             prefetch={true}
-            href={`/person/${result?.id}`}
+            href={`/person/${result?.id}-${spaceToHyphen(result?.name)}`}
             className="block box-content"
           >
             <LazyImage
@@ -108,6 +110,12 @@ export default function Person({ result, currentUser, getPerson }: any) {
               style={{ width: "100%", height: "100%" }}
               priority
               className="w-full object-cover align-middle overflow-clip"
+              placeholder="blur"
+              blurDataURL={
+                result?.poster_path ||
+                result?.backdrop_path ||
+                coverFromDB?.cover
+              }
             />
           </Link>
         </div>
@@ -117,7 +125,7 @@ export default function Person({ result, currentUser, getPerson }: any) {
           <div className="flex items-center justify-between">
             <Link
               prefetch={true}
-              href={`/person/${result?.id}`}
+              href={`/person/${result?.id}-${spaceToHyphen(result?.name)}`}
               className="text-[#2490da] text-md font-bold inline-block"
             >
               {result.title || result.name}
@@ -126,12 +134,12 @@ export default function Person({ result, currentUser, getPerson }: any) {
               {isCurrentUserLoved ? (
                 <span className="flex items-center text-red-600">
                   <GoHeart {...register("love")} />
-                  <span className="pl-1">{getPerson?.love}</span>
+                  <span className="pl-1">{getPersons?.love}</span>
                 </span>
               ) : (
                 <span className="flex items-center">
                   <GoHeart {...register("love")} />
-                  <span className="pl-1">{getPerson?.love}</span>
+                  <span className="pl-1">{getPersons?.love}</span>
                 </span>
               )}
             </button>

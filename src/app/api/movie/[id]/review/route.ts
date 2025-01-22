@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request) {
     try {
       const currentUser = await getCurrentUser();
   
@@ -70,7 +70,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const currentUser = await getCurrentUser();
 
@@ -174,7 +175,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 
   
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const findReleaseInfo = await prisma?.movieReview.findUnique({
       where: {

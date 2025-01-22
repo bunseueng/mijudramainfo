@@ -230,7 +230,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
                 </li>
                 <li className="flex items-center text-xs md:text-base px-2">
                   <RxLink1 className="mr-1" />{" "}
-                  <Link prefetch={true} href={`${networksDetail?.homepage}`}>
+                  <Link prefetch={false} href={`${networksDetail?.homepage}`}>
                     Homepage
                   </Link>
                 </li>

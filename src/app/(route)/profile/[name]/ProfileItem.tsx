@@ -30,7 +30,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarDays, MapPin, Users } from "lucide-react";
 import dynamic from "next/dynamic";
-import { ReviewType } from "../../(id)/tv/[id]/reviews/Reviews";
+import { ReviewType } from "../../(id)/tv/[id]-[slug]/reviews/Reviews";
 import Image from "next/image";
 const RecentLists = lazy(() => import("./lists/RecentLists"));
 const Watchlist = lazy(() => import("./watchlist/Watchlist"));
@@ -47,8 +47,8 @@ const AcceptRejectButton = dynamic(
 );
 
 export interface User {
-  user: UserProps | null;
-  users: UserProps[] | null;
+  user: UserProps;
+  users: UserProps[];
 }
 
 type CommentType = {
@@ -577,11 +577,7 @@ const ProfileItem: React.FC<
                         </div>
                       ))}
 
-                  <FollowButton
-                    user={user}
-                    currentUser={currentUser}
-                    users={null}
-                  />
+                  <FollowButton user={user} currentUser={currentUser} />
                 </div>
               )}
               <Tabs className="inline-block w-full h-full  border-b border-b-[#78828c21] -my-4 mt-4">

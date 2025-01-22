@@ -35,6 +35,7 @@ const ListCard: React.FC<Lists & listResultProps> = ({
   currentUser,
 }) => {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // State to keep track of selected item's id
+  const [loading, setLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
   const router = useRouter();
   const { register, handleSubmit } = useForm<TCreateList>({
@@ -54,16 +55,18 @@ const ListCard: React.FC<Lists & listResultProps> = ({
     }));
 
   const onSubmit = async (data: TCreateList) => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/list/${list?.listId}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           love: data?.love,
           loveBy: data?.loveBy,
-          ...data, // Include other data here
+          userId: data.userId,
+          ...data,
         }),
       });
       if (res.ok) {
@@ -74,19 +77,13 @@ const ListCard: React.FC<Lists & listResultProps> = ({
     } catch (error: any) {
       console.error("Error:", error);
       toast.error("Failed to love");
+    } finally {
+      setLoading(false);
     }
   };
-
-  const tvIds = ratings?.map((item: any) => item?.tvId);
-
-  const matchedIds = userRating?.filter((item: any) =>
-    tvIds.includes(item.tvId)
-  );
-
   const isUserList = ratings?.some(
     (rate: any) => rate?.rating?.userId === currentUser?.id?.toString()
   );
-
   return (
     <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto py-3 px-4 md:px-6">
       <div className="w-full h-full bg-white dark:bg-[#272727] border-[1px] border-slate-200 dark:border-[#272727] rounded-md my-5">
@@ -98,7 +95,11 @@ const ListCard: React.FC<Lists & listResultProps> = ({
             <div className="flex items-start justify-between">
               <div className="flex items-center">
                 <Image
-                  src={user?.profileAvatar || (user?.image as string)}
+                  src={
+                    user?.profileAvatar ||
+                    (user?.image as string) ||
+                    "/placeholder-image.avif"
+                  }
                   alt=""
                   width={200}
                   height={200}
@@ -123,28 +124,33 @@ const ListCard: React.FC<Lists & listResultProps> = ({
                 {list?.tvId?.length || list?.movieId?.length} Titles
               </h1>
             </div>
-            <div
-              className="flex items-center text-[#00000099] dark:text-[#ffffff99] mr-3 cursor-pointer"
+            <button
+              disabled={loading ? true : false}
+              className={`flex items-center text-[#00000099] dark:text-[#ffffff99] mr-3 ${
+                loading ? "cursor-not-allowed" : "cursor-pointer"
+              }`}
               onClick={handleSubmit(onSubmit)}
             >
               <span {...register("love")}>
                 {list?.love ? (
                   <AiFillHeart size={18} className="text-red-600" />
                 ) : (
-                  <AiOutlineHeart size={18} className="text-[#00000099]" />
+                  <AiOutlineHeart size={18} className="text-red-400" />
                 )}
               </span>
-              <h1 className="text-sm pt-[2px] pl-1">{list?.love} Loves</h1>
-            </div>
-            <Link
-              href={`/lists/${list?.listId}/edit`}
-              className="flex items-center text-[#00000099] dark:text-[#ffffff99] mr-3   "
-            >
-              <span>
-                <CiEdit size={18} />
-              </span>
-              <h1 className="text-sm pt-[2px] pl-1">Edit</h1>
-            </Link>
+              <span className="text-sm pt-[2px] pl-1">{list?.love} Loves</span>
+            </button>
+            {list?.userId === currentUser?.id && (
+              <Link
+                href={`/lists/${list?.listId}/edit`}
+                className="flex items-center text-[#00000099] dark:text-[#ffffff99] mr-3   "
+              >
+                <span>
+                  <CiEdit size={18} />
+                </span>
+                <h1 className="text-sm pt-[2px] pl-1">Edit</h1>
+              </Link>
+            )}
           </div>
 
           <div className="">
@@ -172,145 +178,152 @@ const ListCard: React.FC<Lists & listResultProps> = ({
               </div>
             </div>
             <div className="float-left w-full">
-              {ratings?.map((rate: any, idx: number) => (
-                <div
-                  className="border-t-[1px] border-t-slate-300 dark:border-t-[#303030] py-3"
-                  key={idx}
-                >
-                  <div className="flex flex-col -mx-3">
-                    <div className="">
-                      <div className="float-left w-[16.66667] px-3">
-                        <Link
-                          href={`/tv/${rate?.item?.id}`}
-                          className="block text-[#2490da] border-md overflow-hidden "
-                        >
-                          <Image
-                            src={`https://image.tmdb.org/t/p/original/${
-                              rate?.item?.poster_path ||
-                              rate?.item?.backdrop_path
-                            }`}
-                            alt="Image"
-                            width={300}
-                            height={300}
-                            quality={100}
-                            className="w-[100px] h-[150px] align-middle bg-center bg-cover object-cover bg-no-repeat rounded-md"
-                          />
-                        </Link>
-                      </div>
-                      <div className="float-left w-full lg:w-[85%] relative px-3">
-                        <div className="float-left w-full mx-0">
-                          <div className="float-left w-[50%] relative">
-                            <h2 className="inline-block text-[#2490da]">
-                              {idx + 1}.{" "}
-                              <Link
-                                href={`/tv/${rate?.item?.id}`}
-                                className="font-bold"
-                              >
-                                {rate.item?.title || rate.item?.name}
-                              </Link>
-                              <div
+              {ratings?.map((rate: any, idx: number) => {
+                const isUserRating =
+                  yourRating
+                    .filter(
+                      (item: any) =>
+                        item.tvId === rate?.item?.id.toString() &&
+                        item.userId === currentUser?.id
+                    )
+                    .map((item: any) => item.rating).length > 0;
+                return (
+                  <div
+                    className="border-t-[1px] border-t-slate-300 dark:border-t-[#303030] py-3"
+                    key={idx}
+                  >
+                    <div className="flex flex-col -mx-3">
+                      <div className="block">
+                        <div className="float-left px-3">
+                          <Link
+                            href={`/tv/${rate?.item?.id}`}
+                            className="block text-[#2490da] border-md overflow-hidden "
+                          >
+                            <Image
+                              src={`https://image.tmdb.org/t/p/original/${
+                                rate?.item?.poster_path ||
+                                rate?.item?.backdrop_path
+                              }`}
+                              alt="Image"
+                              width={300}
+                              height={300}
+                              quality={100}
+                              className="w-[100px] h-[150px] align-middle bg-center bg-cover object-cover bg-no-repeat rounded-md"
+                            />
+                          </Link>
+                        </div>
+                        <div className="float-left w-full lg:w-[85%] relative px-3">
+                          <div className="float-left w-full mx-0">
+                            <div className="float-left w-[50%] relative">
+                              <h2 className="inline-block text-[#2490da]">
+                                {idx + 1}.{" "}
+                                <Link
+                                  href={`/tv/${rate?.item?.id}`}
+                                  className="font-bold"
+                                >
+                                  {rate.item?.title || rate.item?.name}
+                                </Link>
+                              </h2>
+                              <button
+                                type="button"
                                 onClick={() => {
-                                  setModal(!modal),
-                                    setSelectedItemId(rate.item.id);
+                                  setModal(!modal);
+                                  setSelectedItemId(rate.item.id);
                                 }}
                                 className="inline-block min-w-[32px] bg-white dark:bg-[#242424] border-[1px] border-[#00000011] dark:border-[#292929] hover:bg-[#9e9e9e33] px-2 py-[2px] ml-2 -mb-1 leading-3 rounded-md cursor-pointer"
                               >
                                 <span>
-                                  {rate?.rating?.rating === 0 ? (
-                                    <IoMdAdd className="hover:text-opacity-70 dark:hover:backdrop-brightness-75 transform duration-300" />
-                                  ) : (
+                                  {isUserRating ? (
                                     <CiEdit className="hover:text-opacity-70 dark:hover:backdrop-brightness-75 transform duration-300" />
+                                  ) : (
+                                    <IoMdAdd className="hover:text-opacity-70 dark:hover:backdrop-brightness-75 transform duration-300" />
                                   )}
                                 </span>
-                              </div>
-                            </h2>
-                            {modal &&
-                              selectedItemId === rate.item.id && ( // Open modal for selected item only
-                                <RatingModal
-                                  modal={modal}
-                                  setModal={setModal}
-                                  id={rate.item?.id.toString()}
-                                  user={user}
-                                  tv={rate?.item?.id.toString()} // Pass the item id as a string
-                                  userRating={matchedIds}
-                                  tvName={rate?.item?.name || rate?.item?.title}
-                                  tvItems={rate?.item}
-                                />
-                              )}
+                              </button>
+                              {modal &&
+                                selectedItemId === rate.item.id && ( // Open modal for selected item only
+                                  <RatingModal
+                                    modal={modal}
+                                    setModal={setModal}
+                                    id={rate?.item.id.toString()}
+                                    user={currentUser as any}
+                                    tv={rate?.item.id.toString()} // Pass the item id as a string
+                                    userRating={userRating.filter(
+                                      (data) => data.tvId === rate.tvId
+                                    )}
+                                    tvName={
+                                      rate?.item?.name || rate?.item?.title
+                                    }
+                                    tvItems={rate?.item}
+                                  />
+                                )}
 
-                            <p className="text-sm text-[#818a91] opacity-60 mb-5">
-                              {rate.item?.first_air_date},{" "}
-                              <span>
-                                {rate.item?.number_of_episodes} Episodes
-                              </span>
-                            </p>
-                          </div>
-                          <div
-                            className={`float-left w-[33.33333%] text-center md:text-right relative ${
-                              isUserList && "w-[50%] text-end"
-                            }`}
-                          >
-                            <p className="text-center inline-flex items-center">
-                              {rate?.rating?.rating > 0 ? (
-                                <FaStar className="text-yellow-500" />
-                              ) : (
-                                <CiStar className="text-yellow-500" />
-                              )}{" "}
-                              <span className="pl-1">
-                                {rate?.rating?.rating}
-                              </span>
-                            </p>
-                          </div>
-                          <div
-                            className={`float-left w-[16.66667%] text-end relative ${
-                              isUserList && "w-[50%]"
-                            }`}
-                          >
-                            {!isUserList && (
+                              <p className="text-sm text-[#818a91] opacity-60 mb-5">
+                                {rate.item?.first_air_date},{" "}
+                                <span>
+                                  {rate.item?.number_of_episodes} Episodes
+                                </span>
+                              </p>
+                            </div>
+                            <div
+                              className={`float-left w-[33.33333%] text-center md:text-right relative ${
+                                isUserList && "w-[50%] text-end"
+                              }`}
+                            >
                               <p className="text-center inline-flex items-center">
-                                {yourRating
-                                  .filter(
-                                    (item: any) =>
-                                      item.tvId === rate?.item?.id.toString()
-                                  )
-                                  .map((item: any) => item.rating).length >
-                                0 ? (
+                                {rate?.rating?.rating > 0 ? (
                                   <FaStar className="text-yellow-500" />
                                 ) : (
                                   <CiStar className="text-yellow-500" />
                                 )}{" "}
                                 <span className="pl-1">
-                                  {yourRating
-                                    .filter(
-                                      (item: any) =>
-                                        item.tvId === rate?.item?.id.toString()
-                                    )
-                                    .map((item: any) => item.rating).length > 0
-                                    ? yourRating
-                                        .filter(
-                                          (item: any) =>
-                                            item.tvId ===
-                                            rate?.item?.id.toString()
-                                        )
-                                        .map((item: any) => item.rating)
-                                    : 0}
+                                  {rate?.rating?.rating}
                                 </span>
                               </p>
-                            )}
+                            </div>
+                            <div
+                              className={`float-left w-[16.66667%] text-end relative ${
+                                isUserList && "w-[50%]"
+                              }`}
+                            >
+                              {!isUserList && (
+                                <p className="text-center inline-flex items-center">
+                                  {isUserRating ? (
+                                    <FaStar className="text-yellow-500" />
+                                  ) : (
+                                    <CiStar className="text-yellow-500" />
+                                  )}{" "}
+                                  <span className="pl-1">
+                                    {isUserRating
+                                      ? yourRating
+                                          .filter(
+                                            (item: any) =>
+                                              item.tvId ===
+                                                rate?.item?.id.toString() &&
+                                              item.userId === currentUser?.id
+                                          )
+                                          .map((item: any) => item.rating)
+                                      : 0}
+                                  </span>
+                                </p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className="inline-block">
-                          <p>
-                            {list?.dramaComment
-                              ?.filter((item) => item?.tvId === rate?.item?.id)
-                              ?.map((com) => com?.comment)}
-                          </p>
+                          <div className="inline-block">
+                            <p>
+                              {list?.dramaComment
+                                ?.filter(
+                                  (item) => item?.tvId === rate?.item?.id
+                                )
+                                ?.map((com) => com?.comment)}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

@@ -1236,3 +1236,197 @@ export const fetchMovieKeywords = cache(async (pages  = 1, keyword_id: string, s
     return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
   }
 })
+
+export const fetchPopularSearch = cache(async () => {
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN`)
+    const result = await res.json();
+    return result.results
+  } catch (error) {
+    return NextResponse.json({message: "Failed to fetch data"}, {status: 501})
+  }
+})
+
+export const fetchIqiyiDrama = cache(async() => {
+  try {
+      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_networks=1330&without_genres=16%2C10764%2C10767%2C35`
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+  
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+  
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
+});
+
+export const fetchYoukuDrama = cache(async() => {
+  try {
+      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_networks=1419&without_genres=16%2C10764%2C10767%2C35`
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+  
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+  
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
+});
+
+export const fetchTencentDrama = cache(async() => {
+  try {
+      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_networks=2007&without_genres=16%2C10764%2C10767%2C35`
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+  
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+  
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
+});
+
+export const fetchMongoTVDrama = cache(async() => {
+  try {
+      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_networks=1631&without_genres=16%2C10764%2C10767%2C35`
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+  
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+  
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
+});
+
+export const fetchKoreanDrama = cache(async() => {
+  try {
+      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=vote_count.desc&with_origin_country=KR&without_genres=16%2C10764%2C10767%2C35`
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+  
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+  
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
+});
+
+export const fetchJapaneseDrama = cache(async() => {
+  try {
+      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=vote_count.desc&with_origin_country=JP&without_genres=16%2C10764%2C10767%2C35`
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+  
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+  
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
+});
+
+export const fetchAnime = cache(async() => {
+  try {
+      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=vote_count.desc&&with_genres=16&with_origin_country=CN`
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+  
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+  
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
+});
+
+export const fetchJapaneseAnime = cache(async() => {
+  try {
+      const url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=vote_count.desc&&with_genres=16&with_origin_country=JP`
+    
+    const options = {
+      method: 'GET',
+      headers,
+    };
+    
+    const res = await fetch(url, options);
+  
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+  
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('An error occurred while fetching the Trending data:', error);
+    return null; // Return null or handle appropriately
+  }
+});

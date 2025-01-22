@@ -5,7 +5,8 @@ import { ObjectId } from 'mongodb';
 import { findCommentById } from "@/app/actions/findCommentById";
 
 
-export async function POST(req: Request, { params }: { params: { name: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ name: string }> }) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
         if (!currentUser) {
@@ -137,7 +138,8 @@ async function updateNestedReply(commentId: string, comments: any[], updatedData
     return null;
 }
 
-export async function PUT(req: Request, { params }: { params: { name: string } }) {
+export async function PUT(req: Request, props: { params: Promise<{ name: string }> }) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
 
@@ -201,7 +203,8 @@ export async function PUT(req: Request, { params }: { params: { name: string } }
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: { name: string } }) {
+export async function PATCH(req: Request, props: { params: Promise<{ name: string }> }) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
 
@@ -287,7 +290,8 @@ async function deleteNestedReply(commentId: string, comments: any[]): Promise<bo
     return false;
 }
 
-export async function DELETE(req: Request, { params }: { params: { name: string } }) {
+export async function DELETE(req: Request, props: { params: Promise<{ name: string }> }) {
+    const params = await props.params;
     try {
         const currentUser = await getCurrentUser();
 

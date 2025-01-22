@@ -17,6 +17,10 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     unoptimized: true,
   },
+  experimental: {
+    nextScriptWorkers: true,
+    optimisticClientCache: false,
+  },
 };
 
 export default nextConfig;

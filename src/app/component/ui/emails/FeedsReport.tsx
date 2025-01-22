@@ -1,4 +1,5 @@
 import { Button, Html } from "@react-email/components"; // Keep only essential components
+import Link from "next/link";
 import * as React from "react";
 
 export default function FeedsReport({
@@ -33,8 +34,8 @@ export default function FeedsReport({
           </Button>
           <hr />
           <p>
-            Need Help? <a href="">Contact our support team</a> or hit us on
-            Twitter or <a href="/">@discord</a>.
+            Need Help? <Link href="">Contact our support team</Link> or hit us
+            on Twitter or <Link href="/">@discord</Link>.
           </p>
           <p>
             Want to give us feedback? Let us know what you think on our{" "}

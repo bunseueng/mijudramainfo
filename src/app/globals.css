@@ -6,11 +6,17 @@
   * {
     @apply border-border;
   }
-
+  
   body {
     @apply bg-background text-foreground;
   }
-  :root {
+  :root {    
+    --alpha-white-400: 0, 0%, 0%, 0.12;
+    --alpha-200: 0, 0%, 100%, 0.08;
+    --alpha-300: 0, 0%, 100%, 0.1;
+    --alpha-400: 0, 0%, 100%, 0.12;
+    --alpha-600: 0, 0%, 100%, 0.18;
+
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -39,6 +45,11 @@
   }
 
   .dark {
+    --alpha-white-400: 0, 0%, 0%, 0.12;
+    --alpha-200: 0, 0%, 100%, 0.08;
+    --alpha-300: 0, 0%, 100%, 0.1;
+    --alpha-400: 0, 0%, 100%, 0.12;
+    --alpha-600: 0, 0%, 100%, 0.18;
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
@@ -727,4 +738,90 @@ footer {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+.backface-visibility {
+  backface-visibility: hidden;
+}
+
+.image-box{
+    content: "";
+    display: block;
+    padding-top: 133.333%;
+}
+.embla {
+  position: relative;
+  padding: 20px;
+  margin: -20px;
+}
+.card-hover-effect {
+  transition: transform 0.3s ease-in-out, z-index 0.3s ease-in-out;
+}
+.card-hover-effect:hover {
+  transform: scale(1.05);
+  z-index: 10;
+}
+.card-content {
+  transition: box-shadow 0.3s ease-in-out;
+}
+.card-hover-effect:hover .card-content {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.animation_img {
+  animation: 0.25s ease 0s 1 normal none running sacleImg;
+  transform-origin: center;
+}
+@keyframes scaleImg {
+  0% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.fade-in-out {
+  opacity: 0;
+  animation: fadeInOut 0.3s forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Add CSS containment to optimize rendering */
+.contain-content {
+  contain: content;
+}
+
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+/* Optimize transitions */
+@layer utilities {
+  .optimize-gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}
+
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+.text-balance {
+  text-wrap: balance;
 }

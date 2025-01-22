@@ -2,7 +2,8 @@ import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         // Fetch the current user
         const currentUser = await getCurrentUser();
@@ -68,7 +69,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         // Fetch the current user
         const currentUser = await getCurrentUser();

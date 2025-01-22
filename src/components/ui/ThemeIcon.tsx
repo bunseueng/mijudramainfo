@@ -1,10 +1,10 @@
 "use client";
 
-import { FiSun } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import { GiMoonClaws } from "react-icons/gi";
+import { PiMoonStarsFill } from "react-icons/pi";
+import { IoMdSunny } from "react-icons/io";
 
 // Loading SVG placeholder
 const LoadingPlaceholder = () => (
@@ -33,18 +33,18 @@ export default function ThemeSwitch() {
   // Render theme toggle icons based on current theme
   if (resolvedTheme === "dark") {
     return (
-      <FiSun
+      <IoMdSunny
         onClick={() => setTheme("light")}
-        className="cursor-pointer text-xl"
+        className="cursor-pointer text-2xl"
       />
     );
   }
 
   if (resolvedTheme === "light") {
     return (
-      <GiMoonClaws
+      <PiMoonStarsFill
         onClick={() => setTheme("dark")}
-        className="cursor-pointer text-white text-xl"
+        className="cursor-pointer text-white text-2xl"
       />
     );
   }

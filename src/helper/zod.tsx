@@ -84,6 +84,7 @@ export const createList = z.object({
 export type TCreateList = z.infer<typeof createList>;
 
 export const createRating = z.object({
+  id: z.string().optional(),
   userId: z.any().optional(),
   rating: z.any(),
   mood: z.any().optional(),

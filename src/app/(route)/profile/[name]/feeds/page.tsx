@@ -4,7 +4,8 @@ import prisma from "@/lib/db";
 import { Metadata } from "next";
 
 export const maxDuration = 60;
-export async function generateMetadata({ params }: any): Promise<Metadata> {
+export async function generateMetadata(props: any): Promise<Metadata> {
+  const params = await props.params;
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
   return {
     title: `${user?.displayName || user?.name}'s Feeds` || "User's Feeds",
@@ -15,8 +16,9 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
   };
 }
 
-const FeedsPage = async ({ params }: { params: { name: string } }) => {
-  return <ProfilePage params={params} />;
+const FeedsPage = async (props: { params: Promise<{ name: string }> }) => {
+  const params = await props.params;
+  return <ProfilePage params={params as any} />;
 };
 
 export default FeedsPage;

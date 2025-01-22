@@ -215,7 +215,7 @@ const MovieKeyword: React.FC<Network> = ({ keyword_id }) => {
                   <div className="pl-2 md:pl-3 w-[80%]">
                     <div className="flex items-center justify-between">
                       <Link
-                        prefetch={true}
+                        prefetch={false}
                         href={`/tv/${drama?.id}`}
                         className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
                       >

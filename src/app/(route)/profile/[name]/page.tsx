@@ -8,12 +8,12 @@ import dynamic from "next/dynamic";
 import ProfileItem from "./ProfileItem";
 export const revalidate = 0;
 const SearchLoading = dynamic(
-  () => import("@/app/component/ui/Loading/SearchLoading"),
-  { ssr: false }
+  () => import("@/app/component/ui/Loading/SearchLoading")
 );
 
 export const maxDuration = 60;
-export async function generateMetadata({ params }: any): Promise<Metadata> {
+export async function generateMetadata(props: any): Promise<Metadata> {
+  const params = await props.params;
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
   return {
     title: `${user?.displayName || user?.name}'s Profile` || "User's Profile",
@@ -21,10 +21,25 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
       user?.biography === null
         ? `${user?.displayName || user?.name}'s page`
         : user?.biography,
+    keywords: user?.displayName || user?.name,
+    openGraph: {
+      type: "website",
+      url: `https://mijudramainfo.vercel.app/profile${user?.name}`,
+      title: user?.displayName || user?.name,
+      description: user?.biography ?? `${user?.displayName || user?.name}`,
+      images: [
+        {
+          url: `${user?.image || user?.profileAvatar}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
   };
 }
 
-const ProfilePage = async ({ params }: { params: { name: string } }) => {
+const ProfilePage = async (props: { params: Promise<{ name: string }> }) => {
+  const params = await props.params;
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
   const users = await prisma?.user?.findMany({});
   const currentUser = await getCurrentUser();

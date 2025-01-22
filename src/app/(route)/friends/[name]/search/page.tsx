@@ -3,14 +3,15 @@ import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
-const UserSearch = dynamic(() => import("./UserSearch"), { ssr: false });
+const UserSearch = dynamic(() => import("./UserSearch"));
 
 export const metadata: Metadata = {
   title: "Searching User",
   description: "Searching for all users in this website.",
 };
 
-const SearchPag = async ({ params }: { params: { name: string } }) => {
+const SearchPag = async (props: { params: Promise<{ name: string }> }) => {
+  const params = await props.params;
   const currentUser = await getCurrentUser();
   const user = await prisma?.user?.findUnique({
     where: { name: params?.name },

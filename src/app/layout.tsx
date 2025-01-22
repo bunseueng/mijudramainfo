@@ -13,6 +13,8 @@ import Provider from "@/provider/Provider";
 import TanstackProvider from "@/provider/TanstackProvider";
 import { ScrollProvider } from "@/provider/UseScroll";
 import { Analytics } from "@vercel/analytics/react";
+import Head from "next/head";
+import { LinkProvider } from "./LinkContext";
 const Loading = dynamic(() => import("./loading"));
 const Footer = dynamic(() => import("./component/ui/Main/Footer"));
 
@@ -20,6 +22,8 @@ const nunito = Nunito({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   display: "swap",
+  preload: true,
+  fallback: ["system-ui", "arial"],
 });
 
 export const metadata: Metadata = {
@@ -27,6 +31,9 @@ export const metadata: Metadata = {
   title: {
     default: "MijuDramaInfo (MDI)",
     template: "%s - MijuDramaInfo (MDI)",
+  },
+  alternates: {
+    canonical: "./",
   },
   description:
     "Explore the vibrant world of Asian dramas and movies at MijuDramaInfo (MDI). Discover in-depth insights, trending titles, and the latest news about your favorite shows and actors.",
@@ -38,7 +45,17 @@ export const metadata: Metadata = {
     shortcut: [{ url: "/apple-touch-icon.png" }],
   },
   applicationName: "MijuDramaInfo",
-  keywords: ["mijudramainfo", "drama", "movie", "actor", "asian"],
+  keywords: [
+    "mijudramainfo",
+    "drama",
+    "movie",
+    "actor",
+    "asian",
+    "chinese Drama",
+    "c-drama",
+    "actress",
+    "information",
+  ],
   authors: [{ name: "Eng Bunseu", url: "https://mijudramainfo.vercel.app" }],
   creator: "Eng Bunseu",
   publisher: "Eng Bunseu",
@@ -79,17 +96,34 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={nunito.className}>
-      <head>
+      <Head>
         <link rel="preconnect" href="https://app.posthog.com" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <meta name="google-adsense-account" content="ca-pub-3369705912051027" />
         <Adsense pId="3369705912051027" />
-      </head>
-      <body
-        className="bg-white dark:bg-[#14161a] h-screen"
-        suppressHydrationWarning={true}
-      >
+        {/* Scripts loaded after interactive */}
+        {[
+          "https://app.posthog.com",
+          "https://api.themoviedb.org",
+          "https://pagead2.googlesyndication.com",
+        ].map((url) => (
+          <Script key={url} strategy="worker" src={url} />
+        ))}
+        <script
+          data-partytown-config
+          dangerouslySetInnerHTML={{
+            __html: `
+              partytown = {
+                lib: "/_next/static/~partytown/",
+                debug: true
+              };
+            `,
+          }}
+        />
+        <Analytics />
+      </Head>
+      <body className="bg-white dark:bg-[#111319]" suppressHydrationWarning>
         <PHProvider>
           <Provider>
             <TanstackProvider>
@@ -99,31 +133,21 @@ export default function RootLayout({
                 enableSystem
                 disableTransitionOnChange
               >
-                <ScrollProvider>
-                  <Loading />
-                  <div className="relative">
-                    <SessionAllPage />
-                    <main className="parent-container min-h-screen flex flex-col">
-                      <div className="content-container flex-grow">
-                        {children}
-                      </div>
+                <LinkProvider prefetch={false}>
+                  <ScrollProvider>
+                    <Loading />
+                    <main className="min-h-screen flex flex-col">
+                      <SessionAllPage />
+                      {children}
+                      <Footer />
                     </main>
-                    <Footer />
-                  </div>
-                </ScrollProvider>
-
-                <ToastContainer position="top-right" />
+                    <ToastContainer position="top-right" />
+                  </ScrollProvider>
+                </LinkProvider>
               </ThemeProvider>
             </TanstackProvider>
           </Provider>
         </PHProvider>
-        <Script strategy="afterInteractive" src="https://app.posthog.com" />
-        <Script strategy="afterInteractive" src="https://api.themoviedb.org" />
-        <Script
-          strategy="afterInteractive"
-          src="https://pagead2.googlesyndication.com"
-        />
-        <Analytics />
       </body>
     </html>
   );

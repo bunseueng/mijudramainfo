@@ -5,7 +5,15 @@ import { Rating } from "@/helper/type";
 import { StyledRating } from "@/app/actions/StyleRating";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 
-const DramaListRating = ({ item }: any, yourRating: Rating[]) => {
+interface DramaListRatingProps {
+  item: any;
+  yourRating: Rating[];
+}
+
+const DramaListRating: React.FC<DramaListRatingProps> = ({
+  item,
+  yourRating,
+}) => {
   // Function to find rating for a specific item
   const findRating = (itemId: string) => {
     const rating =

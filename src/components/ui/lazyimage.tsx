@@ -5,7 +5,7 @@ import React, { useRef, useState, useEffect } from "react";
 
 const LazyImage = ({
   src,
-  w,
+  w = "w500", // Default to w500 if not provided
   alt,
   width,
   height,
@@ -22,6 +22,8 @@ const LazyImage = ({
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
+    const observerTarget = imgRef.current; // Store ref value
+
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsVisible(true);
@@ -29,33 +31,36 @@ const LazyImage = ({
       }
     });
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
+    if (observerTarget) {
+      observer.observe(observerTarget);
     }
 
     return () => {
-      if (imgRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        observer.unobserve(imgRef.current);
+      if (observerTarget) {
+        observer.unobserve(observerTarget);
       }
     };
   }, []);
 
-  // Check if the source is undefined, null, or contains 'undefined'
-  const isSrcInvalid =
-    !src || src === "undefined" || src === null || src.includes("undefined");
+  // Determine the correct size parameter
+  const sizeParam = w.startsWith("w") ? w : "w500";
 
-  // Set imageSrc based on visibility and validity of the source
-  const imageSrc = isVisible
-    ? isSrcInvalid
-      ? "/placeholder-image.avif" // Placeholder image for invalid src
-      : `https://image.tmdb.org/t/p/${w}${src}`
-    : "/placeholder-image.avif"; // Placeholder while image is not visible
+  // Determine the final image source
+  const imageSrc = (() => {
+    if (coverFromDB) return coverFromDB;
+    if (!src) return "/placeholder-image.avif";
+    if (src.startsWith("/")) {
+      if (src === "/placeholder-image.avif") return src;
+      return `https://image.tmdb.org/t/p/${sizeParam}${src}`;
+    }
+    return `https://image.tmdb.org/t/p/${sizeParam}/${src}`;
+  })();
+
   return (
     <Image
       ref={imgRef}
-      src={coverFromDB ? coverFromDB : imageSrc}
-      alt={alt}
+      src={isVisible ? imageSrc : "/placeholder-image.avif"}
+      alt={alt || "Image"}
       width={width}
       height={height}
       quality={quality}

@@ -38,6 +38,7 @@ const ListThumbnail: React.FC<ListThumbnailProps> = ({
   const onUpload = async () => {
     setLoading(true);
     try {
+      console.log(thumbnail);
       const res = await fetch(`/api/list/${list?.listId}`, {
         method: "PUT",
         headers: {

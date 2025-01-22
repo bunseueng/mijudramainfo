@@ -4,7 +4,8 @@ import prisma from "@/lib/db";
 import { Metadata } from "next";
 
 export const maxDuration = 60;
-export async function generateMetadata({ params }: any): Promise<Metadata> {
+export async function generateMetadata(props: any): Promise<Metadata> {
+  const params = await props.params;
   const user = await prisma?.user?.findUnique({ where: { name: params.name } });
   return {
     title: `${user?.displayName || user?.name}'s Lists` || "User's Lists",
@@ -14,8 +15,9 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
         : user?.biography,
   };
 }
-const ListCreatePage = async ({ params }: { params: { name: string } }) => {
-  return <ProfilePage params={params} />;
+const ListCreatePage = async (props: { params: Promise<{ name: string }> }) => {
+  const params = await props.params;
+  return <ProfilePage params={params as any} />;
 };
 
 export default ListCreatePage;

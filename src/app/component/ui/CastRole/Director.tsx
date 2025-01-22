@@ -1,3 +1,4 @@
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -27,7 +28,10 @@ const Director = ({ directors, directorsDB }: any) => {
               key={idx}
             >
               <div className="w-full h-full flex flex-row">
-                <Link href={`/person/${item?.id}`} className="cursor-pointer">
+                <Link
+                  href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
+                  className="cursor-pointer"
+                >
                   {item.profile_path === null ? (
                     <Image
                       src="/default-pf.jpg"
@@ -51,7 +55,7 @@ const Director = ({ directors, directorsDB }: any) => {
 
                 <div className="pl-2">
                   <Link
-                    href={`/person/${item?.id}`}
+                    href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                   >
                     {item?.name}
@@ -69,7 +73,10 @@ const Director = ({ directors, directorsDB }: any) => {
               key={item?.id}
             >
               <div className="w-full h-full flex flex-row">
-                <Link href={`/person/${item?.id}`} className="cursor-pointer">
+                <Link
+                  href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
+                  className="cursor-pointer"
+                >
                   {item.profile_path === null ? (
                     <Image
                       src="/default-pf.jpg"
@@ -93,7 +100,7 @@ const Director = ({ directors, directorsDB }: any) => {
 
                 <div className="pl-2">
                   <Link
-                    href={`/person/${item?.id}`}
+                    href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                   >
                     {item?.name}

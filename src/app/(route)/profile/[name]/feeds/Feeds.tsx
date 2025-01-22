@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useActionState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,25 +32,33 @@ import {
   Copy,
 } from "lucide-react";
 import Image from "next/image";
-import { CommentProps, currentUserProps, IProfileFeeds } from "@/helper/type";
+import {
+  CommentProps,
+  currentUserProps,
+  ProfileFeedsTypes,
+  UserProps,
+} from "@/helper/type";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { fetchMultiSearch } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
 import FetchingTv from "@/app/component/ui/Fetching/FetchingTv";
 import { toast } from "react-toastify";
 import { formatDate } from "@/app/actions/formatDate";
-import { User } from "../ProfileItem";
 import ShowCard from "./ShowCard";
 import LinkPreview from "./LinkPreview";
 import ActionModal from "./ActionModal";
-import Discuss from "@/app/(route)/(id)/tv/[id]/discuss/Discuss";
+import Discuss from "@/app/(route)/(id)/tv/[id]-[slug]/discuss/Discuss";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProfileFeedsType, TProfileFeeds } from "@/helper/zod";
 
-type CommentType = {
+type FeedsProps = {
+  user: UserProps;
+  users: UserProps[];
+  getFeeds: ProfileFeedsTypes[];
   getComment: CommentProps[];
+  currentUser: currentUserProps | null;
 };
 export default function Feeds({
   user,
@@ -58,7 +66,7 @@ export default function Feeds({
   getFeeds,
   getComment,
   currentUser,
-}: User & IProfileFeeds & CommentType) {
+}: FeedsProps) {
   const [postText, setPostText] = useState("");
   const [postLink, setPostLink] = useState("");
   const [postImage, setPostImage] = useState<File | null>(null);

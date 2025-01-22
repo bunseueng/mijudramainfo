@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { GoHeart } from "react-icons/go";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 
 interface ITopActor {
   title: string;
@@ -145,7 +146,11 @@ const TopActorCard: React.FC<ITopActor> = ({
                 >
                   <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
                     <div className="relative">
-                      <Link href={`/tv/${person?.id}`}>
+                      <Link
+                        href={`/person/${person?.id}-${spaceToHyphen(
+                          person?.name
+                        )}`}
+                      >
                         {person?.profile_path ? (
                           <Image
                             src={`https://image.tmdb.org/t/p/original/${person?.profile_path}`}
@@ -173,7 +178,9 @@ const TopActorCard: React.FC<ITopActor> = ({
                   <div className="pl-2 md:pl-3 w-[80%]">
                     <div className="flex items-center justify-between">
                       <Link
-                        href={`/tv/${person?.id}`}
+                        href={`/person/${person?.id}-${spaceToHyphen(
+                          person?.name
+                        )}`}
                         className="text-md text-sky-700 dark:text-[#2196f3] font-bold"
                       >
                         {person?.name || person?.title}

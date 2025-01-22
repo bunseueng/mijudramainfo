@@ -3,12 +3,10 @@ import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import dynamic from "next/dynamic";
 import prisma from "@/lib/db";
 const SearchQuery = dynamic(
-  () => import("../../component/ui/Search/SearchQuery"),
-  { ssr: false }
+  () => import("../../component/ui/Search/SearchQuery")
 );
 const SearchLoading = dynamic(
-  () => import("@/app/component/ui/Loading/SearchLoading"),
-  { ssr: false }
+  () => import("@/app/component/ui/Loading/SearchLoading")
 );
 
 const SearchPage = async () => {
