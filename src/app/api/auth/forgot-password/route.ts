@@ -60,7 +60,7 @@ export async function POST(request: Request) {
           );
       
     //  Send email to user
-        await sendEmail(payload.email, "Password Reset Request for MijuDramaInfo", html);
+        await sendEmail(payload.email, "Password Reset Request for MijuDramaInfo", html as any);
 
         return NextResponse.json({
         status: 200,

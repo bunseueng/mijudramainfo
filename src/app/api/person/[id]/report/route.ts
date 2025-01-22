@@ -58,7 +58,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     );
 
     // Send email to user
-    await sendEmailFromReport("MijuDramaInfo@gmail.com", `Report Request from ${user?.name}`, html, user?.email as string);
+    await sendEmailFromReport("MijuDramaInfo@gmail.com", `Report Request from ${user?.name}`, html as any, user?.email as string);
 
     return NextResponse.json({
       status: 200,
