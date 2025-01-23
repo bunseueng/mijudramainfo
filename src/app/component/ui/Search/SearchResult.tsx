@@ -1,13 +1,13 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   fetchMultiSearch,
   fetchPopularSearch,
 } from "@/app/actions/fetchMovieApi";
-import { SearchResultItem } from "./SearchInput";
+import type { SearchResultItem } from "./SearchInput";
 import { FaUser } from "react-icons/fa6";
 import { PiTelevisionDuotone } from "react-icons/pi";
 import { MdLocalMovies } from "react-icons/md";
@@ -18,12 +18,14 @@ interface SearchResultProps {
   query: string;
   debouncedSearchQuery: string;
   onResultSelect: (item: SearchResultItem) => void;
+  onSearch: (query: string) => void;
 }
 
 const SearchResult: React.FC<SearchResultProps> = ({
   query,
   debouncedSearchQuery,
   onResultSelect,
+  onSearch,
 }) => {
   const {
     data: results,
@@ -46,6 +48,19 @@ const SearchResult: React.FC<SearchResultProps> = ({
   });
 
   const displayResults = query ? results : popular_search;
+
+  const handleItemClick = (item: SearchResultItem) => {
+    if (
+      item.media_type === "movie" ||
+      item.media_type === "tv" ||
+      item.media_type === "person"
+    ) {
+      onSearch(item.title || item.name || "");
+    } else {
+      onResultSelect(item);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -78,7 +93,7 @@ const SearchResult: React.FC<SearchResultProps> = ({
                   >
                     <button
                       className="flex items-center px-4 py-3 hover:bg-gray-800/50 transition-colors w-full text-left"
-                      onClick={() => onResultSelect(item)}
+                      onClick={() => handleItemClick(item)}
                     >
                       <span className="text-green-500 text-sm font-medium w-6">
                         {index + 1}

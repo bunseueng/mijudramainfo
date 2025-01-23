@@ -11,7 +11,7 @@ import {
   typeCheckbox2,
 } from "@/helper/item-list";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { Slider } from "@mui/material";
 import { FaCheck } from "react-icons/fa";
@@ -44,9 +44,12 @@ const DramaFilter = () => {
   const query = searchParams?.get("query") ?? "";
   const router = useRouter();
 
+  useEffect(() => {
+    setSearchQuery(query);
+  }, [query]);
+
   const onInput = (e: any) => {
     const { name, value } = e.target;
-    // Update the corresponding state variable based on the input's name
     if (name === "searchQuery") {
       setSearchQuery(value);
     } else if (name === "searchQueryKeyword") {
@@ -55,7 +58,6 @@ const DramaFilter = () => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
-    // Update the query parameter based on the input's name
     if (value) {
       params.set("query", value);
     } else {
@@ -66,6 +68,7 @@ const DramaFilter = () => {
       scroll: false,
     });
   };
+
   const onSearch = (e: any) => {
     e.preventDefault();
     const params = new URLSearchParams(
@@ -117,6 +120,12 @@ const DramaFilter = () => {
     });
   };
 
+  const handleCheckboxChange =
+    (key: string, value: string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      inputCheckbox(key, value);
+    };
+
   const selectBox = (key: any, value: any) => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
@@ -124,7 +133,6 @@ const DramaFilter = () => {
     const query = Object.fromEntries(params);
     let values = query[key] ? query[key].split(",") : [];
 
-    // Remove previously selected items
     values = [value];
 
     if (values.length === 0) {
@@ -153,14 +161,11 @@ const DramaFilter = () => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
-    // Add "from" and "to" parameters
     params.set("date", from.toString());
     params.set("to", to.toString());
 
-    // Construct the new URL with the updated query parameters
     const newUrl = `${pathname}/?${params.toString()}`;
 
-    // Navigate to the new URL
     router.push(newUrl, { scroll: false });
   };
 
@@ -174,14 +179,11 @@ const DramaFilter = () => {
     const params = new URLSearchParams(
       searchParams as unknown as SearchParamsType
     );
-    // Add "from" and "to" parameters
     params.set("rating", from.toString());
     params.set("rto", rto.toString());
 
-    // Construct the new URL with the updated query parameters
     const newUrl = `${pathname}/?${params.toString()}`;
 
-    // Navigate to the new URL
     router.push(newUrl, { scroll: false });
   };
 
@@ -192,8 +194,8 @@ const DramaFilter = () => {
       scale: 1,
       transition: {
         type: "tween",
-        duration: 0.3, // Adjust duration for smoothness
-        ease: "easeOut", // Smooth easing function
+        duration: 0.3,
+        ease: "easeOut",
       },
     },
   };
@@ -209,7 +211,6 @@ const DramaFilter = () => {
             placeholder="Search"
             onChange={onInput}
             value={searchQuery}
-            defaultValue={searchParams?.get("query")?.toString()}
           />
           <button
             className="z-[2] rounded-e border-2 border-primary px-1 lg:px-6 my-4 md:mr-1 lg:mr-4 text-xs uppercase leading-normal text-primary transition duration-150 ease-in-out hover:border-primary-accent-300 hover:bg-primary-50/50 hover:text-primary-accent-300 focus:border-primary-600 focus:bg-primary-50/50 focus:text-primary-600 focus:outline-none focus:ring-0 active:border-primary-700 active:text-primary-700 dark:text-primary-500 dark:hover:bg-blue-950 dark:focus:bg-blue-950"
@@ -250,15 +251,12 @@ const DramaFilter = () => {
               <ul className="py-3 space-y-3 text-sm text-[#2196f3] dark:text-gray-200 ">
                 {typeCheckbox1?.map((item: any, idx: number) => (
                   <li key={idx}>
-                    <label
-                      className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center"
-                      onChange={() => inputCheckbox("type", item.value)}
-                    >
+                    <label className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center">
                       <input
                         type="checkbox"
                         value={item.value}
-                        defaultChecked={type.split(",").includes(item.value)}
-                        defaultValue={searchParams?.get("query")?.toString()}
+                        checked={type.split(",").includes(item.value)}
+                        onChange={handleCheckboxChange("type", item.value)}
                         className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                       />
                       <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -272,15 +270,12 @@ const DramaFilter = () => {
               <ul className="py-3 space-y-3 text-sm text-[#2196f3] dark:text-gray-200 ">
                 {typeCheckbox2?.map((item: any, idx: number) => (
                   <li key={idx}>
-                    <label
-                      className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center"
-                      onChange={() => inputCheckbox("type", item.value)}
-                    >
+                    <label className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center">
                       <input
                         type="checkbox"
                         value={item.value}
-                        defaultChecked={type.split(",").includes(item.value)}
-                        defaultValue={searchParams?.get("query")?.toString()}
+                        checked={type.split(",").includes(item.value)}
+                        onChange={handleCheckboxChange("type", item.value)}
                         className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                       />
                       <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -317,15 +312,12 @@ const DramaFilter = () => {
               <ul className="py-3 space-y-3 text-sm text-[#2196f3] dark:text-gray-200 ">
                 {countryCheckbox1?.map((item: any, idx: number) => (
                   <li key={idx}>
-                    <label
-                      className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center"
-                      onChange={() => inputCheckbox("country", item.value)}
-                    >
+                    <label className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center">
                       <input
                         type="checkbox"
                         value={item.value}
-                        defaultChecked={country.split(",").includes(item.value)}
-                        defaultValue={searchParams?.get("query")?.toString()}
+                        checked={country.split(",").includes(item.value)}
+                        onChange={handleCheckboxChange("country", item.value)}
                         className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                       />
                       <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -362,15 +354,12 @@ const DramaFilter = () => {
               <ul className="py-3 space-y-3 text-sm text-[#2196f3] dark:text-gray-200 ">
                 {genreCheckbox?.map((item: any, idx: number) => (
                   <li key={idx}>
-                    <label
-                      className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center"
-                      onChange={() => inputCheckbox("genre", item.id)}
-                    >
+                    <label className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center">
                       <input
                         type="checkbox"
                         value={item.id}
-                        defaultChecked={genre.split(",").includes(item.id)}
-                        defaultValue={searchParams?.get("query")?.toString()}
+                        checked={genre.split(",").includes(item.id)}
+                        onChange={handleCheckboxChange("genre", item.id)}
                         className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                       />
                       <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -384,15 +373,12 @@ const DramaFilter = () => {
               <ul className="py-3 space-y-3 text-sm text-[#2196f3] dark:text-gray-200 ">
                 {genreCheckbox2?.map((item: any, idx: number) => (
                   <li key={idx}>
-                    <label
-                      className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center"
-                      onChange={() => inputCheckbox("genre", item.id)}
-                    >
+                    <label className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center">
                       <input
                         type="checkbox"
                         value={item.id}
-                        defaultChecked={genre.split(",").includes(item.id)}
-                        defaultValue={searchParams?.get("query")?.toString()}
+                        checked={genre.split(",").includes(item.id)}
+                        onChange={handleCheckboxChange("genre", item.id)}
                         className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                       />
                       <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">
@@ -503,11 +489,10 @@ const DramaFilter = () => {
                 sx={{
                   height: 10,
                   "& .MuiSlider-valueLabel": {
-                    // Customize styles for the value label
-                    backgroundColor: "#3498db", // Example background color
-                    color: "#ffffff", // Example text color
-                    borderRadius: "4px", // Example border radius
-                    fontSize: "1rem", // Example font size
+                    backgroundColor: "#3498db",
+                    color: "#ffffff",
+                    borderRadius: "4px",
+                    fontSize: "1rem",
                   },
                 }}
                 valueLabelDisplay="on"
@@ -596,15 +581,12 @@ const DramaFilter = () => {
               <ul className="pb-3 space-y-3 text-sm text-[#2196f3] dark:text-gray-200 ">
                 {statusCheckbox?.map((item: any, idx: number) => (
                   <li key={idx}>
-                    <label
-                      className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center"
-                      onChange={() => inputCheckbox("status", item.id)}
-                    >
+                    <label className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300 flex items-center">
                       <input
                         type="checkbox"
                         value={item.id}
-                        defaultChecked={status.split(",").includes(item.id)}
-                        defaultValue={searchParams?.get("query")?.toString()}
+                        checked={status.split(",").includes(item.id)}
+                        onChange={handleCheckboxChange("status", item.id)}
                         className="relative peer w-4 h-4 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded dark:checked:text-[#2196f3] focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-[#2196f3] dark:focus:ring-offset-[#2196f3] focus:ring-2 dark:bg-[#242424] dark:border-[#2196f3] appearance-none"
                       />
                       <span className="ms-2 text-xs lg:text-[15px] font-medium text-gray-900 dark:text-gray-300">

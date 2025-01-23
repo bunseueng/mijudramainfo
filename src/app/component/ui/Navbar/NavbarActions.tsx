@@ -47,7 +47,7 @@ const NavbarActions: React.FC<NavbarActionsProps & SessionDropdownProps> = ({
   outsideRef,
 }) => {
   return (
-    <div className="flex items-center space-x-4 md:space-x-6">
+    <div className="flex items-center space-x-2 md:space-x-6">
       <button
         name="Notification"
         className="relative pt-1.5"

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import type React from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoSearchSharp, IoCloseCircle } from "react-icons/io5";
 import useDebounce from "@/hooks/useDebounce";
@@ -12,17 +13,18 @@ export interface SearchResultItem {
   title: string | null;
   media_type: string;
 }
+
 interface SearchInputProps {
-  onSearch: (query: string) => void;
   onClose: () => void;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onClose }) => {
+const SearchInput: React.FC<SearchInputProps> = ({ onClose }) => {
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debouncedQuery = useDebounce(query, 300);
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -30,22 +32,43 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onClose }) => {
     }
   }, []);
 
-  useEffect(() => {
-    onSearch(debouncedQuery);
-  }, [debouncedQuery, onSearch]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
+    setIsSubmitting(false);
   };
 
+  // For real search submission - uses /search?query=
+  const handleSubmitSearch = (searchQuery: string) => {
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      setIsSubmitting(true);
+      router.push(`/search?query=${encodeURIComponent(trimmedQuery)}`);
+      onClose();
+    }
+  };
+
+  // For live search results - uses ?query=
+  const handleLiveSearch = useCallback(
+    (query: string) => {
+      if (query) {
+        router.push(`?query=${encodeURIComponent(query)}`);
+      }
+    },
+    [router]
+  );
+  useEffect(() => {
+    if (!isSubmitting) {
+      handleLiveSearch(debouncedQuery);
+    }
+  }, [debouncedQuery, isSubmitting, handleLiveSearch]);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.push(`/search?query=${encodeURIComponent(query.trim())}`);
-    onClose();
+    handleSubmitSearch(query);
   };
 
   const handleClearInput = () => {
     setQuery("");
+    setIsSubmitting(false);
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -54,8 +77,9 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onClose }) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       setQuery("");
+      setIsSubmitting(false);
     } else if (e.key === "Enter") {
-      router.push(`/search?query=${encodeURIComponent(query.trim())}`);
+      handleSubmitSearch(query);
     }
   };
 
@@ -145,6 +169,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onClose }) => {
               query={query}
               debouncedSearchQuery={debouncedQuery}
               onResultSelect={handleResultSelect}
+              onSearch={handleLiveSearch}
             />
           )}
         </AnimatePresence>

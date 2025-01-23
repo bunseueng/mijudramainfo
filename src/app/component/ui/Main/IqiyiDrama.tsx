@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchIqiyiDrama, fetchTv } from "@/app/actions/fetchMovieApi";
+import { fetchBatchTv, fetchIqiyiDrama } from "@/app/actions/fetchMovieApi";
 import HomeCard from "../Card/HomeCard";
 import { HomeDramaT } from "../Main/Section";
 
@@ -18,8 +18,8 @@ const IqiyiDrama = ({ heading, getDrama, existingRatings }: HomeDramaT) => {
     queryKey: ["tvDetails", data?.results?.map((item: any) => item.id)],
     queryFn: async () => {
       if (!data?.results) return [];
-      const tvPromises = data.results.map((item: any) => fetchTv(item.id));
-      return Promise.all(tvPromises);
+      const tvIds = data.results.map((item: any) => item.id);
+      return fetchBatchTv(tvIds);
     },
     enabled: !!data,
   });

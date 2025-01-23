@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import SidebarItem from "./SidebarItem";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
+import Image from "next/image";
 
 interface NavbarProps {
   users: UserProps[] | undefined;
@@ -117,15 +118,6 @@ const Navbar: React.FC<NavbarProps> = ({
     closeSidebar();
   }, [closeSidebar]);
 
-  const handleSearch = useCallback(
-    (query: string) => {
-      if (query) {
-        router.push(`?query=${encodeURIComponent(query)}`);
-      }
-    },
-    [router]
-  );
-
   const sidebarVariants = {
     open: { x: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
     closed: {
@@ -180,8 +172,8 @@ const Navbar: React.FC<NavbarProps> = ({
           transition: "background-color 0.3s ease-in-out",
         }}
       >
-        <div className="max-w-[1808px] relative flex flex-wrap items-center justify-between mx-auto px-4 py-3">
-          <div className="flex items-center space-x-4">
+        <div className="max-w-[1808px] relative flex flex-wrap items-center justify-between mx-auto px-2 md:px-4 py-3">
+          <div className="flex items-center space-x-2 md:space-x-4">
             <button
               type="button"
               name="Hamburgur"
@@ -224,12 +216,7 @@ const Navbar: React.FC<NavbarProps> = ({
         />
 
         <AnimatePresence>
-          {showSearch && (
-            <SearchInput
-              onSearch={handleSearch}
-              onClose={() => setShowSearch(false)}
-            />
-          )}
+          {showSearch && <SearchInput onClose={() => setShowSearch(false)} />}
         </AnimatePresence>
 
         {notiDrop && (
@@ -258,7 +245,24 @@ const Navbar: React.FC<NavbarProps> = ({
               <ScrollArea className="h-full">
                 <div className="p-6 space-y-6">
                   <div className="flex items-center justify-between">
-                    <NavbarLogo setCurrentNav={setCurrentNav} />
+                    <div className="flex items-center py-1">
+                      <Link
+                        href="/"
+                        className="flex-shrink-0 font-bold text-xl text-gray-900 dark:text-white gap-1.5"
+                        onClick={() => setCurrentNav("/")}
+                        aria-label="Homepage"
+                      >
+                        <Image
+                          src="/MIJUDRAMAINFO__2_-removebg-preview.png"
+                          alt="Mijudramainfo Logo"
+                          width={150}
+                          height={10}
+                          className="h-8 sm:h-10 w-auto"
+                          style={{ maxWidth: "100%", height: "40px" }}
+                          priority
+                        />
+                      </Link>
+                    </div>
                     <Button
                       variant="ghost"
                       size="icon"

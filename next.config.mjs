@@ -21,6 +21,20 @@ const nextConfig = {
     nextScriptWorkers: true,
     optimisticClientCache: false,
   },
+  reactStrictMode: true,
+  async headers() {
+    return [
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "cache-control",
+            value: "s-maxage=600, stale-while-revalidate=30",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

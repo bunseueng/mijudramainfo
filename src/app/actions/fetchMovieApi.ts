@@ -16,6 +16,7 @@ const formattedDate = sevenDaysAgo.format("YYYY-MM-DD");
 const headers = {
   accept: 'application/json',
   Authorization: 'Bearer ' + apiKey,
+  'Cache-Control': 's-maxage=3600, stale-while-revalidate',
 };
 
 export const fetchTrending = cache(async () => {
@@ -1430,3 +1431,43 @@ export const fetchJapaneseAnime = cache(async() => {
     return null; // Return null or handle appropriately
   }
 });
+
+export const fetchBatchTv = cache(async (tvIds: number[]) => {
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY
+  const tvDetailsUrl = `https://api.themoviedb.org/3/tv/`
+  const countryUrl = `https://api.themoviedb.org/3/configuration/countries?api_key=${apiKey}&language=en-US`
+
+  try {
+    const [countryRes, ...tvResponses] = await Promise.all([
+      fetch(countryUrl),
+      ...tvIds.map((id) => fetch(`${tvDetailsUrl}${id}?api_key=${apiKey}&language=en-US`)),
+    ])
+
+    if (!countryRes.ok || tvResponses.some((res) => !res.ok)) {
+      console.log("Failed to fetch data")
+      return null
+    }
+
+    const countryData = await countryRes.json()
+    const tvShowsData = await Promise.all(tvResponses.map((res) => res.json()))
+
+    const processedTvShows = tvShowsData.map((tvShow: any) => {
+      const originCountries = tvShow.origin_country || []
+      const countryNames = originCountries.map((countryCode: string) => {
+        const country = countryData.find((c: any) => c.iso_3166_1 === countryCode)
+        return country ? country.english_name : countryCode
+      })
+
+      return {
+        ...tvShow,
+        type: countryNames,
+      }
+    })
+
+    return processedTvShows
+  } catch (error) {
+    console.error("An error occurred while fetching the data:", error)
+    return null
+  }
+})
+

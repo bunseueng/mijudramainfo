@@ -8,7 +8,7 @@ interface NavbarLogoProps {
 
 const NavbarLogo: React.FC<NavbarLogoProps> = ({ setCurrentNav }) => {
   return (
-    <div className="flex items-center py-1">
+    <div className="hidden md:flex items-center py-1">
       <Link
         href="/"
         className="flex-shrink-0 font-bold text-xl text-gray-900 dark:text-white gap-1.5"

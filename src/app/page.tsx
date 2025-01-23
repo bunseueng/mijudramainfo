@@ -8,6 +8,7 @@ const HeaderSlider = dynamic(
   () => import("./component/ui/Slider/HeaderSlider")
 );
 
+export const revalidate = 60;
 export default async function Home() {
   await connection();
   const existingRatings = await prisma.rating.findMany();
