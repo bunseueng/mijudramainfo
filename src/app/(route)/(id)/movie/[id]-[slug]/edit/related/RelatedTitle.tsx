@@ -1,7 +1,11 @@
 "use client";
 
-import { fetchMovie, fetchMovieSearch } from "@/app/actions/fetchMovieApi";
-import FetchingMovie from "@/app/component/ui/Fetching/FetchingMovie";
+import {
+  fetchMovie,
+  fetchMovieSearch,
+  fetchTvSearch,
+} from "@/app/actions/fetchMovieApi";
+import FetchingTv from "@/app/component/ui/Fetching/FetchingTv";
 import LazyImage from "@/components/ui/lazyimage";
 import { storyFormat } from "@/helper/item-list";
 import { Movie, movieId } from "@/helper/type";
@@ -29,22 +33,18 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   movie_id,
   movieDetails,
 }) => {
-  const [listSearch, setListSearch] = useState<string>("");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-  const [movieIds, setMovieIds] = useState<number[]>(movie_id ? [] : []);
-  const [prevStories, setPrevStories] = useState<string[]>([]);
+  const [mediaIds, setMediaIds] = useState<number[]>([]);
   const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
     Array(movieDetails?.related_title?.length || 0).fill(false)
   );
   const [isItemChanging, setIsItemChanging] = useState<boolean[]>(
     Array(movieDetails?.related_title?.length || 0).fill(false)
   );
-  const inputRef = useRef<HTMLInputElement>(null);
-  const searchResultRef = useRef<HTMLDivElement>(null);
   const searchQuery = useSearchParams();
   const query = searchQuery?.get("q") || "";
   const router = useRouter();
@@ -60,7 +60,7 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
     queryKey: ["movieAndTvResults"],
     queryFn: async () => {
       const movieDetails = await Promise.all(
-        movieIds.map(async (id: number) => await fetchMovie(id))
+        mediaIds.map(async (id: number) => await fetchMovie(id.toString()))
       );
       return [...movieDetails];
     },
@@ -75,11 +75,18 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["movieSearch"],
-    queryFn: () => fetchMovieSearch(query),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
+    queryKey: ["tvAndMovieSearch", query],
+    queryFn: async () => {
+      const tvResults = await fetchTvSearch(query);
+      const movieResults = await fetchMovieSearch(query);
+      return {
+        tv: tvResults.results,
+        movies: movieResults.results,
+      };
+    },
+    staleTime: 3600000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   const [storedData, setStoredData] = useState<any[]>([]);
@@ -92,12 +99,6 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
     setItemRelatedStories((prev) => {
       const newStories = [...prev];
       newStories[idx] = story; // Set only the specific index to the new story
-      return newStories;
-    });
-    // If needed, update other states accordingly
-    setPrevStories((prev) => {
-      const newStories = [...prev];
-      newStories[idx] = story; // This should only be a single story as well
       return newStories;
     });
     setIsItemChanging((prev) => {
@@ -205,23 +206,6 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   }, [movieAndTvResults]);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node) &&
-        searchResultRef.current &&
-        !searchResultRef.current.contains(event.target as Node)
-      ) {
-        setListSearch("");
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
     // Default to an empty array if storedData is undefined
     const addingItems =
       storedData?.map((data) => ({
@@ -241,7 +225,7 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   }, [movieDetails?.related_title, storedData, itemRelatedStories]);
   useEffect(() => {
     refetchData();
-  }, [movieIds, refetchData]);
+  }, [mediaIds, refetchData]);
 
   useEffect(() => {
     if (prevItemRef.current !== item) {
@@ -288,9 +272,13 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
             >
               <AnimatePresence>
                 {item?.map((related: any, idx) => {
-                  const isNew = movieAndTvResults?.some(
-                    (result) => result.id === related.id
-                  );
+                  const isNew =
+                    dynamicSearch?.tv?.some(
+                      (result: any) => result.id === related.id
+                    ) ||
+                    dynamicSearch?.movies?.some(
+                      (result: any) => result.id === related.id
+                    );
                   return (
                     <Reorder.Item
                       as="tr"
@@ -475,19 +463,25 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
               </AnimatePresence>
             </Reorder.Group>
           ) : (
-            <div className="text-sm px-4 py-2">No records have been added.</div>
+            <tbody>
+              <tr>
+                <td colSpan={3} className="text-sm px-4 py-2">
+                  No records have been added.
+                </td>
+              </tr>
+            </tbody>
           )}
         </table>
       </div>
       <div className="text-left-p-4">
         <div className="float-right w-[50%]">
           <div className="block relative">
-            <FetchingMovie
-              dynamicSearch={dynamicSearch?.results}
+            <FetchingTv
+              dynamicSearch={dynamicSearch as any}
               isFetching={isFetching}
               searchQuery={searchQuery as string | any}
-              movieIds={movieIds}
-              setMovieIds={setMovieIds}
+              mediaIds={mediaIds}
+              setMediaIds={setMediaIds}
               setStoredData={setStoredData}
               openSearch={openSearch}
               setItem={setItem}

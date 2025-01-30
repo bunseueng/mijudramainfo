@@ -20,7 +20,6 @@ const Sound = ({ sound, soundDB }: any) => {
     }
   });
 
-  console.log(sound);
   return (
     <div className="md:grid grid-cols-1 md:grid-cols-2 px-5">
       {soundDB?.length > 0
@@ -32,6 +31,7 @@ const Sound = ({ sound, soundDB }: any) => {
               <div className="w-full h-full flex flex-row">
                 <div className="box-content w-[90px]">
                   <Link
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="block outline-none box-content w-[110px] h-full"
                   >
@@ -85,7 +85,7 @@ const Sound = ({ sound, soundDB }: any) => {
                     {item.profile_path === null ? (
                       <Image
                         src="/default-pf.jpg"
-                        alt={`${item?.name}'s Profile`}
+                        alt={`${item?.name}'s Profile` || "Person Profile"}
                         width={200}
                         height={200}
                         quality={100}
@@ -94,7 +94,7 @@ const Sound = ({ sound, soundDB }: any) => {
                     ) : (
                       <Image
                         src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                        alt={`${item?.name}'s Profile`}
+                        alt={`${item?.name}'s Profile` || "Person Profile"}
                         width={200}
                         height={200}
                         quality={100}

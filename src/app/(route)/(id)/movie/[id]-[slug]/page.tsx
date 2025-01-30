@@ -7,6 +7,7 @@ import { getMovieData, getMovieDetails } from "@/app/actions/movieActions";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { getLanguages } from "@/app/actions/tvActions";
+import { MovieDB } from "@/helper/type";
 
 export const revalidate = 3600;
 
@@ -76,7 +77,19 @@ export default async function tvPage(props: {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   return (
     <Suspense key={movie_id} fallback={<SearchLoading />}>
-      <MovieMain movie_id={movie_id} user={user} {...movieData} />
+      <MovieMain
+        movie_id={movie_id}
+        user={user}
+        getMovie={movieData.getMovie as MovieDB | null}
+        users={movieData.users}
+        getComment={movieData.getComment}
+        lists={movieData.lists}
+        existedFavorite={movieData.existedFavorite}
+        existedWatchlist={movieData.existedWatchlist}
+        existingRatings={movieData.existingRatings}
+        getReview={movieData.getReview}
+        userRating={movieData.userRating}
+      />
     </Suspense>
   );
 }

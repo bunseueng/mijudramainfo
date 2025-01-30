@@ -8,8 +8,9 @@ import ReusedImage from "@/components/ui/allreusedimage";
 import CommentCard from "./CommentCard";
 import NestedComment from "./NestedComment";
 import ClipLoader from "react-spinners/ClipLoader";
-import { CommentProps, UserProps } from "@/helper/type";
+import type { CommentProps, UserProps } from "@/helper/type";
 import CommentSkeleton from "@/app/component/ui/Loading/CommentSkeleton";
+import Link from "next/link";
 
 type DiscussProps = {
   user: UserProps;
@@ -35,7 +36,6 @@ const Discuss = ({ user, users, tv_id, getComment, type }: DiscussProps) => {
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
-
   useEffect(() => {
     if (Array.isArray(getComment)) {
       setComments(getComment);
@@ -120,6 +120,7 @@ const Discuss = ({ user, users, tv_id, getComment, type }: DiscussProps) => {
       toast.error("Error posting comment");
     } finally {
       setLoading((prev) => ({ ...prev, [loadingKey]: false }));
+      setIsPosting(false);
       setReplyingToId(null);
     }
   };
@@ -220,77 +221,100 @@ const Discuss = ({ user, users, tv_id, getComment, type }: DiscussProps) => {
             Comments
           </h3>
         </div>
-        <div className="border-b-0 px-3 py-2">
-          <div className="text-md font-bold">
-            <div className="relative inline-block float-left w-[38px] h-[38px] md:w-[48px] md:h-[48px] bg-[#3e4042] mr-3 rounded-full">
-              <ReusedImage
-                src={user?.profileAvatar || user?.image || "/default-pf.jpg"}
-                alt={`${user?.displayName || user?.name}'s profile avatar`}
-                width={48}
-                height={48}
-                quality={100}
-                loading="lazy"
-                className="w-[38px] h-[38px] md:w-[48px] md:h-[48px] bg-center object-cover rounded-full align-middle"
-              />
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handlePostComment(null, tv_id);
-              }}
-              className="overflow-hidden"
-            >
-              <div className="text-left block mb-1">
-                <div className="relative inline-block w-full align-bottom text-md">
-                  <textarea
-                    name="comment"
-                    id="comment"
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    className="w-full h-[53.6px] min-h-[53.6px] text-[#606266] dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] focus:border-blue-500 focus:ring-blue-500 text-sm font-normal rounded-sm outline-none focus:transform focus:duration-300 py-2 px-4"
-                    placeholder="Post a comment..."
-                  ></textarea>
+        {session ? (
+          <div className="border-b-0 px-3 py-2">
+            <div className="text-md font-bold">
+              <div className="relative inline-block float-left w-[38px] h-[38px] md:w-[48px] md:h-[48px] bg-[#3e4042] mr-3 rounded-full">
+                <ReusedImage
+                  src={user?.profileAvatar || user?.image || "/default-pf.jpg"}
+                  alt={`${user?.displayName || user?.name}'s profile avatar`}
+                  width={48}
+                  height={48}
+                  quality={100}
+                  loading="lazy"
+                  className="w-[38px] h-[38px] md:w-[48px] md:h-[48px] bg-center object-cover rounded-full align-middle"
+                />
+              </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handlePostComment(null, tv_id);
+                }}
+                className="overflow-hidden"
+              >
+                <div className="text-left block mb-1">
+                  <div className="relative inline-block w-full align-bottom text-md">
+                    <textarea
+                      name="comment"
+                      id="comment"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      className="w-full h-[53.6px] min-h-[53.6px] text-[#606266] dark:text-white bg-[#fff] dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] focus:border-blue-500 focus:ring-blue-500 text-sm font-normal rounded-sm outline-none focus:transform focus:duration-300 py-2 px-4"
+                      placeholder="Post a comment..."
+                    ></textarea>
+                  </div>
                 </div>
-              </div>
-              <div className="text-right block mb-1">
-                <label
-                  className={`text-sm transform duration-300 cursor-pointer ${
-                    spoilerComment
-                      ? "text-[#409eff] font-bold"
-                      : "text-black dark:text-[#ffffffde]"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    name="spoiler"
-                    checked={spoilerComment}
-                    onChange={(e) => setSpoilerComment(e.target.checked)}
-                    className="transform duration-300 cursor-pointer mr-1 px-2"
-                  />
-                  <span className="pl-1 text-sm mb-1">Spoiler</span>
-                </label>
-                <button
-                  name="Posting Button"
-                  className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-2 px-5 outline-none ${
-                    loading["main"] ? "opacity-50 pointer-events-none" : ""
-                  } ${!session ? "cursor-not-allowed" : "cursor-pointer"}`}
-                  disabled={loading["main"] || !session}
-                >
-                  {loading["main"] ? (
-                    <ClipLoader
-                      color="#c3c3c3"
-                      loading={loading["main"]}
-                      size={14}
-                      className="align-middle"
+                <div className="text-right block mb-1">
+                  <label
+                    className={`text-sm transform duration-300 cursor-pointer ${
+                      spoilerComment
+                        ? "text-[#409eff] font-bold"
+                        : "text-black dark:text-[#ffffffde]"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      name="spoiler"
+                      checked={spoilerComment}
+                      onChange={(e) => setSpoilerComment(e.target.checked)}
+                      className="transform duration-300 cursor-pointer mr-1 px-2"
                     />
-                  ) : (
-                    "Post"
-                  )}
-                </button>
-              </div>
-            </form>
+                    <span className="pl-1 text-sm mb-1">Spoiler</span>
+                  </label>
+                  <button
+                    name="Posting Button"
+                    className={`inline-block text-center text-sm text-black dark:text-[#ffffffde] bg-[#fff] dark:bg-[#3a3b3c] hover:bg-[#787878] hover:bg-opacity-40 hover:text-white dark:hover:bg-opacity-75 border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-md rounded-md whitespace-nowrap ml-2 py-2 px-5 outline-none ${
+                      loading["main"] ? "opacity-50 pointer-events-none" : ""
+                    } ${!session ? "cursor-not-allowed" : "cursor-pointer"}`}
+                    disabled={loading["main"] || !session}
+                  >
+                    {loading["main"] ? (
+                      <ClipLoader
+                        color="#c3c3c3"
+                        loading={loading["main"]}
+                        size={14}
+                        className="align-middle"
+                      />
+                    ) : (
+                      "Post"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              Please sign in or sign up to post a comment.
+            </p>
+            <Link
+              prefetch={false}
+              href="/signin"
+              className="text-blue-500 hover:underline mr-2"
+            >
+              Sign In
+            </Link>
+            <span className="text-gray-400">or</span>
+            <Link
+              prefetch={false}
+              href="/signup"
+              className="text-blue-500 hover:underline ml-2"
+            >
+              Sign Up
+            </Link>
+          </div>
+        )}
         <div className="border-b border-b-[#78828c21] px-3 pt-2">
           <ul>
             {" "}

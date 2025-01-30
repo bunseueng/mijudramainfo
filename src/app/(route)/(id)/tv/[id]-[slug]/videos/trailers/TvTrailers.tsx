@@ -4,43 +4,23 @@ import React, { useEffect, useState } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
 import { CiPlay1 } from "react-icons/ci";
 import { formatDuration } from "@/app/actions/formattedDuration";
-import { fetchTrailer } from "@/app/actions/fetchMovieApi";
 import { FaYoutube } from "react-icons/fa6";
-import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "@/app/actions/formatDate";
-import { DramaReleasedInfo } from "@/helper/type";
-import dynamic from "next/dynamic";
-const SearchLoading = dynamic(
-  () => import("@/app/component/ui/Loading/SearchLoading"),
-  { ssr: false }
-);
-
+import { TrailerType } from "../TvVideo";
 interface Youtube {
   thumbnailUrl: string;
   channelName: string;
   duration: string;
 }
 
-interface TvTrailerType {
-  tv_id: string;
-  tv: DramaReleasedInfo;
-}
-
-const TvTrailers: React.FC<TvTrailerType> = ({ tv_id, tv }) => {
-  const { data: tvTrailer, isLoading } = useQuery({
-    queryKey: ["tvTrailer"],
-    queryFn: () => fetchTrailer(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+const TvTrailers: React.FC<TrailerType> = ({ trailer, tv }) => {
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
   const [thumbnails, setThumbnails] = useState<Youtube[]>([]);
   const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
   useEffect(() => {
     const fetchThumbnails = async () => {
-      if (tvTrailer?.results) {
-        const keys = tvTrailer.results.map((item: any) => item.key);
+      if (trailer?.results) {
+        const keys = trailer.results.map((item: any) => item.key);
         const promises = keys.map((key: string) =>
           fetch(
             `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${key}&key=${api}`
@@ -62,21 +42,18 @@ const TvTrailers: React.FC<TvTrailerType> = ({ tv_id, tv }) => {
     };
 
     fetchThumbnails();
-  }, [tvTrailer]);
+  }, [trailer]);
 
-  if (isLoading) {
-    return <SearchLoading />;
-  }
   return (
     <>
-      {tvTrailer?.results?.filter((type: any) => type?.type === "Trailer")
+      {trailer?.results?.filter((type: any) => type?.type === "Trailer")
         ?.length === 0 ? (
         <p className="relative float-left w-full md:w-[75%] text-center md:text-start -px-3 py-3 my-10">
           There no Trailer for {tv?.title || tv?.name} yet!
         </p>
       ) : (
         <div className="flex flex-col relative float-left w-full md:w-[75%] -px-3 py-3 my-10">
-          {tvTrailer?.results
+          {trailer?.results
             ?.filter((type: any) => type?.type === "Trailer")
             ?.map((item: any, index: number) => {
               const thumbnailData = thumbnails[index];

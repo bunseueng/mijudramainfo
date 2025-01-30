@@ -1,10 +1,8 @@
 "use client";
 
-import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { formatDate } from "@/app/actions/formatDate";
 import LazyImage from "@/components/ui/lazyimage";
 import { ITvReview } from "@/helper/type";
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,14 +11,7 @@ import { IoLogoWechat } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 
-const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
-  const { data: tv, isLoading } = useQuery({
-    queryKey: ["tv", tv_id],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+const ReviewDBCard = ({ getReview, tv_id, user, tv }: any) => {
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
     new Set()
   );
@@ -81,10 +72,6 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
       {getReview?.slice(0, 2)?.map((review: ITvReview, idx: number) => {
@@ -115,7 +102,7 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
 
                   <div className="flex flex-col text-black pl-2">
                     <Link
-                      prefetch={true}
+                      prefetch={false}
                       href={`/profile/${review?.userInfo?.name}`}
                       className="text-[#2490da] text-xs md:text-md"
                     >
@@ -124,6 +111,7 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                     <div className="text-[#2490da]">
                       <span className="text-xs">Other reviews by </span>
                       <Link
+                        prefetch={false}
                         href={`/profile/${review?.userInfo?.name}/reviews`}
                         className="text-xs md:text-md border-b border-b-orange-400"
                       >
@@ -253,9 +241,12 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
                   </div>
                   <div className="relative float-right border border-[#00000024] rounded-sm m-2">
                     <LazyImage
-                      src={`https://image.tmdb.org/t/p/${
-                        tv?.poster_path ? "w154" : "w300"
-                      }/${tv.poster_path || tv.backdrop_path}`}
+                      src={
+                        `https://image.tmdb.org/t/p/${
+                          tv?.poster_path ? "w154" : "w300"
+                        }/${tv.poster_path || tv.backdrop_path}` ||
+                        "Drama Poster"
+                      }
                       alt={`${tv?.name || tv?.title}`}
                       width={100}
                       height={150}
@@ -388,7 +379,11 @@ const ReviewDBCard = ({ getReview, tv_id, user }: any) => {
       })}
       <div className="border-b border-b-[#78828c21]"></div>
       <div className="text-center px-4 py-2.5">
-        <Link href={`/tv/${tv_id}/reviews`} className="text-[#1675b6] text-sm">
+        <Link
+          prefetch={false}
+          href={`/tv/${tv_id}/reviews`}
+          className="text-[#1675b6] text-sm"
+        >
           View All
         </Link>
       </div>

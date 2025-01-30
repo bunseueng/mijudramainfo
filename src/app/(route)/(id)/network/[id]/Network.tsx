@@ -26,6 +26,7 @@ import { BiSort } from "react-icons/bi";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 import dynamic from "next/dynamic";
 import LazyImage from "@/components/ui/lazyimage";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 const PlayTrailer = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
   { ssr: false }
@@ -46,12 +47,12 @@ const Network: React.FC<Network> = ({ network_id }) => {
   const [genre, setGenre] = useState<string>("18");
   const [withoutGenre, setWithoutGenre] = useState<string>("16|10767|10764|35");
   const [dominantColor, setDominantColor] = useState<string | null>(null);
-  const [isBright, setIsBright] = useState<boolean>(false);
   const [page, setPage] = useState(1);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") || "1");
   const per_page = searchParams?.get("per_page") || (20 as any);
+  const getColorFromImage = useColorFromImage();
   const { data: networks } = useQuery({
     queryKey: [
       "networks",
@@ -70,34 +71,16 @@ const Network: React.FC<Network> = ({ network_id }) => {
   const items = networks?.total_results;
   const totalItems = networks?.results?.slice(start, end) || []; // Use slice on results
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        `https://image.tmdb.org/t/p/w300/${networksDetail?.logo_path}`
-      );
+      const imageUrl = `https://image.tmdb.org/t/p/w92/${networksDetail?.logo_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const color = `rgb(${r}, ${g}, ${b})`; // Full opacity
       setDominantColor(color);
-
-      // Calculate brightness
-      const brightness = color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114;
-      setIsBright(brightness > 186); // Adjust this threshold as needed
+    } else {
+      console.error("Image url is undefined");
     }
-  }, [networksDetail?.logo_path]);
+  }, [networksDetail?.logo_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -140,7 +123,6 @@ const Network: React.FC<Network> = ({ network_id }) => {
           const averageRating =
             numberOfRatings > 0 ? sumOfRatings / numberOfRatings : 0;
           averageRatings[id] = averageRating;
-          console.log(numberOfRatings);
         }
         setTvRating(averageRatings);
       } catch (error) {
@@ -198,9 +180,10 @@ const Network: React.FC<Network> = ({ network_id }) => {
         style={{ backgroundColor: dominantColor as string | undefined }}
       >
         <div className="max-w-[1520px] mx-auto py-4 px-4 md:px-6">
-          <div className="w-full">
+          <div className="w-full bg-white bg-opacity-50 p-2">
             <Image
               ref={imgRef}
+              onLoad={extractColor}
               src={`https://image.tmdb.org/t/p/w300/${networksDetail?.logo_path}`}
               alt={`${networksDetail?.name}'s Logo`}
               width={300}
@@ -212,11 +195,7 @@ const Network: React.FC<Network> = ({ network_id }) => {
           </div>
           <div className="w-full flex items-center">
             <div className="mt-5">
-              <ul
-                className={`flex items-center font-bold ${
-                  isBright ? "bg-black text-white" : "bg-white text-black"
-                } p-2 rounded-md`}
-              >
+              <ul className="flex items-center font-bold bg-white text-black p-2 rounded-md">
                 <li className="flex items-center text-xs md:text-base px-2">
                   <PiShareNetworkBold className="mr-1" /> {networksDetail?.name}
                 </li>

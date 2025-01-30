@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchMovie, fetchTitle } from "@/app/actions/fetchMovieApi";
 import {
   contentRatingDetail,
   contentTypeDetail,
@@ -10,8 +9,13 @@ import {
 import { DramaDetails, Movie, movieId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import {
   IoIosArrowDown,
@@ -20,29 +24,20 @@ import {
 } from "react-icons/io";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
-import ClipLoader from "react-spinners/ClipLoader";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { mergeAndRemoveDuplicates } from "@/app/actions/mergeAndRemove";
 import { Loader2 } from "lucide-react";
+import { useMovieData } from "@/hooks/useMovieData";
 
 const MovieDetails: React.FC<movieId & Movie> = ({
   movie_id,
   movieDetails,
 }) => {
-  const { data: movie } = useQuery({
-    queryKey: ["movieEdit", movie_id],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: title } = useQuery({
-    queryKey: ["title"],
-    queryFn: () => fetchTitle(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+  const { movie } = useMovieData(movie_id);
+  const title = useMemo(
+    () => movie?.alternative_titles?.titles || [],
+    [movie?.alternative_titles?.titles]
+  );
   const [certification, setCertification] = useState<string | null>(null);
   // Function to get user country based on IP
   const getUserCountry = async () => {
@@ -130,8 +125,9 @@ const MovieDetails: React.FC<movieId & Movie> = ({
     movie?.original_title || detail?.native_title || "";
   const initialSynopsis = movie?.overview || detail?.synopsis || "";
   const initialDuration = detail?.duration || movie?.runtime || "";
-  const initialTitleResults = title?.results || "";
+  const initialTitleResults = title || "";
   const initialKnownAsDetails = detail?.known_as || "";
+  const [initialDurationSet, setInitialDurationSet] = useState(false);
   const [currentTitle, setCurrentTitle] = useState(initialTitle);
   const [currentNativeTitle, setCurrentNativeTitle] =
     useState(initialNativeTitle);
@@ -289,9 +285,10 @@ const MovieDetails: React.FC<movieId & Movie> = ({
     teens15,
     teens18,
   ]);
+
   useEffect(() => {
-    if (title?.results) {
-      setTitleResults(title.results);
+    if (title) {
+      setTitleResults(title);
     }
     if (detail?.known_as) {
       setKnownAsDetails(detail.known_as);
@@ -371,6 +368,8 @@ const MovieDetails: React.FC<movieId & Movie> = ({
       );
       // Flatten and ensure all items are strings
       const formattedKnownAs = ensureAllStrings(newKnownAs);
+
+      // Use current state values instead of initial values
       const res = await fetch(`/api/movie/${movie?.id}/detail`, {
         method: "POST",
         headers: {
@@ -380,19 +379,20 @@ const MovieDetails: React.FC<movieId & Movie> = ({
           movie_id: movie?.id.toString(),
           details: [
             {
-              title: data?.details?.title,
-              native_title: data?.details?.native_title,
-              country: country || detail?.country,
+              title: currentTitle || data?.details?.title,
+              native_title: currentNativeTitle || data?.details?.native_title,
+              country: currentCountry || country,
               known_as: formattedKnownAs,
               synopsis: currentSynopsis || data?.details?.synopsis,
-              content_type: contentType || detail?.content_type,
-              content_rating: contentRating || detail?.content_rating,
-              status: status || detail?.status,
+              content_type: currentType || contentType,
+              content_rating: currentRating || contentRating,
+              status: currentStatus || status,
               duration: currentDuration || detail?.duration,
             },
           ],
         }),
       });
+
       if (res.status === 200) {
         reset();
         setResults([]);
@@ -450,6 +450,17 @@ const MovieDetails: React.FC<movieId & Movie> = ({
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   };
+
+  // Update the useEffect that sets initial values to also handle duration properly
+  useEffect(() => {
+    if (!initialDurationSet) {
+      const initialDurationValue = detail?.duration || movie?.runtime || "";
+      setCurrentDuration(initialDurationValue);
+      setCounter(Number(initialDurationValue) || 1);
+      setInitialDurationSet(true);
+    }
+  }, [detail?.duration, movie?.runtime, initialDurationSet]);
+
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">
@@ -813,7 +824,7 @@ const MovieDetails: React.FC<movieId & Movie> = ({
                   ? counter
                   : detail?.duration
                   ? detail?.duration
-                  : movie?.runtime
+                  : movie?.runtime || ""
               }
               onChange={(e) => setCurrentDuration(Number(e.target.value))}
             />

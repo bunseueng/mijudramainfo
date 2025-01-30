@@ -173,7 +173,7 @@ const NotificationModal: React.FC<Notification> = ({
   if (isLoading) {
     <div>Fetching...</div>;
   } else if (isError) {
-    console.log("Failed to fetch tv");
+    console.error("Failed to fetch tv");
   }
 
   return (
@@ -194,7 +194,7 @@ const NotificationModal: React.FC<Notification> = ({
         <div className="max-h-[660px] overflow-hidden overflow-y-auto">
           <div className="flex items-center justify-between">
             <Link
-              prefetch={true}
+              prefetch={false}
               href="/notifications"
               className="text-sm md:text-base text-black dark:text-[#ffffffde] font-bold p-4"
             >
@@ -245,6 +245,7 @@ const NotificationModal: React.FC<Notification> = ({
                             No Unread Notifications
                           </h1>
                           <Link
+                            prefetch={false}
                             href="/notifications"
                             className="text-[#ffffffde] font-bold bg-[#1675b6] border border-[#1f6fa7] rounded-sm py-3 px-5 hover:bg-opacity-80"
                           >
@@ -317,13 +318,14 @@ const NotificationModal: React.FC<Notification> = ({
 
                     return (
                       <Link
+                        prefetch={false}
                         href={`/profile/${user?.name}`}
                         className="flex border-t border-t-[#78828c21] dark:border-t-[#3e4042] hover:bg-slate-200 dark:hover:bg-[#18191a] hover:bg-opacity-70 transform duration-300 py-3 px-4"
                         key={idx}
                       >
                         <Image
                           src={user?.profileAvatar || user?.image || ""}
-                          alt={`${user?.name} Profile`}
+                          alt={`${user?.name} Profile` || "User Profile"}
                           width={40}
                           height={40}
                           quality={100}
@@ -362,7 +364,7 @@ const NotificationModal: React.FC<Notification> = ({
                           >
                             <Image
                               src={user.profileAvatar || user.image || ""}
-                              alt={`${user.name} Profile`}
+                              alt={`${user.name} Profile` || "User Profile"}
                               width={40}
                               height={40}
                               quality={100}
@@ -396,6 +398,7 @@ const NotificationModal: React.FC<Notification> = ({
                 No Unread Notifications
               </h1>
               <Link
+                prefetch={false}
                 href="/notifications"
                 className="text-[#ffffffde] font-bold bg-[#1675b6] border border-[#1f6fa7] rounded-sm py-3 px-5 hover:bg-opacity-80"
               >

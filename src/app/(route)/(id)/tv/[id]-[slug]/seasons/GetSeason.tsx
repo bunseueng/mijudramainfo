@@ -5,6 +5,7 @@ import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import LazyImage from "@/components/ui/lazyimage";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import React, {
   Suspense,
@@ -37,40 +38,53 @@ const GetSeason = ({ tv_id }: Props) => {
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
 
-  const handleExtractColor = useCallback(async () => {
-    const imageUrl = `https://image.tmdb.org/t/p/w300/${tv?.backdrop_path}`;
-    const [r, g, b] = await getColorFromImage(imageUrl);
+  const extractColor = useCallback(async () => {
+    if (imgRef.current) {
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        tv?.poster_path ? "w92" : "w300"
+      }/${tv?.poster_path || tv?.backdrop_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(rgbaColor);
+    } else {
+      console.error("Image url undefined");
+    }
+  }, [tv?.backdrop_path, tv?.poster_path, getColorFromImage]);
 
-    const startColor = `rgba(${r}, ${g}, ${b}, 0.9)`;
-    const endColor = `rgba(${r}, ${g}, ${b}, 0.7)`;
-
-    const gradientBackground = `linear-gradient(${startColor}, ${endColor})`;
-    setDominantColor(gradientBackground);
-  }, [tv?.backdrop_path, getColorFromImage]);
+  // Ensure the image element is referenced correctly
   useEffect(() => {
-    handleExtractColor();
-  }, [handleExtractColor]);
+    if (imgRef.current) {
+      const imgElement = imgRef.current; // Store the current value in a local variable
+      imgElement.addEventListener("load", extractColor);
+
+      // Cleanup function
+      return () => {
+        imgElement.removeEventListener("load", extractColor);
+      };
+    }
+  }, [tv, extractColor]);
   return (
-    <Suspense key={tv_id} fallback={<SearchLoading />}>
+    <div className="w-full h-full">
       <div
-        className="bg-cyan-600"
-        style={{ background: dominantColor as string | undefined }}
+        className="bg-cyan-600 dark:bg-[#242424]"
+        style={{ backgroundColor: dominantColor as string | undefined }}
       >
-        <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
-          <div className="flex items-center lg:items-start">
-            <LazyImage
+        <div className="max-w-6xl mx-auto flex items-center mt-0 px-3 py-2">
+          <div className="flex items-center lg:items-start px-2 cursor-default">
+            <Image
               ref={imgRef} // Set the reference to the image
               src={`https://image.tmdb.org/t/p/${
                 tv?.poster_path ? "w92" : "w300"
               }/${tv?.poster_path || tv?.backdrop_path}`}
-              alt={`${tv?.name || tv?.title}'s Poser`}
-              width={90}
-              height={130}
+              alt={`${tv?.name || tv?.title}'s Poster`}
+              width={200}
+              height={200}
               quality={100}
+              className="w-[60px] h-[90px] bg-center object-center rounded-md"
               priority
-              className="w-[90px] h-[130px] bg-center object-center rounded-md"
+              onLoad={extractColor}
             />
-            <div className="flex flex-col pl-5 py-5">
+            <div className="flex flex-col pl-5 py-2">
               <h1 className="text-white text-xl font-bold">
                 {tv?.name} (
                 {getYearFromDate(tv?.first_air_date || tv?.release_date)})
@@ -87,7 +101,7 @@ const GetSeason = ({ tv_id }: Props) => {
           </div>
         </div>
       </div>
-      <div className="max-w-[1520px] flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
+      <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
         {tv?.seasons?.map((season: any, idx: number) => (
           <div
             className="flex flex-col md:flex-row md:items-center lg:items-start mb-2 md:mb-0 py-8 w-full border-b-2 border-b-slate-400"
@@ -134,7 +148,7 @@ const GetSeason = ({ tv_id }: Props) => {
           </div>
         ))}
       </div>
-    </Suspense>
+    </div>
   );
 };
 

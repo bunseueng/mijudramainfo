@@ -84,14 +84,16 @@ const ProfileItem: React.FC<
   const searchParams = useSearchParams();
   const sortby = searchParams?.get("sortby") ?? "";
   const editor = useEditor({
+    immediatelyRender: false,
     editable,
     content: user?.biography,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        dropcursor: false, // Disable the built-in dropcursor to avoid duplication
+      }),
       Underline.configure({
         HTMLAttributes: { class: "text-xl font-bold", levels: [2] },
       }),
-      // BulletList.configure({}),
       TextStyle,
       Color.configure({
         types: ["textStyle"],
@@ -219,7 +221,7 @@ const ProfileItem: React.FC<
   return (
     <div className="max-w-6xl w-full mx-auto py-3 md:px-6">
       <div className="flex flex-col md:block md:-mx-3">
-        <div className="order-2 float-left w-full md:w-[33.33333%] relative px-3">
+        <div className="order-2 float-left w-full md:w-[33.33333%] relative px-3 mb-10">
           <div className="block">
             <div className="relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
               <div className="text-center px-3 py-2">
@@ -427,7 +429,7 @@ const ProfileItem: React.FC<
             </div>
           </div>
         </div>
-        <div className="order-1 float-left w-full md:w-[66.66667%] relative px-3">
+        <div className="order-1 float-left w-full md:w-[66.66667%] relative px-3 mb-10">
           <CoverPhoto user={user} users={users} currentUser={currentUser} />
           <div className="inline-block w-full h-full bg-[#fff] dark:bg-[#242526] relative border border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
             <div className="inline-block w-full h-full relative mt-5 md:mt-2">
@@ -604,7 +606,7 @@ const ProfileItem: React.FC<
                 ))}
               </Tabs>
             </div>
-            <div className="overflow-hidden px-1 md:px-4 py-2">
+            <div className="px-1 md:px-4 py-2">
               {pathname === `/profile/${user?.name}` && (
                 <div className="mt-5">
                   {user?.biography === null ? (

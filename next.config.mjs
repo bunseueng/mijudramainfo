@@ -20,6 +20,7 @@ const nextConfig = {
   experimental: {
     nextScriptWorkers: true,
     optimisticClientCache: false,
+    optimizeCss: true,
   },
   reactStrictMode: true,
   async headers() {

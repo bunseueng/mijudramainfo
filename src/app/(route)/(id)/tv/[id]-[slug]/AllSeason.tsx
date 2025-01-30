@@ -8,6 +8,7 @@ const AllSeason = ({
   firstSeason,
   getYearFromDate,
   tv,
+  drama_poster,
 }: any) => {
   return (
     <div className="border-t-[1px] border-slate-400 mt-7 mx-2 md:mx-0">
@@ -25,6 +26,7 @@ const AllSeason = ({
             className="w-full md:w-[20%] h-[200px] md:h-auto cursor-pointer"
           >
             <LazyImage
+              coverFromDB={drama_poster}
               src={
                 displaySeason?.backdrop_path ||
                 displaySeason?.poster_path ||
@@ -46,7 +48,7 @@ const AllSeason = ({
               height={300}
               quality={100}
               priority
-              className="block align-middle w-full h-[200px] md:h-auto object-cover rounded-lg"
+              className="block align-middle w-full h-[200px] md:h-full object-cover rounded-l-lg"
             />
           </Link>
           <div className="w-full md:w-[80%] flex flex-col items-start px-5 pt-5 pb-3 md:pb-0 md:pt-2">

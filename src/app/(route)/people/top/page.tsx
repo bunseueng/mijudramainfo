@@ -14,11 +14,10 @@ export const metadata: Metadata = {
 
 const TopActorPage = async () => {
   const currentUser = (await getCurrentUser()) as currentUserProps;
-  const personDB = await prisma?.person?.findMany();
   return (
     <div className="mt-10">
       <Suspense fallback={<SearchLoading />}>
-        <TopPeople currentUser={currentUser} personDB={personDB as any} />
+        <TopPeople currentUser={currentUser} />
       </Suspense>
     </div>
   );

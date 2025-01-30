@@ -6,12 +6,11 @@ import {
   releaseDateByMonth,
   releaseDateByYear,
 } from "@/helper/item-list";
-import { AddSeason, ITmdbDrama, Movie, movieId } from "@/helper/type";
+import { AddSeason, TVShow, Movie, movieId } from "@/helper/type";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { useQuery } from "@tanstack/react-query";
 import { IoIosArrowDown } from "react-icons/io";
 import React, { useEffect, useState } from "react";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -40,10 +39,10 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
   }>({});
   const router = useRouter();
   const mergeAndRemoveDuplicates = (
-    array1: ITmdbDrama[],
-    array2: ITmdbDrama[]
-  ): ITmdbDrama[] => {
-    const map = new Map<string, ITmdbDrama>();
+    array1: TVShow[],
+    array2: TVShow[]
+  ): TVShow[] => {
+    const map = new Map<string, TVShow>();
 
     array1?.forEach((item: any) => map.set(item?.id, item));
     array2?.forEach((item: any) => map.set(item?.id, item));
@@ -327,7 +326,7 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
         Release Information
       </h1>
       <div className="-mx-3">
-        {combinedData?.map((item: ITmdbDrama, idx: number) => {
+        {combinedData?.map((item: TVShow, idx: number) => {
           return (
             <div key={idx} className="text-left mb-4">
               <div className="float-left w-full lg:w-[50%] relative px-3">

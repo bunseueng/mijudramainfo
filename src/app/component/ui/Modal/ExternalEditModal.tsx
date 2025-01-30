@@ -36,9 +36,6 @@ const ExternalEditModal: React.FC<ExternalType> = ({
     register,
     handleSubmit,
     formState: { errors },
-    getValues,
-    trigger,
-    reset,
   } = useForm<TExternalLink>({
     resolver: zodResolver(externalLink),
   });

@@ -1,6 +1,5 @@
 import ThemeSwitch from "@/components/ui/ThemeIcon";
 import { footer, footerRecommend } from "@/helper/item-list";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -14,7 +13,7 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="text-white">
             <Link
-              prefetch={true}
+              prefetch={false}
               className="no-underline hover:no-underline font-bold text-2xl lg:text-4xl flex items-center"
               href="/"
             >
@@ -75,7 +74,7 @@ const Footer = () => {
             <div className="flex flex-col space-y-2">
               {footer?.map((item: any, idx: number) => (
                 <Link
-                  prefetch={true}
+                  prefetch={false}
                   href={item?.link}
                   key={idx}
                   className="text-sm hover:text-cyan-400 transition-colors"
@@ -100,7 +99,7 @@ const Footer = () => {
             <div className="flex flex-col space-y-2">
               {footerRecommend?.map((item: any, idx: number) => (
                 <Link
-                  prefetch={true}
+                  prefetch={false}
                   href={item?.link}
                   key={idx}
                   className="text-sm hover:text-cyan-400 transition-colors"

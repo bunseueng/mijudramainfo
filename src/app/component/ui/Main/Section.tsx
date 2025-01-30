@@ -8,9 +8,7 @@ export type HomeDramaT = {
   getDrama: DramaDB[];
   existingRatings: any;
   categoryData: any;
-  categoryDataDetails: any;
   isDataLoading: boolean;
-  isDataDetailsLoading: boolean;
   path: string;
 };
 

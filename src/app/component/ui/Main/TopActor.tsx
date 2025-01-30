@@ -23,7 +23,7 @@ export default function TopActor({ heading, personDB }: TopActorType) {
 
   const fetchAllPersons = async () => {
     const allPersons = await Promise.all(
-      person_ids.map((id: PersonDBType) => fetchPerson(id))
+      person_ids.map((id: PersonDBType) => fetchPerson(id.toString()))
     );
     return allPersons;
   };
@@ -108,6 +108,7 @@ function ActorCard({
               #{rank}
             </Badge>
             <Link
+              prefetch={false}
               href={`/person/${actor?.id}-${spaceToHyphen(actor?.name)}`}
               className="block"
             >
@@ -124,6 +125,7 @@ function ActorCard({
 
           <div className="flex-1 min-w-0">
             <Link
+              prefetch={false}
               href={`/person/${actor?.id}-${spaceToHyphen(actor?.name)}`}
               className="block"
             >

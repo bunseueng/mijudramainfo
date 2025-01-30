@@ -16,7 +16,6 @@ const SearchPag = async (props: { params: Promise<{ name: string }> }) => {
   const user = await prisma?.user?.findUnique({
     where: { name: params?.name },
   });
-  const users = await prisma?.user?.findMany({});
   const findFriendId = await prisma.friend?.findFirst({
     where: {
       friendRequestId: currentUser?.id as string,
@@ -32,7 +31,6 @@ const SearchPag = async (props: { params: Promise<{ name: string }> }) => {
   return (
     <UserSearch
       user={user}
-      users={users}
       friend={friends}
       findFriendId={findFriendId}
       currentUser={currentUser}

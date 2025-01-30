@@ -10,18 +10,17 @@ import {
   CrewRole,
   DramaDB,
   DramaDetails,
-  ITmdbDrama,
+  TVShow,
   Rating,
   TitleData,
   TrailerResponse,
   UserProps,
 } from "@/helper/type";
-import { MobileInfo } from "./MobileInfo";
 
 interface DramaHeaderProps {
-  tv: ITmdbDrama;
+  tv: TVShow;
   detail: DramaDetails;
-  title: TitleData;
+  title: TitleData[];
   getDrama: DramaDB;
   textColor: string;
   dominantColor: string | null;
@@ -49,6 +48,7 @@ interface DramaHeaderProps {
   formattedDates: any;
   content: any;
   rank: any;
+  video: any;
 }
 
 const DramaHeader: React.FC<DramaHeaderProps> = ({
@@ -82,12 +82,13 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
   formattedDates,
   content,
   rank,
+  video,
 }) => {
   return (
     <div
       className="relative overflow-hidden bg-cover bg-no-repeat h-auto"
       style={{
-        backgroundPosition: "calc(50vw - 510px) top",
+        backgroundPosition: "calc(45vw - 800px) top",
         backgroundImage: `url(https://image.tmdb.org/t/p/original/${
           tv?.backdrop_path || tv?.poster_path
         })`,
@@ -112,12 +113,12 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
                   tv?.poster_path || tv?.backdrop_path
                 }`
               }
-              alt={detail?.title || tv?.name}
+              alt={detail?.title || tv?.name || "Drama Poster"}
               width={300}
               height={440}
               quality={100}
               priority
-              className="block align-middle !w-[300px] md:!min-w-[300px] !h-[440px] bg-cover object-cover rounded-lg md:pl-0"
+              className="block align-middle !w-[300px] md:!min-w-[300px] !h-[440px] rounded-lg md:pl-0"
             />
 
             <div className="md:pl-4 lg:pl-8 py-5">
@@ -211,6 +212,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
                 onDeleteFavorite={onDeleteFavorite}
                 trailer={trailer}
                 textColor={textColor}
+                video={video}
               />
               <DramaInfo
                 detail={detail}

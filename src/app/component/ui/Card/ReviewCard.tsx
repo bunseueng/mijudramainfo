@@ -13,6 +13,7 @@ import ReviewDBCard from "./ReviewDBCard";
 import MediaPhoto from "@/app/(route)/(id)/tv/[id]-[slug]/Media";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { handleProfileClick } from "@/app/actions/handleProfileClick";
+import { DramaDetails } from "@/helper/type";
 
 const ReviewCard = ({
   review,
@@ -25,6 +26,7 @@ const ReviewCard = ({
   users,
   getComment,
   getReview,
+  getDrama,
 }: any) => {
   const [mediaActive, setMediaActive] = useState<string>("videos");
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
@@ -32,6 +34,8 @@ const ReviewCard = ({
     new Set()
   );
   const [thumbnails, setThumbnails] = useState<string[]>([]);
+  const [detail]: DramaDetails[] = (getDrama?.details ||
+    []) as unknown as DramaDetails[];
   const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
   const toggleExpand = (index: number) => {
     setExpandedReviews((prev) => {
@@ -46,33 +50,36 @@ const ReviewCard = ({
   };
 
   useEffect(() => {
-    try {
-      const fetchThumbnails = async () => {
-        if (video?.results) {
-          const keys = video.results.map((item: any) => item.key);
+    const fetchThumbnails = async () => {
+      if (video && video.length > 0) {
+        const keys = video.map((item: any) => item.key);
+        try {
           const promises = keys.map((key: string) =>
             fetch(
               `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${key}&key=${api}`
             ).then((response) => response.json())
           );
-
-          try {
-            const responses = await Promise.all(promises);
-            const thumbnailsData = responses.map(
-              (response: any) => response.items[0].snippet.thumbnails.medium.url
-            );
-            setThumbnails(thumbnailsData);
-          } catch (error) {
-            console.error("Error fetching thumbnails:", error);
-          }
+          const responses = await Promise.all(promises);
+          const thumbnailsData = responses
+            .map((response: any) => {
+              if (response.items && response.items.length > 0) {
+                return response.items[0].snippet.thumbnails.medium.url;
+              } else {
+                console.warn("No items found in response:", response);
+                return null;
+              }
+            })
+            .filter(Boolean); // Remove null or undefined values
+          setThumbnails(thumbnailsData);
+        } catch (error) {
+          console.error("Error fetching thumbnails:", error);
         }
-      };
+      }
+    };
 
-      fetchThumbnails();
-    } catch (error) {
-      console.error("Error fetching thumbnails:", error);
-    }
+    fetchThumbnails();
   }, [video]);
+
   return (
     <div>
       <MediaPhoto
@@ -85,25 +92,26 @@ const ReviewCard = ({
         openTrailer={openTrailer}
         setOpenTrailer={setOpenTrailer}
         tv_id={tv_id}
+        detail={detail}
       />
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         <div className="border-t-[1px] border-t-slate-400 pt-3">
           <h1 className="text-2xl font-bold py-4">Recommendations</h1>
-          {recommend?.results?.length === 0 ? (
-            <p className="text-xl font-bold py-5">
-              There no recommendations for {tv?.name} yet !
+          {recommend?.length === 0 ? (
+            <p className="text-md font-semibold">
+              There are no recommendations for {detail?.title || tv?.name} yet !
             </p>
           ) : (
             <div
               className={`flex items-center overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4 ${
-                recommend?.results?.length === 0 ? "hidden" : "flex"
+                recommend?.length === 0 ? "hidden" : "flex"
               }`}
             >
-              {recommend?.results?.map((item: any, index: number) => (
+              {recommend?.map((item: any, index: number) => (
                 <div className="w-[270px] h-[180px] mr-4" key={index}>
                   <div className="w-[270px] h-[180px] bg-cover">
                     <Link
-                      prefetch={true}
+                      prefetch={false}
                       href={`/tv/${item?.id}-${spaceToHyphen(
                         item?.title || item?.name
                       )}`}
@@ -113,7 +121,10 @@ const ReviewCard = ({
                         src={`https://image.tmdb.org/t/p/original/${
                           item?.backdrop_path || item?.poster_path
                         }`}
-                        alt={`${item?.name || item?.title}'s Poster`}
+                        alt={
+                          `${item?.name || item?.title}'s Poster` ||
+                          "Drama Poster"
+                        }
                         width={600}
                         height={600}
                         priority
@@ -150,7 +161,7 @@ const ReviewCard = ({
       </div>
 
       <div className="border-t-[1px] border-t-slate-400 pt-3 mt-10">
-        {review?.results?.length === 0 && getReview?.length === 0 ? (
+        {review?.length === 0 && getReview?.length === 0 ? (
           <div className="border-[1px] border-[#00000024] rounded-md mt-8">
             <div className="flex items-center justify-between text-[#176093] bg-[#a5dafa] px-5 py-2">
               <h1 className="text-md font-bold">Reviews</h1>
@@ -159,19 +170,23 @@ const ReviewCard = ({
               </Link>
             </div>
             <p className="p-5 font-semibold">
-              We don&#39;t have any reviews for In Blossom. Would you like to
-              write one?
+              We don&#39;t have any reviews for {detail?.title || tv?.name}.
+              Would you like to write one?
             </p>
           </div>
         ) : (
           <div className="border-[1px] border-[#00000024] rounded-md mt-8">
             <div className="flex items-center justify-between text-[#176093] bg-[#a5dafa] px-5 py-2">
               <h1 className="text-md font-bold">Reviews</h1>
-              <Link href={`/tv/${tv_id}/write_reviews`} className="text-md">
+              <Link
+                href={`/tv/${tv_id}/write_reviews`}
+                className="text-md"
+                prefetch={false}
+              >
                 Write Review
               </Link>
             </div>
-            {review?.results?.slice(0, 2)?.map((review: any, idx: number) => {
+            {review?.slice(0, 2)?.map((review: any, idx: number) => {
               const dateObject = new Date(review?.updated_at);
               const formattedDate = dateObject.toLocaleDateString("en-US", {
                 month: "long", // Display full month name
@@ -182,6 +197,7 @@ const ReviewCard = ({
                 <div className="flex flex-col" key={idx}>
                   <div className="flex bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
                     <Link
+                      prefetch={false}
                       href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -226,6 +242,7 @@ const ReviewCard = ({
                       <h1 className="text-black dark:text-white text-sm md:text-md">
                         Review by{" "}
                         <Link
+                          prefetch={false}
                           href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -288,6 +305,7 @@ const ReviewCard = ({
               tv_id={tv_id}
               user={user}
               review={review}
+              tv={tv}
             />
           </div>
         )}

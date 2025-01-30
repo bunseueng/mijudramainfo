@@ -16,6 +16,7 @@ const MediaPhoto = ({
   openTrailer,
   setOpenTrailer,
   tv_id,
+  detail,
 }: any) => {
   return (
     <div className="pt-5">
@@ -30,7 +31,7 @@ const MediaPhoto = ({
             }`}
             onClick={() => setMediaActive("videos")}
           >
-            Videos {video?.results?.length}
+            Videos {video?.length}
           </li>
           <li
             className={`text-sm md:text-md font-bold ml-5 md:ml-10 hover:opacity-70 transform duration-300 cursor-pointer list-none ${
@@ -57,13 +58,14 @@ const MediaPhoto = ({
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         {mediaActive === "videos" && (
           <>
-            {video?.results?.length === 0 ? (
+            {video?.length === 0 ? (
               <p className="flex items-center justify-start ">
-                There no video for {tv?.title || tv?.name} yet!
+                There are no video for {detail?.title || tv?.title || tv?.name}{" "}
+                yet!
               </p>
             ) : (
               <div className="flex items-center h-[300px] overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap mb-4">
-                {video?.results?.map((item: any, index: number) => (
+                {video?.map((item: any, index: number) => (
                   <div className="w-[533px] h-[300px]" key={index}>
                     <div
                       className="w-[533px] h-[300px] bg-cover bg-center border-2 rounded-lg"
@@ -168,7 +170,7 @@ const MediaPhoto = ({
                 {image?.posters?.slice(0, 6)?.map((img: any, idx: number) => (
                   <div className="w-[200px] h-[300px]" key={idx}>
                     <div
-                      className="w-[200px] h-[300px] bg-cover bg-no-repeat align-middle rounded-md border-2"
+                      className="w-[200px] h-[300px] object-cover bg-cover bg-no-repeat align-middle rounded-md border-2"
                       style={{
                         backgroundImage: `url(${`https://image.tmdb.org/t/p/original/${img?.file_path}`})`,
                         position: "relative",
@@ -177,7 +179,7 @@ const MediaPhoto = ({
                   </div>
                 ))}
                 <Link
-                  href={`/tv/${tv_id}/photos`}
+                  href={`/tv/${tv_id}/photos/poster`}
                   className="flex items-center text-lg font-bold px-5 hover:opacity-70 transform duration-300 cursor-pointer"
                 >
                   View More

@@ -1,12 +1,11 @@
-import React from "react";
+import React, { Suspense } from "react";
 import EpisodeCast from "./EpisodeCast";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { Metadata } from "next";
-export async function generateMetadata(
-  props: {
-    params: Promise<{ "id]-[slug": string }>;
-  }
-): Promise<Metadata> {
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+export async function generateMetadata(props: {
+  params: Promise<{ "id]-[slug": string }>;
+}): Promise<Metadata> {
   const params = await props.params;
   if (!params["id]-[slug"]) {
     throw new Error("TV ID and slug are missing.");
@@ -64,8 +63,16 @@ export async function generateMetadata(
     },
   };
 }
-const EpisodeCastPage = () => {
-  return <EpisodeCast />;
+const EpisodeCastPage = async (props: {
+  params: Promise<{ "id]-[slug": string }>;
+}) => {
+  const params = await props.params;
+  const [tv_id] = params["id]-[slug"].split("-");
+  return (
+    <Suspense key={tv_id} fallback={<SearchLoading />}>
+      <EpisodeCast tv_id={tv_id} />
+    </Suspense>
+  );
 };
 
 export default EpisodeCastPage;

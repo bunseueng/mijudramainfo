@@ -38,17 +38,21 @@ export function DramaPagination({ totalItems, setPage }: any) {
   return (
     <Pagination className="flex items-start justify-start">
       <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            className="border border-slate-200 rounded-md bg-white dark:bg-[#242424] dark:border-[#272727]"
-            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-            href={`${
-              currentPage === 1
-                ? `?${new URLSearchParams({ page: 1 as any })}`
-                : `?${new URLSearchParams({ page: (currentPage - 1) as any })}`
-            }`}
-          />
-        </PaginationItem>
+        {currentPage > 1 && (
+          <PaginationItem>
+            <PaginationPrevious
+              className="border border-slate-200 rounded-md bg-white dark:bg-[#242424] dark:border-[#272727]"
+              onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+              href={`${
+                currentPage === 1
+                  ? `?${new URLSearchParams({ page: 1 as any })}`
+                  : `?${new URLSearchParams({
+                      page: (currentPage - 1) as any,
+                    })}`
+              }`}
+            />
+          </PaginationItem>
+        )}
         {pageNumbers.map((pageIndex: number) => (
           <PaginationItem key={pageIndex}>
             <PaginationLink
@@ -66,19 +70,23 @@ export function DramaPagination({ totalItems, setPage }: any) {
             </PaginationLink>
           </PaginationItem>
         ))}
-        <PaginationItem>
-          <PaginationNext
-            className="border border-slate-200 rounded-md bg-white dark:bg-[#242424] dark:border-[#272727]"
-            onClick={() => {
-              handlePageChange(Math.min(currentPage + 1, totalPages));
-            }}
-            href={`${
-              currentPage === totalPages
-                ? `?${new URLSearchParams({ page: totalPages as any })}`
-                : `?${new URLSearchParams({ page: (currentPage + 1) as any })}`
-            }`}
-          />
-        </PaginationItem>
+        {currentPage < totalPages && (
+          <PaginationItem>
+            <PaginationNext
+              className="border border-slate-200 rounded-md bg-white dark:bg-[#242424] dark:border-[#272727]"
+              onClick={() => {
+                handlePageChange(Math.min(currentPage + 1, totalPages));
+              }}
+              href={`${
+                currentPage === totalPages
+                  ? `?${new URLSearchParams({ page: totalPages as any })}`
+                  : `?${new URLSearchParams({
+                      page: (currentPage + 1) as any,
+                    })}`
+              }`}
+            />
+          </PaginationItem>
+        )}
       </PaginationContent>
     </Pagination>
   );

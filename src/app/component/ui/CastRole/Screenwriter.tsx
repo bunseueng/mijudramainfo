@@ -30,6 +30,7 @@ const Screenwriter = ({ writer, writerDB }: any) => {
               <div className="w-full h-full flex flex-row">
                 <div className="box-content w-[90px]">
                   <Link
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="block outline-none box-content w-[110px] h-full"
                   >
@@ -83,7 +84,9 @@ const Screenwriter = ({ writer, writerDB }: any) => {
                     {item.profile_path === null ? (
                       <Image
                         src="/default-pf.jpg"
-                        alt={`${item?.name}'s Profile`}
+                        alt={
+                          `${item?.name}'s Profile` || "Screenwriter Profile"
+                        }
                         width={200}
                         height={200}
                         quality={100}
@@ -92,7 +95,9 @@ const Screenwriter = ({ writer, writerDB }: any) => {
                     ) : (
                       <Image
                         src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                        alt={`${item?.name}'s Profile`}
+                        alt={
+                          `${item?.name}'s Profile` || "Screenwriter Profile"
+                        }
                         width={200}
                         height={200}
                         quality={100}
@@ -104,6 +109,7 @@ const Screenwriter = ({ writer, writerDB }: any) => {
 
                 <div className="pl-2">
                   <Link
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                   >

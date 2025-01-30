@@ -1,4 +1,4 @@
-import React from "react";
+import React, { RefObject } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa6";
@@ -8,12 +8,16 @@ interface ReviewHeaderProps {
   tv: any;
   tv_id: string;
   dominantColor: string | null;
+  imgRef: RefObject<HTMLImageElement | null>;
+  extractColor: () => Promise<void>;
 }
 
 const ReviewHeader: React.FC<ReviewHeaderProps> = ({
   tv,
   tv_id,
   dominantColor,
+  imgRef,
+  extractColor,
 }) => {
   return (
     <div
@@ -24,20 +28,22 @@ const ReviewHeader: React.FC<ReviewHeaderProps> = ({
         <div className="flex items-center lg:items-start px-4 md:px-6 cursor-default">
           {tv?.poster_path || tv?.backdrop_path !== null ? (
             <Image
+              ref={imgRef}
               src={`https://image.tmdb.org/t/p/${
                 tv?.poster_path ? "w154" : "w300"
               }/${tv?.poster_path || tv?.backdrop_path}`}
-              alt={`${tv?.name || tv?.title}'s Poster`}
+              alt={`${tv?.name || tv?.title}'s Poster` || "Drama Poster"}
               width={60}
               height={90}
               quality={100}
               priority
+              onLoad={extractColor}
               className="w-[60px] h-[90px] bg-center object-center rounded-md"
             />
           ) : (
             <Image
               src="/placeholder-image.avif"
-              alt={`${tv?.name || tv?.title}'s Poster`}
+              alt={`${tv?.name || tv?.title}'s Poster` || "Drama Poster"}
               width={60}
               height={90}
               quality={100}

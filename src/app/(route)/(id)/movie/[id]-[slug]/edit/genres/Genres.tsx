@@ -20,6 +20,7 @@ import { customStyles, lightTheme } from "@/helper/MuiStyling";
 import { Movie, movieId, SearchParamsType } from "@/helper/type";
 import { useTheme } from "next-themes";
 import { Loader2 } from "lucide-react";
+import { useMovieData } from "@/hooks/useMovieData";
 
 interface Genre {
   label: string;
@@ -43,22 +44,8 @@ const GenresAndTags: React.FC<movieId & { movieDetails?: MovieDetails }> = ({
   movie_id,
   movieDetails,
 }) => {
-  const { data: movie } = useQuery({
-    queryKey: ["movie"],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
-  const { data: keywords } = useQuery({
-    queryKey: ["keywords"],
-    queryFn: () => fetchMovieKeyword(movie_id),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
+  const { movie } = useMovieData(movie_id);
+  const keywords = movie?.keywords || [];
   const [genres, setGenres] = useState<Genre[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [originalGenres, setOriginalGenres] = useState<Genre[]>([]);
@@ -74,7 +61,6 @@ const GenresAndTags: React.FC<movieId & { movieDetails?: MovieDetails }> = ({
   const searchQueries = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const searchResultRef = useRef<HTMLDivElement>(null);
-
   const searchQuery = searchQueries?.get("q") || "";
 
   const {

@@ -18,7 +18,7 @@ const LinkPreview = ({ linkPreview }: any) => {
           />
           <div className="flex flex-col p-3">
             <Link
-              prefetch={true}
+              prefetch={false}
               href={`${linkPreview?.url}`}
               className="text-[#2490da]"
             >

@@ -7,9 +7,13 @@ import { getCurrentUser } from "@/app/actions/getCurrentUser";
 
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const {problemType, extraDetails } = await request.json();
+  const {problemType, extraDetails, type } = await request.json();
 
   const user = await getCurrentUser()
+  if(!user) {
+    return NextResponse.json({message: "Unauthorized"}, {status: 401
+    })
+  }
   const person = await prisma.person.findUnique({
     where: {
       personId: params.id, // Use the correct email value
@@ -23,7 +27,8 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     {
       problemType: problemType, // Use reason instead of reportReason
       extraDetails: extraDetails, // Use explanation instead of reportExplanation
-      url
+      url,
+      type
     },
     ...existingReport
   ]

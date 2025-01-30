@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { FaBitcoin } from "react-icons/fa";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
 import { currentUserProps, PersonType } from "@/helper/type";
@@ -183,7 +182,7 @@ const PopularityModal: React.FC<PopularityType> = ({
                 src={`https://image.tmdb.org/t/p/original/${
                   persons?.profile_path || persons?.poster_path
                 }`}
-                alt={`${persons?.name}'s Avatar`}
+                alt={`${persons?.name}'s Avatar` || "Person Profile"}
                 width={600}
                 height={600}
                 quality={100}
@@ -211,7 +210,7 @@ const PopularityModal: React.FC<PopularityType> = ({
                     >
                       <div className="flex items-center justify-center">
                         <Image
-                          src={`/${item?.image}`}
+                          src={`/${item?.image}` || "Image"}
                           alt={item?.name}
                           width={100}
                           height={100}
@@ -308,6 +307,7 @@ const PopularityModal: React.FC<PopularityType> = ({
             </div>
             <div className="flex items-center justify-between">
               <Link
+                prefetch={false}
                 href="/coin"
                 className="text-[#1675b6] text-sm hover:opacity-70 transform duration-300"
               >

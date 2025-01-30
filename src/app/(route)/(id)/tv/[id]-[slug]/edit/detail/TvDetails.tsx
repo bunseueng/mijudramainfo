@@ -1,11 +1,6 @@
 "use client";
 
 import {
-  fetchContentRating,
-  fetchTitle,
-  fetchTv,
-} from "@/app/actions/fetchMovieApi";
-import {
   contentRatingDetail,
   contentTypeDetail,
   countryDetails,
@@ -14,8 +9,7 @@ import {
 import { Drama, DramaDetails, tvId } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   IoIosArrowDown,
@@ -24,36 +18,21 @@ import {
 } from "react-icons/io";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
-import ClipLoader from "react-spinners/ClipLoader";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { mergeAndRemoveDuplicates } from "@/app/actions/mergeAndRemove";
 import { Loader2 } from "lucide-react";
+import { useDramaData } from "@/hooks/useDramaData";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
-  const { data: tv } = useQuery({
-    queryKey: ["tvEdit", tv_id],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: content } = useQuery({
-    queryKey: ["content"],
-    queryFn: () => fetchContentRating(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: title } = useQuery({
-    queryKey: ["title"],
-    queryFn: () => fetchTitle(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+  const { tv, isLoading } = useDramaData(tv_id);
+  const content = tv?.content || [];
+  const title = useMemo(
+    () => tv?.alternative_titles || [],
+    [tv?.alternative_titles]
+  );
   const [detail]: DramaDetails[] = (tvDetails?.details ||
     []) as unknown as DramaDetails[]; // get rid of array without using map or filter
-
   const [results, setResults] = useState<string[]>([]);
   const [titleResults, setTitleResults] = useState<any[]>([]);
   const [knownAsDetails, setKnownAsDetails] = useState<string[]>([]);
@@ -136,7 +115,6 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const originalEpisode = initialEpisode;
   const originalTitleResults = initialTitleResults;
   const originalKnownAsDetails = initialKnownAsDetails;
-
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
   const arraysEqual = (arr1: any[] | undefined, arr2: any[] | undefined) => {
     // Handle cases where one or both arrays are undefined
@@ -356,7 +334,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     setOpenDropdown(openDropdown === type ? "" : type);
   };
 
-  const onSubmit = async (data: TCreateDetails) => {
+  const onSubmit = async () => {
     try {
       setLoading(true);
       const ensureAllStrings = (arr: any[]) =>
@@ -370,6 +348,35 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       );
       // Flatten and ensure all items are strings
       const formattedKnownAs = ensureAllStrings(newKnownAs);
+
+      // Create an object with only the fields that have changed
+      const updatedFields = {
+        title: currentTitle !== originalTitle ? currentTitle : detail?.title,
+        native_title:
+          currentNativeTitle !== originalNativeTitle
+            ? currentNativeTitle
+            : detail?.native_title,
+        country: country !== originalCountry ? country : detail?.country,
+        known_as: formattedKnownAs,
+        synopsis:
+          currentSynopsis !== originalSynopsis
+            ? currentSynopsis
+            : detail?.synopsis,
+        content_type:
+          contentType !== originalType ? contentType : detail?.content_type,
+        content_rating:
+          contentRating !== originalRating
+            ? contentRating
+            : detail?.content_rating,
+        status: status !== originalStatus ? status : detail?.status,
+        duration:
+          currentDuration !== originalDuration
+            ? currentDuration
+            : detail?.duration,
+        episode:
+          currentEpisode !== originalEpisode ? currentEpisode : detail?.episode,
+      };
+
       const res = await fetch(`/api/tv/${tv?.id}/detail`, {
         method: "POST",
         headers: {
@@ -377,22 +384,10 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         },
         body: JSON.stringify({
           tv_id: tv?.id.toString(),
-          details: [
-            {
-              title: data?.details?.title,
-              native_title: data?.details?.native_title,
-              country: country || detail?.country,
-              known_as: formattedKnownAs,
-              synopsis: currentSynopsis || data?.details?.synopsis,
-              content_type: contentType || detail?.content_type,
-              content_rating: contentRating || detail?.content_rating,
-              status: status || detail?.status,
-              duration: currentDuration || detail?.duration,
-              episode: currentEpisode || tv?.number_of_episodes,
-            },
-          ],
+          details: [updatedFields],
         }),
       });
+
       if (res.status === 200) {
         reset();
         setResults([]);
@@ -400,10 +395,10 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       } else if (res.status === 400) {
         toast.error("Invalid User");
       } else if (res.status === 500) {
-        console.log("Bad Request");
+        toast.error("Bad Request");
       }
     } catch (error: any) {
-      console.log("Bad Request");
+      toast.error("Bad Request");
       throw new Error(error);
     } finally {
       setLoading(false);
@@ -451,6 +446,10 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   };
+
+  if (isLoading) {
+    return <SearchLoading />;
+  }
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">
@@ -467,7 +466,11 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             name="details.title"
             type="text"
             className="w-full bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none py-2 px-4"
-            defaultValue={initialTitle}
+            defaultValue={
+              currentTitle !== originalTitle
+                ? currentTitle
+                : detail?.title || currentTitle
+            }
           />
         </div>
         <small className="text-muted-foreground opacity-80">
@@ -486,7 +489,11 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               type="text"
               name="details.native_title"
               className="w-full bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none py-2 px-4"
-              defaultValue={initialNativeTitle}
+              defaultValue={
+                currentNativeTitle !== originalNativeTitle
+                  ? currentNativeTitle
+                  : detail?.native_title || currentNativeTitle
+              }
             />
           </div>
           <small className="text-muted-foreground opacity-80">
@@ -622,7 +629,11 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             name="details.synopsis"
             ref={textareaRef}
             className="w-full h-auto bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none overflow-hidden px-4 py-1"
-            defaultValue={initialSynopsis}
+            defaultValue={
+              currentSynopsis !== originalSynopsis
+                ? currentSynopsis
+                : detail?.synopsis || currentSynopsis
+            }
           ></textarea>
         </div>
         <small className="text-muted-foreground opacity-80">
@@ -698,7 +709,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                 type="text"
                 readOnly
                 autoComplete="off"
-                placeholder={contentRating}
+                placeholder={contentRating || "Not Yet Rating"}
                 className="w-full text-[#606266] dark:text-white placeholder:text-black dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
                 onClick={() => handleDropdownToggle("content_rating")}
               />
@@ -910,11 +921,13 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             name="Submit"
             type="submit"
             className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 mr-5 ${
-              isSubmitEnabled || results?.length > 0
+              loading || isSubmitEnabled || results?.length > 0
                 ? "cursor-pointer"
                 : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
             }`}
-            disabled={isSubmitEnabled || results?.length > 0 ? false : true}
+            disabled={
+              isSubmitEnabled || results?.length > 0 || loading ? false : true
+            }
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
           </button>

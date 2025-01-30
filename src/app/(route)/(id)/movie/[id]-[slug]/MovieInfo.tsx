@@ -1,20 +1,12 @@
 import { formatDate } from "@/app/actions/formatDate";
 import { formatDuration } from "@/app/actions/formattedDuration";
-import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
+import { DramaReleasedInfo } from "@/helper/type";
 import React from "react";
 
-const MovieInfo = ({
-  getMovie,
-  movie,
-  language,
-  allmovieShows,
-  certification,
-}: any) => {
+const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
   const [info]: DramaReleasedInfo[] = (getMovie?.released_information ||
     []) as unknown as DramaReleasedInfo[];
-  const formattedFirstAirDate = movie?.first_air_date
-    ? formatDate(movie.first_air_date)
-    : "TBA";
+
   const formattedLastAirDate = movie?.last_air_date
     ? formatDate(movie.last_air_date)
     : "";
@@ -35,9 +27,6 @@ const MovieInfo = ({
   );
   // Calculate the rank by adding 1 to the index
   const rank = matchedIndex !== -1 ? matchedIndex + 1 : null;
-  const [detail]: DramaDetails[] = (getMovie?.details ||
-    []) as unknown as DramaDetails[];
-
   return (
     <div>
       <div className="border border-slate-400 dark:border-[#272727] dark:bg-[#242424] h-full rounded-lg">
@@ -60,23 +49,15 @@ const MovieInfo = ({
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
-              Aired:
+              Airs On:
             </h1>
             {getMovie?.released_information?.length > 0
               ? formattedLastAirDate
                 ? `${formattedFirstAirDateDB} - ${formattedLastAirDateDB}`
                 : formattedFirstAirDateDB
               : formattedLastAirDateDB
-              ? `${formattedFirstAirDate} - ${formattedLastAirDate}`
-              : formattedFirstAirDate}
-          </div>
-          <div className="pb-1 break-words text-sm">
-            <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
-              Airs On:
-            </h1>
-            {info?.broadcast?.length > 0
-              ? info?.broadcast?.map((broad) => broad?.day)?.join(", ")
-              : "?"}
+              ? movie?.release_date
+              : movie?.release_date}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
@@ -104,15 +85,6 @@ const MovieInfo = ({
             {movie?.runtime
               ? formatDuration(movie?.runtime)
               : "Duration not yet added."}
-          </div>
-          <div className="pb-1 break-words text-sm">
-            <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
-              Content Rating:
-            </h1>
-
-            {certification === "N/A"
-              ? "Not Yet Rated"
-              : `${certification} or older`}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">

@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+
 const ExternalEditModal = dynamic(
   () => import("@/app/component/ui/Modal/ExternalEditModal"),
   { ssr: false }
@@ -26,7 +27,6 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [selectedExternal, setSelectedExternal] = useState<string>("");
   const [openExternal, setOpenExternal] = useState<boolean>(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [database, setDatabase] = useState<ExternalLinkType[]>([]);
   const [editingIndexes, setEditingIndexes] = useState<boolean[]>(
@@ -54,7 +54,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   });
 
   useEffect(() => {
-    setDatabase([...(tvDetails?.external_links || ([] as any)), ...storedData]);
+    setDatabase([...(tvDetails?.external_links || []), ...storedData] as any);
   }, [storedData, tvDetails?.external_links]);
 
   const scrollIntoViewIfNeeded = (element: any) => {
@@ -106,14 +106,35 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
         link_text: data.link_text,
         additional_text: data.additional_text,
       };
-      setStoredData((prevStoredData) => [...prevStoredData, item] as any);
+
+      // Update both storedData and database states
+      setStoredData((prevStoredData) => {
+        const newStoredData = [...prevStoredData, item] as ExternalLinkType[];
+        setDatabase([
+          ...(tvDetails?.external_links || []),
+          ...newStoredData,
+        ] as any);
+        return newStoredData;
+      });
+
+      // Reset form and close dropdown
+      setSelectedExternal("");
+      setOpenExternal(false);
+      reset();
     } catch (error) {
       console.log(error);
     }
   };
 
   const removingStored = (title: string) => {
-    setStoredData((prev) => prev.filter((item) => item.title !== title));
+    setStoredData((prev) => {
+      const newStoredData = prev.filter((item) => item.title !== title);
+      setDatabase([
+        ...(tvDetails?.external_links || []),
+        ...newStoredData,
+      ] as any);
+      return newStoredData;
+    });
   };
 
   const markForDeletion = (
@@ -122,23 +143,20 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   ) => {
     e.preventDefault();
     const newMarkedForDeletion = [...markedForDeletion];
-    newMarkedForDeletion[idx] = true; // Toggle the deletion status
+    newMarkedForDeletion[idx] = true;
     setMarkedForDeletion(newMarkedForDeletion);
     setOpenExternal(false);
   };
 
   const handleAdding = (label: string) => {
-    // Check if the item is not in the database
     if (
       !database
         ?.filter((item) => item?.title !== "Website")
         ?.find((data) => data?.title === label)
     ) {
-      // Call setExternals and handleDropdownToggle if item is not in database
       handleDropdownToggle("external");
       setExternals(label);
     } else {
-      // Optionally handle the case where the item is already in the database
       console.log("Item already in the database.");
     }
   };
@@ -164,6 +182,18 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       });
 
       if (res.status === 200) {
+        // Update local state with the new data
+        const updatedData = await res.json();
+        setDatabase(updatedData.external_links || []);
+        setInitialValues(updatedData.external_links || []);
+        setStoredData([]);
+        setMarkedForDeletion(
+          Array(updatedData.external_links?.length || 0).fill(false)
+        );
+        setIsItemDataChanged(
+          Array(updatedData.external_links?.length || 0).fill(false)
+        );
+
         router.refresh();
         toast.success("Success");
       } else if (res.status === 400) {
@@ -177,18 +207,10 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     }
   };
 
-  useEffect(() => {
-    if (storedData) {
-      setExternals("");
-      setOpenExternal(false);
-      reset();
-    }
-  }, [storedData, reset]);
-
   const handleResetItem = (idx: number) => {
     setDatabase((prev) => {
       const updatedDatabase = [...prev];
-      updatedDatabase[idx] = initialValues[idx] as ExternalLinkType[] | any;
+      updatedDatabase[idx] = initialValues[idx] as ExternalLinkType | any;
       return updatedDatabase;
     });
     setEditingIndexes((prev) =>
@@ -334,10 +356,10 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                       name="job"
                       readOnly
                       autoComplete="off"
-                      className="w-full md:w-[30%] placeholder:text-black dark:placeholder:text-white bg-[#fff] dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
+                      className="w-full md:w-[33%] placeholder:text-black dark:placeholder:text-white bg-[#fff] dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#c0c4cc] dark:border-[#3a3b3c] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 py-1.5 px-3 mt-1 cursor-pointer"
                       placeholder={
                         selectedExternal || "Select an external link"
-                      } // Update this line
+                      }
                       onClick={() => handleDropdownToggle("external")}
                     />
                     <IoIosArrowDown className="absolute bottom-3 left-52" />
@@ -348,7 +370,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className={`w-full md:w-[30%] h-[250px] absolute bg-[#fff] dark:bg-[#242424] border-[1px] border-[#edeff0] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll`}
+                        className={`w-full md:w-[30%] h-[250px] absolute bg-[#fff] dark:bg-[#242424] border-[1px] border-[#edeff0] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll `}
                       >
                         {external_link?.map((items, index) => {
                           const isContentRating =
@@ -491,7 +513,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           >
             Add External Link
           </button>
-        ))}{" "}
+        ))}
       {(tvDetails?.external_links?.length || 0) > 0 && (
         <button
           type="button"
@@ -509,19 +531,20 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
             storedData?.length > 0 ||
             markedForDeletion?.includes(true) ||
-            isItemDataChanged?.includes(true)
+            isItemDataChanged?.includes(true) ||
+            loading
               ? "cursor-pointer"
               : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
           }`}
           disabled={
-            storedData?.length > 0 ||
-            markedForDeletion?.includes(true) ||
-            isItemDataChanged?.includes(true)
-              ? false
-              : true
+            !(
+              storedData?.length > 0 ||
+              markedForDeletion?.includes(true) ||
+              isItemDataChanged?.includes(true)
+            ) || loading
           }
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
+          {loading ? <Loader2 className="h-6 w-4 animate-spin" /> : "Submit"}
         </button>
       </div>
     </form>

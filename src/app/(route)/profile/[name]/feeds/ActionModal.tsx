@@ -32,33 +32,33 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { MoreVertical, X } from "lucide-react";
 import ShowCard from "./ShowCard";
-import { currentUserProps, ITmdbDrama, UserProps } from "@/helper/type";
-import FetchingTv from "@/app/component/ui/Fetching/FetchingTv";
+import { currentUserProps, TVShow, UserProps } from "@/helper/type";
 import { fetchMultiSearch } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useRouter, useSearchParams } from "next/navigation";
+import FetchingPersonSearch from "@/app/component/ui/Fetching/FetchingPersonSearch";
 
 interface IActionModal {
   feedId: string;
   feed: any;
   user: UserProps | null;
   currentUser: currentUserProps | null;
-  tvIds: number[];
-  setTvIds: (tvIds: any) => void;
   openSearch: boolean;
   setStoredData: (data: any) => void;
+  mediaIds: number[];
+  setMediaIds: (value: number[]) => void;
 }
 
 const ActionModal = ({
   feedId,
   feed,
   user,
-  tvIds,
-  setTvIds,
   openSearch,
   setStoredData,
   currentUser,
+  mediaIds,
+  setMediaIds,
 }: IActionModal) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -70,7 +70,6 @@ const ActionModal = ({
   const [reportReason, setReportReason] = useState("");
   const [reportExplanation, setReportExplanation] = useState("");
   const [item, setItem] = useState(feed?.tag);
-  const setQuery = "q";
   const router = useRouter();
   const searchQuery = useSearchParams();
   const query = searchQuery?.get("q") || "";
@@ -271,13 +270,13 @@ const ActionModal = ({
           />
           {item?.length > 0 === false && (
             <div className="block relative">
-              <FetchingTv
+              <FetchingPersonSearch
                 dynamicSearch={dynamicSearch}
                 isFetching={isFetching}
                 searchQuery={searchQuery as string | any}
                 openSearch={openSearch}
-                tvIds={[]}
-                setTvIds={setTvIds}
+                mediaIds={mediaIds}
+                setMediaIds={setMediaIds}
                 setStoredData={setStoredData}
                 setItem={setItem}
                 query={query}
@@ -285,7 +284,7 @@ const ActionModal = ({
             </div>
           )}
 
-          {item?.map((show: ITmdbDrama, idx: number) => (
+          {item?.map((show: TVShow, idx: number) => (
             <div
               key={show?.id}
               className="relative w-full h-full dark:bg-[#232425] rounded-sm my-2"

@@ -1,55 +1,28 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchMovie } from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import Image from "next/image";
 import { movieId } from "@/helper/type";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useMovieData } from "@/hooks/useMovieData";
 
 const MovieEdit: React.FC<movieId> = ({ movie_id }) => {
-  const { data: movie } = useQuery({
-    queryKey: ["movieEdit", movie_id],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-
+  const { movie } = useMovieData(movie_id);
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
+  const getColorFromImage = useColorFromImage();
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        `https://image.tmdb.org/t/p/${movie?.poster_path ? "w92" : "w300"}/${
-          movie?.poster_path || movie?.backdrop_path
-        }`
-      );
-      if (color) {
-        // Use the color string directly
-        setDominantColor(color);
-      } else {
-        console.error("No valid color returned");
-      }
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        movie?.backdrop_path ? "w300" : "w92"
+      }/${movie?.backdrop_path || movie?.poster_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const color = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(color);
     }
-  }, [movie?.poster_path, movie?.backdrop_path]);
+  }, [movie?.backdrop_path, movie?.poster_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {

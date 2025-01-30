@@ -1,32 +1,17 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import {
-  fetchCastCredit,
-  fetchContentRating,
-  fetchImages,
-  fetchKeyword,
-  fetchLanguages,
-  fetchRecommendation,
-  fetchReview,
-  fetchTitle,
-  fetchTrailer,
-  fetchTv,
-  fetchVideos,
-} from "@/app/actions/fetchMovieApi";
 import { getTextColor } from "@/app/actions/getTextColor";
 import dynamic from "next/dynamic";
 import DramaCast from "./DramaCast";
 import TvList from "./TvList";
-import DramaInfo from "@/app/component/ui/Drama/DramaInfo";
 import DramaHeader from "@/app/component/ui/Drama/DramaHeader";
 import { useDramaData } from "@/hooks/useDramaData";
 import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
 import { formatDate } from "@/app/actions/formatDate";
-
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
@@ -50,23 +35,18 @@ const DramaMain = ({
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [textColor, setTextColor] = useState("#FFFFFF");
-
-  const {
-    tv,
-    isLoading,
-    trailer,
-    cast,
-    language,
-    content,
-    keyword,
-    title,
-    review,
-    image,
-    video,
-    recommend,
-    allTvShows,
-  } = useDramaData(tv_id);
-
+  const getColorFromImage = useColorFromImage();
+  const { tv, isLoading, language } = useDramaData(tv_id);
+  const cast = tv?.credits || {};
+  const content = tv?.content_ratings?.results || [];
+  const keyword = tv?.keywords || {};
+  const title = tv?.alternative_titles?.results || [];
+  const review = tv?.reviews?.results || [];
+  const image = tv?.images || {};
+  const video = tv?.videos?.results || [];
+  const recommend = tv?.recommendations?.results || [];
+  const allTvShows = tv?.similar?.results || [];
+  const trailer = video?.find((vid: any) => vid.type === "Trailer");
   // Getting Crew
   const castCredit = cast?.crew?.map((item: any) => item);
   const director = castCredit?.find(
@@ -104,7 +84,6 @@ const DramaMain = ({
         : capitalizedKeyword + ", ";
     })
     .join("");
-  const genres = tv?.genres;
   const tvRating = existingRatings?.map((item: any) => item?.rating);
   const sumRating = tvRating?.reduce(
     (acc: any, rating: number) => acc + rating,
@@ -116,7 +95,7 @@ const DramaMain = ({
     []) as unknown as DramaDetails[];
   const [info]: DramaReleasedInfo[] = (getDrama?.released_information ||
     []) as unknown as DramaReleasedInfo[];
-
+  const drama_poster = getDrama?.cover;
   const formattedFirstAirDate = tv?.first_air_date
     ? formatDate(tv.first_air_date)
     : "TBA";
@@ -130,42 +109,21 @@ const DramaMain = ({
     ? formatDate(info.end_date)
     : "";
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const colorString = await getColorFromImage(
+      const imageUrl =
         getDrama?.cover ||
-          `https://image.tmdb.org/t/p/${tv?.backdrop_path ? "w300" : "w92"}/${
-            tv?.backdrop_path || tv?.poster_path
-          }`
-      );
+        `https://image.tmdb.org/t/p/${tv?.backdrop_path ? "w300" : "w92"}/${
+          tv?.backdrop_path || tv?.poster_path
+        }`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
 
-      const regex = /rgb\((\d+), (\d+), (\d+)\)/;
-      const match = colorString && colorString?.match(regex);
-
-      if (match) {
-        const [r, g, b] = match.slice(1).map(Number);
-        const rgbaColor = `rgba(${r}, ${g}, ${b}, 1)`;
-        const gradientBackground = `linear-gradient(to right, ${rgbaColor}, rgba(${r}, ${g}, ${b}, 0.84) 50%, rgba(${r}, ${g}, ${b}, 0.84) 100%)`;
-        setDominantColor(gradientBackground);
-        setTextColor(getTextColor(r, g, b));
-      }
+      const rgbaColor = `rgba(${r}, ${g}, ${b}, 1)`;
+      const gradientBackground = `linear-gradient(to right, ${rgbaColor}, rgba(${r}, ${g}, ${b}, 0.84) 50%, rgba(${r}, ${g}, ${b}, 0.84) 100%)`;
+      setDominantColor(gradientBackground);
+      setTextColor(getTextColor(r, g, b));
     }
-  }, [tv?.backdrop_path, tv?.poster_path, getDrama]);
+  }, [tv?.backdrop_path, tv?.poster_path, getDrama, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -195,10 +153,10 @@ const DramaMain = ({
 
   const onDelete = async () => {
     try {
-      const res = await fetch(`/api/watchlist/${tv?.id}`, {
+      const res = await fetch(`/api/tv/${tv?.id}/watchlist`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ movieId: tv?.id }),
+        body: JSON.stringify({ tvId: tv?.id }),
       });
       if (res.status === 200) {
         router.refresh();
@@ -251,7 +209,7 @@ const DramaMain = ({
   return (
     <section className="w-full relative z-50">
       <div className="w-full h-full">
-        <TvList tv_id={tv_id} />
+        <TvList tv_id={tv_id} tv={tv} drama_poster={drama_poster} />
 
         <DramaHeader
           tv={tv}
@@ -269,6 +227,7 @@ const DramaMain = ({
           onFavorite={onFavorite}
           onDeleteFavorite={onDeleteFavorite}
           trailer={trailer}
+          video={video}
           modal={modal}
           setModal={setModal}
           userRating={userRating}
@@ -293,6 +252,7 @@ const DramaMain = ({
 
         <DramaCast
           getDrama={getDrama}
+          drama_poster={drama_poster}
           cast={cast}
           tv={tv}
           content={content}

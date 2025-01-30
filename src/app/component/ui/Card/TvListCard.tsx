@@ -36,7 +36,7 @@ const TvListCard: React.FC<IList> = ({ list }) => {
             <div className="flex flex-col items-start" key={listIndex}>
               <div className="float-left w-[48.3333%] px-1 h-[108px]">
                 <div className="h-[108px] relative mb-2 md:mb-10">
-                  <Link href={`/lists/${listItem?.listId}`}>
+                  <Link prefetch={false} href={`/lists/${listItem?.listId}`}>
                     <ul className="flex h-[108px] float-left m-0 p-0">
                       {[...Array(5)].map((_, index) => {
                         const tvId = listItem.tvId[index];

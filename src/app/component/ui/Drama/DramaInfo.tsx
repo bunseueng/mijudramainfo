@@ -4,15 +4,15 @@ import {
   CrewRole,
   DramaDB,
   DramaDetails,
-  ITmdbDrama,
+  TVShow,
   TitleData,
 } from "@/helper/type";
 import { MobileInfo } from "./MobileInfo";
 
 interface DramaInfoProps {
   detail: DramaDetails;
-  title: TitleData;
-  tv: ITmdbDrama;
+  title: TitleData[];
+  tv: TVShow;
   textColor: string;
   getDrama: DramaDB;
   director: CrewRole;
@@ -55,6 +55,7 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
           : `${tv?.name} has no overview yet!`}{" "}
         <span>
           <Link
+            prefetch={false}
             href={`/tv/${tv?.id}/edit/detail`}
             className="text-sm text-[#2490da] break-words"
             shallow
@@ -86,8 +87,8 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
                   {known}
                 </span>
               ))
-            : title?.results?.length > 0
-            ? title?.results?.map((title: any, index: number) => (
+            : title?.length > 0
+            ? title?.map((title: any, index: number) => (
                 <span key={index}>
                   {index > 0 && ", "}
                   {title?.title}
@@ -164,6 +165,7 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
           formattedDates={formattedDates}
           content={content}
           rank={rank}
+          getDrama={getDrama}
         />
       </div>
     </div>

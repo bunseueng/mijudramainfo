@@ -9,7 +9,7 @@ const ShowCard = ({ show }: any) => {
           src={`https://image.tmdb.org/t/p/${
             show?.poster_path ? "w154" : "w300"
           }/${show?.poster_path || show?.backdrop_path}`}
-          alt={show?.name}
+          alt={show?.name || "Image"}
           width={150}
           height={150}
           quality={100}

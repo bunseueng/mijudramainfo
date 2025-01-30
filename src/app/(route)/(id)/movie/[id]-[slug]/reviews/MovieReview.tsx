@@ -1,18 +1,12 @@
 "use client";
 
-import {
-  fetchLanguages,
-  fetchMovie,
-  fetchMovieReview,
-} from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import {
   currentUserProps,
-  DramaDB,
   IMovieReview,
+  MovieDB,
   SearchParamsType,
 } from "@/helper/type";
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import React, {
@@ -39,6 +33,8 @@ import ReusedImage from "@/components/ui/allreusedimage";
 import { BsStars } from "react-icons/bs";
 import MovieInfo from "../MovieInfo";
 import { handleProfileClick } from "@/app/actions/handleProfileClick";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useMovieData } from "@/hooks/useMovieData";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
@@ -46,7 +42,7 @@ const SearchLoading = dynamic(
 
 type ReviewType = {
   movie_id: string;
-  getMovie: DramaDB | any;
+  getMovie: MovieDB | any;
   getReview: IMovieReview[];
   currentUser: currentUserProps | null;
 };
@@ -57,27 +53,8 @@ const MovieReview: React.FC<ReviewType> = ({
   getReview,
   currentUser,
 }) => {
-  const { data: movie, isLoading } = useQuery({
-    queryKey: ["movie", movie_id],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: language } = useQuery({
-    queryKey: ["movieLanguage", movie_id],
-    queryFn: fetchLanguages,
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: review } = useQuery({
-    queryKey: ["review", movie_id],
-    queryFn: () => fetchMovieReview(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+  const { movie, isLoading, language } = useMovieData(movie_id);
+  const review = movie?.reviews || [];
   const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>("");
   const [reviewType, setReviewType] = useState<string>("Most Helpful");
@@ -90,6 +67,7 @@ const MovieReview: React.FC<ReviewType> = ({
   const [loadingStates, setLoadingStates] = useState<{
     [key: string]: boolean;
   }>({});
+  const getColorFromImage = useColorFromImage();
   const pathname = usePathname();
   const router = useRouter();
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
@@ -227,36 +205,16 @@ const MovieReview: React.FC<ReviewType> = ({
     }
   };
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        `https://image.tmdb.org/t/p/w92/${movie?.poster_path}`
-      );
-      if (color) {
-        // Use the color string directly
-        setDominantColor(color);
-      } else {
-        console.error("No valid color returned");
-      }
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        movie?.backdrop_path ? "w300" : "w92"
+      }/${movie?.backdrop_path || movie?.poster_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const color = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(color);
     }
-  }, [movie?.poster_path]);
+  }, [movie?.backdrop_path, movie?.poster_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -270,16 +228,10 @@ const MovieReview: React.FC<ReviewType> = ({
     }
   }, [extractColor]);
 
-  if (loading) {
-    return <SearchLoading />;
-  }
-  if (isLoading) {
+  if (loading || isLoading || !movie) {
     return <SearchLoading />;
   }
 
-  if (!movie) {
-    return <SearchLoading />; // Add loading state if data is being fetched
-  }
   return (
     <div className="bg-slate-100 dark:bg-[#1e1e1e]">
       <div
@@ -295,7 +247,9 @@ const MovieReview: React.FC<ReviewType> = ({
                 src={`https://image.tmdb.org/t/p/${
                   movie?.poster_path ? "w154" : "w300"
                 }/${movie?.poster_path || movie?.backdrop_path}`}
-                alt={`${movie?.name || movie?.title}'s Poster`}
+                alt={
+                  `${movie?.name || movie?.title}'s Poster` || "Movie Poster"
+                }
                 width={60}
                 height={90}
                 quality={100}
@@ -305,7 +259,9 @@ const MovieReview: React.FC<ReviewType> = ({
             ) : (
               <Image
                 src="/placeholder-image.avif"
-                alt={`${movie?.name || movie?.title}'s Poster`}
+                alt={
+                  `${movie?.name || movie?.title}'s Poster` || "Movie Poster"
+                }
                 width={60}
                 height={90}
                 quality={100}
@@ -315,7 +271,7 @@ const MovieReview: React.FC<ReviewType> = ({
             )}
             <div className="flex flex-col pl-5 py-2">
               <h1 className="text-white text-xl font-bold">
-                {movie?.name} (
+                {movie?.name || movie?.title} (
                 {getYearFromDate(movie?.first_air_date || movie?.release_date)})
               </h1>
               <Link
@@ -336,7 +292,7 @@ const MovieReview: React.FC<ReviewType> = ({
             <div className=" bg-white dark:bg-[#242424] border rounded-md ">
               <div className="w-full bg-sky-300 dark:bg-[#242424] border-b boder-b-bg-slate-200 dark:border-b-[#272727] rounded-md p-5">
                 <h1 className="text-xl text-sky-900 dark:text-[#2196f3] font-bold">
-                  {movie?.name}
+                  {movie?.name || movie?.title}
                 </h1>
               </div>
               <div className="px-4 py-3">
@@ -564,6 +520,7 @@ const MovieReview: React.FC<ReviewType> = ({
                       (data) => currentUser?.id?.includes(data?.userId)
                     );
                     const isLongReview = review?.review?.length > 500;
+                    console.log(currentItems);
                     return (
                       <div id={review?.id} className="flex flex-col" key={idx}>
                         <div className=" bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">

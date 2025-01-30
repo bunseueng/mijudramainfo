@@ -39,10 +39,13 @@ const Lists: React.FC<Lists> = ({
     queryKey: ["listResult"],
     queryFn: async () => {
       const tvDetails = await Promise.all(
-        list?.tvId?.map(async (id: number) => await fetchTv(id)) || []
+        list?.tvId?.map(async (id: number) => await fetchTv(id.toString())) ||
+          []
       );
       const movieDetails = await Promise.all(
-        list?.movieId?.map(async (id: number) => await fetchMovie(id)) || []
+        list?.movieId?.map(
+          async (id: number) => await fetchMovie(id.toString())
+        ) || []
       );
       return [...tvDetails, ...movieDetails];
     },

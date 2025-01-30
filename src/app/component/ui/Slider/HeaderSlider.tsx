@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchTrending, fetchTv } from "@/app/actions/fetchMovieApi";
+import { fetchTrending } from "@/app/actions/fetchMovieApi";
 import { useInView } from "react-intersection-observer";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
 import dynamic from "next/dynamic";
@@ -33,16 +33,6 @@ const HeaderSlider = ({ existingRatings }: any) => {
     queryFn: fetchTrending,
     staleTime: 3600000,
     refetchOnWindowFocus: false,
-  });
-
-  const { data: tvDetails } = useQuery({
-    queryKey: ["tvDetails", trending?.results?.map((item: any) => item.id)],
-    queryFn: async () => {
-      if (!trending?.results) return [];
-      const tvPromises = trending.results.map((item: any) => fetchTv(item.id));
-      return Promise.all(tvPromises);
-    },
-    enabled: !!trending,
   });
 
   const filteredData = useMemo(
@@ -120,7 +110,6 @@ const HeaderSlider = ({ existingRatings }: any) => {
           currentItem={currentItem}
           currentIndex={currentIndex}
           direction={direction}
-          tvDetails={tvDetails}
           existingRatings={existingRatings}
           getRating={getRating}
           {...colorState}

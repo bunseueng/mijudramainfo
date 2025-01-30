@@ -106,7 +106,7 @@ const MovieReviewDBCard = ({ getReview, movie_id, user }: any) => {
                     }`}
                     alt={`${
                       review?.userInfo?.displayName || review?.userInfo?.name
-                    }`}
+                    }` || "User Profile"}
                     width={100}
                     height={100}
                     loading="lazy"
@@ -115,7 +115,7 @@ const MovieReviewDBCard = ({ getReview, movie_id, user }: any) => {
 
                   <div className="flex flex-col text-black pl-2">
                     <Link
-                      prefetch={true}
+                        prefetch={false}
                       href={`/profile/${review?.userInfo?.name}`}
                       className="text-[#2490da] text-xs md:text-md"
                     >
@@ -124,6 +124,7 @@ const MovieReviewDBCard = ({ getReview, movie_id, user }: any) => {
                     <div className="text-[#2490da]">
                       <span className="text-xs">Other reviews by </span>
                       <Link
+                        prefetch={false}
                         href={`/profile/${review?.userInfo?.name}/reviews`}
                         className="text-xs md:text-md border-b border-b-orange-400"
                       >
@@ -256,7 +257,7 @@ const MovieReviewDBCard = ({ getReview, movie_id, user }: any) => {
                       src={`https://image.tmdb.org/t/p/${
                         movie?.poster_path ? "w154" : "w300"
                       }/${movie.poster_path || movie.backdrop_path}`}
-                      alt={`${movie?.name || movie?.title}`}
+                      alt={`${movie?.name || movie?.title}` || "Movie Poster"}
                       width={100}
                       height={150}
                       quality={100}
@@ -389,6 +390,7 @@ const MovieReviewDBCard = ({ getReview, movie_id, user }: any) => {
       <div className="border-b border-b-[#78828c21]"></div>
       <div className="text-center px-4 py-2.5">
         <Link
+                        prefetch={false}
           href={`/movie/${movie_id}/reviews`}
           className="text-[#1675b6] text-sm"
         >

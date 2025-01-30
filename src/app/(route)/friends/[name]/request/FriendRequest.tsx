@@ -63,6 +63,7 @@ const FriendRequest: React.FC<IFriend & currentUser> = ({
                   }`}
                 >
                   <Link
+                    prefetch={false}
                     href={linkPath}
                     className="relative text-sm md:text-md font-semibold px-2 md:px-4 py-2"
                   >
@@ -85,7 +86,7 @@ const FriendRequest: React.FC<IFriend & currentUser> = ({
                       <div className="flex">
                         <Image
                           src={item?.profileAvatar || item?.image}
-                          alt={`${item?.name}'s Profile`}
+                          alt={`${item?.name}'s Profile` || "User Profile"}
                           width={100}
                           height={100}
                           quality={100}

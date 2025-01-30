@@ -36,7 +36,7 @@ type PopularitySentItem = {
   // Add other properties if they exist
 };
 
-export const getPersonData = cache(async (person_id: string, userId: string | undefined) => {
+export const getPersonData = cache(async (person_id: string) => {
   const users = await prisma.user.findMany({});
   const getAllPerson = await prisma.person.findMany();
   const getPersons = await prisma.person.findUnique({

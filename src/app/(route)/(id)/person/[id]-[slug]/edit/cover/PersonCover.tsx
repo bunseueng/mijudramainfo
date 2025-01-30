@@ -1,34 +1,24 @@
 "use client";
 
-import { fetchPerson } from "@/app/actions/fetchMovieApi";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { PersonEditList } from "../details/PersonEditList";
 import ReusedImage from "@/components/ui/allreusedimage";
 import { Loader2 } from "lucide-react";
+import { usePersonData } from "@/hooks/usePersonData";
 
 const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
+  const { person, isLoading } = usePersonData(person_id);
   const [cover, setCover] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const { handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
-  });
-
-  const { data: person } = useQuery({
-    queryKey: ["personEdit", person_id],
-    queryFn: () => fetchPerson(person_id),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
   });
 
   const resizeAndConvertToBase64 = (file: File): Promise<string> => {
@@ -127,6 +117,9 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
     fileInputRef.current?.click();
   };
 
+  if (isLoading) {
+    return <div>Fetching Data...</div>;
+  }
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6">Cover Image</h1>

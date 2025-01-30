@@ -5,6 +5,7 @@ import { getMovieData, getMovieDetails } from "@/app/actions/movieActions";
 import { getLanguages } from "@/app/actions/tvActions";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { Metadata } from "next";
+import { MovieDB } from "@/helper/type";
 export async function generateMetadata(props: {
   params: Promise<{ "id]-[slug": string }>;
 }): Promise<Metadata> {
@@ -64,9 +65,9 @@ const BloopersPage = async (props: {
   }
   const [movie_id] = params["id]-[slug"].split("-");
   const user = await getCurrentUser();
-  const { getMovie, getAllMovie } = await getMovieData(movie_id, user?.id);
+  const { getMovie } = await getMovieData(movie_id, user?.id);
   return (
-    <MovieVideo movie_id={movie_id} movieDB={getMovie} getMovie={getAllMovie} />
+    <MovieVideo movie_id={movie_id} movieDB={getMovie as MovieDB | null} />
   );
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useScrollContext } from "@/provider/UseScroll";
@@ -34,8 +34,7 @@ import { Bell, LogOut, Search, Settings, Text, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarItem from "./SidebarItem";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useOutsideClick } from "@/hooks/useOutsideClick";
-import Image from "next/image";
+import { useOutsideClickNav } from "@/hooks/useOutsideClickNav";
 
 interface NavbarProps {
   users: UserProps[] | undefined;
@@ -65,9 +64,9 @@ const Navbar: React.FC<NavbarProps> = ({
   const [sidebarOpen, setSidebarOpen] = useState(false); // Update 1
   const { setTheme, resolvedTheme } = useTheme();
   const pathname = usePathname();
-  const router = useRouter();
   const { data: session } = useSession();
   const outsideRef = useRef(null);
+  const triggerRef = useRef(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const { notificationCount, hasUnreadFriends, findRpNoti } =
@@ -151,7 +150,7 @@ const Navbar: React.FC<NavbarProps> = ({
     };
   }, []);
 
-  useOutsideClick(outsideRef, () => {
+  useOutsideClickNav(outsideRef, triggerRef, () => {
     if (notiDrop) {
       setNotiDrop(false);
     }
@@ -178,9 +177,9 @@ const Navbar: React.FC<NavbarProps> = ({
               type="button"
               name="Hamburgur"
               onClick={handleNavClick}
-              className="lg:hidden hover:bg-[#ffffff] hover:bg-opacity-20 p-1 rounded-md"
+              className="lg:hidden hover:bg-[#ffffff] hover:bg-opacity-20 p-[1px] md:p-1 rounded-md"
             >
-              <Text className="text-white text-xl md:text-2xl" />
+              <Text className="text-white text-md md:text-2xl" />
             </button>
             <NavbarLogo setCurrentNav={setCurrentNav} />
             <NavbarItems
@@ -206,6 +205,7 @@ const Navbar: React.FC<NavbarProps> = ({
             setTheme={setTheme}
             sessionDrop={sessionDrop}
             outsideRef={outsideRef}
+            triggerRef={triggerRef}
           />
         </div>
 
@@ -240,39 +240,22 @@ const Navbar: React.FC<NavbarProps> = ({
               animate="open"
               exit="closed"
               variants={sidebarVariants}
-              className="fixed inset-y-0 left-0 z-50 w-80 bg-background border-r shadow-lg"
+              className="fixed inset-y-0 left-0 z-50 w-64 sm:w-80 bg-background border-r shadow-lg"
             >
               <ScrollArea className="h-full">
-                <div className="p-6 space-y-6">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center py-1">
-                      <Link
-                        href="/"
-                        className="flex-shrink-0 font-bold text-xl text-gray-900 dark:text-white gap-1.5"
-                        onClick={() => setCurrentNav("/")}
-                        aria-label="Homepage"
-                      >
-                        <Image
-                          src="/MIJUDRAMAINFO__2_-removebg-preview.png"
-                          alt="Mijudramainfo Logo"
-                          width={150}
-                          height={10}
-                          className="h-8 sm:h-10 w-auto"
-                          style={{ maxWidth: "100%", height: "40px" }}
-                          priority
-                        />
-                      </Link>
-                    </div>
+                    <NavbarLogo setCurrentNav={setCurrentNav} />
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <X className="h-6 w-6" />
+                      <X className="h-5 w-5 sm:h-6 sm:w-6" />
                     </Button>
                   </div>
                   <Separator />
-                  <div className="space-y-4">
+                  <div className="space-y-2 sm:space-y-4">
                     {sidebar_items.map((item, index) => (
                       <SidebarItem
                         key={index}
@@ -284,26 +267,26 @@ const Navbar: React.FC<NavbarProps> = ({
                     ))}
                   </div>
                   <Separator />
-                  <div className="space-y-4">
+                  <div className="space-y-2 sm:space-y-4">
                     <Button
                       variant="outline"
-                      className="w-full justify-start"
+                      className="w-full justify-start text-xs sm:text-sm"
                       onClick={handleSearchClick}
                     >
-                      <Search className="mr-2 h-4 w-4" />
+                      <Search className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                       Search
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start"
+                      className="w-full justify-start text-xs sm:text-sm"
                       onClick={closeSidebar}
                       asChild
                     >
-                      <Link href="/notifications">
-                        <Bell className="mr-2 h-4 w-4" />
+                      <Link href="/notifications" prefetch={false}>
+                        <Bell className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                         Notifications
                         <span
-                          className={`text-white bg-[#f44455] text-[10px] px-2 py-[1px] rounded-full ml-2`}
+                          className={`text-white bg-[#f44455] text-[8px] sm:text-[10px] px-1 sm:px-2 py-[1px] rounded-full ml-2`}
                         >
                           {(hasUnreadFriends || findRpNoti) && (
                             <span>
@@ -317,7 +300,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   {!session && (
                     <Button
                       variant="default"
-                      className="w-full"
+                      className="w-full text-xs sm:text-sm"
                       onClick={closeSidebar}
                       asChild
                     >
@@ -325,11 +308,11 @@ const Navbar: React.FC<NavbarProps> = ({
                     </Button>
                   )}
                   {session && (
-                    <div className="pt-4">
+                    <div className="pt-2 sm:pt-4">
                       <Separator />
-                      <div className="pt-4 space-y-4">
+                      <div className="pt-2 sm:pt-4 space-y-2 sm:space-y-4">
                         <div className="flex items-center">
-                          <Avatar className="h-10 w-10 mr-2">
+                          <Avatar className="h-8 w-8 sm:h-10 sm:w-10 mr-2">
                             <AvatarImage
                               src={
                                 user?.profileAvatar ||
@@ -339,45 +322,45 @@ const Navbar: React.FC<NavbarProps> = ({
                             <AvatarFallback>{user?.name}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">
+                            <p className="font-medium text-xs sm:text-sm">
                               {user?.displayName || user?.name}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-[10px] sm:text-xs text-muted-foreground">
                               {session?.user?.email}
                             </p>
                           </div>
                         </div>
                         <Button
                           variant="outline"
-                          className="w-full justify-start"
+                          className="w-full justify-start text-xs sm:text-sm"
                           onClick={closeSidebar}
                           asChild
                         >
-                          <Link href={`/profile/${user?.name}`}>
-                            <User className="mr-2 h-4 w-4" />
+                          <Link prefetch={false} href={`/profile/${user?.name}`}>
+                            <User className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                             Profile
                           </Link>
                         </Button>
                         <Button
                           variant="outline"
-                          className="w-full justify-start"
+                          className="w-full justify-start text-xs sm:text-sm"
                           onClick={closeSidebar}
                           asChild
                         >
                           <Link href="/setting">
-                            <Settings className="mr-2 h-4 w-4" />
+                            <Settings className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                             Settings
                           </Link>
                         </Button>
                         <Button
                           variant="destructive"
-                          className="w-full justify-start"
+                          className="w-full justify-start text-xs sm:text-sm"
                           onClick={() => {
                             /* Add logout logic */
                             closeSidebar();
                           }}
                         >
-                          <LogOut className="mr-2 h-4 w-4" />
+                          <LogOut className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                           Logout
                         </Button>
                       </div>

@@ -1,101 +1,44 @@
-import React from "react";
+import type React from "react";
 
-const DramaRegion = ({ item }: any) => {
-  const movieType = item?.media_type === "movie";
-  // Assuming genre_ids and origin_country are arrays
-  const genreIds = item?.genre_ids || [];
-  const originCountries = item?.origin_country && item?.origin_country[0];
-  const dramaType = item?.media_type === "tv";
-  // Check if genreIds include 10764 and originCountries include "CN"
-  const isChineseDrama =
-    dramaType &&
-    originCountries?.includes("CN") &&
-    !genreIds?.includes(10764) &&
-    !genreIds?.includes(16);
-  const isKoreanDrama =
-    dramaType &&
-    originCountries?.includes("KR") &&
-    !genreIds?.includes(10764) &&
-    !genreIds?.includes(16);
-  const isJapanDrama =
-    dramaType &&
-    originCountries?.includes("JP") &&
-    !genreIds?.includes(10764) &&
-    !genreIds?.includes(16);
-  const isHKDrama =
-    dramaType &&
-    originCountries?.includes("HK") &&
-    !genreIds?.includes(10764) &&
-    !genreIds?.includes(16);
-  const isTaiwanDrama =
-    dramaType &&
-    originCountries?.includes("TW") &&
-    !genreIds?.includes(10764) &&
-    !genreIds?.includes(16);
-  const isThaiDrama =
-    dramaType &&
-    originCountries?.includes("TH") &&
-    !genreIds?.includes(10764) &&
-    !genreIds?.includes(16);
-  const isChineseMovie = movieType && originCountries?.includes("CN");
-  const isKoreanMovie = movieType && originCountries?.includes("KR");
-  const isJapanMovie = movieType && originCountries?.includes("JP");
-  const isHKMovie = movieType && originCountries?.includes("HK");
-  const isTaiwanMovie = movieType && originCountries?.includes("TW");
-  const isThaiMovie = movieType && originCountries?.includes("TH");
-  const isMovie =
-    movieType && !genreIds?.includes(10764) && !genreIds?.includes(16);
-  const isChineseShow =
-    genreIds?.includes(10764) && originCountries?.includes("CN");
-  const isKoreanShow =
-    genreIds?.includes(10764) && originCountries?.includes("KR");
-  const isJapanShow =
-    genreIds?.includes(10764) && originCountries?.includes("JP");
-  const ChineseDrama =
-    genreIds?.includes(18) &&
-    !genreIds?.includes(16) &&
-    originCountries?.includes("CN");
-  const KoreanDrama =
-    genreIds?.includes(18) &&
-    !genreIds?.includes(16) &&
-    originCountries?.includes("KR");
-  const JapanDrama =
-    genreIds?.includes(18) &&
-    !genreIds?.includes(16) &&
-    originCountries?.includes("JP");
-  const HKDrama =
-    genreIds?.includes(18) &&
-    !genreIds?.includes(16) &&
-    originCountries?.includes("HK");
-  const TwDrama =
-    genreIds?.includes(18) &&
-    !genreIds?.includes(16) &&
-    originCountries?.includes("TW");
-  const ThDrama =
-    genreIds?.includes(18) &&
-    !genreIds?.includes(16) &&
-    originCountries?.includes("TH");
-  return (
-    <div>
-      {isChineseShow && "Chinese Tv Show"}
-      {isKoreanShow && "Korean Tv Show"}
-      {isJapanShow && "Japanese Tv Show"}
-      {isChineseDrama ? isChineseDrama : ChineseDrama && "Chinese Drama"}
-      {isKoreanDrama ? isKoreanDrama : KoreanDrama && "Korean Drama"}
-      {isJapanDrama ? isJapanDrama : JapanDrama && "Japanese Drama"}
-      {isHKDrama ? isHKDrama : HKDrama && "Hongkong Drama"}
-      {isTaiwanDrama ? isTaiwanDrama : TwDrama && "Taiwanese Drama"}
-      {isThaiDrama ? isThaiDrama : ThDrama && "Thai Drama"}
-      {isChineseMovie && "Chinese Movie"}
-      {isKoreanMovie && "Korean Movie"}
-      {isJapanMovie && "Japanese Movie"}
-      {isHKMovie && "Hongkong Movie"}
-      {isTaiwanMovie && "Taiwanese Movie"}
-      {isThaiMovie && "Thai Movie"}
-      {genreIds.includes(16) && "Anime"}
-      {isMovie && "Movie"}
-    </div>
-  );
+interface MediaItem {
+  media_type?: string;
+  genre_ids?: number[];
+  origin_country?: string[];
+}
+
+const DramaRegion: React.FC<{ item: MediaItem }> = ({ item }) => {
+  const { media_type, genre_ids = [], origin_country = [] } = item;
+
+  const isMovie = media_type === "movie";
+  const isVarietyShow = genre_ids.includes(10764);
+  const isAnime = genre_ids.includes(16);
+  const isDrama = genre_ids.includes(18) && !isAnime;
+
+  const getCountrySpecificLabel = (country: string, mediaType: string) => {
+    const countryMap: { [key: string]: string } = {
+      CN: "Chinese",
+      KR: "Korean",
+      JP: "Japanese",
+      HK: "Hongkong",
+      TW: "Taiwanese",
+      TH: "Thai",
+    };
+    return `${countryMap[country] || ""} ${mediaType}`;
+  };
+
+  const renderMediaType = () => {
+    const country = origin_country[0];
+
+    if (isAnime) return "Anime";
+    if (isVarietyShow) return `${getCountrySpecificLabel(country, "Tv Show")}`;
+    if (isDrama) return `${getCountrySpecificLabel(country, "Drama")}`;
+    if (isMovie)
+      return country ? `${getCountrySpecificLabel(country, "Movie")}` : "Movie";
+
+    return null;
+  };
+
+  return <div>{renderMediaType()}</div>;
 };
 
 export default DramaRegion;

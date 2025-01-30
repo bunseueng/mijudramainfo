@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  fetchLanguages,
-  fetchMovie,
-  fetchMovieCastCredit,
-} from "@/app/actions/fetchMovieApi";
+import { fetchMovie } from "@/app/actions/fetchMovieApi";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
 import Director from "@/app/component/ui/CastRole/Director";
 import MainRole from "@/app/component/ui/CastRole/MainRole";
@@ -22,31 +18,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import React from "react";
 import MovieSupportRole from "@/app/component/ui/CastRole/MovieSupportRole";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { useMovieData } from "@/hooks/useMovieData";
 
 const AllMovieCast = ({ movie_id, getMovie }: any) => {
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
-  const { data: movie } = useQuery({
-    queryKey: ["movie", movie_id],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: cast } = useQuery({
-    queryKey: ["movieCast", movie_id],
-    queryFn: () => fetchMovieCastCredit(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: language } = useQuery({
-    queryKey: ["movieLanguage", movie_id],
-    queryFn: () => fetchLanguages(),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+  const getColorFromImage = useColorFromImage();
+  const { movie, isLoading, language } = useMovieData(movie_id);
+  const cast = movie?.cast || [];
   const crew = cast?.crew?.map((item: any) => item);
 
   // Filter the crew array to find all directors
@@ -87,33 +68,16 @@ const AllMovieCast = ({ movie_id, getMovie }: any) => {
     return date.getFullYear();
   };
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        `https://image.tmdb.org/t/p/${movie?.poster_path ? "w154" : "w300"}/${
-          movie?.poster_path || movie?.backdrop_path
-        }`
-      );
-      setDominantColor(color); // Set the dominant color in RGB format
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        movie?.backdrop_path ? "w300" : "w92"
+      }/${movie?.backdrop_path || movie?.poster_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const color = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(color);
     }
-  }, [movie?.backdrop_path, movie?.poster_path]);
+  }, [movie?.backdrop_path, movie?.poster_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -127,8 +91,12 @@ const AllMovieCast = ({ movie_id, getMovie }: any) => {
     }
   }, [extractColor]);
 
-  if (!movie || !cast) {
-    return <div>Loading...</div>; // Add loading state if data is being fetched
+  if (!movie || !cast || isLoading) {
+    return (
+      <div>
+        <SearchLoading />
+      </div>
+    ); // Add loading state if data is being fetched
   }
 
   console.log(cast);

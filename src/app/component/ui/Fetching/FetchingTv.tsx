@@ -1,34 +1,39 @@
 "use client";
 
-import DramaRegion from "@/app/(route)/lists/[listId]/edit/DramaRegion";
-import { fetchTv } from "@/app/actions/fetchMovieApi";
-import LazyImage from "@/components/ui/lazyimage";
-import { AnimatePresence, motion } from "framer-motion";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useDebouncedCallback } from "use-debounce";
 import { CiSearch } from "react-icons/ci";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
-import { useDebouncedCallback } from "use-debounce";
 
-type FetchingTv = {
-  dynamicSearch: any;
+import DramaRegion from "@/app/(route)/lists/[listId]/edit/DramaRegion";
+import { fetchTv, fetchMovie } from "@/app/actions/fetchMovieApi";
+import LazyImage from "@/components/ui/lazyimage";
+
+type FetchingMediaProps = {
+  dynamicSearch: {
+    tv: any[];
+    movies: any[];
+  };
   isFetching: boolean;
   searchQuery: string;
-  tvIds: number[];
-  setTvIds: (tvIds: any) => void;
+  mediaIds: number[];
+  setMediaIds: (mediaIds: number[]) => void;
   openSearch: boolean;
   setStoredData: (data: any) => void;
   setItem: (item: any) => void;
   query: string;
 };
 
-const FetchingTv: React.FC<FetchingTv> = ({
+const FetchingTv: React.FC<FetchingMediaProps> = ({
   dynamicSearch,
   isFetching,
   searchQuery,
-  tvIds,
-  setTvIds,
+  mediaIds,
+  setMediaIds,
   openSearch,
   setStoredData,
   setItem,
@@ -40,6 +45,7 @@ const FetchingTv: React.FC<FetchingTv> = ({
   const searchResultRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -62,7 +68,7 @@ const FetchingTv: React.FC<FetchingTv> = ({
       setLoading(true);
       const { value } = e.target;
       setListSearch(value);
-      const params = new URLSearchParams(searchQuery as string | any);
+      const params = new URLSearchParams(searchQuery);
 
       if (value) {
         if (query === "query") {
@@ -86,18 +92,24 @@ const FetchingTv: React.FC<FetchingTv> = ({
     300
   );
 
-  const onClickAddMovie = async (id: string, mediaType: string) => {
-    const parsedId = parseInt(id, 10);
-    if (mediaType === "tv" && !tvIds.includes(parsedId)) {
-      setTvIds((prevTvIds: any) => [...prevTvIds, parsedId]);
+  const onClickAddMedia = async (id: string, mediaType: string) => {
+    const parsedId = Number.parseInt(id, 10);
+    if (!mediaIds.includes(parsedId)) {
+      setMediaIds([...mediaIds, parsedId]);
       setListSearch(""); // Clear the search input
     }
     try {
-      const tvDetail = await fetchTv(parsedId);
-      if (query === "query") {
-        setStoredData((prevData: any) => [...prevData, tvDetail]);
+      let mediaDetail;
+      if (mediaType === "movie") {
+        mediaDetail = await fetchMovie(parsedId.toString());
       } else {
-        setItem((prevItems: any) => [...prevItems, tvDetail]);
+        mediaDetail = await fetchTv(parsedId.toString());
+      }
+      if (query === "query") {
+        setStoredData((prevData: any) => [...prevData, mediaDetail]);
+      } else {
+        setItem((prevItems: any) => [...prevItems, mediaDetail]);
+        setStoredData((prevData: any) => [...prevData, mediaDetail]);
       }
       setListSearch("");
     } catch (error) {
@@ -105,12 +117,13 @@ const FetchingTv: React.FC<FetchingTv> = ({
       toast.error("Failed to add related title.");
     }
   };
+
   return (
     <div className="relative w-full inline-block">
       <input
         type="text"
         className="w-full h-10 leading-10 placeholder:text-xs text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] hover:border-[#c0c4cc] text-[#ffffffde] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 px-4"
-        placeholder="Search to add a related title"
+        placeholder="Search to add a related title (TV or Movie)"
         ref={inputRef}
         onChange={onInput}
       />
@@ -135,35 +148,41 @@ const FetchingTv: React.FC<FetchingTv> = ({
               </div>
             ) : (
               <>
-                {dynamicSearch.map((item: any, idx: number) => (
-                  <div
-                    className={`flex items-center text-sm hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer w-full ${
-                      listSearch && "force-overflow"
-                    }`}
-                    key={idx}
-                    onClick={() => onClickAddMovie(item.id, item.media_type)}
-                  >
-                    <LazyImage
-                      src={`https://image.tmdb.org/t/p/${
-                        item?.poster_path ? "w154" : "w300"
-                      }/${item.poster_path || item.backdrop_path}`}
-                      alt={`${item?.name}'s Poster`}
-                      width={50}
-                      height={50}
-                      quality={100}
-                      priority
-                      className="bg-cover bg-center mx-4 my-3"
-                    />
-                    <div className="flex flex-col items-start w-full">
-                      <p className="text-[#2490da]">
-                        {item.name || item.title}
-                      </p>
-                      <h4>
-                        <DramaRegion item={item} />
-                      </h4>
+                {[...dynamicSearch?.tv, ...dynamicSearch?.movies].map(
+                  (item: any, idx: number) => (
+                    <div
+                      className={`flex items-center text-sm hover:bg-[#00000011] dark:hover:bg-[#2a2b2c] hover:bg-opacity-85 transform duration-300 px-5 py-2 cursor-pointer w-full ${
+                        listSearch && "force-overflow"
+                      }`}
+                      key={idx}
+                      onClick={() => onClickAddMedia(item.id, item.media_type)}
+                    >
+                      <div className="flex-shrink-0 w-[50px] h-[75px] relative">
+                        <LazyImage
+                          src={`https://image.tmdb.org/t/p/${
+                            item?.poster_path ? "w154" : "w300"
+                          }${item.poster_path || item.backdrop_path}`}
+                          alt={
+                            `${item?.name || item?.title}'s Poster` || "Poster"
+                          }
+                          width={50}
+                          height={75}
+                          quality={100}
+                          priority
+                          className="mx-4 mb-3 w-[50px] h-[75px] object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col items-start w-full ml-10">
+                        <p className="text-[#2490da]">
+                          {item.name || item.title}
+                        </p>
+                        <h4>
+                          <DramaRegion item={item} />
+                        </h4>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </>
             )}
           </motion.div>

@@ -2,9 +2,9 @@
 
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import {
+  fetchMovie,
   fetchMovieKeywords,
-  fetchTvByNetwork,
-  fetchTvKeyword,
+  fetchRatings,
 } from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { StyledRating } from "@/app/actions/StyleRating";
@@ -12,18 +12,8 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import React, {
-  cache,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { BsGlobeAsiaAustralia } from "react-icons/bs";
-import { CiLocationOn } from "react-icons/ci";
-import { PiShareNetworkBold } from "react-icons/pi";
-import { RxLink1 } from "react-icons/rx";
+import type React from "react";
+import { Suspense, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { BiSort } from "react-icons/bi";
@@ -31,35 +21,140 @@ import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination
 import dynamic from "next/dynamic";
 import LazyImage from "@/components/ui/lazyimage";
 import { countryFilter } from "@/helper/item-list";
-const PlayTrailer = dynamic(
-  () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
+import { useInView } from "react-intersection-observer";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
+
+const PlayMovieTrailer = dynamic(
+  () => import("@/app/(route)/(id)/movie/[id]-[slug]/PlayMovieTrailer"),
   { ssr: false }
 );
+
 interface Network {
   keyword_id: string;
 }
 
+const MovieCard = ({ movie, ratings, overallIndex, movieDetail }: any) => {
+  const { ref, inView } = useInView({
+    threshold: 0,
+    triggerOnce: true,
+  });
+
+  const ratingData = ratings?.[movie.id];
+  const averageRating = ratingData?.ratings
+    ? ratingData.ratings.reduce(
+        (sum: number, rating: any) => sum + rating.rating,
+        0
+      ) / ratingData.ratings.length
+    : 0;
+
+  const combinedRating =
+    movie.vote_average && averageRating
+      ? (movie.vote_average + averageRating) / 2
+      : movie.vote_average || averageRating || 0;
+  return (
+    <div
+      ref={ref}
+      className="flex border-2 bg-white dark:bg-[#242424] dark:border-[#272727] rounded-lg p-4 mb-10"
+    >
+      {inView ? (
+        <>
+          <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
+            <div className="relative">
+              <Link
+                href={`/movie/${movie?.id}-${spaceToHyphen(
+                  movie?.name || movie?.title
+                )}`}
+              >
+                {movie?.poster_path || movie?.backdrop_path ? (
+                  <LazyImage
+                    src={`https://image.tmdb.org/t/p/${
+                      movie?.poster_path ? "w154" : "w300"
+                    }/${movie.poster_path || movie.backdrop_path}`}
+                    alt={`${movie?.title}'s Poster` || "Movie Poster"}
+                    width={200}
+                    height={200}
+                    style={{ width: "100%", height: "100%" }}
+                    priority
+                    className="w-full object-cover align-middle overflow-clip"
+                  />
+                ) : (
+                  <Image
+                    src="/placeholder-image.avif"
+                    alt={movie?.title || "Movie Poster"}
+                    width={200}
+                    height={200}
+                    style={{ width: "100%", height: "100%" }}
+                    priority
+                    className="w-full h-full align-middle overflow-clip"
+                  />
+                )}
+              </Link>
+            </div>
+          </div>
+          <div className="pl-2 md:pl-3 w-[80%]">
+            <div className="flex items-center justify-between">
+              <Link
+                prefetch={false}
+                href={`/movie/${movie?.id}-${spaceToHyphen(
+                  movie?.name || movie?.title
+                )}`}
+                className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
+              >
+                {movie?.title}
+              </Link>
+              <p>#{overallIndex}</p>
+            </div>
+            <p className="text-slate-400 py-1">
+              {getMovieType(movie)}
+              <span> - {getYearFromDate(movie?.release_date)}</span>
+            </p>
+            <div className="flex items-center">
+              <StyledRating
+                name="customized-color"
+                value={convertToFiveStars(combinedRating, 10)}
+                readOnly
+                icon={<FavoriteIcon fontSize="inherit" />}
+                emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
+                precision={0.5}
+              />
+              <p className="pl-2 pt-1">{combinedRating.toFixed(1)}</p>
+            </div>
+            <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
+              {movie?.overview}
+            </p>
+            <div className="flex items-center">
+              <Suspense fallback={null}>
+                <PlayMovieTrailer video={movieDetail?.videos?.results} />
+              </Suspense>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="w-full h-[200px] animate-pulse bg-gray-200 dark:bg-gray-700" />
+      )}
+    </div>
+  );
+};
+
 const MovieKeyword: React.FC<Network> = ({ keyword_id }) => {
   const [sortby, setSortby] = useState<string>();
   const [genre, setGenre] = useState<string>("movie");
-  const [country, setCountry] = useState<string>("CN");
-  const [withoutGenre, setWithoutGenre] = useState<string>("");
-  const [dominantColor, setDominantColor] = useState<string | null>(null);
-  const [isBright, setIsBright] = useState<boolean>(false);
+  const [country, setCountry] = useState<string>("");
   const [page, setPage] = useState(1);
-  const imgRef = useRef<HTMLImageElement | null>(null);
   const searchParams = useSearchParams();
-  const currentPage = parseInt(searchParams.get("page") || "1");
-  const per_page = searchParams?.get("per_page") || (20 as any);
+  const [withoutGenre, setWithoutGenre] = useState<string>("");
+  const currentPage = Number.parseInt(searchParams.get("page") || "1");
+  const per_page = Number.parseInt(searchParams?.get("per_page") || "20");
 
-  const { data: keywordDetails } = useQuery({
+  // Update the component to use the TV details again
+  const { data: keywordDetails, isLoading: isKeywordLoading } = useQuery({
     queryKey: [
-      "keywordDetails",
+      "movieKeywordDetails",
       currentPage,
       keyword_id,
       sortby,
       withoutGenre,
-      keyword_id,
       country,
     ],
     queryFn: () =>
@@ -70,103 +165,29 @@ const MovieKeyword: React.FC<Network> = ({ keyword_id }) => {
         withoutGenre,
         country
       ),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
+    staleTime: 3600000,
   });
 
-  const start = (page - 1) * per_page;
-  const end = start + per_page;
-  const items = keywordDetails?.total_results;
-  const totalItems = keywordDetails?.results?.slice(start, end) || []; // Use slice on results
+  const totalItems = keywordDetails?.results?.slice(0, per_page) || [];
+  const movieIds = totalItems.map((item: any) => item.id.toString());
 
-  const [tvRating, setTvRating] = useState<any>();
-
-  useEffect(() => {
-    const fetchRating = async () => {
-      try {
-        if (
-          !keywordDetails ||
-          !keywordDetails.results ||
-          keywordDetails.results.length === 0
-        ) {
-          console.log("No items to fetch ratings for.");
-          return;
-        }
-        const tvIds = keywordDetails.results.map((item: any) =>
-          item.id.toString()
-        );
-        const averageRatings: { [key: string]: number } = {};
-        for (const id of tvIds) {
-          const getRatings = await fetch(`/api/rating/${id}`);
-          const data = await getRatings.json();
-          const ratings = data?.ratings || [];
-          // Filter ratings by tvId
-          const filteredRatings = ratings.filter(
-            (rating: any) => rating.tvId === id.toString()
-          );
-          // Get the number of ratings
-          const numberOfRatings = filteredRatings.length;
-          // Sum up all the ratings
-          const sumOfRatings = filteredRatings.reduce(
-            (sum: number, rating: any) => sum + rating.rating,
-            0
-          );
-          // Calculate the average rating
-          const averageRating =
-            numberOfRatings > 0 ? sumOfRatings / numberOfRatings : 0;
-          averageRatings[id] = averageRating;
-          console.log(numberOfRatings);
-        }
-        setTvRating(averageRatings);
-      } catch (error) {
-        console.error("Error fetching rating:", error);
-      }
-    };
-    fetchRating();
-  }, [keywordDetails]);
-
-  const fetchEpisodeCount = cache(async (ids: number[]) => {
-    try {
-      const promises = ids.map((id) =>
-        fetch(
-          `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
-        )
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Failed to fetch episode count");
-            }
-            return response.json();
-          })
-          .then((data) => ({
-            id: id,
-            episode_count: data.number_of_episodes, // Adjust to match API response structure
-          }))
-      );
-      const results = await Promise.all(promises);
-      const episodeCounts: { [key: number]: number } = {};
-      results.forEach((result) => {
-        episodeCounts[result.id] = result.episode_count;
-      });
-      return episodeCounts;
-    } catch (error: any) {
-      console.log(error);
-    }
+  const { data: movieDetails, isLoading: isMovieDetailsLoading } = useQuery({
+    queryKey: ["movieDetails", movieIds],
+    queryFn: () => fetchMovie(movieIds),
+    staleTime: 3600000,
+    enabled: !!movieIds.length,
   });
 
-  const result_id = totalItems?.map((drama: any) => drama?.id);
-  const { data: episodes, isError } = useQuery({
-    queryKey: ["episodes", result_id],
-    queryFn: () => fetchEpisodeCount(result_id || []),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
+  const { data: ratings, isLoading: isRatingsLoading } = useQuery({
+    queryKey: ["ratings", movieIds],
+    queryFn: () => fetchRatings(movieIds),
+    staleTime: 3600000,
+    enabled: !!movieIds.length,
   });
 
-  //   if (isError) {
-  //     return null;
-  //   }
-  console.log(keywordDetails);
+  if (isKeywordLoading || isRatingsLoading || isMovieDetailsLoading) {
+    return <SearchLoading />;
+  }
   return (
     <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10 px-2 md:px-5">
       <div className="mt-10">
@@ -175,327 +196,206 @@ const MovieKeyword: React.FC<Network> = ({ keyword_id }) => {
             <div className="flex items-center justify-between mb-5">
               <p>{keywordDetails?.total_results} results</p>
             </div>
-            {totalItems?.map((drama: any, idx: number) => {
+            {totalItems?.map((movie: any, idx: number) => {
               const startCal = (currentPage - 1) * per_page;
               const overallIndex = startCal + idx + 1;
-              return (
-                <div
-                  className="flex border-2 bg-white dark:bg-[#242424] dark:border-[#272727] rounded-lg p-4 mb-10"
-                  key={drama?.id}
-                >
-                  <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
-                    <div className="relative">
-                      <Link href={`/tv/${drama?.id}`}>
-                        {drama?.poster_path || drama?.backdrop_path !== null ? (
-                          <LazyImage
-                            src={`https://image.tmdb.org/t/p/${
-                              drama?.poster_path ? "w154" : "w300"
-                            }/${drama.poster_path || drama.backdrop_path}`}
-                            alt={`${drama?.name || drama?.title}'s Poster`}
-                            width={200}
-                            height={200}
-                            style={{ width: "100%", height: "100%" }}
-                            priority
-                            className="w-full object-cover align-middle overflow-clip"
-                          />
-                        ) : (
-                          <Image
-                            src="/placeholder-image.avif"
-                            alt={drama?.name || drama?.title}
-                            width={200}
-                            height={200}
-                            style={{ width: "100%", height: "100%" }}
-                            priority
-                            className="w-full h-full align-middle overflow-clip"
-                          />
-                        )}
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="pl-2 md:pl-3 w-[80%]">
-                    <div className="flex items-center justify-between">
-                      <Link
-                        prefetch={false}
-                        href={`/tv/${drama?.id}`}
-                        className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
-                      >
-                        {drama?.name || drama?.title}
-                      </Link>
-                      <p>#{overallIndex}</p>
-                    </div>
-                    <p className="text-slate-400 py-1">
-                      {(country === "CN" && "Chinese Movie") ||
-                        (country === "JP" && "Japanese Movie") ||
-                        (country === "KR" && "Korean Movie") ||
-                        (country === "TW" && "Taiwanese Movie") ||
-                        (country === "HK" && "Hong Kong Movie") ||
-                        (country === "TH" && "Thailand Movie")}
+              const movieDetail = movieDetails?.find(
+                (data: any) => data.id === movie.id
+              );
 
-                      <span>
-                        {" "}
-                        -{" "}
-                        {getYearFromDate(
-                          drama?.first_air_date || drama?.release_date
-                        )}
-                        {episodes && !episodes[drama.id] ? "" : ","}{" "}
-                        {episodes && episodes[drama.id]}{" "}
-                        {episodes && !episodes[drama.id] ? "" : "Episodes"}
-                      </span>
-                    </p>
-                    <div className="flex items-center">
-                      <StyledRating
-                        name="customized-color"
-                        value={convertToFiveStars(
-                          drama &&
-                            drama.vote_average &&
-                            tvRating &&
-                            tvRating[idx]
-                            ? (drama.vote_average + tvRating[idx]) / 2
-                            : tvRating && tvRating[idx]
-                            ? tvRating[idx] / 2
-                            : drama && drama.vote_average,
-                          10
-                        )}
-                        readOnly
-                        icon={<FavoriteIcon fontSize="inherit" />}
-                        emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
-                        precision={0.5}
-                      />
-                      <p className="pl-2 pt-1">
-                        {drama &&
-                        drama.vote_average &&
-                        tvRating &&
-                        tvRating[drama.id]
-                          ? (
-                              (drama.vote_average * (drama.vote_count || 0) +
-                                (tvRating[drama.id] || 0) * 10) /
-                              ((drama.vote_count || 0) + 10)
-                            ).toFixed(1)
-                          : tvRating && tvRating[drama.id]
-                          ? tvRating[drama.id].toFixed(1)
-                          : drama && drama.vote_average
-                          ? drama.vote_average.toFixed(1)
-                          : "0.0"}
-                      </p>
-                    </div>
-                    <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
-                      {drama?.overview}
-                    </p>
-                    <div className="flex items-center">
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <PlayTrailer tv_id={drama?.id} />
-                      </Suspense>
-                    </div>
-                  </div>
-                </div>
+              return (
+                <MovieCard
+                  key={movie?.id}
+                  movie={movie}
+                  ratings={ratings}
+                  overallIndex={overallIndex}
+                  movieDetail={movieDetail}
+                />
               );
             })}
           </div>
 
           <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3">
-            <div className="inline-block">
-              <BiSort className="inline-block" />{" "}
-              <span className="align-middle">Sort By</span>
-            </div>
-            <div className="mt-4">
-              <div className="border-b border-b-slate-400">Type:</div>
-              <div className="relative float-left w-full text-left mb-4 my-5">
-                <div className="-mx-3">
-                  <div className="relative float-left w-full px-3">
-                    <label
-                      className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                        genre === "movie" ? "text-[#409eff] font-bold" : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="movie"
-                        value="movie"
-                        checked={genre === "movie"}
-                        onChange={() => {
-                          setGenre("movie");
-                        }}
-                        className="transform duration-300 cursor-pointer mr-2"
-                      />
-                      <span>Movie</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="border-b border-b-slate-400">Country:</div>
-              <div className="relative float-left w-full text-left mb-4 my-5">
-                <div className="-mx-3">
-                  <div className="relative float-left w-full px-3">
-                    {countryFilter?.map((c, idx) => (
-                      <label
-                        className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                          country === `${c?.value}`
-                            ? "text-[#409eff] font-bold"
-                            : ""
-                        }`}
-                        key={idx}
-                      >
-                        <input
-                          type="radio"
-                          name={c?.value}
-                          value={c?.value}
-                          checked={country === c?.value}
-                          onChange={() => setCountry(c?.value)}
-                          className="transform duration-300 cursor-pointer mr-2"
-                        />
-                        <span>{c?.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="border-b border-b-slate-400">Populairty:</div>
-              <div className="relative float-left w-full text-left mb-4 my-5">
-                <div className="-mx-3">
-                  <div className="relative float-left w-full px-3">
-                    <label
-                      className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                        sortby === "popularity.asc"
-                          ? "text-[#409eff] font-bold"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="popularity.asc"
-                        value="popularity.asc"
-                        checked={sortby === "popularity.asc"}
-                        onChange={() => setSortby("popularity.asc")}
-                        className="transform duration-300 cursor-pointer mr-2"
-                      />
-                      <span>Ascending</span>
-                    </label>
-                  </div>
-                  <div className="relative float-left w-full px-3 mt-2">
-                    <label
-                      className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                        sortby === "popularity.desc"
-                          ? "text-[#409eff] font-bold"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="popularity.desc"
-                        value="popularity.desc"
-                        checked={sortby === "popularity.desc"}
-                        onChange={() => setSortby("popularity.desc")}
-                        className="transform duration-300 cursor-pointer mr-2"
-                      />
-                      <span>Descending</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="border-b border-b-slate-400">Rating:</div>
-              <div className="relative float-left w-full text-left mb-4 my-5">
-                <div className="-mx-3">
-                  <div className="relative float-left w-full px-3">
-                    <label
-                      className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                        sortby === "vote_average.asc"
-                          ? "text-[#409eff] font-bold"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="vote_average.asc"
-                        value="vote_average.asc"
-                        checked={sortby === "vote_average.asc"}
-                        onChange={() => setSortby("vote_average.asc")}
-                        className="transform duration-300 cursor-pointer mr-2"
-                      />
-                      <span>Ascending</span>
-                    </label>
-                  </div>
-                  <div className="relative float-left w-full px-3 mt-2">
-                    <label
-                      className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                        sortby === "vote_average.desc"
-                          ? "text-[#409eff] font-bold"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="vote_average.desc"
-                        value="vote_average.desc"
-                        checked={sortby === "vote_average.desc"}
-                        onChange={() => setSortby("vote_average.desc")}
-                        className="transform duration-300 cursor-pointer mr-2"
-                      />
-                      <span>Descending</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5">
-              <div className="border-b border-b-slate-400">First Air Date:</div>
-              <div className="relative float-left w-full text-left mb-4 my-5">
-                <div className="-mx-3">
-                  <div className="relative float-left w-full px-3">
-                    <label
-                      className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                        sortby === "first_air_date.asc"
-                          ? "text-[#409eff] font-bold"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="first_air_date.asc"
-                        value="first_air_date.asc"
-                        checked={sortby === "first_air_date.asc"}
-                        onChange={() => setSortby("first_air_date.asc")}
-                        className="transform duration-300 cursor-pointer mr-2"
-                      />
-                      <span>Ascending</span>
-                    </label>
-                  </div>
-                  <div className="relative float-left w-full px-3 mt-2">
-                    <label
-                      className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                        sortby === "first_air_date.desc"
-                          ? "text-[#409eff] font-bold"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="first_air_date.desc"
-                        value="first_air_date.desc"
-                        checked={sortby === "first_air_date.desc"}
-                        onChange={() => setSortby("first_air_date.desc")}
-                        className="transform duration-300 cursor-pointer mr-2"
-                      />
-                      <span>Descending</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <FilterSection
+              genre={genre}
+              setGenre={setGenre}
+              country={country}
+              setCountry={setCountry}
+              sortby={sortby}
+              setSortby={setSortby}
+            />
           </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between px-1: md:px-2 mt-3">
-        <SearchPagination setPage={setPage} totalItems={items} per_page="20" />
+      <div className="flex flex-wrap items-center justify-between px-1 md:px-2 mt-3">
+        <SearchPagination
+          setPage={setPage}
+          totalItems={keywordDetails?.total_results}
+          per_page={per_page.toString()}
+        />
       </div>
     </div>
   );
+};
+
+const FilterSection: React.FC<{
+  genre: string;
+  setGenre: (genre: string) => void;
+  country: string;
+  setCountry: (country: string) => void;
+  sortby: string | undefined;
+  setSortby: (sortby: string) => void;
+}> = ({ genre, setGenre, country, setCountry, sortby, setSortby }) => {
+  return (
+    <>
+      <div className="inline-block">
+        <BiSort className="inline-block" />{" "}
+        <span className="align-middle">Sort By</span>
+      </div>
+      <div className="mt-4">
+        <div className="border-b border-b-slate-400">Type:</div>
+        <div className="relative float-left w-full text-left mb-4 my-5">
+          <div className="-mx-3">
+            <div className="relative float-left w-full px-3">
+              <label
+                className={`flex items-center text-sm transform duration-300 cursor-pointer ${
+                  genre === "movie" ? "text-[#409eff] font-bold" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="movie"
+                  value="movie"
+                  checked={genre === "movie"}
+                  onChange={() => setGenre("movie")}
+                  className="transform duration-300 cursor-pointer mr-2"
+                />
+                <span>Movie</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4">
+        <div className="border-b border-b-slate-400">Country:</div>
+        <div className="relative float-left w-full text-left mb-4 my-5">
+          <div className="-mx-3">
+            <div className="relative float-left w-full px-3">
+              {countryFilter?.map((c, idx) => (
+                <label
+                  key={idx}
+                  className={`flex items-center text-sm transform duration-300 cursor-pointer ${
+                    country === c?.value ? "text-[#409eff] font-bold" : ""
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={c?.value}
+                    value={c?.value}
+                    checked={country === c?.value}
+                    onChange={() => setCountry(c?.value)}
+                    className="transform duration-300 cursor-pointer mr-2"
+                  />
+                  <span>{c?.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <SortOption
+        title="Popularity"
+        options={[
+          { value: "popularity.asc", label: "Ascending" },
+          { value: "popularity.desc", label: "Descending" },
+        ]}
+        sortby={sortby}
+        setSortby={setSortby}
+      />
+      <SortOption
+        title="Rating"
+        options={[
+          { value: "vote_average.asc", label: "Ascending" },
+          { value: "vote_average.desc", label: "Descending" },
+        ]}
+        sortby={sortby}
+        setSortby={setSortby}
+      />
+      <SortOption
+        title="Release Date"
+        options={[
+          { value: "release_date.asc", label: "Ascending" },
+          { value: "release_date.desc", label: "Descending" },
+        ]}
+        sortby={sortby}
+        setSortby={setSortby}
+      />
+    </>
+  );
+};
+
+const SortOption: React.FC<{
+  title: string;
+  options: { value: string; label: string }[];
+  sortby: string | undefined;
+  setSortby: (sortby: string) => void;
+}> = ({ title, options, sortby, setSortby }) => {
+  return (
+    <div className="mt-5">
+      <div className="border-b border-b-slate-400">{title}:</div>
+      <div className="relative float-left w-full text-left mb-4 my-5">
+        <div className="-mx-3">
+          {options.map((option, index) => (
+            <div
+              key={option.value}
+              className={`relative float-left w-full px-3 ${
+                index > 0 ? "mt-2" : ""
+              }`}
+            >
+              <label
+                className={`flex items-center text-sm transform duration-300 cursor-pointer ${
+                  sortby === option.value ? "text-[#409eff] font-bold" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name={option.value}
+                  value={option.value}
+                  checked={sortby === option.value}
+                  onChange={() => setSortby(option.value)}
+                  className="transform duration-300 cursor-pointer mr-2"
+                />
+                <span>{option.label}</span>
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const getMovieType = (movie: any) => {
+  const { production_countries } = movie;
+  const country = production_countries?.[0]?.iso_3166_1;
+
+  switch (country) {
+    case "CN":
+      return "Chinese Movie";
+    case "JP":
+      return "Japanese Movie";
+    case "KR":
+      return "Korean Movie";
+    case "TW":
+      return "Taiwanese Movie";
+    case "HK":
+      return "Hong Kong Movie";
+    case "TH":
+      return "Thailand Movie";
+    default:
+      return "Movie";
+  }
 };
 
 export default MovieKeyword;

@@ -35,10 +35,11 @@ const NetworkPage = async (props: { params: Promise<{ id: string }> }) => {
   const params = await props.params;
   // Add an artificial delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  return;
-  <Suspense key={params?.id} fallback={<SearchLoading />}>
-    <Network network_id={params?.id} />
-  </Suspense>;
+  return (
+    <Suspense key={params?.id} fallback={<SearchLoading />}>
+      <Network network_id={params?.id} />
+    </Suspense>
+  );
 };
 
 export default NetworkPage;

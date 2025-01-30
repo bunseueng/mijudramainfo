@@ -10,16 +10,13 @@ import { IoIosClose } from "react-icons/io";
 import { CiSearch } from "react-icons/ci";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDebouncedCallback } from "use-debounce";
-import {
-  fetchAllKeywords,
-  fetchKeyword,
-  fetchTv,
-} from "@/app/actions/fetchMovieApi";
+import { fetchAllKeywords, fetchTv } from "@/app/actions/fetchMovieApi";
 import { genre_edit } from "@/helper/item-list";
 import { customStyles, lightTheme } from "@/helper/MuiStyling";
 import { Drama, SearchParamsType, tvId } from "@/helper/type";
 import { useTheme } from "next-themes";
 import { Loader2 } from "lucide-react";
+import { useDramaData } from "@/hooks/useDramaData";
 
 interface Genre {
   label: string;
@@ -43,22 +40,8 @@ const GenresAndTags: React.FC<tvId & { tvDetails?: tvDetails | null }> = ({
   tv_id,
   tvDetails,
 }) => {
-  const { data: tv } = useQuery({
-    queryKey: ["tv"],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
-  const { data: keywords } = useQuery({
-    queryKey: ["keywords"],
-    queryFn: () => fetchKeyword(tv_id),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
+  const { tv, isLoading } = useDramaData(tv_id);
+  const keywords = tv?.keywords || [];
   const [genres, setGenres] = useState<Genre[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [originalGenres, setOriginalGenres] = useState<Genre[]>([]);
@@ -232,7 +215,9 @@ const GenresAndTags: React.FC<tvId & { tvDetails?: tvDetails | null }> = ({
     );
   };
 
-  console.log(keywords);
+  if (isLoading) {
+    return <div>Fetching Data...</div>;
+  }
   return (
     <form className="py-3 px-4" onSubmit={onSubmit}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">
@@ -429,7 +414,7 @@ const GenresAndTags: React.FC<tvId & { tvDetails?: tvDetails | null }> = ({
           disabled={!isChanged()}
         >
           {submitLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-6 w-10 animate-spin" />
           ) : (
             "Submit"
           )}

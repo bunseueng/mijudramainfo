@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import ProviderBlock from "./ProviderProps";
 
-const WatchProvider = ({ getDrama, tv, selectedProvider }: any) => {
+const WatchProvider = ({ getDrama, selectedProvider, tv }: any) => {
   return (
     <div className="grid grid-cols-1 min-[649px]:grid-cols-2 min-[1350px]:grid-cols-3 ml-5 md:ml-0">
       {getDrama?.services?.length > 0 ? (
@@ -24,10 +24,10 @@ const WatchProvider = ({ getDrama, tv, selectedProvider }: any) => {
               key={show?.id}
             >
               <div className="flex flex-row items-center justify-between">
-                <Link href={`${show?.link}`}>
+                <Link href={`${show?.link}`} prefetch={false}>
                   <ReusedImage
                     src={serviceImage}
-                    alt={`${show?.provider_name}`}
+                    alt={`${show?.provider_name}` || "Provider logo"}
                     width={200}
                     height={200}
                     quality={100}
@@ -37,6 +37,7 @@ const WatchProvider = ({ getDrama, tv, selectedProvider }: any) => {
                 </Link>
                 <div className="flex flex-col items-start ml-2">
                   <Link
+                    prefetch={false}
                     href={`${show?.link}`}
                     className="text-sm md:text-md font-bold truncate text-[#2196f3] hover:opacity-75 transform duration-300 cursor-pointer"
                   >
@@ -53,20 +54,31 @@ const WatchProvider = ({ getDrama, tv, selectedProvider }: any) => {
         })
       ) : (
         <React.Fragment>
-          <ProviderBlock provider={selectedProvider?.free} label="(Free)" />
+          <ProviderBlock
+            provider={selectedProvider?.free}
+            label="(Free)"
+            tv={tv}
+          />
           <ProviderBlock
             provider={selectedProvider?.ads}
             label="(Advertisement)"
+            tv={tv}
           />
           <ProviderBlock
             provider={selectedProvider?.flatrate}
             label="(Subscription)"
+            tv={tv}
           />
           <ProviderBlock
             provider={selectedProvider?.rent}
             label="(Pay Per View)"
+            tv={tv}
           />
-          <ProviderBlock provider={selectedProvider?.buy} label="(Purchase)" />
+          <ProviderBlock
+            provider={selectedProvider?.buy}
+            label="(Purchase)"
+            tv={tv}
+          />
         </React.Fragment>
       )}
     </div>

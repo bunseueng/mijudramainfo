@@ -67,6 +67,7 @@ const PersonEditList: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                 }`}
               >
                 <Link
+                  prefetch={false}
                   href={`/person/${person_id}/edit/${item?.link}`}
                   className="text-md"
                   shallow

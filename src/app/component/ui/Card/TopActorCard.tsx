@@ -1,97 +1,59 @@
-"use client";
-
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import DramaFilter from "@/app/(route)/(drama)/drama/top/DramaFilter";
 import SearchLoading from "../Loading/SearchLoading";
 import AdBanner from "../Adsense/AdBanner";
-import { useQueries } from "@tanstack/react-query";
-import { fetchPerson } from "@/app/actions/fetchMovieApi";
-import { PersonDb } from "../Fetching/Person";
-import { currentUserProps } from "@/helper/type";
-import { personLove, TPersonLove } from "@/helper/zod";
+import { currentUserProps, PersonDBType } from "@/helper/type";
+import { TPersonLove } from "@/helper/zod";
 import { toast } from "react-toastify";
 import { GoHeart } from "react-icons/go";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 interface ITopActor {
   title: string;
-  topActor: any;
   total_results: number;
   currentUser: currentUserProps;
-  personDB: PersonDb[];
+  router: AppRouterInstance;
+  items: string;
+  register: UseFormRegister<{
+    userId?: string | undefined;
+    love?: number | undefined;
+    loveBy?: string[] | undefined;
+  }>;
+  handleSubmit: UseFormHandleSubmit<
+    {
+      userId?: string | undefined;
+      love?: number | undefined;
+      loveBy?: string[] | undefined;
+    },
+    undefined
+  >;
+  person: PersonDBType[];
+  person_like: PersonDBType[];
+  setPage: (value: number) => void;
 }
 
 const TopActorCard: React.FC<ITopActor> = ({
   title,
-  topActor,
   total_results,
   currentUser,
-  personDB,
+  router,
+  items,
+  register,
+  handleSubmit,
+  person,
+  person_like,
+  setPage,
 }) => {
-  const [getPerson, setGetPerson] = useState<PersonDb>();
-  const [page, setPage] = useState(1);
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const per_page = searchParams?.get("per_page") || (20 as any);
-  const start = (Number(page) - 1) * Number(per_page);
-  const end = start + Number(per_page);
-  const items = topActor?.total_results;
-  const totalItems = topActor?.results?.slice(start, end);
-  const filteredActor = totalItems?.filter(
-    (item: any) => item?.known_for_department === "Acting"
-  );
-  const actorIds = filteredActor?.map((actor: string | any) => actor?.id) || [];
-  const { register, handleSubmit } = useForm<TPersonLove>({
-    resolver: zodResolver(personLove),
-  });
-  const queries = useQueries({
-    queries: actorIds?.map((id: number) => ({
-      queryKey: ["fetchPerson", id],
-      queryFn: () => fetchPerson([id]), // Fetch persons for each ID
-      enabled: !!id,
-      staleTime: 3600000, // Cache data for 1 hour
-      refetchOnWindowFocus: true, // Refetch when window is focused
-    })),
-  });
-
-  // Extract data from queries
-  const fetchPersonsData = queries?.map((query) => query.data).flat();
-  const isLoading = queries?.some((query) => query.isLoading);
-  const isError = queries?.some((query) => query.isError);
-
   const getBirth = (placeOfBirth: string) => {
     if (!placeOfBirth) return ""; // Handle cases where placeOfBirth is undefined or null
     const parts = placeOfBirth.split(","); // Split the string by comma
     return parts[parts.length - 1].trim(); // Get the last part and trim whitespace
   };
-
-  useEffect(() => {
-    const actorId =
-      filteredActor?.map((actor: string | any) => actor?.id) || [];
-    const fetchPerson = async () => {
-      try {
-        const res = await fetch(`/api/person/${actorId}/love`, {
-          method: "GET",
-        });
-        if (res.ok) {
-          const data = await res.json();
-          router.refresh();
-          setGetPerson(data);
-        } else {
-          console.error("Failed to fetch person from API");
-        }
-      } catch (error) {
-        console.error("Failed to fetch person from API:", error);
-      }
-    };
-    fetchPerson();
-  }, [filteredActor, router]);
 
   const handleLove = async (data: TPersonLove, actorId: number) => {
     try {
@@ -117,9 +79,6 @@ const TopActorCard: React.FC<ITopActor> = ({
     }
   };
 
-  if (isLoading) return <SearchLoading />;
-  if (isError) return <div>Error loading data</div>;
-
   return (
     <div className="max-w-[1134px] mx-auto py-4">
       <div className="py-5">
@@ -132,12 +91,14 @@ const TopActorCard: React.FC<ITopActor> = ({
               <h1 className="text-2xl font-bold">{title}</h1>
               <p>{total_results} results</p>
             </div>
-            {fetchPersonsData?.map((person: any) => {
-              const personRecord = personDB.find(
-                (db) => db?.personId === String(person?.id)
-              );
-              const isCurrentUserLoved = personRecord?.lovedBy.find((item) =>
-                item.includes(currentUser?.id)
+            {person?.map((person: any) => {
+              const personRecord =
+                person_like &&
+                person_like?.find(
+                  (db: PersonDBType) => db?.personId === String(person?.id)
+                );
+              const isCurrentUserLoved = personRecord?.lovedBy.find(
+                (item: any) => item?.includes(currentUser?.id)
               );
               return (
                 <div
@@ -147,13 +108,17 @@ const TopActorCard: React.FC<ITopActor> = ({
                   <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
                     <div className="relative">
                       <Link
+                        prefetch={false}
                         href={`/person/${person?.id}-${spaceToHyphen(
                           person?.name
                         )}`}
                       >
                         {person?.profile_path ? (
                           <Image
-                            src={`https://image.tmdb.org/t/p/original/${person?.profile_path}`}
+                            src={
+                              `https://image.tmdb.org/t/p/original/${person?.profile_path}` ||
+                              "Person Profile"
+                            }
                             alt={person?.profile_path}
                             width={200}
                             height={200}
@@ -164,7 +129,7 @@ const TopActorCard: React.FC<ITopActor> = ({
                         ) : (
                           <Image
                             src="/empty-img.jpg"
-                            alt={person?.profile_path}
+                            alt={person?.profile_path || "Person Profile"}
                             width={200}
                             height={200}
                             style={{ width: "100%", height: "100%" }}
@@ -178,6 +143,7 @@ const TopActorCard: React.FC<ITopActor> = ({
                   <div className="pl-2 md:pl-3 w-[80%]">
                     <div className="flex items-center justify-between">
                       <Link
+                        prefetch={false}
                         href={`/person/${person?.id}-${spaceToHyphen(
                           person?.name
                         )}`}

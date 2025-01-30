@@ -48,8 +48,8 @@ const MovieReviewCard = ({
   useEffect(() => {
     try {
       const fetchThumbnails = async () => {
-        if (video?.results) {
-          const keys = video.results.map((item: any) => item.key);
+        if (video) {
+          const keys = video?.map((item: any) => item.key);
           const promises = keys.map((key: string) =>
             fetch(
               `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${key}&key=${api}`
@@ -90,21 +90,21 @@ const MovieReviewCard = ({
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         <div className="border-t-[1px] border-t-slate-400 pt-3">
           <h1 className="text-2xl font-bold py-4">Recommendations</h1>
-          {recommend?.results?.length === 0 ? (
+          {recommend?.length === 0 ? (
             <p className="text-xl font-bold py-5">
               There no recommendations for {movie?.name} yet !
             </p>
           ) : (
             <div
               className={`flex items-center overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4 ${
-                recommend?.results?.length === 0 ? "hidden" : "flex"
+                recommend?.length === 0 ? "hidden" : "flex"
               }`}
             >
-              {recommend?.results?.map((item: any, index: number) => (
+              {recommend?.map((item: any, index: number) => (
                 <div className="w-[270px] h-[180px] mr-4" key={index}>
                   <div className="w-[270px] h-[180px] bg-cover">
                     <Link
-                      prefetch={true}
+                      prefetch={false}
                       href={`/movie/${item?.id}-${spaceToHyphen(
                         item?.title || item?.name
                       )}`}
@@ -114,7 +114,10 @@ const MovieReviewCard = ({
                         src={`https://image.tmdb.org/t/p/original/${
                           item?.backdrop_path || item?.poster_path
                         }`}
-                        alt={`${item?.name || item?.title}'s Poster`}
+                        alt={
+                          `${item?.name || item?.title}'s Poster` ||
+                          "Movie Poster"
+                        }
                         width={600}
                         height={600}
                         priority
@@ -151,11 +154,12 @@ const MovieReviewCard = ({
       </div>
 
       <div className="border-t-[1px] border-t-slate-400 pt-3 mt-10">
-        {review?.results?.length === 0 && getReview?.length === 0 ? (
+        {review?.length === 0 && getReview?.length === 0 ? (
           <div className="border-[1px] border-[#00000024] rounded-md mt-8">
             <div className="flex items-center justify-between text-[#176093] bg-[#a5dafa] px-5 py-2">
               <h1 className="text-md font-bold">Reviews</h1>
               <Link
+                prefetch={false}
                 href={`/movie/${movie_id}/write_reviews`}
                 className="text-md"
               >
@@ -172,13 +176,14 @@ const MovieReviewCard = ({
             <div className="flex items-center justify-between text-[#176093] bg-[#a5dafa] px-5 py-2">
               <h1 className="text-md font-bold">Reviews</h1>
               <Link
+                prefetch={false}
                 href={`/movie/${movie_id}/write_reviews`}
                 className="text-md"
               >
                 Write Review
               </Link>
             </div>
-            {review?.results?.slice(0, 2)?.map((review: any, idx: number) => {
+            {review?.slice(0, 2)?.map((review: any, idx: number) => {
               const dateObject = new Date(review?.updated_at);
               const formattedDate = dateObject.toLocaleDateString("en-US", {
                 month: "long", // Display full month name
@@ -259,6 +264,7 @@ const MovieReviewCard = ({
                         <p className="text-black dark:text-white text-sm font-semibold">
                           Written by{" "}
                           <Link
+                            prefetch={false}
                             href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
                             target="_blank"
                             rel="noopener noreferrer"

@@ -14,16 +14,11 @@ import ActorCard from "../Card/ActorCard";
 type ActorT = {
   heading: string;
   personDB: PersonDBType[] | any;
+  categoryData: any;
+  isLoading: any;
 };
 
-const Actor = ({ heading, personDB }: ActorT) => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["actor"],
-    queryFn: fetchActor,
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-  });
-
+const Actor = ({ heading, personDB, categoryData, isLoading }: ActorT) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     containScroll: "trimSnaps",
@@ -60,12 +55,11 @@ const Actor = ({ heading, personDB }: ActorT) => {
   }, [emblaApi, onSelect]);
 
   useEffect(() => {
-    if (emblaApi && data) {
+    if (emblaApi && categoryData) {
       emblaApi.reInit();
       onSelect();
     }
-  }, [data, emblaApi, onSelect]);
-
+  }, [categoryData, emblaApi, onSelect]);
   return (
     <Card className="max-w-[1808px] mx-auto !bg-transparent border-0">
       <CardHeader className="p-4">
@@ -83,7 +77,7 @@ const Actor = ({ heading, personDB }: ActorT) => {
                       className="w-[180px] h-[280px] rounded-xl mr-4 flex-shrink-0"
                     />
                   ))
-              : data
+              : categoryData?.results
                   ?.filter(
                     (item: any) =>
                       item.profile_path !== "url(/placeholder-image.avif)"
@@ -95,7 +89,6 @@ const Actor = ({ heading, personDB }: ActorT) => {
                       coverFromDB={personDB?.find((p: any) =>
                         p?.person_id?.includes(result?.id)
                       )}
-                      idx={idx}
                       className="mr-4 flex-shrink-0"
                     />
                   ))}
@@ -104,22 +97,22 @@ const Actor = ({ heading, personDB }: ActorT) => {
         <Button
           variant="outline"
           size="icon"
-          className="absolute -left-9 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-sm z-10 transition-all duration-300 hover:bg-primary hover:text-primary-foreground pulse-animation"
+          className="absolute -left-9 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-sm z-10 transition-all duration-300 hover:bg-primary hover:text-primary-foreground pulse-animation border border-black"
           onClick={scrollPrev}
           disabled={!prevBtnEnabled}
           aria-label="Previous actor"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="text-black dark:text-white h-4 w-4" />
         </Button>
         <Button
           variant="outline"
           size="icon"
-          className="absolute -right-9 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-sm z-10 transition-all duration-300 hover:bg-primary hover:text-primary-foreground pulse-animation"
+          className="absolute -right-9 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-sm z-10 transition-all duration-300 hover:bg-primary hover:text-primary-foreground pulse-animation border border-black"
           onClick={scrollNext}
           disabled={!nextBtnEnabled}
           aria-label="Next actor"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="text-black dark:text-white h-4 w-4" />
         </Button>
       </CardContent>
     </Card>

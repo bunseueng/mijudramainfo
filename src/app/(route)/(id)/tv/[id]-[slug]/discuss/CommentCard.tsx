@@ -1,5 +1,6 @@
 "use client";
 
+import ReportModal from "@/app/component/ui/Modal/ReportModal";
 import ReusedImage from "@/components/ui/allreusedimage";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,17 +73,17 @@ const CommentCard = ({
   const [enableDialog, setEnableDialog] = useState<boolean>(true);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [openModalId, setOpenModalId] = useState<string | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const eachUser = users.find((u: any) => u.id === comment.repliedUserId);
   const [isEditSpoiler, setIsEditSpoiler] = useState(comment.spoiler);
 
-  const handleAction = (commentId: string) => {
-    if (openModalId === commentId) {
-      setOpenModalId(null);
-    } else {
-      setOpenModalId(commentId);
-    }
+  const handleAction = (e: React.MouseEvent, commentId: string) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent event bubbling
+
+    setOpenModalId((prevId) => (prevId === commentId ? null : commentId));
   };
   const toggleSpoiler = (commentId: string) => {
     setRevealSpoiler((prev: any) => ({
@@ -139,7 +140,6 @@ const CommentCard = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
   return (
     <div ref={modalRef}>
       <div className="relative pb-4 transform duration-300">
@@ -244,7 +244,7 @@ const CommentCard = ({
                 type="button"
                 name="Modal"
                 className="text-black dark:text-[#ffffff99] min-w-[30px] bg-transparent rounded-sm py-1 px-[6px] mr-[2px] opacity-60 cursor-default"
-                onClick={() => handleAction(comment.id)}
+                onClick={(e) => handleAction(e, comment.id)}
               >
                 <HiDotsVertical size={16} className="cursor-pointer" />
               </button>
@@ -337,83 +337,131 @@ const CommentCard = ({
           )}
         </div>
       </div>
-      {openModalId === comment.id && user?.id === eachUser?.id && (
-        <div className="min-w-[160px] absolute right-auto left-5 top-24 float-right text-start text-[#ffffffcc] bg-[#242526] border-[1px] border-[#3e4042] rounded-md z-[9999]">
-          <Dialog
-            onOpenChange={(open) => {
-              if (!open) {
-                setOpenModalId(null);
-              }
-            }}
-          >
-            <DialogTrigger asChild>
-              <button className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-1 px-5">
-                Edit
+      {openModalId === comment.id && (
+        <div
+          className="min-w-[160px] absolute right-auto left-5 top-24 float-right text-start text-[#ffffffcc] bg-[#242526] border-[1px] border-[#3e4042] rounded-md z-[9997] shadow-lg"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {user?.id === eachUser?.id ? (
+            // Owner options
+            <>
+              <Dialog
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setOpenModalId(null);
+                  }
+                }}
+              >
+                <DialogTrigger asChild>
+                  <button className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-2 px-5">
+                    Edit
+                  </button>
+                </DialogTrigger>
+                {enableDialog && (
+                  <DialogContent onClick={(e) => e.stopPropagation()}>
+                    <DialogHeader>
+                      <DialogTitle>Edit Comment</DialogTitle>
+                      <DialogDescription>
+                        <textarea
+                          name="details.synopsis"
+                          className="w-full h-auto bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none overflow-hidden px-4 py-1"
+                          defaultValue={comment?.message}
+                          onChange={(
+                            e: React.ChangeEvent<HTMLTextAreaElement>
+                          ) => setMessage(e?.target?.value)}
+                        ></textarea>
+                      </DialogDescription>
+                      <div className="flex items-center justify-between">
+                        <label
+                          className={`text-sm transform duration-300 cursor-pointer ${
+                            spoilerReply === true
+                              ? "text-[#409eff] font-bold"
+                              : "text-black dark:text-[#ffffffde]"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            name="spoiler"
+                            value="spoiler"
+                            checked={isEditSpoiler}
+                            onChange={() => setIsEditSpoiler(!isEditSpoiler)}
+                            className="transform duration-300 cursor-pointer mr-1 px-2"
+                          />
+                          <span className="pl-1 text-sm mb-1">Spoiler</span>
+                        </label>
+                        <label
+                          htmlFor="comment"
+                          className="text-[#606266] font-semibold whitespace-nowrap cursor-pointer"
+                        >
+                          <span className="inline-block relative cursor-pointer whitespace-nowrap align-middle"></span>
+                        </label>
+                        <Button
+                          type="button"
+                          name="Save"
+                          onClick={updatingComment}
+                        >
+                          {saveLoading ? (
+                            <ClipLoader
+                              loading={saveLoading}
+                              color="#c3c3c3"
+                              size={12}
+                            />
+                          ) : (
+                            "Save"
+                          )}
+                        </Button>
+                      </div>
+                    </DialogHeader>
+                  </DialogContent>
+                )}
+              </Dialog>
+              <button
+                className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-2 px-5"
+                onClick={() => handleDelete(null, tv_id)}
+                disabled={loading}
+              >
+                {loading ? "Deleting..." : "Delete"}
               </button>
-            </DialogTrigger>
-            {enableDialog && (
-              <DialogContent onClick={(e) => e.stopPropagation()}>
-                <DialogHeader>
-                  <DialogTitle>Edit Comment</DialogTitle>
-                  <DialogDescription>
-                    <textarea
-                      name="details.synopsis"
-                      className="w-full h-auto bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none overflow-hidden px-4 py-1"
-                      defaultValue={comment?.message}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                        setMessage(e?.target?.value)
-                      }
-                    ></textarea>
-                  </DialogDescription>
-                  <div className="flex items-center justify-between">
-                    <label
-                      className={`text-sm transform duration-300 cursor-pointer ${
-                        spoilerReply === true
-                          ? "text-[#409eff] font-bold"
-                          : "text-black dark:text-[#ffffffde]"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        name="spoiler"
-                        value="spoiler"
-                        checked={isEditSpoiler}
-                        onChange={() => setIsEditSpoiler(!isEditSpoiler)}
-                        className="transform duration-300 cursor-pointer mr-1 px-2"
-                      />
-                      <span className="pl-1 text-sm mb-1">Spoiler</span>
-                    </label>
-                    <label
-                      htmlFor="comment"
-                      className="text-[#606266] font-semibold whitespace-nowrap cursor-pointer"
-                    >
-                      <span className="inline-block relative cursor-pointer whitespace-nowrap align-middle"></span>
-                    </label>
-                    <Button type="button" name="Save" onClick={updatingComment}>
-                      {saveLoading ? (
-                        <ClipLoader
-                          loading={saveLoading}
-                          color="#c3c3c3"
-                          size={12}
-                        />
-                      ) : (
-                        "Save"
-                      )}
-                    </Button>
-                  </div>
-                </DialogHeader>
-              </DialogContent>
-            )}
-          </Dialog>
-          <button
-            className={`block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-1 px-5 ${
-              loading ? "cursor-not-allowed" : "cursor-pointer"
-            }`}
-            onClick={() => handleDelete(null, tv_id)}
-            disabled={!loading ? false : true}
-          >
-            {loading ? "Deleting..." : "Delete"}
-          </button>
+              <button
+                className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-2 px-5"
+                onClick={() => {
+                  // Add share functionality
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied to clipboard!");
+                  setOpenModalId(null);
+                }}
+              >
+                Share
+              </button>
+            </>
+          ) : (
+            // Non-owner options
+            <>
+              <button
+                className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-2 px-5"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied to clipboard!");
+                  setOpenModalId(null);
+                }}
+              >
+                Share
+              </button>
+              <Dialog
+                open={isReportModalOpen}
+                onOpenChange={setIsReportModalOpen}
+              >
+                <DialogTrigger asChild>
+                  <button className="block w-full bg-transparent text-sm text-left clear-both hover:bg-[#3a3b3c] transform duration-300 py-2 px-5">
+                    Report
+                  </button>
+                </DialogTrigger>
+                {isReportModalOpen && (
+                  <ReportModal route="person" id={tv_id} type="comment" />
+                )}
+              </Dialog>
+            </>
+          )}
         </div>
       )}
     </div>

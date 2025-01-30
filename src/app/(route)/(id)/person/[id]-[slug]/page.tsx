@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import FetchPerson from "@/app/component/ui/Fetching/FetchPerson";
 import { Metadata } from "next";
 import PersonList from "./PersonList";
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { getPersonData, getPersonDetails } from "@/app/actions/personActions";
 import { notFound } from "next/navigation";
@@ -38,7 +38,6 @@ export async function generateMetadata(props: {
     },
   };
 }
-
 export default async function PersonPage(props: {
   params: Promise<{ "id]-[slug": any }>;
 }) {
@@ -48,8 +47,7 @@ export default async function PersonPage(props: {
   }
   const [person_id] = params["id]-[slug"].split("-");
   const currentUser = await getCurrentUser();
-  const personData = await getPersonData(person_id, currentUser?.id);
-
+  const personData = await getPersonData(person_id);
   // Add an artificial delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
   return (

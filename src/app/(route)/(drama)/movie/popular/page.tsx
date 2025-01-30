@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import dynamic from "next/dynamic";
 import PopularMovie from "./PopularMovie";
 import prisma from "@/lib/db";
+import { MovieDB } from "@/helper/type";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading")
 );
@@ -18,7 +19,10 @@ const PopularMoviePage = async () => {
   return (
     <div className="mt-10">
       <Suspense fallback={<SearchLoading />}>
-        <PopularMovie getMovie={getMovie} personDB={personDB} />
+        <PopularMovie
+          getMovie={getMovie as MovieDB[] | []}
+          personDB={personDB}
+        />
       </Suspense>
     </div>
   );

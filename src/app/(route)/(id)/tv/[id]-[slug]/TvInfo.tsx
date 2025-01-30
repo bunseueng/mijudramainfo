@@ -1,10 +1,18 @@
 import { formatDate } from "@/app/actions/formatDate";
-import { DramaReleasedInfo } from "@/helper/type";
+import {
+  DramaDetails,
+  DramaProduction,
+  DramaReleasedInfo,
+} from "@/helper/type";
 import React from "react";
 
 const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
   const [info]: DramaReleasedInfo[] = (getDrama?.released_information ||
     []) as unknown as DramaReleasedInfo[];
+  const [detail]: DramaDetails[] = (getDrama?.details ||
+    []) as unknown as DramaDetails[];
+  const [production]: DramaProduction[] = (getDrama?.production_information ||
+    []) as unknown as DramaProduction[];
   const formattedFirstAirDate = tv?.first_air_date
     ? formatDate(tv.first_air_date)
     : "TBA";
@@ -28,7 +36,6 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
   );
   // Calculate the rank by adding 1 to the index
   const rank = matchedIndex !== -1 ? matchedIndex + 1 : null;
-
   return (
     <div>
       <div className="border border-slate-400 dark:border-[#272727] dark:bg-[#242424] h-full rounded-lg">
@@ -40,21 +47,21 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
               Drama:
             </h1>
-            {tv?.title || tv?.name}
+            {detail?.title || tv?.title || tv?.name}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
               Country:
             </h1>
 
-            {matchedLanguage?.english_name}
+            {detail?.country || matchedLanguage?.english_name}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
               Episode:
             </h1>
 
-            {tv?.number_of_episodes}
+            {detail?.episode || tv?.number_of_episodes}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
@@ -63,7 +70,7 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
             {getDrama?.released_information?.length > 0
               ? formattedLastAirDate
                 ? `${formattedFirstAirDateDB} - ${formattedLastAirDateDB}`
-                : formattedFirstAirDateDB
+                : `${formattedFirstAirDateDB} - ${formattedLastAirDateDB}`
               : formattedLastAirDateDB
               ? `${formattedFirstAirDate} - ${formattedLastAirDate}`
               : formattedFirstAirDate}
@@ -80,17 +87,18 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
               Original Network:{" "}
             </h1>
-            {tv?.networks
-              ?.map((network: DramaReleasedInfo) => network?.name)
-              ?.join(", ")}
+            {production?.network?.map((net) => net?.value).join(", ") ||
+              tv?.networks
+                ?.map((network: DramaReleasedInfo) => network?.name)
+                ?.join(", ")}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
               Duration:
             </h1>
 
-            {tv?.episode_run_time?.[0]}
-            {tv?.episode_run_time?.length > 0
+            {detail?.duration || tv?.episode_run_time?.[0]}
+            {tv?.episode_run_time?.length || detail?.duration > 0
               ? "min."
               : "Duration not yet added"}
           </div>
@@ -98,12 +106,19 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
               Content Rating:
             </h1>
-
-            {content?.results?.length === 0
-              ? "Not Yet Rated"
-              : content?.results[0]?.rating}
-            {content?.results?.length !== 0 && (
-              <span>+ - Teens {content?.results[0]?.rating} or older</span>
+            {detail?.content_rating ? (
+              <span>{detail?.content_rating}</span>
+            ) : (
+              <span>
+                {content?.length === 0
+                  ? "Not Yet Rated"
+                  : content && content[0]?.rating}
+                {content?.length !== 0 && (
+                  <span>
+                    + - Teens {content && content[0]?.rating} or older
+                  </span>
+                )}
+              </span>
             )}
           </div>
           <div className="pb-1 break-words text-sm">
@@ -111,7 +126,11 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
               Status:
             </h1>
 
-            {tv?.status === "Returning Series" ? "Ongoing" : tv?.status}
+            {detail?.status
+              ? detail?.status
+              : tv?.status === "Returning Series"
+              ? "Ongoing"
+              : tv?.status}
           </div>
         </div>
       </div>

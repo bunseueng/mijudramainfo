@@ -1,6 +1,5 @@
 import React from "react";
 import PersonPhotoAlbum from "./PhotoAlbum";
-import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { getPersonData, getPersonDetails } from "@/app/actions/personActions";
 import { Metadata } from "next";
 export async function generateMetadata(props: {
@@ -39,8 +38,7 @@ const PhotosPage = async (props: { params: Promise<{ "id]-[slug": any }> }) => {
     throw new Error("Person ID and slug are missing.");
   }
   const [person_id] = params["id]-[slug"].split("-");
-  const currentUser = await getCurrentUser();
-  const { getAllPerson } = await getPersonData(person_id, currentUser?.id);
+  const { getAllPerson } = await getPersonData(person_id);
   return <PersonPhotoAlbum personId={person_id} getPerson={getAllPerson} />;
 };
 

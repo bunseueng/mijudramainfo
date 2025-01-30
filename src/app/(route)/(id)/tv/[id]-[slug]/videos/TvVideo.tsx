@@ -8,7 +8,7 @@ import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { VscQuestion } from "react-icons/vsc";
 import { tvVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
-import { DramaDB } from "@/helper/type";
+import { DramaDB, DramaReleasedInfo, TrailerResponse } from "@/helper/type";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 const TvTrailers = lazy(() => import("./trailers/TvTrailers"));
 const TvTeasers = lazy(() => import("./teasers/TvTeasers"));
@@ -20,28 +20,30 @@ const Bloopers = lazy(() => import("./bloopers/Bloopers"));
 const Featurettes = lazy(() => import("./featurettes/Featurettes"));
 const OpeningCredits = lazy(() => import("./opening_credits/OpeningCredits"));
 import Image from "next/image";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { useDramaData } from "@/hooks/useDramaData";
 
 interface TvTrailerType {
   tv_id: string;
   tvDB: DramaDB | null;
   getDrama: DramaDB[];
 }
+export interface TrailerType {
+  trailer: TrailerResponse;
+  tv: DramaReleasedInfo;
+}
 
 const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB, getDrama }) => {
-  const { data: tv, isLoading } = useQuery({
-    queryKey: ["tvEdit", tv_id],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-
+  const { tv, isLoading } = useDramaData(tv_id);
+  const trailer = tv?.videos;
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
   const [currentPage, setCurrentPage] = useState("/trailers");
   const router = useRouter();
   const pathname = usePathname();
   const coverFromDB = getDrama?.find((t) => t?.tv_id?.includes(tv_id));
+  const getColorFromImage = useColorFromImage();
 
   const handleNavigation = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -60,35 +62,25 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB, getDrama }) => {
     }
   }, [pathname]);
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        coverFromDB
-          ? (coverFromDB?.cover as string)
-          : `https://image.tmdb.org/t/p/${tv?.poster_path ? "w500" : "w780"}/${
-              tv?.poster_path || tv?.backdrop_path
-            }`
-      );
-      setDominantColor(color); // Set the dominant color in RGB format
+      const imageUrl =
+        (coverFromDB?.cover as string) ||
+        `https://image.tmdb.org/t/p/${tv?.poster_path ? "w92" : "w300"}/${
+          tv?.poster_path || tv?.backdrop_path
+        }`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(rgbaColor);
+    } else {
+      console.error("Image url undefined");
     }
-  }, [coverFromDB, tv?.backdrop_path, tv?.poster_path]);
+  }, [
+    coverFromDB?.cover,
+    tv?.backdrop_path,
+    tv?.poster_path,
+    getColorFromImage,
+  ]);
   // Ensure the image element is referenced correctly
   useEffect(() => {
     if (imgRef.current) {
@@ -103,10 +95,10 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB, getDrama }) => {
   }, [tv, extractColor]);
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <SearchLoading />;
   }
   return (
-    <div className="w-full h-full ">
+    <div className="w-full h-full">
       <div
         className="bg-cyan-600 dark:bg-[#242424]"
         style={{ backgroundColor: dominantColor as string | undefined }}
@@ -122,7 +114,7 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB, getDrama }) => {
                       tv?.poster_path ? "w500" : "w780"
                     }/${tv?.poster_path || tv?.backdrop_path}`
               }
-              alt={`${tv?.name || tv?.title}'s Poster`}
+              alt={`${tv?.name || tv?.title}'s Poster` || "Drama Poster"}
               width={200}
               height={200}
               quality={100}
@@ -136,6 +128,7 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB, getDrama }) => {
                 {getYearFromDate(tv?.first_air_date || tv?.release_date)})
               </h1>
               <Link
+                prefetch={false}
                 href={`/tv/${tv_id}`}
                 className="flex items-center text-sm my-1 opacity-75 hover:opacity-90"
               >
@@ -168,6 +161,7 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB, getDrama }) => {
                 }`}
               >
                 <Link
+                  prefetch={false}
                   href={`/tv/${tv?.id}/videos${item?.link}`}
                   className="text-md"
                   shallow
@@ -186,21 +180,21 @@ const TvVideo: React.FC<TvTrailerType> = ({ tv_id, tvDB, getDrama }) => {
         </div>
 
         {currentPage === "/trailers" ? (
-          <TvTrailers tv_id={tv_id} tv={tv} />
+          <TvTrailers tv={tv} trailer={trailer} />
         ) : currentPage === "/teasers" ? (
-          <TvTeasers tv_id={tv_id} tv={tv} />
+          <TvTeasers tv={tv} trailer={trailer} />
         ) : currentPage === "/clips" ? (
-          <Clips tv_id={tv_id} tv={tv} />
+          <Clips tv={tv} trailer={trailer} />
         ) : currentPage === "/behind_the_scenes" ? (
-          <BehindTheScenes tv_id={tv_id} tv={tv} />
+          <BehindTheScenes tv={tv} trailer={trailer} />
         ) : currentPage === "/bloopers" ? (
-          <Bloopers tv_id={tv_id} tv={tv} />
+          <Bloopers tv={tv} trailer={trailer} />
         ) : currentPage === "/featurettes" ? (
-          <Featurettes tv_id={tv_id} tv={tv} />
+          <Featurettes tv={tv} trailer={trailer} />
         ) : currentPage === "/opening_credits" ? (
-          <OpeningCredits tv_id={tv_id} tv={tv} />
+          <OpeningCredits tv={tv} trailer={trailer} />
         ) : (
-          <TvTrailers tv_id={tv_id} tv={tv} />
+          <TvTrailers tv={tv} trailer={trailer} />
         )}
       </div>
     </div>

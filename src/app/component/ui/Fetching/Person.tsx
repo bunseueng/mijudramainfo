@@ -97,14 +97,14 @@ export default function Person({ result, currentUser, getPerson }: any) {
       <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
         <div className="relative">
           <Link
-            prefetch={true}
+            prefetch={false}
             href={`/person/${result?.id}-${spaceToHyphen(result?.name)}`}
             className="block box-content"
           >
             <LazyImage
               coverFromDB={coverFromDB?.cover}
               src={`https://image.tmdb.org/t/p/w185/${result.profile_path}`}
-              alt={`${result?.name}'s Profile`}
+              alt={`${result?.name}'s Profile` || "Person Profile"}
               width={200}
               height={200}
               style={{ width: "100%", height: "100%" }}
@@ -124,7 +124,7 @@ export default function Person({ result, currentUser, getPerson }: any) {
         <div className="w-full  px-2">
           <div className="flex items-center justify-between">
             <Link
-              prefetch={true}
+              prefetch={false}
               href={`/person/${result?.id}-${spaceToHyphen(result?.name)}`}
               className="text-[#2490da] text-md font-bold inline-block"
             >

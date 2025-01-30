@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
@@ -61,18 +62,20 @@ const MoviePhotoAlbum = ({ getMovie }: MovieDatabase) => {
     refetchOnMount: true,
   });
 
+  const getColorFromImage = useColorFromImage();
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [base64Image, setBase64Image] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const currentBackdrops = getImage?.backdrops?.map((item: any) => item);
-  const currentPosters = getMovie?.map((item: any) => item?.photo);
+  const currentPosters = getMovie
+    ?.filter((data: any) => data.movie_id === movie_id)
+    ?.map((item: any) => item?.photo);
   const combinedItems = currentPosters
     ?.concat(currentBackdrops)
     ?.reduce((acc: any, val: any) => acc.concat(val), []);
@@ -85,35 +88,23 @@ const MoviePhotoAlbum = ({ getMovie }: MovieDatabase) => {
     g?.movie_id?.includes(movie?.id)
   );
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        coverFromDB
-          ? (coverFromDB?.cover as string)
-          : `https://image.tmdb.org/t/p/${
-              movie?.poster_path ? "w154" : "w300"
-            }/${movie?.poster_path || movie?.backdrop_path}`
-      );
+      const imageUrl =
+        (coverFromDB as string) ||
+        `https://image.tmdb.org/t/p/${movie?.backdrop_path ? "w300" : "w92"}/${
+          movie?.backdrop_path || movie?.poster_path
+        }`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const color = `rgb(${r}, ${g}, ${b})`; // Full opacity
       setDominantColor(color);
     }
-  }, [movie, coverFromDB]);
+  }, [
+    coverFromDB,
+    movie?.backdrop_path,
+    movie?.poster_path,
+    getColorFromImage,
+  ]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -140,7 +131,6 @@ const MoviePhotoAlbum = ({ getMovie }: MovieDatabase) => {
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      setUploadedImage(file);
       setPreviewUrl(URL.createObjectURL(file));
       try {
         const base64 = await convertToBase64(file);
@@ -175,7 +165,6 @@ const MoviePhotoAlbum = ({ getMovie }: MovieDatabase) => {
       if (response.ok) {
         toast.success("Image uploaded successfully");
         setIsModalOpen(false);
-        setUploadedImage(null);
         setPreviewUrl(null);
         setBase64Image(null);
         setTitle("");

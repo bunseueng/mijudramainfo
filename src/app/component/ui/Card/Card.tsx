@@ -1,58 +1,53 @@
 "use client";
 
-import { fetchEpisodeCount } from "@/app/actions/fetchMovieApi";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import { StyledRating } from "@/app/actions/StyleRating";
 import dynamic from "next/dynamic";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
-const ReusedImage = dynamic(() => import("@/components/ui/allreusedimage"), {
+import { fetchRatings, fetchTv } from "@/app/actions/fetchMovieApi";
+import SearchLoading from "../Loading/SearchLoading";
+import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
+const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
   ssr: false,
 });
 
-export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
-  const [tvRating, setTvRating] = useState<any>();
-  const tvCover = getDrama?.find((d: any) => d?.tv_id?.includes(result.id));
-  const movieCover = getMovie?.find((d: any) =>
-    d?.movie_id?.includes(result.id)
-  );
+export default function Card({
+  result,
+  BASE_URL,
+  getDrama,
+  getMovie,
+  results,
+}: any) {
+  const drama = getDrama?.find((d: any) => d?.tv_id?.includes(result.id));
+  const movie = getMovie?.find((d: any) => d?.movie_id?.includes(result.id));
+  const [info]: DramaReleasedInfo[] = (drama?.released_information ||
+    []) as unknown as DramaReleasedInfo[];
+  const [detail]: DramaDetails[] = (drama?.details ||
+    []) as unknown as DramaDetails[];
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const result_id = result?.id;
+  const tvIds = results
+    ?.filter((item: any) => item.media_type === "tv")
+    .map((data: any) => data.id.toString());
 
-  const { data: episode, isError } = useQuery({
-    queryKey: ["episodes", result_id],
-    queryFn: () => fetchEpisodeCount(result_id),
+  const { data: tmdb_drama, isLoading: isTopDramaLoading } = useQuery({
+    queryKey: ["tmdb_drama", tvIds],
+    queryFn: () => fetchTv(tvIds),
+    staleTime: 3600000,
+    enabled: Boolean(tvIds?.length),
   });
 
-  useEffect(() => {
-    const fetchRating = async () => {
-      try {
-        const getRatings = await fetch(`/api/rating/${result?.id}`);
-        const data = await getRatings.json();
-        const ratings = data?.ratings || [];
-        const filteredRatings = ratings.filter(
-          (rating: any) => rating.tvId === result?.id.toString()
-        );
-        const sumOfRatings = filteredRatings.reduce(
-          (sum: number, rating: any) => sum + rating.rating,
-          0
-        );
-        const numberOfRatings = filteredRatings.length;
-        const averageRating =
-          numberOfRatings > 0 ? sumOfRatings / numberOfRatings : 0;
-        setTvRating(averageRating);
-      } catch (error) {
-        console.error("Error fetching rating:", error);
-      }
-    };
-    fetchRating();
-  }, [result?.id]);
+  const { data: tvRating, isLoading: isRatingLoading } = useQuery({
+    queryKey: ["tvRating", tvIds],
+    queryFn: () => fetchRatings(tvIds),
+    staleTime: 3600000,
+    enabled: Boolean(tvIds?.length),
+  });
 
   const path = BASE_URL.split("/").pop();
   const parts = BASE_URL.split("/");
@@ -111,8 +106,17 @@ export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
     return "Other";
   };
 
-  if (isError) {
-    console.log("Failed to fetch");
+  // Find the current drama's details safely
+  const currentDrama = tmdb_drama?.find((data: any) => data.id === result_id);
+  const currentDramaRating = tvRating?.find((data: any) =>
+    data.tvId.includes(result_id)
+  );
+  const rating = currentDramaRating?.rating;
+  const number_of_episodes = currentDrama?.number_of_episodes;
+  const isLoading = isRatingLoading || isTopDramaLoading;
+
+  if (isLoading) {
+    return <SearchLoading />;
   }
 
   return (
@@ -120,21 +124,26 @@ export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
       <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
         <div className="relative">
           <Link
-            prefetch={true}
+            prefetch={false}
             href={constructedHref}
             className="block box-content"
           >
-            <ReusedImage
+            <LazyImage
+              coverFromDB={drama?.cover || movie?.cover}
               src={
-                movieCover || tvCover
-                  ? movieCover?.cover || tvCover?.cover
-                  : result?.poster_path || result.backdrop_path !== null
+                result?.poster_path || result.backdrop_path !== null
                   ? `https://image.tmdb.org/t/p/w780/${
                       result.poster_path || result.backdrop_path
                     }`
                   : "/placeholder-image.avif"
               }
-              alt={result?.name || result?.title}
+              alt={
+                result?.name ||
+                result?.title ||
+                drama?.title ||
+                movie?.title ||
+                "Drama/Movie Poster"
+              }
               width={200}
               height={200}
               style={{ width: "100%", height: "100%" }}
@@ -150,46 +159,45 @@ export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
       <div className="float-left w-[75%] md:w-[80%] px-3 align-top table-cell pl-1 md:pl-2">
         <div className="flex items-center justify-between">
           <Link
+            prefetch={false}
             href={constructedHref}
             className="text-md text-sky-700 dark:text-[#2196f3] font-bold truncate"
           >
-            {result?.title || result?.name}
+            {detail?.title || detail?.title || result?.title || result?.name}
           </Link>
         </div>
 
         <p className="flex flex-wrap items-center text-sm opacity-70 py-1">
           {getMediaType(result)}
-          <span
-            className={`px-2 opacity-70 ${
-              !result?.first_air_date && !result?.release_date
-                ? "hidden"
-                : "block"
-            }`}
-          >
-            -
-          </span>
-          <span className="font-semibold truncate opacity-70">
-            {!result?.first_air_date && !result?.release_date ? (
-              <span className="pl-2">TBA</span>
-            ) : (
-              result?.first_air_date || result?.release_date
-            )}
-            {episode?.number_of_episodes && (
-              <>, {episode.number_of_episodes} Episodes</>
-            )}
-          </span>
+          <span className="px-2 opacity-70">-</span>
+          {info ? (
+            <span className="font-semibold truncate opacity-70">
+              {info?.air_date}
+            </span>
+          ) : (
+            <span className="font-semibold truncate opacity-70">
+              {!result?.first_air_date && !result?.release_date ? (
+                <span>TBA</span>
+              ) : (
+                result?.first_air_date || result?.release_date
+              )}
+            </span>
+          )}
+          {!detail?.episode ||
+            (number_of_episodes && (
+              <>, {detail?.episode || number_of_episodes} Episodes</>
+            ))}
         </p>
 
         <div className="flex items-center">
           <StyledRating
             name="customized-color"
             value={convertToFiveStars(
-              result && result.vote_average && tvRating
-                ? (result.vote_average * result.vote_count +
-                    tvRating * tvRating) /
-                    (result.vote_count + tvRating)
-                : tvRating
-                ? tvRating
+              result && result.vote_average && rating
+                ? (result.vote_average * result.vote_count + rating * rating) /
+                    (result.vote_count + rating)
+                : rating
+                ? rating
                 : result && result.vote_average,
               10
             )}
@@ -199,25 +207,25 @@ export default function Card({ result, BASE_URL, getDrama, getMovie }: any) {
             precision={0.5}
           />
           <p className="pl-2 pt-1">
-            {result && result.vote_average && tvRating
+            {result && result.vote_average && rating
               ? (
-                  (result.vote_average * result.vote_count +
-                    tvRating * tvRating) /
-                  (result.vote_count + tvRating)
-                ).toFixed(1)
-              : tvRating
-              ? tvRating.toFixed(1)
+                  (result.vote_average * result.vote_count + rating * rating) /
+                  (result.vote_count + rating)
+                ).toFixed(1) // Apply toFixed(1) to the entire expression
+              : rating
+              ? rating.toFixed(1)
               : result && result.vote_average.toFixed(1)}
           </p>
         </div>
 
         {result?.overview === "" ? (
           <p className="text-sm font-semibold line-clamp-3 truncate whitespace-normal my-2">
-            {result?.title || result?.name} does not have overview yet!
+            {detail?.title || result?.title || result?.name} does not have
+            overview yet!
           </p>
         ) : (
           <p className="text-sm font-semibold line-clamp-3 truncate whitespace-normal my-2">
-            {result?.overview}
+            {detail?.synopsis || result?.overview}
           </p>
         )}
       </div>

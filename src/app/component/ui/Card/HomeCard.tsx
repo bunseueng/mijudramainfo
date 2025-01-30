@@ -9,15 +9,14 @@ import { Button } from "@/components/ui/button";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
 import { HomeDramaT } from "../Main/Section";
 import HomeCardHover from "./HomeCardHover";
+import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
 
 const HomeCard = ({
   heading,
   getDrama,
   existingRatings,
   categoryData,
-  categoryDataDetails,
   isDataLoading,
-  isDataDetailsLoading,
   path,
 }: HomeDramaT) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -120,7 +119,7 @@ const HomeCard = ({
     });
   }, [categoryData?.results, handleExtractColor]);
 
-  const isLoading = isDataLoading || isDataDetailsLoading;
+  const isLoading = isDataLoading;
 
   return (
     <div className="max-w-[1808px] mx-auto relative px-4">
@@ -145,9 +144,14 @@ const HomeCard = ({
                   (gen: any) => gen.genre_ids && gen.genre_ids.length !== 0
                 )
                 .map((result: any, index: number, array: any[]) => {
-                  const coverFromDB = getDrama?.find((d: any) =>
+                  const drama_db = getDrama?.find((d: any) =>
                     d?.tv_id?.includes(result?.id)
                   );
+                  const [detail]: DramaDetails[] = (drama_db?.details ||
+                    []) as unknown as DramaDetails[];
+                  const [info]: DramaReleasedInfo[] =
+                    (drama_db?.released_information ||
+                      []) as unknown as DramaReleasedInfo[];
                   const cardColor = dominantColor[result.id] || "transparent";
                   const backgroundColor =
                     linearColors[result.id] || "transparent";
@@ -166,7 +170,7 @@ const HomeCard = ({
                     >
                       <Link
                         aria-label={`Visit ${result?.name || result?.title}?`}
-                        prefetch={true}
+                        prefetch={false}
                         href={`/${path}/${result?.id}-${spaceToHyphen(
                           result?.name || result?.title
                         )}`}
@@ -174,10 +178,14 @@ const HomeCard = ({
                       >
                         <div className="relative rounded-t-sm overflow-hidden z-[2] image-box aspect-[2/2.7]">
                           <LazyImage
-                            coverFromDB={coverFromDB?.cover}
+                            coverFromDB={drama_db?.cover}
                             src={result?.poster_path || result?.backdrop_path}
                             w={result?.poster_path ? "w342" : "w780"}
-                            alt={`Poster for ${result?.name || result?.title}`}
+                            alt={
+                              `Poster for ${
+                                detail?.title || result?.name || result?.title
+                              }` || "Poster"
+                            }
                             width={500}
                             height={750}
                             quality={75}
@@ -210,15 +218,26 @@ const HomeCard = ({
                           }}
                         >
                           <h2 className="mx-[10px] mb-[6px] whitespace-normal overflow-hidden text-ellipsis flex flex-col text-white/80 font-medium text-[12px] sm:text-[14px] md:text-[16px] leading-tight line-clamp-2">
-                            {result?.name || result?.title}
+                            {detail?.title || result?.name || result?.title}
                           </h2>
-                          <p className="text-[12px] sm:text-[14px] text-white/70 tracking-[0px] font-normal absolute bottom-[10px] overflow-hidden text-ellipsis whitespace-normal flex items-center mx-[10px] line-clamp-1">
-                            {result?.first_air_date ? (
-                              result.first_air_date.split("-")[0]
-                            ) : (
-                              <span className="text-[#2490da]">Upcoming</span>
-                            )}
-                          </p>
+
+                          {info ? (
+                            <p className="text-[12px] sm:text-[14px] text-white/70 tracking-[0px] font-normal absolute bottom-[10px] overflow-hidden text-ellipsis whitespace-normal flex items-center mx-[10px] line-clamp-1">
+                              {detail?.status !== "Announced" ? (
+                                <span className="text-[#2490da]">Upcoming</span>
+                              ) : (
+                                info?.release_date?.slice(0, 4) // Extracts the first 4 characters (YYYY)
+                              )}
+                            </p>
+                          ) : (
+                            <p className="text-[12px] sm:text-[14px] text-white/70 tracking-[0px] font-normal absolute bottom-[10px] overflow-hidden text-ellipsis whitespace-normal flex items-center mx-[10px] line-clamp-1">
+                              {result?.first_air_date ? (
+                                result.first_air_date.split("-")[0]
+                              ) : (
+                                <span className="text-[#2490da]">Upcoming</span>
+                              )}
+                            </p>
+                          )}
                         </div>
                       </Link>
                     </div>
@@ -231,22 +250,22 @@ const HomeCard = ({
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-2 min-[1888px]:-left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full bg-transparent min-[1888px]:bg-background/80 min-[1888px]:text-white backdrop-blur-0 min-[1888px]:backdrop-blur-sm !border-0 min-[1888px]:border hover:bg-transparent min-[1888px]:hover:bg-background/60"
+            className="absolute left-2 min-[1888px]:-left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full bg-transparent min-[1888px]:bg-background/80 min-[1888px]:text-white backdrop-blur-0 min-[1888px]:backdrop-blur-sm  border border-black min-[1888px]:border hover:bg-transparent min-[1888px]:hover:bg-background/60"
             onClick={scrollPrev}
             disabled={!prevBtnEnabled}
             aria-label="Previous Slide"
           >
-            <ChevronLeft className="size-6 min-[1888px]:size-4" />
+            <ChevronLeft className="text-black dark:text-white font-bold size-6 min-[1888px]:size-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-2 min-[1888px]:-right-4 top-1/2 -translate-y-1/2 translate-x-1/2 rounded-full bg-transparent min-[1888px]:bg-background/80 min-[1888px]:text-white backdrop-blur-0 min-[1888px]:backdrop-blur-sm border-0 min-[1888px]:border hover:bg-transparent min-[1888px]:hover:bg-background/60"
+            className="absolute right-2 min-[1888px]:-right-4 top-1/2 -translate-y-1/2 translate-x-1/2 rounded-full bg-transparent min-[1888px]:bg-background/80 min-[1888px]:text-white backdrop-blur-0 min-[1888px]:backdrop-blur-sm border border-black min-[1888px]:border hover:bg-transparent min-[1888px]:hover:bg-background/60"
             onClick={scrollNext}
             disabled={!nextBtnEnabled}
             aria-label="Next Slide"
           >
-            <ChevronRight className="size-6 min-[1888px]:size-4" />
+            <ChevronRight className="text-black dark:text-white font-bold size-6 min-[1888px]:size-4" />
           </Button>
 
           {/* Hover Card Portal */}
@@ -254,7 +273,6 @@ const HomeCard = ({
             {hoveredCard && (
               <HomeCardHover
                 categoryData={categoryData}
-                categoryDataDetails={categoryDataDetails}
                 path={path}
                 dominantColor={dominantColor}
                 getRating={getRating}

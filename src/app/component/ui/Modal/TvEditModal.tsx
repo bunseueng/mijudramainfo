@@ -29,7 +29,6 @@ interface EditModal {
   isItemDataChanged: boolean[]; // Update the type here
   markedForDeletion: boolean[];
   setMarkedForDeletion: (data: boolean[]) => void;
-  tv: EditDramaPage[];
 }
 
 const TvEditModal: React.FC<EditModal> = ({
@@ -46,7 +45,6 @@ const TvEditModal: React.FC<EditModal> = ({
   isItemDataChanged,
   markedForDeletion,
   setMarkedForDeletion,
-  tv,
 }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [service, setService] = useState<

@@ -1,18 +1,16 @@
-import React from "react";
-import prisma from "@/lib/db";
+import React, { Suspense } from "react";
 import TvEditList from "../detail/TvEditList";
 import TvEdit from "../detail/TvEdit";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { Metadata } from "next";
 import { getDramaData } from "@/app/actions/tvActions";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 export const maxDuration = 60;
-export async function generateMetadata(
-  props: {
-    params: Promise<{ "id]-[slug": string }>;
-  }
-): Promise<Metadata> {
+export async function generateMetadata(props: {
+  params: Promise<{ "id]-[slug": string }>;
+}): Promise<Metadata> {
   const params = await props.params;
   if (!params["id]-[slug"]) {
     throw new Error("TV ID and slug are missing.");
@@ -70,11 +68,9 @@ export async function generateMetadata(
     },
   };
 }
-const ExternalLinkPage = async (
-  props: {
-    params: Promise<{ "id]-[slug": string }>;
-  }
-) => {
+const ExternalLinkPage = async (props: {
+  params: Promise<{ "id]-[slug": string }>;
+}) => {
   const params = await props.params;
   if (!params["id]-[slug"]) {
     throw new Error("TV ID and slug are missing.");
@@ -83,10 +79,12 @@ const ExternalLinkPage = async (
   const user = await getCurrentUser();
   const { getDrama } = await getDramaData(tv_id, user?.id);
   return (
-    <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10 px-2 md:px-5">
-      <TvEdit tv_id={tv_id} />
-      <TvEditList tv_id={tv_id} tvDetails={getDrama} />
-    </div>
+    <Suspense key={tv_id} fallback={<SearchLoading />}>
+      <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10 px-2 md:px-5">
+        <TvEdit tv_id={tv_id} tvDetails={getDrama} />
+        <TvEditList tv_id={tv_id} tvDetails={getDrama} />
+      </div>
+    </Suspense>
   );
 };
 

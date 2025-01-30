@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { PersonEditList } from "./PersonEditList";
 import { useQuery } from "@tanstack/react-query";
-import { fetchPerson, fetchPersonSearch } from "@/app/actions/fetchMovieApi";
+import { fetchPersonSearch } from "@/app/actions/fetchMovieApi";
 import { Controller, useForm } from "react-hook-form";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -12,20 +12,15 @@ import { CreatePersonDetails, TCreatePersonDetails } from "@/helper/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import { IoIosArrowDown } from "react-icons/io";
 import { nationalityList, person_gender } from "@/helper/item-list";
-import ClipLoader from "react-spinners/ClipLoader";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { mergeAndRemoveDuplicates } from "@/app/actions/mergeAndRemove";
 import { toast } from "react-toastify";
 import { PersonDetail } from "@/helper/type";
 import { Loader2 } from "lucide-react";
+import { usePersonData } from "@/hooks/usePersonData";
 
 const PersonDetails: React.FC<PersonEditList> = ({ person_id, personDB }) => {
-  const { data: person } = useQuery({
-    queryKey: ["personEdit", person_id],
-    queryFn: () => fetchPerson(person_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-  });
+  const { person, isLoading } = usePersonData(person_id);
   const { data: personFulLDetails } = useQuery({
     queryKey: ["personFulLDetails", person?.name],
     queryFn: () => fetchPersonSearch(person?.name),
@@ -304,6 +299,10 @@ const PersonDetails: React.FC<PersonEditList> = ({ person_id, personDB }) => {
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   };
+
+  if (isLoading) {
+    return <div>Fetching Data...</div>;
+  }
 
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>

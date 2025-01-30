@@ -10,10 +10,7 @@ import AllSeason from "./AllSeason";
 import ReviewCard from "@/app/component/ui/Card/ReviewCard";
 import TvInfo from "./TvInfo";
 import TvListCard from "@/app/component/ui/Card/TvListCard";
-import { useQuery } from "@tanstack/react-query";
-import { fetchTvWatchProvider } from "@/app/actions/fetchMovieApi";
 import { useEffect, useState } from "react";
-
 const WatchProvider = dynamic(() => import("./WatchProvider"), { ssr: false });
 
 const DramaCast = ({
@@ -34,16 +31,11 @@ const DramaCast = ({
   content,
   lists,
   keyword,
+  drama_poster,
 }: any) => {
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
-  const { data: watchProvider } = useQuery({
-    queryKey: ["watchProvider", tv?.id],
-    queryFn: () => fetchTvWatchProvider(tv?.id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
   const seasons = tv?.seasons?.map((drama: any) => drama);
+  const watchProvider = tv["watch/providers"] && tv["watch/providers"]?.results;
 
   // Determine which season to display based on the number of seasons
   let displaySeason;
@@ -153,6 +145,7 @@ const DramaCast = ({
           )}
 
           <AllSeason
+            drama_poster={drama_poster}
             displaySeason={displaySeason}
             firstSeason={firstSeason}
             tv={tv}
@@ -171,6 +164,7 @@ const DramaCast = ({
               tv={tv}
               getComment={getComment}
               getReview={getReview}
+              getDrama={getDrama}
             />
           </div>
         </div>
@@ -184,7 +178,7 @@ const DramaCast = ({
           />
           {keyword?.results?.length > 0 && (
             <div className="my-5">
-              <h1 className="font-bold text-lg">Keywords</h1>
+              <h1 className="font-bold text-lg mb-3">Keywords</h1>
               <div className="flex flex-wrap w-full">
                 {keyword?.results?.map((k: any) => {
                   return (
@@ -204,42 +198,52 @@ const DramaCast = ({
             </div>
           )}
           {tv?.networks?.length > 0 && (
-            <div className="my-5">
-              <h1 className="font-bold text-lg">Networks</h1>
-              {tv?.networks?.map(
-                (net: {
-                  id: number;
-                  name: string;
-                  logo_path: string;
-                  origin_country: string;
-                }) => (
-                  <div className="block mt-5" id={`${net?.id}`} key={net?.id}>
+            <div className="my-8">
+              <h1 className="font-bold text-lg mb-2">Networks</h1>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tv?.networks?.map(
+                  (net: {
+                    id: number;
+                    name: string;
+                    logo_path: string;
+                    origin_country: string;
+                  }) => (
                     <Link
-                      prefetch={false}
+                      key={net?.id}
                       href={`/network/${net?.id}`}
-                      className="inline-block"
+                      className="block"
+                      prefetch={false}
                     >
-                      <Image
-                        src={`https://image.tmdb.org/t/p/original/${net?.logo_path}`}
-                        alt={net?.name}
-                        width={200}
-                        height={200}
-                        quality={100}
-                        loading="lazy"
-                        className="w-[200px] object-cover bg-center text-white"
-                      />
+                      <div className="relative aspect-[16/9] overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 shadow-md hover:shadow-lg transition-shadow duration-300">
+                        <Image
+                          src={`https://image.tmdb.org/t/p/original/${net?.logo_path}`}
+                          alt={net?.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 33vw"
+                          quality={100}
+                          className="object-contain p-4"
+                          style={{
+                            filter: "contrast(1.2) brightness(1.1)",
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end">
+                          <div className="w-full p-4 text-white text-lg font-semibold truncate">
+                            {net?.name}
+                          </div>
+                        </div>
+                      </div>
                     </Link>
-                  </div>
-                )
-              )}
+                  )
+                )}
+              </div>
             </div>
           )}
           {sortedChanges?.length > 0 && (
             <div className="my-5">
               <h1 className="font-bold text-lg">Top Contributors</h1>
-              {sortedChanges?.slice(0, 4)?.map((drama: any) => {
+              {sortedChanges?.slice(0, 4)?.map((data: any, idx: number) => {
                 const getUser = users?.find((users: UserProps) =>
-                  users?.id?.includes(drama?.userId)
+                  users?.id?.includes(data?.userId)
                 );
                 const userContributions = getDrama?.changes?.reduce(
                   (acc: number[], change: any) => {
@@ -249,15 +253,16 @@ const DramaCast = ({
                   },
                   {}
                 );
-                const userContributeCount =
-                  userContributions[drama.userId] || 0;
+                const userContributeCount = userContributions[data.userId] || 0;
 
                 return (
-                  <div className="flex items-center py-2" key={drama?.id}>
+                  <div className="flex items-center py-2" key={data?.id || idx}>
                     <div className="block">
                       <Image
                         src={getUser?.profileAvatar || getUser?.image}
-                        alt={getUser?.displayName || getUser?.name}
+                        alt={
+                          getUser?.displayName || getUser?.name || "User Image"
+                        }
                         width={100}
                         height={100}
                         loading="lazy"
@@ -277,7 +282,7 @@ const DramaCast = ({
           )}
           <div className="my-5">
             <h1 className="font-bold text-lg">Popular Lists</h1>
-            <div className="mt-5">
+            <div className="mt-3">
               <TvListCard list={lists} movieId={[]} tvId={tv_id} />
             </div>
           </div>

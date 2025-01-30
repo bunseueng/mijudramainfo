@@ -1,6 +1,7 @@
 import { UseFormRegister, UseFormReset } from "react-hook-form";
 import { TCreateList, TProfileSetting } from "./zod";
 import { Prisma } from "@prisma/client";
+import { JsonValue } from "@prisma/client/runtime/library";
 
 export type SearchParamsType =
   | string
@@ -47,10 +48,6 @@ export interface currentUserProps {
   lastLogin: Date | null;
   createdAt: string;
   updatedAt: Date;
-}
-
-export interface ICurrentUser {
-  currentUser: currentUserProps;
 }
 
 export interface UserProps {
@@ -318,6 +315,13 @@ export interface Movie {
   } | null;
 }
 
+interface Photo {
+  url: string;
+  public_id: string;
+  title: string;
+  description: string;
+}
+
 export interface DramaDB {
   id: string;
   userId: string;
@@ -333,11 +337,25 @@ export interface DramaDB {
   production_information: Prisma.JsonValue[];
   genres_tags: Prisma.JsonValue[];
   changes: Prisma.JsonValue[];
+  photo: Photo[];
   changeCount: Number;
   createdAt: Date;
   updatedAt: Date;
 }
+interface Genre {
+  label: string;
+  value: string;
+}
 
+interface Tag {
+  name: string;
+  value: string;
+}
+
+interface GenreTag {
+  genre: Genre[];
+  tag: Tag[];
+}
 export interface MovieDB {
   id: string;
   userId: string;
@@ -351,7 +369,7 @@ export interface MovieDB {
   external_links: Prisma.JsonValue[];
   released_information: Prisma.JsonValue[];
   production_information: Prisma.JsonValue[];
-  genres_tags: Prisma.JsonValue[];
+  genres_tags: GenreTag[];
   changes: Prisma.JsonValue[];
   changeCount: Number;
   createdAt: Date;
@@ -468,49 +486,6 @@ export interface EditPageDefaultvalue {
     label: string;
     value: string;
   }[];
-}
-
-export interface ITmdbDrama {
-  adult: boolean;
-  backdrop_path: string;
-  broadcast: {
-    day: string[];
-    time: string;
-    all_episode: [{}];
-  }[];
-  created_by: any[];
-  episode_run_time: any[];
-  first_air_date: string;
-  genres: any[];
-  homepage: string;
-  id: number;
-  in_production: boolean;
-  language: string[];
-  last_air_date: string;
-  last_episode_to_air: any;
-  name: string;
-  title: string | null;
-  networks: any[];
-  next_episode_to_air: any;
-  number_of_episodes: number;
-  number_of_seasons: number;
-  origin_country: string[];
-  original_language: string;
-  original_name: string;
-  overview: string;
-  popularity: number;
-  poster_path: string;
-  production_companies: any[];
-  production_countries: any[];
-  seasons: any[];
-  spoken_languages: any[];
-  status: string;
-  tagline: string;
-  type: string[];
-  vote_average: number;
-  vote_count: number;
-  release_date: string;
-  end_date: string;
 }
 
 export interface AddSeason {
@@ -695,7 +670,7 @@ export interface IMovieReview {
     overall: number;
     rewatchValue: number;
     story: number;
-  };
+  } | null;
   userInfo: {
     name: string;
     displayName: string;
@@ -739,7 +714,7 @@ export type ProfileFeedsTypes = {
   };
   image: string | null;
   spoiler: boolean;
-  tag: ITmdbDrama[];
+  tag: TVShow[];
   like: number;
   likeBy: string[];
   comment: Prisma.JsonValue[];
@@ -752,54 +727,7 @@ export interface IProfileFeeds {
   currentUser: currentUserProps | null;
 }
 
-export interface IActor {
-  cast: {
-    adult: boolean;
-    character: string;
-    credit_id: string;
-    gender: number;
-    id: number;
-    known_for_department: string;
-    name: string;
-    order: number;
-    original_name: string;
-    popularity: number;
-    profile_path: string;
-  }[];
-  tvShow: {
-    adult: boolean;
-    backdrop_path: string;
-    first_air_date: string;
-    genre_ids: number[];
-    id: number;
-    name: string;
-    origin_country: string[];
-    original_language: string;
-    original_name: string;
-    overview: string;
-    popularity: number;
-    poster_path: string;
-    vote_average: number;
-    vote_count: number;
-    cast: [
-      {
-        adult: boolean;
-        character: string;
-        credit_id: string;
-        gender: number;
-        id: number;
-        known_for_department: string;
-        name: string;
-        order: number;
-        original_name: string;
-        popularity: number;
-        profile_path: string;
-      }
-    ];
-  };
-}
-
-export interface TrailerResult {
+interface TrailerResult {
   id: string;
   iso_639_1: string;
   iso_3166_1: string;
@@ -839,5 +767,454 @@ interface TitleInfo {
 
 export interface TitleData {
   id: number; // Unique identifier for the title
-  results: TitleInfo[]; // Array of title information
+  title: TitleInfo[]; // Array of title information
+}
+
+export interface IExistedFavorite {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  movieId: JsonValue[];
+  tvId: JsonValue[];
+  favoriteIds: JsonValue[];
+}
+
+interface Genre {
+  id: number;
+  name: string;
+}
+
+interface ProductionCompany {
+  id: number;
+  logo_path: string | null; // Can be null
+  name: string;
+  origin_country: string;
+}
+
+interface ProductionCountry {
+  iso_3166_1: string;
+  name: string;
+}
+
+export interface SpokenLanguage {
+  english_name: string;
+  iso_639_1: string;
+  name: string;
+}
+
+interface BelongsToCollection {
+  id: number;
+  name: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+}
+
+interface Releases {
+  countries: string[]; // Or a more specific type if you know the structure
+}
+
+export interface TMDBMovie {
+  adult: boolean;
+  name: string;
+  backdrop_path: string | null;
+  belongs_to_collection: BelongsToCollection | null; // Can be null
+  budget: number;
+  genres: Genre[];
+  homepage: string | null;
+  id: number;
+  imdb_id: string | null;
+  origin_country: string[];
+  original_language: string;
+  original_title: string;
+  overview: string | null;
+  popularity: number;
+  poster_path: string | null;
+  production_companies: ProductionCompany[];
+  production_countries: ProductionCountry[];
+  release_date: string;
+  releases: Releases;
+  revenue: number;
+  runtime: number | null;
+  spoken_languages: SpokenLanguage[];
+  status: string;
+  tagline: string | null;
+  title: string;
+  video: boolean;
+  vote_average: number;
+  vote_count: number;
+}
+interface Title {
+  iso_3166_1: string;
+  title: string;
+  type: string;
+}
+
+export interface MovieTitles {
+  id: number;
+  title: Title[];
+}
+
+export interface TVShow {
+  adult: boolean;
+  backdrop_path: string | null;
+  created_by: any[];
+  episode_run_time: number[];
+  first_air_date: string;
+  genres: Genre[];
+  homepage: string;
+  id: number;
+  in_production: boolean;
+  languages: string[];
+  last_air_date: string;
+  last_episode_to_air: Episode;
+  name: string;
+  title: string;
+  release_date: string;
+  next_episode_to_air: Episode | null;
+  networks: Network[];
+  number_of_episodes: number;
+  number_of_seasons: number;
+  origin_country: string[];
+  original_language: string;
+  original_name: string;
+  overview: string;
+  popularity: number;
+  poster_path: string | null;
+  production_companies: ProductionCompany[];
+  production_countries: ProductionCountry[];
+  seasons: Season[];
+  spoken_languages: SpokenLanguage[];
+  status: string;
+  tagline: string;
+  type: string[];
+  vote_average: number;
+  vote_count: number;
+  aggregate_credits: AggregateCredits;
+  alternative_titles: AlternativeTitles;
+  changes: Changes;
+  content_ratings: ContentRatings;
+  credits: Credits;
+  episode_groups: EpisodeGroups;
+  external_ids: ExternalIds;
+  images: Images;
+  keywords: Keywords;
+  lists: TMDBList;
+  recommendations: Recommendations;
+  reviews: Reviews;
+  screened_theatrically: ScreenedTheatrically;
+  similar: Similar;
+  translations: Translations;
+  videos: Videos;
+  "watch/providers": WatchProviders;
+  broadcast: {
+    day: string;
+    time: string;
+  }[];
+  end_date: string;
+}
+
+interface Genre {
+  id: number;
+  name: string;
+}
+
+interface Episode {
+  id: number;
+  name: string;
+  overview: string;
+  vote_average: number;
+  vote_count: number;
+  air_date: string;
+  episode_number: number;
+  episode_type: string;
+  production_code: string;
+  runtime: number;
+  season_number: number;
+  show_id: number;
+  still_path: string;
+}
+
+interface Network {
+  id: number;
+  logo_path: string;
+  name: string;
+  origin_country: string;
+}
+
+interface ProductionCompany {
+  id: number;
+  logo_path: string | null;
+  name: string;
+  origin_country: string;
+}
+
+interface ProductionCountry {
+  iso_3166_1: string;
+  name: string;
+}
+
+interface Season {
+  air_date: string;
+  episode_count: number;
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string;
+  season_number: number;
+  vote_average: number;
+}
+
+interface AggregateCredits {
+  cast: CastMember[];
+  crew: CrewMember[];
+}
+
+interface CastMember {
+  adult: boolean;
+  gender: number;
+  id: number;
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number;
+  profile_path: string | null;
+  roles: Role[];
+  total_episode_count: number;
+  order: number;
+}
+
+interface Role {
+  credit_id: string;
+  character: string;
+  episode_count: number;
+}
+
+interface CrewMember {
+  adult: boolean;
+  gender: number;
+  id: number;
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number;
+  profile_path: string | null;
+  jobs: Job[];
+  department: string;
+  total_episode_count: number;
+}
+
+interface Job {
+  credit_id: string;
+  job: string;
+  episode_count: number;
+}
+
+interface AlternativeTitles {
+  results: AlternativeTitle[];
+}
+
+interface AlternativeTitle {
+  iso_3166_1: string;
+  title: string;
+  type: string;
+}
+
+interface Changes {
+  changes: Change[];
+}
+
+interface Change {
+  key: string;
+  items: ChangeItem[];
+}
+
+interface ChangeItem {
+  id: string;
+  action: string;
+  time: string;
+  iso_639_1: string;
+  iso_3166_1: string;
+  value: any;
+  original_value?: any;
+}
+
+interface ContentRatings {
+  results: any[];
+}
+
+interface Credits {
+  cast: CastMember[];
+  crew: CrewMember[];
+}
+
+interface EpisodeGroups {
+  results: any[];
+}
+
+interface ExternalIds {
+  imdb_id: string | null;
+  freebase_mid: string | null;
+  freebase_id: string | null;
+  tvdb_id: number | null;
+  tvrage_id: number | null;
+  wikidata_id: string | null;
+  facebook_id: string | null;
+  instagram_id: string | null;
+  twitter_id: string | null;
+}
+
+interface Images {
+  backdrops: any[];
+  logos: any[];
+  posters: any[];
+}
+
+interface Keywords {
+  results: Keyword[];
+}
+
+interface Keyword {
+  name: string;
+  id: number;
+}
+
+interface Lists {
+  page: number;
+  results: List[];
+  total_pages: number;
+  total_results: number;
+}
+
+interface TMDBList {
+  description: string;
+  favorite_count: number;
+  id: number;
+  item_count: number;
+  iso_639_1: string;
+  iso_3166_1: string;
+  name: string;
+  poster_path: string | null;
+}
+
+interface Recommendations {
+  page: number;
+  results: RecommendedShow[];
+  total_pages: number;
+  total_results: number;
+}
+
+interface RecommendedShow {
+  adult: boolean;
+  backdrop_path: string | null;
+  id: number;
+  name: string;
+  original_language: string;
+  original_name: string;
+  overview: string;
+  poster_path: string | null;
+  media_type: string;
+  genre_ids: number[];
+  popularity: number;
+  first_air_date: string;
+  vote_average: number;
+  vote_count: number;
+  origin_country: string[];
+}
+
+interface Reviews {
+  page: number;
+  results: any[];
+  total_pages: number;
+  total_results: number;
+}
+
+interface ScreenedTheatrically {
+  results: any[];
+}
+
+interface Similar {
+  page: number;
+  results: SimilarShow[];
+  total_pages: number;
+  total_results: number;
+}
+
+interface SimilarShow extends RecommendedShow {}
+
+interface Translations {
+  translations: Translation[];
+}
+
+interface Translation {
+  iso_3166_1: string;
+  iso_639_1: string;
+  name: string;
+  english_name: string;
+  data: TranslationData;
+}
+
+interface TranslationData {
+  name: string;
+  overview: string;
+  homepage: string;
+  tagline: string;
+}
+
+interface Videos {
+  results: Video[];
+}
+
+interface Video {
+  iso_639_1: string;
+  iso_3166_1: string;
+  name: string;
+  key: string;
+  site: string;
+  size: number;
+  type: string;
+  official: boolean;
+  published_at: string;
+  id: string;
+}
+
+interface WatchProviders {
+  results: {
+    [key: string]: {
+      link: string;
+      flatrate?: Provider[];
+      ads?: Provider[];
+    };
+  };
+}
+
+interface Provider {
+  logo_path: string;
+  provider_id: number;
+  provider_name: string;
+  display_priority: number;
+}
+
+export interface TrailerVideo {
+  id: string;
+  iso_639_1: string;
+  iso_3166_1: string;
+  key: string;
+  name: string;
+  official: boolean;
+  published_at: string;
+  site: string;
+  size: number;
+  type: string;
+}
+
+type CountryAndNetwork = {
+  label: string;
+  value: string;
+};
+
+export interface DramaProduction {
+  language: string[];
+  country: CountryAndNetwork[];
+  network: CountryAndNetwork[];
 }

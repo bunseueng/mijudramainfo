@@ -1,7 +1,7 @@
 "use client";
 
 import { external_link } from "@/helper/item-list";
-import { Drama, ExternalLinkType, Movie, movieId, tvId } from "@/helper/type";
+import { ExternalLinkType, Movie, movieId } from "@/helper/type";
 import { TExternalLink, externalLink } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
@@ -11,7 +11,6 @@ import { useForm } from "react-hook-form";
 import { FaShare } from "react-icons/fa6";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdDelete, MdEdit } from "react-icons/md";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
@@ -30,7 +29,6 @@ const ExternalLink: React.FC<movieId & Movie> = ({
   const [selectedExternal, setSelectedExternal] = useState<string>("");
   const [openExternal, setOpenExternal] = useState<boolean>(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [database, setDatabase] = useState<ExternalLinkType[]>([]);
   const [editingIndexes, setEditingIndexes] = useState<boolean[]>(

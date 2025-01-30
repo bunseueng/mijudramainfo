@@ -15,10 +15,10 @@ const FetchList: React.FC<FetchRecentListProps> = ({
 }) => {
   const fetchDetails = async () => {
     if (tvId) {
-      const tvData = await fetchTv(tvId);
+      const tvData = await fetchTv(tvId.toString());
       return { item: tvData, mediaType: "tv" };
     } else if (movieId) {
-      const movieData = await fetchMovie(movieId);
+      const movieData = await fetchMovie(movieId.toString());
       return { item: movieData, mediaType: "movie" };
     }
     return null;

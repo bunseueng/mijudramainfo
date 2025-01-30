@@ -5,7 +5,7 @@ import { IoClose } from "react-icons/io5";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { Controller, useForm } from "react-hook-form";
-import { AddSeason, Drama, ITmdbDrama } from "@/helper/type";
+import { AddSeason, Drama, TVShow } from "@/helper/type";
 import { JsonValue } from "@prisma/client/runtime/library";
 import ReactDatePicker from "react-datepicker";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
@@ -13,8 +13,7 @@ import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 interface EditModal {
   idx: number;
   setOpenEditModal: (open: boolean) => void;
-  openEditModal: boolean;
-  item: ITmdbDrama[];
+  item: TVShow[];
   setStoredData: (data: AddSeason[]) => void;
   storedData: AddSeason[];
   setIsItemDataChanged: (data: boolean[]) => void;
@@ -23,13 +22,11 @@ interface EditModal {
   setMarkedForDeletion: (data: boolean[]) => void;
   defaultValue: AddSeason | undefined;
   setTvDatabase: (data: JsonValue[] | undefined) => void;
-  tvDatabase: JsonValue[] | undefined;
 }
 
 const EditSeasonModal: React.FC<EditModal> = ({
   idx,
   setOpenEditModal,
-  openEditModal,
   item,
   setStoredData,
   storedData,
@@ -39,7 +36,6 @@ const EditSeasonModal: React.FC<EditModal> = ({
   setMarkedForDeletion,
   defaultValue,
   setTvDatabase,
-  tvDatabase,
 }) => {
   const [epStart, setEpStart] = useState<number>(1);
   const [epEnd, setEpEnd] = useState<number>(1);

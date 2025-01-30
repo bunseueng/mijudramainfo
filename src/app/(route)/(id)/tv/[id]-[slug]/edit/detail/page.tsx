@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-import prisma from "@/lib/db";
 import TvEditList from "../detail/TvEditList";
 import TvEdit from "../detail/TvEdit";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
@@ -10,11 +9,9 @@ import { getDramaData } from "@/app/actions/tvActions";
 
 export const maxDuration = 60;
 export const revalidate = 3600;
-export async function generateMetadata(
-  props: {
-    params: Promise<{ "id]-[slug": string }>;
-  }
-): Promise<Metadata> {
+export async function generateMetadata(props: {
+  params: Promise<{ "id]-[slug": string }>;
+}): Promise<Metadata> {
   const params = await props.params;
   if (!params["id]-[slug"]) {
     throw new Error("TV ID and slug are missing.");
@@ -72,11 +69,9 @@ export async function generateMetadata(
     },
   };
 }
-const PrimaryDetailsPage = async (
-  props: {
-    params: Promise<{ "id]-[slug": string }>;
-  }
-) => {
+const PrimaryDetailsPage = async (props: {
+  params: Promise<{ "id]-[slug": string }>;
+}) => {
   const params = await props.params;
   if (!params["id]-[slug"]) {
     throw new Error("TV ID and slug are missing.");
@@ -87,7 +82,7 @@ const PrimaryDetailsPage = async (
   return (
     <Suspense key={tv_id} fallback={<SearchLoading />}>
       <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10 px-2 md:px-5">
-        <TvEdit tv_id={tv_id} />
+        <TvEdit tv_id={tv_id} tvDetails={getDrama} />
         <TvEditList tv_id={tv_id} tvDetails={getDrama} />
       </div>
     </Suspense>

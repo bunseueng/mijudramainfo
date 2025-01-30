@@ -53,21 +53,36 @@ export async function PUT(req: Request, props: {params: Promise<{id: string}>}) 
     }
 }
 
-export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
-    const params = await props.params;
+
+export async function POST(req: Request) {
     try {
-      const person = await prisma.person.findUnique({
-        where: {
-          personId: params.id,
-        },
-      });
+      const { ids } = await req.json()
   
-      if (!person) {
-        return NextResponse.json({ message: "Person not found" }, { status: 404 });
+      if (!Array.isArray(ids)) {
+        return NextResponse.json({ message: "Invalid input: 'ids' must be an array" }, { status: 400 })
       }
   
-      return NextResponse.json(person, { status: 200 });
+      const persons = await prisma.person.findMany({
+        where: {
+          personId: {
+            in: ids.map((id) => id.toString()),
+          },
+        },
+      })
+  
+      // If you need to fetch additional data for each person, you can do it here
+      const personsWithAdditionalData = await Promise.all(
+        persons.map(async (person) => {
+          // Example: Fetch additional data for each person
+          // Replace this with your actual data fetching logic
+          return { ...person }
+        }),
+      )
+      return NextResponse.json(personsWithAdditionalData, { status: 200 })
     } catch (error) {
-      return NextResponse.json(error, { status: 500 });
+      console.error("Error fetching persons:", error)
+      return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    } finally {
+      await prisma.$disconnect()
     }
-}
+  }

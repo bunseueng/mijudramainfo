@@ -1,12 +1,9 @@
 "use client";
 
-import ColorThief from "colorthief";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa6";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
-import { fetchMovie } from "@/app/actions/fetchMovieApi";
 import { VscQuestion } from "react-icons/vsc";
 import { movieVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
@@ -17,31 +14,23 @@ import MovieClips from "./clips/Clips";
 import MovieBehindTheScenes from "./behind_the_scenes/BehindTheScenes";
 import MovieBloopers from "./bloopers/Bloopers";
 import MovieFeaturettes from "./featurettes/Featurettes";
-import LazyImage from "@/components/ui/lazyimage";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useMovieData } from "@/hooks/useMovieData";
 
 interface TvTrailerType {
   movie_id: string;
   movieDB: MovieDB | null;
-  getMovie: MovieDB[];
 }
 
-const MovieVideo: React.FC<TvTrailerType> = ({
-  movie_id,
-  movieDB,
-  getMovie,
-}) => {
-  const { data: movie, isLoading } = useQuery({
-    queryKey: ["movie", movie_id],
-    queryFn: () => fetchMovie(movie_id),
-  });
-
+const MovieVideo: React.FC<TvTrailerType> = ({ movie_id, movieDB }) => {
+  const { movie, isLoading } = useMovieData(movie_id);
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
   const [currentPage, setCurrentPage] = useState("/trailers");
   const router = useRouter();
   const pathname = usePathname();
-  const coverFromDB = getMovie?.find((g) => g?.movie_id?.includes(movie_id));
+  const getColorFromImage = useColorFromImage();
 
   const handleNavigation = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -60,35 +49,24 @@ const MovieVideo: React.FC<TvTrailerType> = ({
     }
   }, [pathname]);
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        coverFromDB
-          ? (coverFromDB?.cover as string)
-          : `https://image.tmdb.org/t/p/${
-              movie?.poster_path ? "w500" : "w780"
-            }/${movie?.poster_path || movie?.backdrop_path}`
-      );
-      setDominantColor(color); // Set the dominant color in RGB format
+      const imageUrl =
+        movieDB?.cover ||
+        `https://image.tmdb.org/t/p/${movie?.backdrop_path ? "w300" : "w92"}/${
+          movie?.backdrop_path || movie?.poster_path
+        }`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const color = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(color);
     }
-  }, [coverFromDB, movie?.backdrop_path, movie?.poster_path]);
+  }, [
+    movieDB?.cover,
+    movie?.backdrop_path,
+    movie?.poster_path,
+    getColorFromImage,
+  ]);
+
   // Ensure the image element is referenced correctly
   useEffect(() => {
     if (imgRef.current) {
@@ -114,7 +92,7 @@ const MovieVideo: React.FC<TvTrailerType> = ({
         <div className="max-w-6xl mx-auto flex items-center mt-0 px-2 py-2">
           <div className="flex items-center lg:items-start px-2 cursor-default">
             {movie?.poster_path || movie?.backdrop_path !== null ? (
-              <LazyImage
+              <Image
                 ref={imgRef} // Set the reference to the image
                 src={`https://image.tmdb.org/t/p/${
                   movie?.poster_path ? "w154" : "w300"
@@ -155,7 +133,7 @@ const MovieVideo: React.FC<TvTrailerType> = ({
         </div>
       </div>
       <div className="max-w-6xl mx-auto">
-        <div className="relative float-left w-full md:w-[25%] py-3 px-4">
+        <div className="relative float-left w-full md:w-[25%] py-3 px-4 my-10">
           <div
             className="bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#242527] rounded-sm px-4 py-2"
             style={{ backgroundColor: dominantColor as string | undefined }}

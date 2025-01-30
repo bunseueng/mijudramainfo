@@ -1,3 +1,4 @@
+import { getGenreName } from "@/lib/getGenres";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
@@ -5,7 +6,6 @@ import React from "react";
 
 interface HoemCardHover {
   categoryData: any;
-  categoryDataDetails: any;
   path: string;
   dominantColor: { [key: string]: string };
   getRating: (result: any) => string;
@@ -14,7 +14,6 @@ interface HoemCardHover {
 }
 const HomeCardHover = ({
   categoryData,
-  categoryDataDetails,
   path,
   dominantColor,
   getRating,
@@ -44,6 +43,7 @@ const HomeCardHover = ({
           >
             <div className="w-full">
               <Link
+                prefetch={false}
                 aria-label={`Visit ${result?.name || result?.title}?`}
                 href={`/${path}/${result?.id}-${spaceToHyphen(
                   result?.name || result?.title
@@ -97,17 +97,17 @@ const HomeCardHover = ({
                     </div>
 
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {categoryDataDetails
-                        ?.find((data: any) => data.id === result?.id)
-                        ?.genres?.slice(0, 3)
-                        .map((genre: any) => (
+                      {result.genre_ids.map((genreId: string) => {
+                        const genreName = getGenreName(genreId);
+                        return genreName ? (
                           <span
-                            key={genre.id}
+                            key={genreId}
                             className="text-xs px-2 py-1 bg-gray-700/50 text-gray-200 rounded"
                           >
-                            {genre.name}
+                            {genreName}
                           </span>
-                        ))}
+                        ) : null;
+                      })}
                     </div>
 
                     <section className="flex flex-wrap justify-end content-between w-full h-[118px] mt-2 grow">

@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { usePathname, useRouter } from "next/navigation";
-import { ITmdbDrama, UserProps } from "@/helper/type";
+import { TVShow, UserProps } from "@/helper/type";
 
 type RatingModalProps = {
   setModal: Dispatch<SetStateAction<boolean>>;
@@ -26,7 +26,7 @@ type RatingModalProps = {
   id: string;
   user: UserProps | null;
   userRating: any;
-  tv: ITmdbDrama;
+  tv: TVShow;
   tvName: string;
   tvItems: any;
 };

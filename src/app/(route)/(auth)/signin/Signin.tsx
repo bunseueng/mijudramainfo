@@ -67,7 +67,7 @@ const Signin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <AnimatedBackground
         animationName="starryNight"
         style={{ position: "absolute", zIndex: "0" }}

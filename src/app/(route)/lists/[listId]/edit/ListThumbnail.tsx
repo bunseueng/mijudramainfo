@@ -85,7 +85,7 @@ const ListThumbnail: React.FC<ListThumbnailProps> = ({
                       }`
                     : "/empty-img.jpg"
                 }`}
-                alt={`${result?.name || result?.title} image`}
+                alt={`${result?.name || result?.title} image` || "Drama Poster"}
                 width={400}
                 height={400}
                 quality={100}

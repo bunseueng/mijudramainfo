@@ -83,7 +83,7 @@ const MovieCamera = ({ camera, cameraDB }: any) => {
                     {item.profile_path === null ? (
                       <Image
                         src="/default-pf.jpg"
-                        alt={`${item?.name}'s Profile`}
+                        alt={`${item?.name}'s Profile` || "Person Profile"}
                         width={200}
                         height={200}
                         quality={100}
@@ -92,7 +92,7 @@ const MovieCamera = ({ camera, cameraDB }: any) => {
                     ) : (
                       <Image
                         src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                        alt={`${item?.name}'s Profile`}
+                        alt={`${item?.name}'s Profile` || "Person Profile"}
                         width={200}
                         height={200}
                         quality={100}

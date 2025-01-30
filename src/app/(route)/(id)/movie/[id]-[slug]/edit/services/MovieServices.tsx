@@ -1,18 +1,14 @@
 "use client";
 
 import {
-  fetchMovie,
-  fetchMovieWatchProvider,
-} from "@/app/actions/fetchMovieApi";
-import {
   EditDramaPage,
   EditPageDefaultvalue,
   Movie,
   movieId,
 } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
+import { useMovieData } from "@/hooks/useMovieData";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -23,7 +19,6 @@ import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { GrPowerReset } from "react-icons/gr";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 const TvAddModal = dynamic(
   () => import("@/app/component/ui/Modal/TvAddModal"),
@@ -47,21 +42,11 @@ const MovieServices: React.FC<movieId & Movie> = ({
   movie_id,
   movieDetails,
 }) => {
-  const { data: movie, refetch } = useQuery({
-    queryKey: ["movieEdit", movie_id],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: watchProvider } = useQuery({
-    queryKey: ["watchProvider", movie_id],
-    queryFn: () => fetchMovieWatchProvider(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-
+  const { movie } = useMovieData(movie_id);
+  const watchProvider = useMemo(
+    () => movie["watch/providers"]?.results || [],
+    [movie]
+  );
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
   const combinedProviders: ProviderWithServiceType[] = useMemo(() => {
     return [
@@ -275,10 +260,6 @@ const MovieServices: React.FC<movieId & Movie> = ({
     fetchCountryAndSetProvider();
   }, [watchProvider]);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">Services</h1>
@@ -473,7 +454,6 @@ const MovieServices: React.FC<movieId & Movie> = ({
                         </button>
                         {openEditModal && deleteIndex === idx && (
                           <TvEditModal
-                            tv={movie}
                             setOpenEditModal={setOpenEditModal}
                             openEditModal={openEditModal}
                             show={[drama[deleteIndex]]}

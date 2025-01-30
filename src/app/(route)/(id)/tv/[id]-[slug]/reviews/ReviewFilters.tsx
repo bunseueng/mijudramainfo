@@ -220,6 +220,7 @@ const ReviewFilters: React.FC<ReviewFiltersProps> = ({
 
         {/* Write Review Button */}
         <Link
+          prefetch={false}
           href={`/tv/${tv_id}/write_reviews`}
           className="text-xs md:text-base float-none relative inline-block md:float-right text-white bg-[#409eff] border border-[#409eff] rounded-md px-4 py-2 mt-5 md:mt-0"
         >

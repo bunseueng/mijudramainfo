@@ -3,8 +3,7 @@
 const AdBanner = dynamic(() => import("../Adsense/AdBanner"), { ssr: false });
 import { DramaPagination } from "@/app/component/ui/Pagination/DramaPagination";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, Suspense } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Link from "next/link";
@@ -13,12 +12,8 @@ import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import dynamic from "next/dynamic";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import TopActor from "../Main/TopActor";
-import { MovieDB, PersonDBType } from "@/helper/type";
-import PlayMovieTrailer from "@/app/(route)/(drama)/movie/top/PlayMovieTrailer";
-const PlayTrailer = dynamic(
-  () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
-  { ssr: false }
-);
+import { MovieDB, PersonDBType, TVShow } from "@/helper/type";
+import PlayMovieTrailer from "@/app/(route)/(id)/movie/[id]-[slug]/PlayMovieTrailer";
 const DramaFilter = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/DramaFilter"),
   { ssr: false }
@@ -29,76 +24,29 @@ const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
 
 type ExploreMovieCardProps = {
   title: string;
-  movie: any;
+  totalItems: TVShow[];
   total_results: number;
   getMovie: MovieDB[];
   personDB: PersonDBType[];
+  tvRating: any;
+  per_page: number;
+  setPage: Dispatch<SetStateAction<number>>;
+  currentPage: number;
+  items: number;
 };
 
 const ExploreMovieCard = ({
   title,
-  movie,
   total_results,
   getMovie,
   personDB,
+  totalItems,
+  tvRating,
+  per_page,
+  setPage,
+  currentPage,
+  items,
 }: ExploreMovieCardProps) => {
-  const searchParams = useSearchParams();
-  const currentPage = parseInt(searchParams.get("page") || "1");
-  const [page, setPage] = useState(1);
-  const per_page = searchParams?.get("per_page") || (20 as any);
-  const start = (page - 1) * per_page;
-  const end = start + per_page;
-  const items = movie?.total_results;
-  const totalItems = movie?.results?.slice(start, end) || []; // Use slice on results
-  const [tvRating, setTvRating] = useState<any>();
-
-  useEffect(() => {
-    const fetchRating = async () => {
-      try {
-        if (!movie || !movie.results || movie.results.length === 0) {
-          console.log("No items to fetch ratings for.");
-          return;
-        }
-
-        const tvIds = movie.results.map((item: any) => item.id.toString());
-        const averageRatings: { [key: string]: number } = {};
-
-        for (const id of tvIds) {
-          const getRatings = await fetch(`/api/rating/${id}`);
-          const data = await getRatings.json();
-          const ratings = data?.ratings || [];
-
-          // Filter ratings by tvId
-          const filteredRatings = ratings.filter(
-            (rating: any) => rating.tvId === id.toString()
-          );
-
-          // Get the number of ratings
-          const numberOfRatings = filteredRatings.length;
-
-          // Sum up all the ratings
-          const sumOfRatings = filteredRatings.reduce(
-            (sum: number, rating: any) => sum + rating.rating,
-            0
-          );
-
-          // Calculate the average rating
-          const averageRating =
-            numberOfRatings > 0 ? sumOfRatings / numberOfRatings : 0;
-
-          averageRatings[id] = averageRating;
-          console.log(numberOfRatings);
-        }
-
-        setTvRating(averageRatings);
-      } catch (error) {
-        console.error("Error fetching rating:", error);
-      }
-    };
-
-    fetchRating();
-  }, [movie]);
-
   return (
     <div className="flex flex-col max-w-6xl mx-auto py-4 px-4 lg:px-0 overflow-hidden">
       <div className="w-full md:max-w-[1150px] mx-auto py-5 order-last md:order-first">
@@ -127,6 +75,7 @@ const ExploreMovieCard = ({
                     <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
                       <div className="relative">
                         <Link
+                          prefetch={false}
                           href={`/tv/${movie?.id}-${spaceToHyphen(
                             movie?.title || movie?.name
                           )}`}
@@ -141,7 +90,9 @@ const ExploreMovieCard = ({
                                       movie.poster_path || movie.backdrop_path
                                     }`
                               }
-                              alt={movie?.name || movie?.title}
+                              alt={
+                                movie?.name || movie?.title || "Movie Poster"
+                              }
                               width={200}
                               height={200}
                               style={{ width: "100%", height: "100%" }}
@@ -151,7 +102,9 @@ const ExploreMovieCard = ({
                           ) : (
                             <Image
                               src="/placeholder-image.avif"
-                              alt={movie?.name || movie?.title}
+                              alt={
+                                movie?.name || movie?.title || "Movie Poster"
+                              }
                               width={200}
                               height={200}
                               style={{ width: "100%", height: "100%" }}
@@ -165,7 +118,7 @@ const ExploreMovieCard = ({
                     <div className="pl-2 md:pl-3 w-[80%]">
                       <div className="flex items-center justify-between">
                         <Link
-                          prefetch={true}
+                          prefetch={false}
                           href={`/movie/${movie?.id}-${spaceToHyphen(
                             movie?.title || movie?.name
                           )}`}
@@ -224,11 +177,12 @@ const ExploreMovieCard = ({
                         </p>
                       </div>
                       <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
-                        {movie?.overview}
+                        {movie?.overview ||
+                          "This movie currently has no synosis."}
                       </p>
                       <div className="flex items-center">
                         <Suspense fallback={<div>Loading...</div>}>
-                          <PlayMovieTrailer movie_id={movie?.id} />
+                          <PlayMovieTrailer video={movie?.videos} />
                         </Suspense>
                       </div>
                     </div>

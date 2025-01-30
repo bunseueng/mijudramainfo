@@ -8,20 +8,20 @@ interface NavbarLogoProps {
 
 const NavbarLogo: React.FC<NavbarLogoProps> = ({ setCurrentNav }) => {
   return (
-    <div className="hidden md:flex items-center py-1">
+    <div className="flex items-center py-1">
       <Link
+        prefetch={false}
         href="/"
-        className="flex-shrink-0 font-bold text-xl text-gray-900 dark:text-white gap-1.5"
+        className="flex-shrink-0 font-bold text-xl text-gray-900 dark:text-white"
         onClick={() => setCurrentNav("/")}
         aria-label="Homepage"
       >
         <Image
-          src="/MIJUDRAMAINFO__2_-removebg-preview.png"
+          src="/MIJUDRAMAINFO.png"
           alt="Mijudramainfo Logo"
           width={150}
-          height={10}
-          className="h-8 sm:h-10 w-auto"
-          style={{ maxWidth: "100%", height: "40px" }}
+          height={40}
+          className="w-[100px] h-[27px] sm:w-[120px] sm:h-[32px] md:w-[150px] md:h-[40px] lg:w-[150px] lg:h-[40px] object-contain"
           priority
         />
       </Link>

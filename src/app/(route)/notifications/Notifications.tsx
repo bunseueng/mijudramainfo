@@ -55,7 +55,7 @@ const Notifications: React.FC<IFriend & currentUser & IFindSpecificUser> = ({
     localStorage.setItem(`notificationsRead_${currentUser?.id}`, "true");
   };
   return (
-    <div className="max-w-4xl mx-auto my-10 h-screen px-4 md:px-0">
+    <div className="max-w-6xl mx-auto my-10 h-screen px-4 md:px-0">
       <div className="bg-white dark:bg-[#242526] h-[500px] border-2 border-[#00000024] shadow-md border-sm">
         <div className="flex items-center justify-between px-5">
           <h1 className="text-xl font-bold">All Notifications</h1>
@@ -109,7 +109,7 @@ const Notifications: React.FC<IFriend & currentUser & IFindSpecificUser> = ({
                       >
                         <Image
                           src={user?.profileAvatar || (user?.image as string)}
-                          alt={`${user?.name} image`}
+                          alt={`${user?.name} image` || "User Profile"}
                           width={40}
                           height={40}
                           quality={100}

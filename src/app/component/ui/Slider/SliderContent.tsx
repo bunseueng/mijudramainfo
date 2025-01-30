@@ -7,10 +7,10 @@ import { Info, Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { motion, AnimatePresence } from "framer-motion";
+import { getGenreName } from "@/lib/getGenres";
 
 const SliderContent = ({
   currentItem,
-  tvDetails,
   existingRatings,
   left,
   right,
@@ -52,14 +52,6 @@ const SliderContent = ({
       ? currentItem.vote_average.toFixed(1)
       : "NR";
   }, [currentItem.id, currentItem.vote_average, existingRatings]);
-
-  const genres = useMemo(() => {
-    return (
-      tvDetails
-        ?.find((data: any) => data.id === currentItem?.id)
-        ?.genres?.slice(0, 3) || []
-    );
-  }, [currentItem?.id, tvDetails]);
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -131,7 +123,6 @@ const SliderContent = ({
           currentItem={currentItem}
           itemLink={itemLink}
           getRating={getRating}
-          genres={genres}
           contentVariants={contentVariants}
         />
       )}
@@ -145,7 +136,7 @@ const BackgroundImage = React.memo(
     <div className="w-full h-[98.49%] relative">
       <Images
         src={imageUrl || "/placeholder.svg"}
-        alt={`Poster for ${title}`}
+        alt={`Poster for ${title}` || "Poster"}
         priority={true}
         loading="eager"
         fill
@@ -210,9 +201,9 @@ const OptimizedContentWrapper = React.memo(
           <OptimizedContentDetails
             rating={getRating}
             releaseYear={currentItem?.first_air_date?.split("-")[0]}
-            genres={genres}
             overview={currentItem?.overview}
             itemLink={itemLink}
+            currentItem={currentItem}
           />
         </motion.div>
       </div>
@@ -222,28 +213,31 @@ const OptimizedContentWrapper = React.memo(
 OptimizedContentWrapper.displayName = "OptimizedContentWrapper";
 
 const OptimizedContentDetails = React.memo(
-  ({ rating, releaseYear, genres, overview, itemLink }: any) => {
+  ({ rating, releaseYear, currentItem, overview, itemLink }: any) => {
     const renderGenres = useCallback(
       () =>
-        genres?.map((genre: any) => (
-          <motion.span
-            key={genre.id}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  duration: 0.5,
-                  ease: "easeOut",
+        currentItem.genre_ids.map((genreId: string) => {
+          const genreName = getGenreName(genreId);
+          return genreName ? (
+            <motion.span
+              key={genreId}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    duration: 0.5,
+                    ease: "easeOut",
+                  },
                 },
-              },
-            }}
-            className="bg-orange-500 text-xs px-2 py-1 text-gray-200 rounded"
-          >
-            {genre.name}
-          </motion.span>
-        )),
-      [genres]
+              }}
+              className="bg-orange-500 text-xs px-2 py-1 text-gray-200 rounded"
+            >
+              {genreName}
+            </motion.span>
+          ) : null;
+        }),
+      [currentItem.genre_ids]
     );
 
     return (

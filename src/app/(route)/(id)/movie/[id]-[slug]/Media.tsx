@@ -30,7 +30,7 @@ const MovieMediaPhoto = ({
             }`}
             onClick={() => setMediaActive("videos")}
           >
-            Videos {video?.results?.length}
+            Videos {video?.length}
           </li>
           <li
             className={`text-sm md:text-md font-bold ml-5 md:ml-10 hover:opacity-70 transform duration-300 cursor-pointer list-none ${
@@ -57,13 +57,13 @@ const MovieMediaPhoto = ({
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         {mediaActive === "videos" && (
           <>
-            {video?.results?.length === 0 ? (
+            {video?.length === 0 ? (
               <p className="flex items-center justify-start ">
                 There no video for {movie?.title || movie?.name} yet!
               </p>
             ) : (
               <div className="flex items-center h-[300px] overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap mb-4">
-                {video?.results?.map((item: any, index: number) => (
+                {video?.map((item: any, index: number) => (
                   <div className="w-[533px] h-[300px]" key={index}>
                     <div
                       className="w-[533px] h-[300px] bg-cover bg-center border-2 rounded-lg"

@@ -26,6 +26,7 @@ const NavbarItems: React.FC<NavbarItemsProps> = ({
           onClick={() => setCurrentNav(item.link)}
         >
           <Link
+            prefetch={false}
             href={item.link}
             className={`block py-2 px-2 xl:px-3 text-xs md:text-[16px] font-semibold text-[#FFFFFF] rounded lg:bg-transparent cursor-default ${
               item.link === currentNav &&

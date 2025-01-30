@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Card from "../Card/Card";
 import Person from "../Fetching/Person";
 import { Suspense } from "react";
@@ -41,19 +40,12 @@ export default function Results({
   results,
   items,
   searchQuery,
-  searchParams,
-  fetchMovie,
-  fetchTv,
   BASE_URL,
-  fetchCollection,
-  fetchPersons,
   currentUser,
   getDrama,
   getMovie,
   getPerson,
 }: any) {
-  const path = BASE_URL.split("/").pop();
-
   // Sort results by name similarity
   const sortedResults = [...(results || [])].sort((a, b) => {
     const nameA = (a.title || a.name || "").toLowerCase();
@@ -65,7 +57,6 @@ export default function Results({
 
     return distanceA - distanceB;
   });
-
   return (
     <div className="max-w-6xl relative flex flex-wrap items-center justify-between mx-auto px-4 my-7">
       <div className="w-full h-full flex flex-col md:flex-row justify-between">
@@ -85,6 +76,7 @@ export default function Results({
                     <Card
                       key={idx}
                       result={result}
+                      results={results}
                       searchQuery={searchQuery}
                       BASE_URL={BASE_URL}
                       getDrama={getDrama}

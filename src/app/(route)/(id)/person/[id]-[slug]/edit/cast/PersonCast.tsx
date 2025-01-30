@@ -3,8 +3,6 @@
 import {
   fetchAllCast,
   fetchMultiSearch,
-  fetchPerson,
-  fetchPersonCombinedCredits,
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
 import { castRole, personTVShowRole } from "@/helper/item-list";
@@ -15,7 +13,13 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { CiSearch } from "react-icons/ci";
 import { GiHamburgerMenu } from "react-icons/gi";
@@ -29,6 +33,9 @@ import { GrPowerReset } from "react-icons/gr";
 import { PersonEditList } from "../details/PersonEditList";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import { usePersonData } from "@/hooks/usePersonData";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
@@ -72,24 +79,16 @@ const determineRole = (cast: any, totalEpisodes: number) => {
 };
 
 const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
-  const { data: personDetails } = useQuery({
-    queryKey: ["personEdit", person_id],
-    queryFn: () => fetchPerson(person_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-  });
-  const { data: person, isLoading } = useQuery({
-    queryKey: ["personCredits", person_id],
-    queryFn: () => fetchPersonCombinedCredits(person_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-  });
-  const tvid = person?.cast?.map((item: any) => item?.id);
+  const { person, isLoading } = usePersonData(person_id);
+  const person_credit = useMemo(
+    () => person?.combined_credits || [],
+    [person?.combined_credits]
+  );
+  const tvid = person_credit?.cast?.map((item: any) => item?.id);
   const { data: castData } = useQuery({
     queryKey: ["tv_cast", tvid],
     queryFn: async () => {
       if (!tvid || tvid.length === 0) {
-        console.log("No TV IDs found.");
         return {};
       }
       try {
@@ -100,10 +99,6 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
               const castData = await fetchAllCast(id);
               return { [id]: castData?.cast || [] };
             } catch (fetchError) {
-              console.error(
-                `Error fetching cast data for TV ID ${id}:`,
-                fetchError
-              );
               return { [id]: [] }; // Return an empty array for the specific TV ID if an error occurs
             }
           })
@@ -115,7 +110,6 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
 
         return castObject;
       } catch (error) {
-        console.error("Error in the Promise.all execution:", error);
         return {};
       }
     },
@@ -123,6 +117,7 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
     refetchOnWindowFocus: true, // Refetch when window is focused
     enabled: !!tvid && tvid.length > 0,
   });
+  const [storedData, setStoredData] = useState<CastType[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -130,9 +125,10 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   const [listSearch, setListSearch] = useState<string>("");
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [resetLoading, setResetLoading] = useState<boolean>(false);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
   const [character, setCharacter] = useState<string[]>(
-    person?.cast?.map((role: any) => role?.character) || []
+    person_credit?.cast?.map((role: any) => role?.character) || []
   );
   const [tvIds, setTvIds] = useState<number[]>(person_id ? [] : []);
   const [prevCastRoles, setPrevCastRoles] = useState<string[]>([]);
@@ -171,7 +167,7 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
     queryKey: ["tvAndMovieResult"],
     queryFn: async () => {
       const tvDetails = await Promise.all(
-        tvIds.map(async (id: number) => await fetchTv(id))
+        tvIds.map(async (id: number) => await fetchTv(id.toString()))
       );
       return [...tvDetails];
     },
@@ -179,6 +175,7 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
     refetchOnWindowFocus: true, // Refetch when window is focused
     enabled: true,
   });
+
   const filterDuplicates = (arr: any) => {
     const uniqueIds = new Set();
     return arr.filter((item: any) => {
@@ -190,8 +187,6 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
     });
   };
 
-  const [storedData, setStoredData] = useState<CastType[]>([]);
-
   useEffect(() => {
     if (tvAndMovieResult.length > 0) {
       setStoredData(tvAndMovieResult);
@@ -201,24 +196,32 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   const [item, setItem] = useState(() =>
     [...(personDB?.cast || []), ...storedData].length > 0
       ? [...(personDB?.cast || []), ...storedData]
-      : person?.cast || []
+      : person_credit?.cast || []
   );
+  const [originalItems, setOriginalItems] = useState([...item]); // Keep the original order
+  const [isDragging, setIsDragging] = useState(false); // Track drag state
+  const [hasReordered, setHasReordered] = useState(false); // Track if order has been changed
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [reorderedItems, setReorderedItems] = useState<Set<string>>(new Set());
+  const [originalPositions, setOriginalPositions] = useState<{
+    [key: string]: number;
+  }>({});
 
   useEffect(() => {
-    if (!isLoading && person && person.crew) {
+    if (!isLoading && person_credit && person_credit.crew) {
       if (personDB?.cast?.length && personDB?.cast?.length > 0) {
         setItem(filterDuplicates([...(personDB?.cast || []), ...storedData]));
       } else {
         setItem(
           filterDuplicates([
             ...(personDB?.cast || []),
-            ...person?.cast,
+            ...person_credit?.cast,
             ...storedData,
           ])
         );
       }
     }
-  }, [isLoading, person, storedData, personDB?.cast]);
+  }, [isLoading, person_credit, storedData, personDB?.cast]);
 
   useEffect(() => {
     refetchData();
@@ -273,11 +276,10 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
       setListSearch(""); // Clear the search input
     }
     try {
-      const tvDetail = await fetchTv(parsedId);
+      const tvDetail = await fetchTv(parsedId.toString());
       setItem((prevItems: any) => [...prevItems, tvDetail]);
       setListSearch("");
     } catch (error) {
-      console.error("Error adding related title:", error);
       toast.error("Failed to add related title.");
     }
   };
@@ -348,10 +350,10 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
       } else if (res.status === 400) {
         toast.error("Invalid User");
       } else if (res.status === 500) {
-        console.log("Bad Request");
+        toast.error("Bad Request");
       }
     } catch (error: any) {
-      console.log("Bad Request");
+      toast.error("Bad Request");
       throw new Error(error);
     } finally {
       setSubmitLoading(false);
@@ -404,32 +406,175 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
     setInputFocused(null);
   };
 
-  const handleResetChanges = (ind: number) => {
-    setIsItemChanging((prevIsItemChanging) => {
-      const newIsItemChanging = [...prevIsItemChanging];
-      newIsItemChanging[ind] = false;
-      return newIsItemChanging;
-    });
-    setMarkedForDeletion((prev) =>
-      prev.map((marked, index) => (index === ind ? false : marked))
+  const handleReorder = useCallback(
+    (newOrder: any) => {
+      setItem(newOrder);
+      setHasReordered(true);
+
+      if (draggedItemId) {
+        const originalIndex = originalPositions[draggedItemId];
+        const newIndex = newOrder.findIndex(
+          (item: any) => item.id.toString() === draggedItemId
+        );
+
+        if (originalIndex !== newIndex) {
+          setReorderedItems((prev) => new Set([...prev, draggedItemId]));
+        }
+      }
+    },
+    [draggedItemId, originalPositions]
+  );
+
+  const handleResetChanges = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.preventDefault();
+      try {
+        setResetLoading(true);
+
+        // Clear reordered items first
+        setReorderedItems(new Set());
+
+        // Wait for animation frame to ensure state updates are processed
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            // Reset all states in a single batch
+            setIsItemChanging(Array(originalItems.length).fill(false));
+            setMarkedForDeletion(Array(originalItems.length).fill(false));
+            setHasReordered(false);
+            setIsDragging(false);
+            setDraggedItemId(null);
+            setItem([...originalItems]);
+            setStoredData([]);
+            resolve();
+          });
+        });
+      } catch (error) {
+        toast.error("Failed to reset changes");
+      } finally {
+        setResetLoading(false);
+      }
+    },
+    [originalItems]
+  );
+
+  const handleIndividualReset = useCallback(
+    async (
+      e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+      index: number
+    ) => {
+      e.preventDefault();
+      try {
+        setResetLoading(true);
+        const currentItem = item[index];
+
+        // Clear this item from reordered items first
+        setReorderedItems((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(currentItem.id.toString());
+          return newSet;
+        });
+
+        // Find original index
+        const originalIndex = originalItems.findIndex(
+          (origItem) => origItem.id === currentItem.id
+        );
+
+        if (originalIndex !== -1) {
+          await new Promise<void>((resolve) => {
+            requestAnimationFrame(() => {
+              // Create new array with current state
+              const newItems = [...item];
+              // Remove current item
+              newItems.splice(index, 1);
+              // Insert at original position
+              newItems.splice(originalIndex, 0, {
+                ...originalItems[originalIndex],
+                character: originalItems[originalIndex].character,
+                cast_role: originalItems[originalIndex].cast_role,
+              });
+
+              // Update states
+              setItem(newItems);
+              setIsItemChanging((prev) => {
+                const newChanging = [...prev];
+                newChanging[index] = false;
+                return newChanging;
+              });
+              setMarkedForDeletion((prev) => {
+                const newDeletion = [...prev];
+                newDeletion[index] = false;
+                return newDeletion;
+              });
+              setCastRoles((prev) => {
+                const newRoles = [...prev];
+                newRoles[index] = "";
+                return newRoles;
+              });
+              setCharacter((prev) => {
+                const newCharacters = [...prev];
+                newCharacters[index] = originalItems[index]?.character || "";
+                return newCharacters;
+              });
+              setInputChanged((prev) => {
+                const newChanged = new Set(prev);
+                newChanged.delete(index);
+                return newChanged;
+              });
+              // Update hasReordered state based on remaining reordered items
+              setHasReordered((prev) => {
+                // Only keep hasReordered true if there are other reordered items
+                const remainingReorderedItems = new Set([...reorderedItems]);
+                remainingReorderedItems.delete(currentItem.id.toString());
+                return remainingReorderedItems.size > 0;
+              });
+              resolve();
+            });
+          });
+        }
+      } catch (error) {
+        toast.error("Failed to reset item");
+      } finally {
+        setResetLoading(false);
+      }
+    },
+    [item, originalItems, reorderedItems]
+  );
+
+  const hasChanges = useMemo(() => {
+    if (resetLoading) return false;
+
+    return (
+      hasReordered ||
+      markedForDeletion.some((marked) => marked) ||
+      isItemChanging.some((changing) => changing) ||
+      reorderedItems.size > 0
     );
-    setCastRoles((prevCastRole) => {
-      const newRole = [...prevCastRole];
-      newRole[ind] = prevCastRoles[ind];
-      return newRole;
-    });
-    setCharacter((prevCharacters) => {
-      const newCharacter = [...prevCharacters];
-      newCharacter[ind] = prevCharacter[ind];
-      return newCharacter;
-    });
-    setInputChanged((prevChanged) => {
-      const newChanged = new Set(prevChanged);
-      newChanged.delete(ind); // Remove the index from the changed set
-      return newChanged;
-    });
-    setPrevCharacter([]);
-  };
+  }, [
+    resetLoading,
+    hasReordered,
+    markedForDeletion,
+    isItemChanging,
+    reorderedItems,
+  ]);
+
+  useEffect(() => {
+    // Only update originalItems when item changes and we're not in the middle of reordering
+    if (!hasReordered && item.length > 0) {
+      setOriginalItems([...item]);
+    }
+  }, [item, hasReordered]); // Keep both dependencies
+
+  // Add this effect to handle cleanup
+  useEffect(() => {
+    const cleanup = () => {
+      // Only cleanup if the component is still mounted
+      setReorderedItems(new Set());
+      setResetLoading(false);
+      setIsDragging(false);
+      setDraggedItemId(null);
+    };
+    return cleanup;
+  }, []); // Empty dependency array since this is cleanup
 
   useEffect(() => {
     refetch();
@@ -478,16 +623,16 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                     const matchingData = castData[castId];
                     data = matchingData;
                   } else {
-                    console.log(`No matching data found for ID: ${castId}`);
+                    return null;
                   }
                   const findRole = data?.filter(
-                    (item: any) => item?.name === personDetails?.name
+                    (item: any) => item?.name === person?.name
                   );
                   const roleLogic = findRole?.reduce((acc: any, item: any) => {
                     acc[item.name] = determineRole(item, cast?.episode_count);
                     return acc;
                   }, {});
-                  const personName = personDetails?.name?.toString(); // Replace with the desired person's name
+                  const personName = person?.name?.toString(); // Replace with the desired person's name
                   const roles = roleLogic && roleLogic[personName];
                   const role = castRoles[ind];
                   const roleFromApi =
@@ -502,13 +647,45 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                       as="tr"
                       value={cast}
                       key={cast.id}
-                      whileDrag={{
-                        scale: 1.0,
-                        boxShadow: "0px 5px 15px rgba(0,0,0,0.3)",
-                        backgroundColor: "#c2e7b0",
+                      initial={false}
+                      animate={{
+                        backgroundColor:
+                          reorderedItems.has(cast.id.toString()) &&
+                          !resetLoading
+                            ? "hsl(var(--primary))"
+                            : "transparent",
+                        color:
+                          reorderedItems.has(cast.id.toString()) &&
+                          !resetLoading
+                            ? "hsl(var(--primary-foreground))"
+                            : "inherit",
+                        transition: { duration: 0.2 },
+                        zIndex:
+                          isDragging && draggedItemId === cast.id.toString()
+                            ? 9999
+                            : openDropdown === `cast_role-${ind}`
+                            ? 9998
+                            : 1,
                       }}
-                      className="relative w-full"
-                      style={{ display: "table-row" }}
+                      className="relative border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                      dragListener={
+                        !isItemChanging[ind] && !markedForDeletion[ind]
+                      }
+                      dragConstraints={{ top: 0, bottom: 0 }}
+                      onDragStart={() => {
+                        setIsDragging(true);
+                        setDraggedItemId(cast.id.toString());
+                      }}
+                      onDragEnd={() => {
+                        setIsDragging(false);
+                        setDraggedItemId(null);
+                        setHasReordered(true);
+                        setReorderedItems((prev) => {
+                          const newSet = new Set(prev);
+                          newSet.add(cast.id.toString());
+                          return newSet;
+                        });
+                      }}
                     >
                       <td className="w-3 border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-2 py-3">
                         {!markedForDeletion[ind] && (
@@ -534,17 +711,21 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                                       }`
                                     : "/empty-pf.jpg"
                                 }
-                                alt={cast?.name}
+                                alt={cast?.name || "Cast Profile"}
                                 width={500}
                                 height={500}
                                 quality={100}
+                                loading="lazy"
                                 className="block w-10 h-10 bg-center bg-cover object-cover leading-10 rounded-full align-middle pointer-events-none"
                               />
                             </div>
                             <div>
                               <b>
                                 <Link
-                                  href={`/tv/${cast?.id}`}
+                                  prefetch={false}
+                                  href={`/tv/${cast?.id}-${spaceToHyphen(
+                                    cast?.name
+                                  )}`}
                                   className={`w-full text-sm font-normal  ${
                                     isNew && "text-green-500"
                                   } ${isFocused ? "ring-blue-500" : ""} ${
@@ -564,7 +745,13 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                         </div>
                       </td>
                       <td className="text-left border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
-                        <div className="relative">
+                        <div
+                          className={`relative ${
+                            openDropdown === `cast_role-${ind}`
+                              ? "z-[10000]"
+                              : "z-auto"
+                          }`}
+                        >
                           <div className="relative">
                             <input
                               type="text"
@@ -596,7 +783,7 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="w-full h-[250px] absolute bg-white dark:bg-[#242424] border-[1px] border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-10 custom-scroll"
+                                className="w-full h-[250px] absolute bg-white dark:bg-[#242424] border-[1px] border-[#dcdfe6] dark:border-[#242424] py-1 mt-2 rounded-md z-[10001] custom-scroll"
                                 style={
                                   cast?.genre_ids?.includes(10764) ||
                                   cast?.episode_count > 70
@@ -686,13 +873,9 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                               onChange={(
                                 e: React.ChangeEvent<HTMLInputElement>
                               ) => handleCharacterChange(e, ind)}
-                              value={character[ind] || cast?.character}
+                              value={character[ind] || cast?.character || ""}
                               onFocus={() => handleFocus(ind)}
                               onBlur={handleBlur}
-                              defaultValue={
-                                cast?.character ||
-                                cast?.roles?.map((role: any) => role?.character)
-                              }
                               onDragStart={(e) => e.stopPropagation()}
                               className="w-full text-[#606266] dark:text-white placeholder:text-black dark:placeholder:text-white dark:placeholder:font-bold bg-white dark:bg-[#3a3b3c] detail_placeholder border-[1px] border-[#dcdfe6] dark:border-[#3a3b3c] hover:border-[#c0c4cc] rounded-md outline-none focus:ring-blue-500 focus:border-blue-500 transform duration-300 py-2 px-3 mt-1 cursor-pointer"
                             />
@@ -702,16 +885,15 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                       <td className="text-right border-[#78828c0b] border-t-[1px] border-t-[#06090c21] dark:border-t-[#3e4042] align-top pl-4 py-3">
                         <div className="relative">
                           <div className="relative">
-                            {markedForDeletion[ind] ||
-                            isItemChanging[ind] ||
-                            isChanged ? (
+                            {(markedForDeletion[ind] ||
+                              isItemChanging[ind] ||
+                              isChanged ||
+                              reorderedItems.has(cast.id.toString())) &&
+                            !resetLoading ? (
                               <button
                                 type="button"
                                 className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3 mt-1"
-                                onClick={(e) => {
-                                  e.preventDefault(); // Prevent form submission
-                                  handleResetChanges(ind);
-                                }}
+                                onClick={(e) => handleIndividualReset(e, ind)}
                               >
                                 <GrPowerReset />
                               </button>
@@ -829,33 +1011,43 @@ const PersonCast: React.FC<PersonEditList> = ({ person_id, personDB }) => {
           </div>
         </div>
       </div>
-      <button
-        onClick={handleSubmit(onSubmit)}
-        className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-          tvIds?.length > 0 ||
-          castRoles?.some((role) => role !== undefined) ||
-          character?.some((role) => role !== undefined) ||
-          markedForDeletion?.includes(true) ||
-          isItemChanging?.includes(true)
-            ? "cursor-pointer"
-            : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
-        }`}
-        disabled={
-          tvIds?.length > 0 ||
-          castRoles?.some((role) => role !== undefined) ||
-          character?.some((role) => role !== undefined) ||
-          markedForDeletion?.includes(true) ||
-          isItemChanging?.includes(true)
-            ? false
-            : true
-        }
-      >
-        {submitLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          "Submit"
-        )}
-      </button>
+      <div className="flex items-start">
+        <button
+          name="Submit"
+          onClick={handleSubmit(onSubmit)}
+          className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+            hasChanges
+              ? "cursor-pointer"
+              : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+          }`}
+          disabled={!hasChanges}
+        >
+          {submitLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Submit"
+          )}
+        </button>
+        <button
+          type="button"
+          className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-4 ${
+            hasChanges
+              ? "cursor-pointer"
+              : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
+          }`}
+          onClick={(e) => handleResetChanges(e)}
+          disabled={!hasChanges}
+        >
+          {resetLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <span className="mr-1">
+              <FaRegTrashAlt />
+            </span>
+          )}
+          Reset
+        </button>
+      </div>
     </form>
   );
 };

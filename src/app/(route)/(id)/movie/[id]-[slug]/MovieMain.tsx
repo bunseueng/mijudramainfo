@@ -1,44 +1,46 @@
 "use client";
 
-import {
-  MdBookmarkAdd,
-  MdFormatListBulletedAdd,
-  MdOutlineFavorite,
-} from "react-icons/md";
-import {
-  fetchLanguages,
-  fetchMovie,
-  fetchMovieCastCredit,
-  fetchMovieImages,
-  fetchMovieKeyword,
-  fetchMovieRecommendation,
-  fetchMovieReview,
-  fetchMovieTitle,
-  fetchMovieTrailer,
-  fetchMovieVideos,
-  fetchRecommendation,
-} from "@/app/actions/fetchMovieApi";
-import { useQuery } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import MovieCast from "./MovieCast";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { getTextColor } from "@/app/actions/getTextColor";
-import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import Image from "next/image";
 import { formatDate } from "@/app/actions/formatDate";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
-import RatingModal from "@/app/component/ui/CircleRating/RatingModal";
-import { IoIosAddCircle } from "react-icons/io";
-import Link from "next/link";
-import PlayMovieTrailer from "@/app/(route)/(drama)/movie/top/PlayMovieTrailer";
-import { formatDuration } from "@/app/actions/formattedDuration";
+import {
+  CommentProps,
+  DramaDetails,
+  DramaReleasedInfo,
+  IExistedFavorite,
+  IMovieReview,
+  List,
+  MovieDB,
+  Rating,
+  TrailerVideo,
+  UserProps,
+} from "@/helper/type";
 import MovieList from "./MovieList";
-const CircleRating = dynamic(
-  () => import("@/app/component/ui/CircleRating/CircleRating"),
-  { ssr: false }
-);
+import MovieHeader from "@/app/component/ui/Movie/MovieHeader";
+import MovieRating from "@/app/component/ui/Movie/MovieRating";
+import MovieActions from "@/app/component/ui/Movie/MovieActions";
+import MovieDetails from "@/app/component/ui/Movie/MovieDetails";
+import { useMovieData } from "@/hooks/useMovieData";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+
+type MovieMainProps = {
+  movie_id: string;
+  getMovie: MovieDB | null;
+  user: UserProps | any;
+  users: UserProps[];
+  getComment: CommentProps[];
+  lists: List[];
+  existedFavorite: IExistedFavorite | undefined;
+  existedWatchlist: IExistedFavorite | undefined;
+  existingRatings: Rating[];
+  getReview: IMovieReview[] | any;
+  userRating: Rating[];
+};
 
 const MovieMain = ({
   movie_id,
@@ -52,7 +54,7 @@ const MovieMain = ({
   existingRatings,
   getReview,
   userRating,
-}: any) => {
+}: MovieMainProps) => {
   const [openList, setOpenList] = useState(false);
   const [modal, setModal] = useState<boolean>(false);
   const [dominantColor, setDominantColor] = useState<string | null>(null);
@@ -60,83 +62,16 @@ const MovieMain = ({
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
   const [textColor, setTextColor] = useState("#FFFFFF"); // Default to white text
   const router = useRouter();
-  const { data: movie } = useQuery({
-    queryKey: ["movie", movie_id],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: trailer } = useQuery({
-    queryKey: ["movieTrailer", movie_id],
-    queryFn: () => fetchMovieTrailer(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: cast } = useQuery({
-    queryKey: ["movieCast", movie_id],
-    queryFn: () => fetchMovieCastCredit(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: language } = useQuery({
-    queryKey: ["movieLanguage", movie_id],
-    queryFn: () => fetchLanguages(),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: keyword } = useQuery({
-    queryKey: ["movieKeyword", movie_id],
-    queryFn: () => fetchMovieKeyword(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: title } = useQuery({
-    queryKey: ["movieTitle", movie_id],
-    queryFn: () => fetchMovieTitle(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: review } = useQuery({
-    queryKey: ["movieReview", movie_id],
-    queryFn: () => fetchMovieReview(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: image } = useQuery({
-    queryKey: ["movieImage", movie_id],
-    queryFn: () => fetchMovieImages(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: video } = useQuery({
-    queryKey: ["movieVideo", movie_id],
-    queryFn: () => fetchMovieVideos(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: recommend } = useQuery({
-    queryKey: ["movieRecommend", movie_id],
-    queryFn: () => fetchMovieRecommendation(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: allmovieShows } = useQuery({
-    queryKey: ["allmovieShows"],
-    queryFn: fetchRecommendation,
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+  const getColorFromImage = useColorFromImage();
+  const { movie, isLoading, language } = useMovieData(movie_id);
+  const cast = movie?.credits || {};
+  const keyword = movie?.keywords || {};
+  const title = movie?.alternative_titles?.titles || [];
+  const review = movie?.reviews?.results || [];
+  const image = movie?.images || {};
+  const video = movie?.videos?.results || ([] as TrailerVideo[]);
+  const recommend = movie?.recommendations?.results || [];
+  const allmovieShows = movie?.similar?.results || [];
   // Getting Crew
   const castCredit = cast?.crew?.map((item: any) => item);
   const director = castCredit?.find(
@@ -168,13 +103,13 @@ const MovieMain = ({
     ?.map((key: any, index: number) => {
       const capitalizedKeyword =
         key.name.charAt(0).toUpperCase() + key.name.slice(1);
-      return index === getMovie.genres_tags[0].tag.length - 1
+      return index === getMovie?.genres_tags[0]?.tag.length - 1
         ? capitalizedKeyword
         : capitalizedKeyword + ", ";
     })
     .join("");
-  const genres = movie?.genres;
 
+  const genres = movie?.genres;
   const movieRating = existingRatings?.map((item: any) => item?.rating);
   const sumRating = movieRating?.reduce(
     (acc: any, rating: number) => acc + rating,
@@ -222,7 +157,7 @@ const MovieMain = ({
 
   const onDelete = async () => {
     try {
-      const res = await fetch(`/api/watchlist/${movie?.id}`, {
+      const res = await fetch(`/api/movie/${movie?.id}/watchlist`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -283,49 +218,28 @@ const MovieMain = ({
     }
   };
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const colorString = await getColorFromImage(
-        getMovie?.cover ||
-          `https://image.tmdb.org/t/p/w500/${
-            movie?.poster_path || movie?.backdrop_path
-          }`
-      );
-      // Parse the RGB values from the string
-      const regex = /rgb\((\d+), (\d+), (\d+)\)/;
-      const match = colorString && colorString?.match(regex);
-
-      if (match) {
-        const r = parseInt(match[1]);
-        const g = parseInt(match[2]);
-        const b = parseInt(match[3]);
-        const rgbaColor = `rgba(${r}, ${g}, ${b}, 1)`; // Full opacity
-        const gradientBackground = `linear-gradient(to right, ${rgbaColor}, rgba(${r}, ${g}, ${b}, 0.84) 50%, rgba(${r}, ${g}, ${b}, 0.84) 100%)`;
-        setDominantColor(gradientBackground);
-        const textColor = getTextColor(r, g, b);
-        setTextColor(textColor);
-      } else {
-        console.error("Failed to parse color string:", colorString);
-      }
+      const imageUrl =
+        (getMovie?.cover as string) ||
+        `https://image.tmdb.org/t/p/${movie?.backdrop_path ? "w300" : "w92"}/${
+          movie?.backdrop_path || movie?.poster_path
+        }`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgba(${r}, ${g}, ${b}, 1)`; // Full opacity
+      const gradientBackground = `linear-gradient(to right, ${rgbaColor}, rgba(${r}, ${g}, ${b}, 0.84) 50%, rgba(${r}, ${g}, ${b}, 0.84) 100%)`;
+      setDominantColor(gradientBackground);
+      const textColor = getTextColor(r, g, b);
+      setTextColor(textColor);
+    } else {
+      console.error("Image url undefined");
     }
-  }, [getMovie?.cover, movie?.backdrop_path, movie?.poster_path]);
+  }, [
+    getMovie?.cover,
+    movie?.backdrop_path,
+    movie?.poster_path,
+    getColorFromImage,
+  ]);
 
   // Function to get user country based on IP
   const getUserCountry = async () => {
@@ -389,10 +303,14 @@ const MovieMain = ({
       };
     }
   }, [movie, extractColor]);
+
+  if (isLoading) {
+    return <SearchLoading />;
+  }
   return (
     <section className="relative w-full z-50">
       <div className="w-full h-full">
-        <MovieList movie_id={movie_id} />
+        <MovieList movie_id={movie_id} movie={movie} />
         <div
           className="relative overflow-hidden bg-cover bg-no-repeat h-auto"
           style={{
@@ -405,9 +323,9 @@ const MovieMain = ({
           <div
             className="w-full flex flex-wrap items-center justify-center h-full"
             style={{
-              backgroundImage: dominantColor
-                ? (dominantColor as string | undefined)
-                : "linear-gradient(to right, rgba(24, 40, 72, 1) calc((50vw - 170px) - 340px), rgba(24, 40, 72, 0.84) 50%, rgba(24, 40, 72, 0.84) 100%)",
+              backgroundImage:
+                dominantColor ||
+                "linear-gradient(to right, rgba(24, 40, 72, 1) calc((50vw - 170px) - 340px), rgba(24, 40, 72, 0.84) 50%, rgba(24, 40, 72, 0.84) 100%)",
             }}
           >
             <div className="px-3">
@@ -417,11 +335,11 @@ const MovieMain = ({
                   onLoad={extractColor}
                   src={
                     getMovie?.cover ||
-                    `https://image.tmdb.org/t/p/w500/${
-                      movie?.poster_path || movie?.backdrop_path
-                    }`
+                    `https://image.tmdb.org/t/p/${
+                      movie?.poster_path ? "w500" : "w780"
+                    }/${movie?.poster_path || movie?.backdrop_path}`
                   }
-                  alt={detail?.title || movie?.name}
+                  alt={movie?.name || "Movie Poster"}
                   width={300}
                   height={440}
                   quality={100}
@@ -430,569 +348,60 @@ const MovieMain = ({
                 />
 
                 <div className="md:pl-4 lg:pl-8 py-5">
-                  <div className="relative">
-                    <h2
-                      className="text-3xl font-bold text-white"
-                      style={{ color: textColor }}
-                    >
-                      <span className="cursor-pointer hover:opacity-50 duration-300">
-                        {detail?.title || movie?.title || movie?.name}
-                      </span>{" "}
-                      (
-                      {getYearFromDate(
-                        movie?.first_air_date || movie?.release_date
-                      )}
-                      )
-                    </h2>
-                  </div>
-                  <div className="mb-2 text-sm md:text-md font-bold text-white">
-                    <span
-                      className="cursor-pointer hover:opacity-50 duration-300"
-                      style={{ color: textColor }}
-                    >
-                      {getMovie?.genres_tags?.length > 0
-                        ? getMovie?.genres_tags
-                            ?.map(
-                              (tag: any) =>
-                                tag?.genre
-                                  ?.map((gen: any) => gen?.value)
-                                  .join(", ") // Join genres with commas
-                            )
-                            .join(", ")
-                        : movie?.genres?.length > 0
-                        ? movie?.genres?.map((genre: any, index: number) => {
-                            return index === genres.length - 1
-                              ? genre.name
-                              : genre.name + ", ";
-                          })
-                        : null}
-                    </span>
-                  </div>
-                  <div className="flex flex-col md:flex-row items-start md:items-center py-5">
-                    <CircleRating
-                      rating={
-                        movie && movie.vote_average && calculatedRating
-                          ? (
-                              (movie.vote_average * movie.vote_count +
-                                calculatedRating * calculatedRating) /
-                              (movie.vote_count + calculatedRating)
-                            ).toFixed(1)
-                          : calculatedRating
-                          ? calculatedRating.toFixed(1)
-                          : movie && movie.vote_average
-                          ? movie.vote_average.toFixed(1)
-                          : "NR"
-                      }
-                    />
+                  <MovieHeader
+                    title={movie?.title || movie?.name}
+                    releaseDate={movie?.first_air_date || movie?.release_date}
+                    genres={movie?.genres?.map((g: any) => g.name)}
+                    textColor={textColor}
+                  />
 
-                    <p
-                      className="inline-block text-white text-1xl md:text-md lg:text-1xl font-bold uppercase my-3 md:pl-2 lg:pl-5"
-                      style={{
-                        color: textColor,
-                        width: "auto",
-                        overflow: "hidden",
-                      }}
-                    >
-                      From {movie?.vote_count + existingRatings?.length}
-                      {movie?.vote_count < 2 ? " user" : " users"}
-                    </p>
-                    {userRating.length > 0 ? (
-                      <div
-                        className="group flex items-center justify-center space-2 rating_true reactions_true bg-[#032541] rounded-full cursor-pointer hover:scale-105 transition ease-in-out duration-150 pr-1 pl-4 py-1 md:ml-3"
-                        onClick={() => setModal(!modal)}
-                      >
-                        <div className="flex items-center justify-center">
-                          <div className="flex items-center text-white font-bold cursor-pointer transform">
-                            <div className="flex items-center font-bold">
-                              Your vibe{" "}
-                            </div>
-                            <div className="flex items-center font-bold ml-2">
-                              <span className="text-[#21D07A] text-xl decoration-2 decoration-white">
-                                {userRating[0]?.rating * 10}
-                                <span className="self-start text-xs pt-1">
-                                  %
-                                </span>
-                              </span>
-                            </div>
-                            {userRating[0]?.emojiImg && (
-                              <>
-                                <div className="inline-block mx-2 h-6 w-px bg-white/30"></div>
-                                <ul className="flex items-center justify-between">
-                                  <li className="!mx-0 w-8 h-8 md:w-9 md:h-9 md:bg-[#032541] mt-1">
-                                    <Image
-                                      src={userRating[0]?.emojiImg}
-                                      alt="icon"
-                                      width={100}
-                                      height={100}
-                                      priority
-                                      className="w-6 h-6 md:w-7 md:h-7"
-                                    />
-                                  </li>
-                                </ul>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        className="group flex items-center justify-center space-2 rating_true reactions_true bg-[#032541] rounded-full cursor-pointer hover:scale-105 transition ease-in-out duration-150 pr-4 pl-4 py-[9px] md:ml-3"
-                        onClick={() => setModal(!modal)}
-                      >
-                        <div className="flex items-center justify-center">
-                          <div className="flex items-center text-white font-bold cursor-pointer transform">
-                            <div className="flex items-center font-bold text-xs lg:text-md">
-                              What&apos;s your{" "}
-                              <span className="border-b-[1px] border-b-cyan-500 ml-2 md:ml-0 lg:ml-2 pt-1">
-                                Vibe
-                              </span>
-                              ?{" "}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {modal && (
-                      <RatingModal
-                        modal={modal}
-                        setModal={setModal}
-                        id={movie_id}
-                        user={user}
-                        userRating={userRating}
-                        tv={movie}
-                        tvName={""}
-                        tvItems={undefined}
-                      />
-                    )}
-                  </div>
-                  <div className="flex items-center mt-2 mb-8">
-                    <div className="tooltip p-2 mr-5 rounded-full bg-cyan-600">
-                      <MdFormatListBulletedAdd
-                        size={20}
-                        className="text-white cursor-pointer"
-                        onClick={() => setOpenList(!openList)}
-                      />
-                      {openList ? (
-                        <div className={`${openList && "tooltiptext"}`}>
-                          <div className="flex flex-col items-center">
-                            <Link
-                              href="/lists/create"
-                              className="flex items-center justify-center py-1"
-                            >
-                              <IoIosAddCircle
-                                size={25}
-                                className="text-white"
-                              />
-                              <span className="pl-3">Create New List</span>
-                            </Link>
-                            <span className="pl-3 oveflow-hidden">
-                              Add {movie?.title || movie?.name} to one of your
-                              list
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="tooltiptext">Add to list</span>
-                      )}
-                    </div>
-                    {existedFavorite ? (
-                      <div className="tooltip p-2 mr-5 rounded-full bg-cyan-600">
-                        <MdOutlineFavorite
-                          size={20}
-                          className="text-pink-500 cursor-pointer"
-                          onClick={onDeleteFavorite}
-                        />
-                        <span className="tooltiptext">Mark as favorite</span>
-                      </div>
-                    ) : (
-                      <div className="tooltip p-2 mr-5 rounded-full bg-cyan-600">
-                        <MdOutlineFavorite
-                          size={20}
-                          className="text-slate-200 cursor-pointer"
-                          onClick={onFavorite}
-                        />
-                        <span className="tooltiptext">Mark as favorite</span>
-                      </div>
-                    )}
-                    {existedWatchlist ? (
-                      <div className="tooltip p-2 mr-5 rounded-full bg-cyan-600">
-                        <MdBookmarkAdd
-                          size={20}
-                          className="text-red-500 cursor-pointer"
-                          onClick={onDelete}
-                        />
-                        <span className="tooltiptext">
-                          Remove from your watchlist
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="tooltip p-2 mr-5 rounded-full bg-cyan-600">
-                        <MdBookmarkAdd
-                          size={20}
-                          className="text-white cursor-pointer"
-                          onClick={onSubmit}
-                        />
-                        <span className="tooltiptext">
-                          Add to your watchlist
-                        </span>
-                      </div>
-                    )}
-                    {/* Play Trailer Button  */}
-                    <PlayMovieTrailer trailer={trailer} textColor={textColor} />
-                  </div>
-                  <p
-                    className="font-bold mb-3 text-2xl mt-3"
-                    style={{ color: textColor }}
-                  >
-                    Overview:
-                  </p>
-                  <p
-                    className="text-md text-white mb-3"
-                    style={{ color: textColor }}
-                  >
-                    {detail?.synopsis
-                      ? detail?.synopsis
-                      : movie?.overview !== ""
-                      ? movie?.overview
-                      : `${movie?.name} has no overview yet!`}{" "}
-                    <span>
-                      <Link
-                        href={`/movie/${movie?.id}/edit/detail`}
-                        className="text-sm text-[#2490da] break-words"
-                        shallow
-                        prefetch={false}
-                      >
-                        Edit Translation
-                      </Link>
-                    </span>
-                  </p>
-                  <div className="border-t-[1px] pt-4">
-                    <h1
-                      className="text-white font-bold text-md"
-                      style={{ color: textColor }}
-                    >
-                      Navtive Title:
-                      <span
-                        className="text-sm pl-2 font-semibold text-[#1675b6]"
-                        style={{ color: textColor }}
-                      >
-                        {detail?.native_title
-                          ? detail?.native_title
-                          : movie?.original_title?.length > 0
-                          ? movie?.original_title
-                          : "Native title is not yet added!"}
-                      </span>
-                    </h1>
-                  </div>
-                  <div className="mt-4">
-                    <h1
-                      className="text-white font-bold text-md"
-                      style={{ color: textColor }}
-                    >
-                      Also Known As:
-                      <span
-                        className="text-sm pl-2 font-semibold text-[#1675b6]"
-                        style={{ color: textColor }}
-                      >
-                        {detail?.known_as?.length > 0
-                          ? detail?.known_as?.map((known, idx) => (
-                              <span key={idx}>
-                                {idx > 0 && ", "}
-                                {known}
-                              </span>
-                            ))
-                          : title?.titles?.length > 0
-                          ? title?.titles?.map((title: any, index: number) => (
-                              <span key={index}>
-                                {index > 0 && ", "}
-                                {title?.title}
-                              </span>
-                            ))
-                          : "Not yet added!"}
-                      </span>
-                    </h1>
-                  </div>
-                  <div className="mt-4">
-                    <h1
-                      className="text-white font-bold text-md"
-                      style={{ color: textColor }}
-                    >
-                      Director:
-                      <span
-                        className="text-sm pl-2 font-semibold text-[#1675b6]"
-                        style={{ color: textColor }}
-                      >
-                        {getMovie?.crew?.length > 0
-                          ? getMovie?.crew?.find(
-                              (crew: any) => crew?.department === "Directing"
-                            )?.name
-                          : director?.name?.length > 0
-                          ? director?.name
-                          : "Director is not yet added!"}
-                      </span>
-                    </h1>
-                  </div>
-                  <div className="mt-4">
-                    <h1
-                      className="text-white font-bold text-md"
-                      style={{ color: textColor }}
-                    >
-                      Screenwriter:
-                      <span
-                        className="text-sm pl-2 font-semibold text-[#1675b6]"
-                        style={{ color: textColor }}
-                      >
-                        {getMovie?.crew?.length > 0
-                          ? getMovie?.crew?.find(
-                              (crew: any) =>
-                                crew?.jobs &&
-                                crew?.jobs[0]?.job === "Screenstory"
-                            )?.name
-                          : screenwriter?.name?.length > 0
-                          ? screenwriter?.name
-                          : "Screenwirter is not yet added!"}
-                      </span>
-                    </h1>
-                  </div>
-                  <div className="mt-4">
-                    <h1
-                      className="text-white font-bold text-md"
-                      style={{ color: textColor }}
-                    >
-                      Genres:
-                      <span
-                        className="text-sm pl-2 font-semibold text-[#1675b6]"
-                        style={{ color: textColor }}
-                      >
-                        {getMovie?.genres_tags?.length > 0
-                          ? getMovie?.genres_tags
-                              ?.map(
-                                (tag: any) =>
-                                  tag?.genre
-                                    ?.map((gen: any) => gen?.value)
-                                    .join(", ") // Join genres with commas
-                              )
-                              .join(", ")
-                          : movie?.genres?.length > 0
-                          ? movie?.genres?.map((genre: any, index: number) => {
-                              return index === genres.length - 1
-                                ? genre.name
-                                : genre.name + ", ";
-                            })
-                          : "Genres not yet added!"}
-                      </span>
-                    </h1>
-                  </div>
-                  <div className="mt-4">
-                    <h1
-                      className="text-white font-bold text-md"
-                      style={{ color: textColor }}
-                    >
-                      Tags:
-                      <span
-                        className="text-sm pl-2 font-semibold text-[#1675b6]"
-                        style={{ color: textColor }}
-                      >
-                        {getMovie?.genres_tags?.length > 0
-                          ? formattedKeywordsDB
-                          : formattedKeywords?.length > 0
-                          ? formattedKeywords
-                          : "Tags is not yet added!"}
-                      </span>
-                    </h1>
-                  </div>
-                  <div className="md:hidden">
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Country:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {detail?.title || matchedLanguage?.english_name}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Aired:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {getMovie?.released_information?.length > 0
-                            ? formattedLastAirDate
-                              ? `${formattedFirstAirDateDB} - ${formattedLastAirDateDB}`
-                              : formattedFirstAirDateDB
-                            : formattedLastAirDateDB
-                            ? `${formattedFirstAirDate} - ${formattedLastAirDate}`
-                            : formattedFirstAirDate}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Airs On:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {info?.broadcast?.length > 0
-                            ? info?.broadcast
-                                ?.map((broad) => broad?.day)
-                                ?.join(", ")
-                            : "?"}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Budget:{" "}
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          }).format(movie?.budget)}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Revenue:{" "}
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          }).format(movie?.revenue)}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Duration:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {movie?.runtime
-                            ? formatDuration(movie?.runtime)
-                            : "Duration not yet added."}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Content Rating:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {certification === "N/A"
-                            ? "Not Yet Rated"
-                            : `${certification} or older`}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Status:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {getMovie?.details?.length > 0
-                            ? detail?.status
-                            : movie?.status === "Returning Series"
-                            ? "Ongoing"
-                            : movie?.status}
-                        </span>
-                      </h1>
-                    </div>
+                  <MovieRating
+                    movie={movie}
+                    calculatedRating={calculatedRating}
+                    existingRatings={existingRatings}
+                    userRating={userRating}
+                    modal={modal}
+                    setModal={setModal}
+                    textColor={textColor}
+                    user={user}
+                    movie_id={movie_id}
+                  />
 
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Score:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          {movie?.vote_average?.toFixed(1)}{" "}
-                          {movie?.vote_average === 0
-                            ? ""
-                            : `(scored by ${movie?.vote_count} ${
-                                movie?.vote_count < 2 ? " user" : " users"
-                              })`}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Ranked:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          #{!rank ? "10000+" : rank}
-                        </span>
-                      </h1>
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        className="text-white font-bold text-md"
-                        style={{ color: textColor }}
-                      >
-                        Popularity:
-                        <span
-                          className="text-sm pl-2 font-semibold text-[#1675b6]"
-                          style={{ color: textColor }}
-                        >
-                          #{movie?.popularity}
-                        </span>
-                      </h1>
-                    </div>
-                  </div>
+                  <MovieActions
+                    openList={openList}
+                    setOpenList={setOpenList}
+                    existedFavorite={existedFavorite}
+                    existedWatchlist={existedWatchlist}
+                    onFavorite={onFavorite}
+                    onDeleteFavorite={onDeleteFavorite}
+                    onSubmit={onSubmit}
+                    onDelete={onDelete}
+                    video={video}
+                    movieTitle={movie?.title || movie?.name}
+                  />
+
+                  <MovieDetails
+                    getMovie={getMovie}
+                    movie={movie}
+                    detail={detail}
+                    textColor={textColor}
+                    director={director}
+                    screenwriter={screenwriter}
+                    genres={genres}
+                    title={title}
+                    formattedKeywords={formattedKeywords}
+                    formattedKeywordsDB={formattedKeywordsDB}
+                    matchedLanguage={matchedLanguage}
+                    formattedLastAirDate={formattedLastAirDate}
+                    formattedFirstAirDateDB={formattedFirstAirDateDB}
+                    formattedLastAirDateDB={formattedLastAirDateDB}
+                    rank={rank}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        {/* Cast */}
       </div>
       <div>
         <MovieCast

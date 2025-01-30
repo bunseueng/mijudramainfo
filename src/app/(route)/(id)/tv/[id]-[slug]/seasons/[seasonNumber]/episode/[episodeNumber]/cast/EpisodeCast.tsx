@@ -5,20 +5,21 @@ import {
   fetchSeasonEpisode,
   fetchTv,
 } from "@/app/actions/fetchMovieApi";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import LazyImage from "@/components/ui/lazyimage";
+import { tvId } from "@/helper/type";
+import { useDramaData } from "@/hooks/useDramaData";
 import { useQuery } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-const EpisodeCast = () => {
+const EpisodeCast = ({ tv_id }: tvId) => {
+  const { tv, isLoading } = useDramaData(tv_id);
   const [episode, setEpisode] = useState<any>();
   const router = useRouter();
-
   const pathParts =
     typeof window !== "undefined" ? window.location.pathname.split("/") : [];
-  const tv_id = pathParts[2]; // Assuming the tv_id is at index 2 in the path
   const season_number = pathParts[4]; // Assuming the season number is at index 4 in the path
   const episodes = pathParts[6]; // Assuming the episode  is at index 4 in the path
 
@@ -37,15 +38,6 @@ const EpisodeCast = () => {
     refetchOnWindowFocus: true, // Refetch when window is focused
     refetchOnMount: true, // Refetch on mount to get the latest data
   });
-
-  const { data: tv } = useQuery({
-    queryKey: ["tv"],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-
   const getYearFromDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.getFullYear();
@@ -71,6 +63,9 @@ const EpisodeCast = () => {
     }
   };
 
+  if (isLoading) {
+    return <SearchLoading />;
+  }
   return (
     <div>
       <div className="bg-cyan-600">
@@ -80,7 +75,7 @@ const EpisodeCast = () => {
               src={`https://image.tmdb.org/t/p/${
                 tv?.poster_path ? "w92" : "w300"
               }/${tv?.poster_path || tv?.backdrop_path}`}
-              alt={`${tv?.name || tv?.title}'s Poster`}
+              alt={`${tv?.name || tv?.title}'s Poster` || "Drama Poster"}
               width={50}
               height={50}
               quality={100}
@@ -131,7 +126,9 @@ const EpisodeCast = () => {
               <div className="flex items-center" key={idx}>
                 <LazyImage
                   src={`https://image.tmdb.org/t/p/w185/${item?.profile_path}`}
-                  alt={`${item?.name || item?.title}'s Profile`}
+                  alt={
+                    `${item?.name || item?.title}'s Profile` || "Person Profile"
+                  }
                   width={100}
                   height={100}
                   quality={100}
@@ -157,7 +154,10 @@ const EpisodeCast = () => {
                   <div className="flex items-center" key={idx}>
                     <LazyImage
                       src={`https://image.tmdb.org/t/p/w185/${item?.profile_path}`}
-                      alt={`${item?.name || item?.title}'s Profile`}
+                      alt={
+                        `${item?.name || item?.title}'s Profile` ||
+                        "Person Profile"
+                      }
                       width={100}
                       height={100}
                       quality={100}
@@ -183,7 +183,10 @@ const EpisodeCast = () => {
                   <div className="flex items-center" key={idx}>
                     <LazyImage
                       src={`https://image.tmdb.org/t/p/w185/${item?.profile_path}`}
-                      alt={`${item?.name || item?.title}'s Profile`}
+                      alt={
+                        `${item?.name || item?.title}'s Profile` ||
+                        "Person Profile"
+                      }
                       width={100}
                       height={100}
                       quality={100}

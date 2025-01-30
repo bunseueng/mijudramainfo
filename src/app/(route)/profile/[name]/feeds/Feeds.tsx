@@ -41,7 +41,6 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { fetchMultiSearch } from "@/app/actions/fetchMovieApi";
 import { useQuery } from "@tanstack/react-query";
-import FetchingTv from "@/app/component/ui/Fetching/FetchingTv";
 import { toast } from "react-toastify";
 import { formatDate } from "@/app/actions/formatDate";
 import ShowCard from "./ShowCard";
@@ -52,6 +51,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProfileFeedsType, TProfileFeeds } from "@/helper/zod";
+import FetchingPersonSearch from "@/app/component/ui/Fetching/FetchingPersonSearch";
 
 type FeedsProps = {
   user: UserProps;
@@ -79,17 +79,16 @@ export default function Feeds({
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean[]>([]);
   const [revealedItems, setRevealedItems] = useState<boolean[]>([]);
   const [revealedComment, setRevealedComment] = useState<boolean[]>([]);
-  const [tvIds, setTvIds] = useState<number[]>([]);
+  const [mediaIds, setMediaIds] = useState<number[]>([]);
   const [storedData, setStoredData] = useState<any[]>([]);
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [shareUrl, setShareUrl] = useState("");
   const [feedId, setFeedId] = useState<string>("");
   const pathname = usePathname();
   const router = useRouter();
-  const setQuery = "query";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchQuery = useSearchParams();
-  const query = searchQuery?.get("query") || "";
+  const query = searchQuery?.get("q") || "";
   const { register, handleSubmit } = useForm<TProfileFeeds>({
     resolver: zodResolver(ProfileFeedsType),
   });
@@ -323,13 +322,13 @@ export default function Feeds({
           </div>
           {storedData?.length > 0 === false && (
             <div className="block relative">
-              <FetchingTv
+              <FetchingPersonSearch
                 dynamicSearch={dynamicSearch}
                 isFetching={isFetching}
                 searchQuery={searchQuery as string | any}
                 openSearch={openSearch}
-                tvIds={[]}
-                setTvIds={setTvIds}
+                mediaIds={mediaIds}
+                setMediaIds={setMediaIds}
                 setStoredData={setStoredData}
                 setItem={function (item: any): void {
                   throw new Error("Function not implemented.");
@@ -383,7 +382,7 @@ export default function Feeds({
           })}
         </CardContent>
         <CardFooter className="!p-2">
-          <Button type="button" onClick={createPost}>
+          <Button type="button" onClick={createPost} className="ml-4">
             {loading["post"] ? (
               <ClipLoader color="#c3c3c3" loading={loading["post"]} size={14} />
             ) : (
@@ -429,8 +428,8 @@ export default function Feeds({
                     user={user}
                     currentUser={currentUser}
                     openSearch={openSearch}
-                    tvIds={[]}
-                    setTvIds={setTvIds}
+                    mediaIds={mediaIds}
+                    setMediaIds={setMediaIds}
                     setStoredData={setStoredData}
                   />
                 </div>

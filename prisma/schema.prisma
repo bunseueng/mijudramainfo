@@ -246,6 +246,7 @@ model Comment {
   parent        Comment?  @relation("ParentChild", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children      Comment[] @relation("ParentChild")
   replies       Json[]
+  report        Json[]
   spoiler       Boolean   @default(false)
   parentId      String?   @db.ObjectId
   repliedUserId String?   @db.ObjectId

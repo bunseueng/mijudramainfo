@@ -1,22 +1,26 @@
 "use client";
 
-import { fetchSeasonEpisode, fetchTv } from "@/app/actions/fetchMovieApi";
+import { fetchSeasonEpisode } from "@/app/actions/fetchMovieApi";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import LazyImage from "@/components/ui/lazyimage";
+import { tvId } from "@/helper/type";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useDramaData } from "@/hooks/useDramaData";
 import { useQuery } from "@tanstack/react-query";
-import ColorThief from "colorthief";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaArrowCircleDown, FaArrowLeft } from "react-icons/fa";
 
-const SeasonEpisode = () => {
+const SeasonEpisode = ({ tv_id }: tvId) => {
+  const { tv } = useDramaData(tv_id);
   const [expandedEpisode, setExpandedEpisode] = useState<number | null>(null);
   const path = usePathname();
-
+  const getColorFromImage = useColorFromImage();
   // Use useRouter to get current URL path
   const pathParts = path ? path.split("/") : [];
-  const tv_id = pathParts[2] || ""; // Assuming the tv_id is at index 2 in the path
   const season_number = pathParts[4] || ""; // Assuming the season number is at index 4 in the path
   const {
     data: season,
@@ -27,13 +31,6 @@ const SeasonEpisode = () => {
     queryFn: () => fetchSeasonEpisode(tv_id, season_number),
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
-  });
-  const { data: tv } = useQuery({
-    queryKey: ["tv", tv_id],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
   });
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
@@ -57,13 +54,18 @@ const SeasonEpisode = () => {
     refetch();
   }, [tv_id, season_number, refetch]);
 
-  const extractColor = () => {
+  const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        tv?.poster_path ? "w92" : "w300"
+      }/${tv?.poster_path || tv?.backdrop_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(rgbaColor);
+    } else {
+      console.error("Image url undefined");
     }
-  };
+  }, [tv?.backdrop_path, tv?.poster_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -75,35 +77,36 @@ const SeasonEpisode = () => {
         imgElement.removeEventListener("load", extractColor);
       };
     }
-  }, [tv]);
+  }, [tv, extractColor]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <SearchLoading />;
   }
 
   return (
-    <div>
+    <div className="w-full h-full">
       <div
-        className="bg-cyan-600"
+        className="bg-cyan-600 dark:bg-[#242424]"
         style={{ backgroundColor: dominantColor as string | undefined }}
       >
-        <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto py-4 px-4 md:px-6">
-          <div className="flex items-center lg:items-start">
-            <LazyImage
+        <div className="max-w-6xl mx-auto flex items-center mt-0 px-3 py-2">
+          <div className="flex items-center lg:items-start px-2 cursor-default">
+            <Image
               ref={imgRef} // Set the reference to the image
               src={`https://image.tmdb.org/t/p/${
                 season?.poster_path ? "w92" : "w300"
               }/${season?.poster_path}`}
-              alt={`${tv?.name}'s Poster`}
-              width={90}
-              height={130}
+              alt={`${tv?.name || tv?.title}'s Poster` || "Drama Poster"}
+              width={200}
+              height={200}
               quality={100}
+              className="w-[60px] h-[90px] bg-center object-center rounded-md"
               priority
-              className="w-[90px] h-[130px] bg-center object-center rounded-md"
+              onLoad={extractColor}
             />
-            <div className="flex flex-col pl-5 py-5">
-              <h1 className="text-white text-2xl font-bold">
-                {season?.name} (
+            <div className="flex flex-col pl-5 py-2">
+              <h1 className="text-white text-xl font-bold">
+                {tv?.name} (
                 {getYearFromDate(tv?.first_air_date || tv?.release_date)})
               </h1>
               <Link
@@ -133,10 +136,10 @@ const SeasonEpisode = () => {
                 <LazyImage
                   src={
                     item?.still_path !== null
-                      ? `https://image.tmdb.org/t/p/w185/${item?.still_path}`
+                      ? `https://image.tmdb.org/t/p/w300/${item?.still_path}`
                       : "/placeholder-image.avif"
                   }
-                  alt={`${item?.name}'s Still`}
+                  alt={`${item?.name}'s Still` || "Image"}
                   width={200}
                   height={130}
                   quality={100}
@@ -258,7 +261,10 @@ const SeasonEpisode = () => {
                                 >
                                   <LazyImage
                                     src={`https://image.tmdb.org/t/p/w185/${crewItem?.profile_path}`}
-                                    alt={`${crewItem?.name}'s Profile`}
+                                    alt={
+                                      `${crewItem?.name}'s Profile` ||
+                                      "Crew Profile"
+                                    }
                                     width={90}
                                     height={70}
                                     priority
@@ -297,7 +303,10 @@ const SeasonEpisode = () => {
                                 >
                                   <LazyImage
                                     src={`https://image.tmdb.org/t/p/w185/${crewItem?.profile_path}`}
-                                    alt={`${crewItem?.name}'s Profile`}
+                                    alt={
+                                      `${crewItem?.name}'s Profile` ||
+                                      "Crew Profile"
+                                    }
                                     width={90}
                                     height={70}
                                     priority
@@ -334,7 +343,10 @@ const SeasonEpisode = () => {
                                 >
                                   <LazyImage
                                     src={`https://image.tmdb.org/t/p/w185/${guest?.profile_path}`}
-                                    alt={`${guest?.name}'s Profile`}
+                                    alt={
+                                      `${guest?.name}'s Profile` ||
+                                      "Guest Profile"
+                                    }
                                     width={90}
                                     height={70}
                                     priority

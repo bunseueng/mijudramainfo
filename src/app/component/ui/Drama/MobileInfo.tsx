@@ -1,9 +1,17 @@
+import {
+  DramaDB,
+  DramaDetails,
+  DramaProduction,
+  DramaReleasedInfo,
+  TVShow,
+} from "@/helper/type";
 import React from "react";
 
 interface MobileInfoProps {
-  detail: any;
-  tv: any;
-  info: any;
+  getDrama: DramaDB;
+  detail: DramaDetails;
+  tv: TVShow;
+  info: DramaReleasedInfo;
   textColor: string;
   matchedLanguage: any;
   formattedDates: {
@@ -17,6 +25,7 @@ interface MobileInfoProps {
 }
 
 export const MobileInfo: React.FC<MobileInfoProps> = ({
+  getDrama,
   detail,
   tv,
   info,
@@ -26,6 +35,8 @@ export const MobileInfo: React.FC<MobileInfoProps> = ({
   content,
   rank,
 }) => {
+  const [production]: DramaProduction[] = (getDrama?.production_information ||
+    []) as unknown as DramaProduction[];
   const InfoRow = ({ label, value }: any) => (
     <div className="mt-4">
       <h1 className="text-white font-bold text-md" style={{ color: textColor }}>
@@ -44,18 +55,22 @@ export const MobileInfo: React.FC<MobileInfoProps> = ({
     <>
       <InfoRow
         label="Country"
-        value={detail?.title || matchedLanguage?.english_name}
+        value={detail?.country || matchedLanguage?.english_name}
       />
 
       <InfoRow
         label="Episode"
-        value={info?.number_of_episodes || tv?.number_of_episodes}
+        value={detail?.episode || tv?.number_of_episodes}
       />
 
       <InfoRow
         label="Aired"
         value={
-          formattedDates.formattedLastAirDate
+          getDrama?.released_information?.length > 0
+            ? formattedDates.formattedLastAirDate
+              ? `${formattedDates.formattedFirstAirDateDB} - ${formattedDates.formattedLastAirDateDB}`
+              : `${formattedDates.formattedFirstAirDateDB} - ${formattedDates.formattedLastAirDateDB}`
+            : formattedDates.formattedLastAirDateDB
             ? `${formattedDates.formattedFirstAirDate} - ${formattedDates.formattedLastAirDate}`
             : formattedDates.formattedFirstAirDate
         }
@@ -70,7 +85,10 @@ export const MobileInfo: React.FC<MobileInfoProps> = ({
 
       <InfoRow
         label="Original Network"
-        value={tv?.networks?.map((network: any) => network?.name)?.join(", ")}
+        value={
+          production?.network?.map((net) => net?.value).join(", ") ||
+          tv?.networks?.map((network: any) => network?.name)?.join(", ")
+        }
       />
 
       <InfoRow
@@ -84,7 +102,9 @@ export const MobileInfo: React.FC<MobileInfoProps> = ({
           detail?.content_rating ||
           (content?.results?.length === 0
             ? "Not Yet Rated"
-            : `${content?.results[0]?.rating} + - Teens ${content?.results[0]?.rating} or older`)
+            : `${content?.results && content?.results[0]?.rating} + - Teens ${
+                content?.results && content?.results[0]?.rating
+              } or older`)
         }
       />
 

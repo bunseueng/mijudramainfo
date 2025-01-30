@@ -1,14 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaArrowLeft, FaUpload } from "react-icons/fa";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
-import Image from "next/image";
-import { DramaDB } from "@/helper/type";
+import Images from "next/image";
+import type { DramaDB } from "@/helper/type";
 import ReusedImage from "@/components/ui/allreusedimage";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 import {
@@ -24,8 +23,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
-import { fetchImages, fetchTv } from "@/app/actions/fetchMovieApi";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useDramaData } from "@/hooks/useDramaData";
 
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
@@ -34,44 +34,28 @@ const SearchLoading = dynamic(
 
 type DramaDatabase = {
   tv_id: string;
-  getDrama: DramaDB[] | any;
+  getDrama: DramaDB[] | [];
 };
 
 const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
   const searchParams = useSearchParams();
   const route = useRouter();
-
-  const {
-    data: getImage,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["getDramaImage", tv_id],
-    queryFn: () => fetchImages(tv_id),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-  const { data: tv } = useQuery({
-    queryKey: ["tv", tv_id],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
+  const { tv, isLoading } = useDramaData(tv_id);
+  const getColorFromImage = useColorFromImage();
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [base64Image, setBase64Image] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const currentBackdrops = getImage?.backdrops?.map((item: any) => item);
-  const currentPosters = getDrama?.map((item: any) => item?.photo);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const currentBackdrops = tv?.images?.backdrops?.map((item: any) => item);
+  const currentPosters = getDrama
+    ?.filter((data: any) => data.tv_id === tv_id)
+    ?.map((item: any) => item?.photo);
   const combinedItems = currentPosters
     ?.concat(currentBackdrops)
     ?.reduce((acc: any, val: any) => acc.concat(val), []);
@@ -81,36 +65,18 @@ const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
   const totalItems = combinedItems?.length;
   const currentItems = combinedItems?.slice(start, end) || combinedItems;
   const coverFromDB = getDrama?.find((g: any) => g?.tv_id?.includes(tv?.id));
-
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        coverFromDB
-          ? (coverFromDB?.cover as string)
-          : `https://image.tmdb.org/t/p/${tv?.poster_path ? "w154" : "w300"}/${
-              tv?.poster_path || tv?.backdrop_path
-            }`
-      );
-      setDominantColor(color);
+      const imageUrl =
+        (coverFromDB?.cover as string) ||
+        `https://image.tmdb.org/t/p/${tv?.poster_path ? "w92" : "w300"}/${tv?.poster_path || tv?.backdrop_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(rgbaColor);
+    } else {
+      console.error("Image url undefined");
     }
-  }, [tv, coverFromDB]);
+  }, [coverFromDB, tv?.backdrop_path, tv?.poster_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -132,12 +98,43 @@ const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
     });
   };
 
+  const checkImageDimensions = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const aspectRatio = img.width / img.height;
+        // Allow a small tolerance for aspect ratio (e.g., 0.1)
+        resolve(Math.abs(aspectRatio - 16 / 9) < 0.1);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      setUploadedImage(file);
+      const isBackdropSize = await checkImageDimensions(file);
+
+      if (!isBackdropSize) {
+        toast.error(
+          "Please upload an image with a backdrop aspect ratio (approximately 16:9)"
+        );
+        // Clear the input
+        event.target.value = "";
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        setBase64Image(null);
+        return;
+      }
+
+      // Remove previous image
+      if (selectedFile) {
+        URL.revokeObjectURL(previewUrl as string);
+      }
+
+      setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
       try {
         const base64 = await convertToBase64(file);
@@ -172,12 +169,11 @@ const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
       if (response.ok) {
         toast.success("Image uploaded successfully");
         setIsModalOpen(false);
-        setUploadedImage(null);
         setPreviewUrl(null);
         setBase64Image(null);
+        setSelectedFile(null);
         setTitle("");
         setDescription("");
-        refetch();
         route.refresh();
       } else {
         toast.error("Failed to upload image");
@@ -190,10 +186,17 @@ const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   if (isLoading) {
     return <SearchLoading />;
   }
-
   return (
     <div>
       <div
@@ -202,7 +205,7 @@ const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
       >
         <div className="max-w-6xl mx-auto flex items-center mt-0 px-4 py-2">
           <div className="flex items-center lg:items-start px-2 cursor-default">
-            <Image
+            <Images
               ref={imgRef}
               src={
                 coverFromDB?.cover ||
@@ -210,11 +213,12 @@ const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
                   tv?.poster_path ? "w154" : "w300"
                 }/${tv?.poster_path || tv?.backdrop_path}`
               }
-              alt={`${tv?.name || tv?.title}'s Poster`}
+              alt={`${tv?.name || tv?.title}'s Poster` || "Drama Poster"}
               width={80}
               height={90}
               quality={100}
               priority
+              onLoad={extractColor}
               className="w-[80px] h-[90px] bg-center object-cover rounded-md"
             />
             <div className="flex flex-col pl-5 py-2">
@@ -255,24 +259,30 @@ const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
                     <Label htmlFor="picture" className="text-right">
                       Picture
                     </Label>
-                    <Input
-                      id="picture"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="col-span-3"
-                    />
+                    <div className="col-span-3">
+                      <Input
+                        id="picture"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="w-full"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Please upload an image with a backdrop aspect ratio
+                        (approximately 16:9)
+                      </p>
+                    </div>
                   </div>
                   {previewUrl && (
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label className="text-right">Preview</Label>
                       <div className="col-span-3">
-                        <Image
-                          src={previewUrl}
+                        <Images
+                          src={previewUrl || "/placeholder.svg"}
                           alt="Preview"
-                          width={200}
-                          height={200}
-                          className="rounded-md object-cover"
+                          width={320}
+                          height={180}
+                          className="rounded-md object-cover w-full"
                         />
                       </div>
                     </div>
@@ -313,24 +323,26 @@ const PhotoAlbum = ({ getDrama, tv_id }: DramaDatabase) => {
               </DialogContent>
             </Dialog>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-            {currentItems.map((img: any, idx: number) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            {currentItems?.map((img: any, idx: number) => {
               return (
                 <div
                   key={idx}
-                  className="aspect-square overflow-hidden rounded-lg"
+                  className="aspect-video overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                 >
                   <ReusedImage
                     src={
                       img?.url ||
                       `https://image.tmdb.org/t/p/original/${img?.file_path}`
                     }
-                    alt={`${tv?.name || tv?.title}'s Poster/Backdrop`}
-                    width={300}
-                    height={300}
+                    alt={
+                      `${tv?.name || tv?.title}'s Backdrop` || "Drama Backdrop"
+                    }
+                    width={1280}
+                    height={720}
                     quality={100}
                     loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-110 cursor-grab"
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105 cursor-pointer"
                   />
                 </div>
               );

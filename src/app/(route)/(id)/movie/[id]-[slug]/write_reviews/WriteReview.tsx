@@ -1,7 +1,5 @@
 "use client";
 
-import { fetchMovie } from "@/app/actions/fetchMovieApi";
-import { useQuery } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { currentUserProps } from "@/helper/type";
 import Rating from "@mui/material/Rating";
@@ -9,17 +7,15 @@ import Box from "@mui/material/Box";
 import StarBorderRoundedIcon from "@mui/icons-material/StarBorderRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  IoIosArrowDown,
-  IoMdArrowDropdown,
-  IoMdArrowDropup,
-} from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io";
 import { reviewLanguage } from "@/helper/item-list";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import Image from "next/image";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useMovieData } from "@/hooks/useMovieData";
 
 type RatingCategory = "story" | "acting" | "music" | "rewatchValue" | "overall";
 
@@ -29,14 +25,7 @@ interface WriteReview {
 }
 
 const WriteReview: React.FC<WriteReview> = ({ movie_id, currentUser }) => {
-  const { data: movie } = useQuery({
-    queryKey: ["movie", movie_id],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-
+  const { movie } = useMovieData(movie_id);
   const [ratings, setRatings] = useState<{
     story: number;
     acting: number;
@@ -66,6 +55,7 @@ const WriteReview: React.FC<WriteReview> = ({ movie_id, currentUser }) => {
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const router = useRouter();
+  const getColorFromImage = useColorFromImage();
 
   const handleRatingChange = (
     category: RatingCategory,
@@ -78,32 +68,17 @@ const WriteReview: React.FC<WriteReview> = ({ movie_id, currentUser }) => {
       }));
     }
   };
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
 
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        `https://image.tmdb.org/t/p/${movie?.backdrop_path ? "w300" : "w92"}/${
-          movie?.backdrop_path || movie?.poster_path
-        }`
-      );
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        movie?.backdrop_path ? "w300" : "w92"
+      }/${movie?.backdrop_path || movie?.poster_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const color = `rgb(${r}, ${g}, ${b})`; // Full opacity
       setDominantColor(color);
     }
-  }, [movie?.backdrop_path, movie?.poster_path]);
+  }, [movie?.backdrop_path, movie?.poster_path, getColorFromImage]);
 
   const handleDropdownToggle = (dropdown: string) => {
     setOpenDropdown((prev) => (prev === `${dropdown}` ? null : `${dropdown}`));
@@ -198,6 +173,7 @@ const WriteReview: React.FC<WriteReview> = ({ movie_id, currentUser }) => {
           <div className="flex items-center lg:items-start">
             <Image
               ref={imgRef}
+              onLoad={extractColor}
               src={`https://image.tmdb.org/t/p/original/${
                 movie?.poster_path || movie?.backdrops_path
               }`}

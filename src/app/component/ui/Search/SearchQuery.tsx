@@ -1,11 +1,5 @@
 "use client";
 
-import {
-  fetchCollectionSearch,
-  fetchMovieSearch,
-  fetchPersonSearch,
-  fetchTvSearch,
-} from "@/app/actions/fetchMovieApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
@@ -94,27 +88,6 @@ const SearchQuery = ({
   const items = totalResults?.total_results;
   const totalItems = results?.slice(start, end);
 
-  const fetchAllSearchResults = async (pages = 1) => {
-    try {
-      const [tv, movie, person, collection] = await Promise.all([
-        fetchTvSearch(searchQuery),
-        fetchMovieSearch(searchQuery),
-        fetchPersonSearch(searchQuery),
-        fetchCollectionSearch(searchQuery),
-      ]);
-
-      return { tv, movie, person, collection };
-    } catch (error) {
-      console.error("Failed to fetch", error);
-    }
-  };
-
-  const { data: combinedData } = useQuery({
-    queryKey: ["results", searchQuery, currentPage],
-    queryFn: () => fetchAllSearchResults(currentPage),
-    placeholderData: keepPreviousData,
-  });
-
   if (isLoading) {
     return <SearchLoading />;
   }
@@ -130,16 +103,12 @@ const SearchQuery = ({
             items={items}
             results={totalItems}
             searchQuery={searchQuery}
-            fetchMovie={combinedData?.movie}
-            fetchTv={combinedData?.tv}
-            fetchCollection={combinedData?.collection}
-            fetchPersons={combinedData?.person}
-            BASE_URL={BASE_URL}
             searchParams={searchParams}
             currentUser={currentUser}
             getDrama={getDrama}
             getMovie={getMovie}
             getPerson={getPerson}
+            BASE_URL={BASE_URL}
           />
           <div className="flex flex-wrap items-start justify-start max-w-6xl mx-auto px-1 md:px-2 pb-10">
             <SearchPagination

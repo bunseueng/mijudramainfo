@@ -209,44 +209,38 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
   }
 }
 
-
 let currentIndex = 0;
+
 export async function GET(req: Request) {
   try {
     // Fetch all people from the database who have non-empty popularity and sentBy arrays
     const people = await prisma.person.findMany({
       where: {
         AND: [
-          {
-            popularity: {
-              isEmpty: false, // Ensure the popularity array is not empty
-            },
-          },
-          {
-            sentBy: {
-              isEmpty: false, // Ensure the sentBy array is not empty
-            },
-          },
+          { popularity: { isEmpty: false } }, // Ensure the popularity array is not empty
+          { sentBy: { isEmpty: false } }, // Ensure the sentBy array is not empty
         ],
       },
-      orderBy: { id: 'asc' }, // Ensure ordering
+      orderBy: { id: "asc" }, // Ensure ordering
     });
 
     // Check if there are no items
     if (people.length === 0) {
-      return NextResponse.json({ message: 'No items found' }, { status: 404 });
+      return NextResponse.json({ message: "No items found" }, { status: 404 });
     }
 
     // Get the current item
     const item = people[currentIndex];
-    
+
     // Update index, reset if it exceeds length
     currentIndex = (currentIndex + 1) % people.length;
 
     return NextResponse.json(item, { status: 200 });
   } catch (error) {
-    console.error('Error fetching item:', error);
-    return NextResponse.json({ message: 'Error fetching next item' }, { status: 500 });
+    console.error("Error fetching item:", error);
+    return NextResponse.json(
+      { message: "Error fetching next item" },
+      { status: 500 }
+    );
   }
 }
-

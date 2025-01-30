@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ITmdbDrama } from "@/helper/type";
+import { TVShow } from "@/helper/type";
 
 const SliderControls = ({
   filteredData,
@@ -34,7 +34,7 @@ const SliderControls = ({
   return (
     <>
       <div className="absolute bottom-5 xl:bottom-[219px] right-2 md:right-10 flex justify-end space-x-[1px] md:space-x-2 mt-8 z-[111]">
-        {filteredData.map((tv: ITmdbDrama, index: number) => (
+        {filteredData.map((tv: TVShow, index: number) => (
           <motion.button
             key={tv.id}
             initial={{ opacity: 0.7, scale: 0.8 }}

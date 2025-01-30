@@ -7,8 +7,6 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
 import { DramaDB, UserProps } from "@/helper/type";
-import { useQuery } from "@tanstack/react-query";
-import { fetchMovieWatchProvider } from "@/app/actions/fetchMovieApi";
 import MovieInfo from "./MovieInfo";
 import WatchProvider from "../../tv/[id]-[slug]/WatchProvider";
 import MovieReviewCard from "@/app/component/ui/Card/MovieReviewCard";
@@ -33,14 +31,7 @@ const MovieCast = ({
   certification,
 }: any) => {
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
-  const { data: watchProvider } = useQuery({
-    queryKey: ["watchProvider", movie_id],
-    queryFn: () => fetchMovieWatchProvider(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-
+  const watchProvider = movie["watch/providers"]?.results;
   const uniqueChanges = Array.from(
     new Map(
       getMovie?.changes.map((change: DramaDB) => [change.userId, change])
@@ -162,7 +153,7 @@ const MovieCast = ({
           />
           {keyword?.keywords?.length > 0 && (
             <div className="my-5">
-              <h1 className="font-bold text-lg">Keywords</h1>
+              <h1 className="font-bold text-lg mb-3">Keywords</h1>
               <div className="flex flex-wrap w-full">
                 {keyword?.keywords?.map((k: any, idx: number) => {
                   return (
@@ -226,7 +217,7 @@ const MovieCast = ({
           )}
           <div className="my-5">
             <h1 className="font-bold text-lg">Popular Lists</h1>
-            <div className="mt-5">
+            <div className="mt-3">
               <TvListCard list={lists} movieId={movie_id} tvId={[]} />
             </div>
           </div>

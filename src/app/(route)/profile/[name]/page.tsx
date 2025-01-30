@@ -128,7 +128,7 @@ const ProfilePage = async (props: { params: Promise<{ name: string }> }) => {
     createdAt: review.createdAt, // Keep as Date
   }));
   return (
-    <main className="overflow-hidden">
+    <main className="w-full h-full">
       <div className="relative">
         <div className="my-10">
           <Suspense key={params?.name} fallback={<SearchLoading />}>

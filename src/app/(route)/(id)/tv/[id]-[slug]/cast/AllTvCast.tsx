@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  fetchAllCast,
-  fetchAllPopularTvShows,
-  fetchContentRating,
-  fetchLanguages,
-  fetchTv,
-} from "@/app/actions/fetchMovieApi";
+import { fetchAllPopularTvShows } from "@/app/actions/fetchMovieApi";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -27,42 +21,21 @@ import SupportRole from "@/app/component/ui/CastRole/SupportRole";
 import GuestRole from "@/app/component/ui/CastRole/GuestRole";
 import TvInfo from "../TvInfo";
 import React from "react";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useDramaData } from "@/hooks/useDramaData";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
 
 const AllTvCast = ({ tv_id, getDrama }: any) => {
+  const { tv, isLoading, language } = useDramaData(tv_id);
+  const cast = tv?.aggregate_credits || [];
+  const content = tv?.content_ratings || [];
+  console.log(cast, content);
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
-  const { data: tv } = useQuery({
-    queryKey: ["movie", tv_id],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: cast } = useQuery({
-    queryKey: ["tvCast", tv_id],
-    queryFn: () => fetchAllCast(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: language } = useQuery({
-    queryKey: ["tvLanguage", tv_id],
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-    queryFn: fetchLanguages,
-  });
-  const { data: content } = useQuery({
-    queryKey: ["tvContent", tv_id],
-    queryFn: () => fetchContentRating(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+  const getColorFromImage = useColorFromImage();
   const { data: allTvShows } = useQuery({
     queryKey: ["tvCast", tv_id],
     queryFn: fetchAllPopularTvShows,
@@ -106,33 +79,21 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
     (item: any) => item?.known_for_department === "Art"
   );
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        `https://image.tmdb.org/t/p/${tv?.poster_path ? "w154" : "w300"}/${
-          tv?.poster_path || tv?.backdrop_path
-        }`
-      );
-      setDominantColor(color); // Set the dominant color in RGB format
+      const imageUrl =
+        (getDrama?.cover as string) ||
+        `https://image.tmdb.org/t/p/${tv?.backdrop_path ? "w300" : "w92"}/${
+          tv?.backdrop_path || tv?.poster_path
+        }`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgba(${r}, ${g}, ${b}, 1)`; // Full opacity
+      const gradientBackground = `linear-gradient(to right, ${rgbaColor}, rgba(${r}, ${g}, ${b}, 0.84) 50%, rgba(${r}, ${g}, ${b}, 0.84) 100%)`;
+      setDominantColor(gradientBackground);
+    } else {
+      console.error("Image url undefined");
     }
-  }, [tv?.backdrop_path, tv?.poster_path]);
+  }, [getDrama?.cover, tv?.backdrop_path, tv?.poster_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -146,7 +107,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
     }
   }, [extractColor]);
 
-  if (!tv || !cast) {
+  if (!tv || !cast || isLoading) {
     return <SearchLoading />; // Add loading state if data is being fetched
   }
 
@@ -154,7 +115,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
     <div className="bg-slate-100 dark:bg-[#1e1e1e]">
       <div
         className="bg-cyan-600 dark:bg-[#242424] w-full"
-        style={{ backgroundColor: dominantColor as string | undefined }}
+        style={{ backgroundImage: dominantColor as string | undefined }}
       >
         <div className="max-w-6xl mx-auto flex items-center mt-0 py-2">
           <div className="flex items-center lg:items-start px-4 md:px-6 cursor-default">
@@ -165,7 +126,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
                 src={`https://image.tmdb.org/t/p/${
                   tv?.poster_path ? "w154" : "w300"
                 }/${tv?.poster_path || tv?.backdrop_path}`}
-                alt={`${tv?.name || tv?.title}'s Poster`}
+                alt={`${tv?.name || tv?.title}'s Poster` || "Drama Poster"}
                 width={60}
                 height={90}
                 quality={100}

@@ -8,7 +8,6 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { customStyles, lightTheme } from "@/helper/MuiStyling";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";

@@ -14,7 +14,6 @@ import TanstackProvider from "@/provider/TanstackProvider";
 import { ScrollProvider } from "@/provider/UseScroll";
 import { Analytics } from "@vercel/analytics/react";
 import Head from "next/head";
-import { LinkProvider } from "./LinkContext";
 const Loading = dynamic(() => import("./loading"));
 const Footer = dynamic(() => import("./component/ui/Main/Footer"));
 
@@ -97,6 +96,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={nunito.className}>
       <Head>
+        <link rel="icon" href="data:," />
         <link rel="preconnect" href="https://app.posthog.com" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
@@ -133,17 +133,18 @@ export default function RootLayout({
                 enableSystem
                 disableTransitionOnChange
               >
-                <LinkProvider prefetch={false}>
-                  <ScrollProvider>
-                    <Loading />
-                    <main className="min-h-screen flex flex-col">
-                      <SessionAllPage />
-                      {children}
-                      <Footer />
-                    </main>
-                    <ToastContainer position="top-right" />
-                  </ScrollProvider>
-                </LinkProvider>
+                <ScrollProvider>
+                  <Loading />
+                  <main className="min-h-screen flex flex-col">
+                    <SessionAllPage />
+                    {children}
+                    <Footer />
+                  </main>
+                  <ToastContainer
+                    position="top-right"
+                    toastStyle={{ zIndex: 9999 }}
+                  />
+                </ScrollProvider>
               </ThemeProvider>
             </TanstackProvider>
           </Provider>

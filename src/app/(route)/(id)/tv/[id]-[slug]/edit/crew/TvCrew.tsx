@@ -16,27 +16,23 @@ import { ChevronDown, Loader2, Menu, RotateCcw, Search, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
-import { CiSearch } from "react-icons/ci";
-import { GiHamburgerMenu } from "react-icons/gi";
-import { GrPowerReset } from "react-icons/gr";
-import { IoIosArrowDown } from "react-icons/io";
-import { IoCloseOutline } from "react-icons/io5";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { useDebouncedCallback } from "use-debounce";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
   { ssr: false }
@@ -57,7 +53,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [listSearch, setListSearch] = useState<string>("");
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [openSearch, setOpenSearch] = useState<boolean>(false);
+  const [resetLoading, setResetLoading] = useState<boolean>(false);
   const [tvIds, setTvIds] = useState<number[]>(tv_id ? [] : []);
   const [prevCrewRole, setPrevCrewRole] = useState<string[]>([]);
   const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
@@ -72,7 +68,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const pathname = usePathname();
   const searchQuery = searchQueries?.get("query") || "";
   const router = useRouter();
-  const { register, handleSubmit, reset } = useForm<TCreateDetails>({
+  const { handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
   });
   const fetchPersons = async (person_ids: any) => {
@@ -106,7 +102,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     queryKey: ["crewResult"],
     queryFn: async () => {
       const personDetails = await Promise.all(
-        tvIds.map(async (id: number) => await fetchPerson(id))
+        tvIds.map(async (id: number) => await fetchPerson(id.toString()))
       );
       return [...personDetails];
     },
@@ -167,34 +163,24 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   };
 
   const setCrewRole = (idx: number, role: string) => {
-    setCrewRoles((prev) => {
-      const newRoles = [...prev];
-      newRoles[idx] = role;
-      setIsItemChanging(newRoles as any);
-      return newRoles;
-    });
     setPrevCrewRole((prev) => {
       const newRoles = [...prev];
       newRoles[idx] = role;
-      setIsItemChanging(newRoles as any);
       return newRoles;
     });
-  };
 
-  const handleResetChanges = (ind: number) => {
-    setIsItemChanging((prevIsItemChanging) => {
-      const newIsItemChanging = [...prevIsItemChanging];
-      newIsItemChanging[ind] = false;
-      return newIsItemChanging;
+    setCrewRoles((prev) => {
+      const newRoles = [...prev];
+      newRoles[idx] = role;
+      return newRoles;
     });
-    setCrewRoles((prevCrewRoles) => {
-      const newRole = [...prevCrewRoles];
-      newRole[ind] = prevCrewRole[ind];
-      return newRole;
+
+    // Update isItemChanging separately, only for the specific index
+    setIsItemChanging((prev) => {
+      const newState = [...prev];
+      newState[idx] = true;
+      return newState;
     });
-    setMarkedForDeletion((prev) =>
-      prev.map((marked, index) => (index === ind ? false : marked))
-    );
   };
 
   useEffect(() => {
@@ -219,11 +205,10 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     setTvIds((prevTvIds) => [...prevTvIds, parsedId]);
     setListSearch(""); // Clear the search input
     try {
-      const personDetail = await fetchPerson(parsedId);
+      const personDetail = await fetchPerson(parsedId.toString());
       setItem((prevItems: any) => [...prevItems, personDetail]);
       setListSearch("");
     } catch (error) {
-      console.error("Error adding related title:", error);
       toast.error("Failed to add related title.");
     }
   };
@@ -257,7 +242,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     300
   );
 
-  const onSubmit = async (data: TCreateDetails) => {
+  const onSubmit = async () => {
     try {
       setSubmitLoading(true);
       const updatedItems = item
@@ -282,35 +267,208 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       } else if (res.status === 400) {
         toast.error("Invalid User");
       } else if (res.status === 500) {
-        console.log("Bad Request");
+        toast.error("Bad Request");
       }
     } catch (error: any) {
-      console.log("Bad Request");
       throw new Error(error);
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (prevItemRef.current !== item) {
-    }
-    prevItemRef.current = item; // Update the ref with the current item
-  }, [item]);
+  const [originalItems, setOriginalItems] = useState([...item]); // Keep the original order
+  const [isDragging, setIsDragging] = useState(false); // Track drag state
+  const [hasReordered, setHasReordered] = useState(false); // Track if order has been changed
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [reorderedItems, setReorderedItems] = useState<Set<string>>(new Set());
+  const [originalPositions, setOriginalPositions] = useState<{
+    [key: string]: number;
+  }>({});
 
-  const isItemChanged = prevItemRef.current !== item;
+  const handleReorder = useCallback(
+    (newOrder: any) => {
+      setItem(newOrder);
+      setHasReordered(true);
+
+      if (draggedItemId) {
+        const originalIndex = originalPositions[draggedItemId];
+        const newIndex = newOrder.findIndex(
+          (item: any) => item.id.toString() === draggedItemId
+        );
+
+        if (originalIndex !== newIndex) {
+          setReorderedItems((prev) => new Set([...prev, draggedItemId]));
+        }
+      }
+    },
+    [draggedItemId, originalPositions]
+  );
+
+  const handleResetChanges = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.preventDefault();
+      try {
+        setResetLoading(true);
+
+        // Clear reordered items first
+        setReorderedItems(new Set());
+
+        // Wait for animation frame to ensure state updates are processed
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            // Reset all states in a single batch
+            setIsItemChanging(Array(originalItems.length).fill(false));
+            setMarkedForDeletion(Array(originalItems.length).fill(false));
+            setHasReordered(false);
+            setIsDragging(false);
+            setDraggedItemId(null);
+            setItem([...originalItems]);
+            setStoredData([]);
+            setTvIds([]);
+            setCrewRoles([]);
+            resolve();
+          });
+        });
+      } catch (error) {
+        toast.error("Failed to reset changes");
+      } finally {
+        setResetLoading(false);
+      }
+    },
+    [originalItems]
+  );
+
+  const handleIndividualReset = useCallback(
+    async (
+      e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+      index: number
+    ) => {
+      e.preventDefault();
+      try {
+        setResetLoading(true);
+        const currentItem = item[index];
+
+        // Clear this item from reordered items first
+        setReorderedItems((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(currentItem.id.toString());
+          return newSet;
+        });
+
+        // Find original index
+        const originalIndex = originalItems.findIndex(
+          (origItem) => origItem.id === currentItem.id
+        );
+
+        if (originalIndex !== -1) {
+          await new Promise<void>((resolve) => {
+            requestAnimationFrame(() => {
+              // Create new array with current state
+              const newItems = [...item];
+              // Remove current item
+              newItems.splice(index, 1);
+              // Insert at original position
+              newItems.splice(originalIndex, 0, {
+                ...originalItems[originalIndex],
+                jobs: originalItems[originalIndex].jobs,
+              });
+
+              // Update states
+              setItem(newItems);
+              setIsItemChanging((prev) => {
+                const newChanging = [...prev];
+                newChanging[index] = false;
+                return newChanging;
+              });
+              setMarkedForDeletion((prev) => {
+                const newDeletion = [...prev];
+                newDeletion[index] = false;
+                return newDeletion;
+              });
+              setCrewRoles((prev) => {
+                const newRoles = [...prev];
+                newRoles[index] = "";
+                return newRoles;
+              });
+
+              // Update hasReordered state based on remaining reordered items
+              setHasReordered((prev) => {
+                // Only keep hasReordered true if there are other reordered items
+                const remainingReorderedItems = new Set([...reorderedItems]);
+                remainingReorderedItems.delete(currentItem.id.toString());
+                return remainingReorderedItems.size > 0;
+              });
+
+              resolve();
+            });
+          });
+        }
+      } catch (error) {
+        toast.error("Failed to reset item");
+      } finally {
+        setResetLoading(false);
+      }
+    },
+    [item, originalItems, reorderedItems]
+  );
+
+  const hasChanges = useMemo(() => {
+    if (resetLoading) return false;
+
+    const hasReorderedItems = reorderedItems.size > 0;
+    const hasRoleChanges = crewRoles.some((role) => role && role.length > 0);
+    const hasMarkedItems = markedForDeletion.some((marked) => marked);
+    const hasChangingItems = isItemChanging.some((changing) => changing);
+    const hasNewItems = tvIds.length > 0;
+
+    return (
+      hasReorderedItems ||
+      hasRoleChanges ||
+      hasMarkedItems ||
+      hasChangingItems ||
+      hasNewItems ||
+      hasReordered
+    );
+  }, [
+    resetLoading,
+    reorderedItems,
+    crewRoles,
+    markedForDeletion,
+    isItemChanging,
+    tvIds.length,
+    hasReordered,
+  ]);
+
+  useEffect(() => {
+    // Only update originalItems when item changes and we're not in the middle of reordering
+    if (!hasReordered && item.length > 0) {
+      setOriginalItems([...item]);
+    }
+  }, [item, hasReordered]); // Keep both dependencies
+
+  // Add this effect to handle cleanup
+  useEffect(() => {
+    const cleanup = () => {
+      // Only cleanup if the component is still mounted
+      setReorderedItems(new Set());
+      setResetLoading(false);
+      setIsDragging(false);
+      setDraggedItemId(null);
+    };
+    return cleanup;
+  }, []); // Empty dependency array since this is cleanup
 
   useEffect(() => {
     refetch();
   }, [searchQuery, refetch]);
 
   if (isLoading) {
-    return <div>Fetching...</div>;
+    return <SearchLoading />;
   }
 
   return (
-    <Card className="w-full !bg-transparent">
-      <CardHeader>
+    <Card className="w-full !bg-transparent !border-0">
+      <CardHeader className="!p-0 !px-4 !pb-4">
         <CardTitle className="text-2xl font-bold text-primary">Crew</CardTitle>
       </CardHeader>
       <CardContent>
@@ -319,7 +477,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
             as="ul"
             axis="y"
             values={item}
-            onReorder={setItem}
+            onReorder={handleReorder}
             className="space-y-2"
           >
             <AnimatePresence>
@@ -328,15 +486,50 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   const role = crewRoles[ind];
                   const job = crew?.jobs?.map((rol: any) => rol?.job);
                   const isNew = personResult.includes(crew);
+
                   return (
                     <Reorder.Item
                       key={crew.id}
                       value={crew}
-                      whileDrag={{
-                        scale: 1.02,
-                        boxShadow: "0px 3px 8px rgba(0,0,0,0.1)",
+                      initial={false}
+                      animate={{
+                        backgroundColor:
+                          reorderedItems.has(crew.id.toString()) &&
+                          !resetLoading
+                            ? "hsl(var(--primary))"
+                            : "transparent",
+                        color:
+                          reorderedItems.has(crew.id.toString()) &&
+                          !resetLoading
+                            ? "hsl(var(--primary-foreground))"
+                            : "inherit",
+                        transition: { duration: 0.2 },
+                        zIndex:
+                          isDragging && draggedItemId === crew.id.toString()
+                            ? 9999
+                            : openDropdown === `job-${ind}`
+                            ? 9998
+                            : 1,
                       }}
-                      className="p-4 flex items-center justify-between w-full"
+                      className="relative flex items-center justify-between border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted p-4"
+                      dragListener={
+                        !isItemChanging[ind] && !markedForDeletion[ind]
+                      }
+                      dragConstraints={{ top: 0, bottom: 0 }}
+                      onDragStart={() => {
+                        setIsDragging(true);
+                        setDraggedItemId(crew.id.toString());
+                      }}
+                      onDragEnd={() => {
+                        setIsDragging(false);
+                        setDraggedItemId(null);
+                        setHasReordered(true);
+                        setReorderedItems((prev) => {
+                          const newSet = new Set(prev);
+                          newSet.add(crew.id.toString());
+                          return newSet;
+                        });
+                      }}
                     >
                       <div className="flex items-center space-x-4 flex-grow">
                         <Menu
@@ -356,7 +549,10 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           className="size-10 object-cover rounded-full"
                         />
                         <Link
-                          href={`/person/${crew?.id}`}
+                          prefetch={false}
+                          href={`/person/${crew?.id}-${spaceToHyphen(
+                            crew?.name
+                          )}`}
                           className={`font-medium ${
                             isNew ? "text-green-500" : ""
                           } ${isItemChanging[ind] ? "text-blue-500" : ""} ${
@@ -369,10 +565,21 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                         </Link>
                       </div>
                       <div className="flex items-center space-x-4">
-                        <div className="relative">
+                        <div
+                          className={`relative ${
+                            openDropdown === `cast_role-${ind}`
+                              ? "z-[10000]"
+                              : "z-auto"
+                          }`}
+                        >
                           <Button
                             variant="outline"
-                            className="w-40 justify-between"
+                            className={`w-auto md:w-56 justify-between !bg-transparent  ${
+                              reorderedItems.has(crew.id.toString()) &&
+                              !resetLoading
+                                ? "hover:text-black"
+                                : "hover:text-white"
+                            }`}
                             type="button"
                             onClick={() => handleDropdownToggle("job", ind)}
                           >
@@ -384,7 +591,7 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                               initial={{ opacity: 0, y: -10 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -10 }}
-                              className="absolute z-10 w-full mt-1 bg-popover text-popover-foreground shadow-md rounded-md overflow-auto max-h-60"
+                              className="absolute z-[10001] w-full mt-1 bg-popover text-popover-foreground shadow-md rounded-md overflow-auto max-h-60"
                             >
                               {crewRole?.map((item, index) => (
                                 <li
@@ -410,15 +617,15 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             </motion.ul>
                           )}
                         </div>
-                        {markedForDeletion[ind] || isItemChanging[ind] ? (
+                        {markedForDeletion[ind] ||
+                        isItemChanging[ind] ||
+                        (reorderedItems.has(crew.id.toString()) &&
+                          !resetLoading) ? (
                           <Button
                             variant="ghost"
                             size="icon"
                             type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleResetChanges(ind);
-                            }}
+                            onClick={(e) => handleIndividualReset(e, ind)}
                           >
                             <RotateCcw className="h-4 w-4" />
                           </Button>
@@ -460,23 +667,43 @@ const TvCast: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           </Reorder.Group>
 
           <div className="flex justify-between items-center">
-            <Button
-              type="submit"
-              disabled={
-                !(
-                  tvIds?.length > 0 ||
-                  isItemChanged ||
-                  crewRoles?.some((role) => role !== undefined) ||
-                  markedForDeletion?.includes(true) ||
-                  isItemChanging?.includes(true)
-                )
-              }
-            >
-              {submitLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Submit
-            </Button>
+            <div className="flex items-start">
+              <button
+                name="Submit"
+                onClick={handleSubmit(onSubmit)}
+                className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+                  hasChanges
+                    ? "cursor-pointer"
+                    : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+                }`}
+                disabled={!hasChanges}
+              >
+                {submitLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Submit"
+                )}
+              </button>
+              <button
+                type="button"
+                className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-4 ${
+                  hasChanges
+                    ? "cursor-pointer"
+                    : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
+                }`}
+                onClick={(e) => handleResetChanges(e)}
+                disabled={!hasChanges}
+              >
+                {resetLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <span className="mr-1">
+                    <FaRegTrashAlt />
+                  </span>
+                )}
+                Reset
+              </button>
+            </div>
 
             <div className="relative w-64">
               <Input

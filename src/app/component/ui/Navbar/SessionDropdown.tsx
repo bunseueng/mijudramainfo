@@ -46,6 +46,7 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
               </button>
             ) : (
               <Link
+                prefetch={false}
                 href={`${
                   item.link === "/profile"
                     ? `${item.link}/${session?.user?.name}`

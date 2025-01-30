@@ -3,10 +3,9 @@
 import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { ITvReview, SearchParamsType } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
-import ColorThief from "colorthief";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { AnimatePresence, motion } from "framer-motion";
 import { reviewLanguage, reviewStatus } from "@/helper/item-list";
@@ -46,13 +45,11 @@ const ProfileReviews: React.FC<ReviewType> = ({
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
   });
-  console.log(tv);
   const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>("");
   const [reviewType, setReviewType] = useState<string>("Most Helpful");
   const [languages, setLanguages] = useState<string>();
   const [status, setStatus] = useState<string>("all_status");
-  const [dominantColor, setDominantColor] = useState<string | null>(null);
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
     new Set()
   );
@@ -61,7 +58,6 @@ const ProfileReviews: React.FC<ReviewType> = ({
   }>({});
   const pathname = usePathname();
   const router = useRouter();
-  const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
   const searchParams = useSearchParams(); // Assuming you have this declared somewhere
   const per_page = Number(searchParams?.get("per_page")) || "10"; // Default to 10 items per page
   const initialPage = Number(searchParams?.get("page")) || 1; // Initial page from URL or default to 1
@@ -200,40 +196,13 @@ const ProfileReviews: React.FC<ReviewType> = ({
     }
   };
 
-  const extractColor = () => {
-    if (imgRef.current) {
-      const colorThief = new ColorThief();
-      const color = colorThief?.getColor(imgRef.current);
-      setDominantColor(`rgb(${color.join(",")})`); // Set the dominant color in RGB format
-    }
-  };
-
-  useEffect(() => {
-    if (imgRef.current) {
-      const imgElement = imgRef.current; // Store the current value in a local variable
-      imgElement.addEventListener("load", extractColor);
-
-      // Cleanup function
-      return () => {
-        imgElement.removeEventListener("load", extractColor);
-      };
-    }
-  }, [tv]);
-
-  if (loading) {
+  if (loading || isLoading || !tv) {
     return <SearchLoading />;
-  }
-  if (isLoading) {
-    return <SearchLoading />;
-  }
-
-  if (!tv) {
-    return <SearchLoading />; // Add loading state if data is being fetched
   }
 
   return (
     <div className="bg-slate-100 dark:bg-[#1e1e1e]">
-      <div className="w-full relative overflow-hidden">
+      <div className="w-full relative">
         <div className="w-full h-full">
           <div className="bg-white dark:bg-[#242424]">
             <div className="block bg-white dark:bg-[#242526] px-2 py-4">

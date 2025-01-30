@@ -18,6 +18,7 @@ const NavbarDropdown: React.FC<NavbarDropdownProps> = ({ items, title }) => {
           whileTap={{ scale: 0.95 }}
         >
           <Link
+            prefetch={false}
             href={item.link}
             className="block py-2 px-2 xl:px-3 text-sm xl:text-md text-black dark:text-white font-semibold rounded lg:bg-transparent cursor-pointer hover:bg-gray-400 hover:text-black transform duration-300"
           >

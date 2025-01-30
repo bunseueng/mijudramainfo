@@ -5,11 +5,10 @@ import { Metadata } from "next";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { getDramaData } from "@/app/actions/tvActions";
-export async function generateMetadata(
-  props: {
-    params: Promise<{ "id]-[slug": string }>;
-  }
-): Promise<Metadata> {
+import { DramaDB } from "@/helper/type";
+export async function generateMetadata(props: {
+  params: Promise<{ "id]-[slug": string }>;
+}): Promise<Metadata> {
   const params = await props.params;
   if (!params["id]-[slug"]) {
     throw new Error("TV ID and slug are missing.");
@@ -67,15 +66,17 @@ export async function generateMetadata(
     },
   };
 }
-const PhotosPage = async (props: { params: Promise<{ "id]-[slug": string }> }) => {
+const PhotosPage = async (props: {
+  params: Promise<{ "id]-[slug": string }>;
+}) => {
   const params = await props.params;
   if (!params["id]-[slug"]) {
     throw new Error("TV ID and slug are missing.");
   }
   const [tv_id] = params["id]-[slug"].split("-");
   const user = await getCurrentUser();
-  const { getDrama } = await getDramaData(tv_id, user?.id);
-  return <PhotoAlbum tv_id={tv_id} getDrama={getDrama} />;
+  const { getAllDrama } = await getDramaData(tv_id, user?.id);
+  return <PhotoAlbum tv_id={tv_id} getDrama={getAllDrama as DramaDB[] | []} />;
 };
 
 export default PhotosPage;

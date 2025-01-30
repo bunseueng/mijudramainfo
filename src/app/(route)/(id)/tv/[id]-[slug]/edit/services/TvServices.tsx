@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchTv, fetchTvWatchProvider } from "@/app/actions/fetchMovieApi";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import {
   Drama,
   EditDramaPage,
@@ -8,8 +8,8 @@ import {
   tvId,
 } from "@/helper/type";
 import { createDetails, TCreateDetails } from "@/helper/zod";
+import { useDramaData } from "@/hooks/useDramaData";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -20,8 +20,8 @@ import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { GrPowerReset } from "react-icons/gr";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
+
 const TvAddModal = dynamic(
   () => import("@/app/component/ui/Modal/TvAddModal"),
   { ssr: false }
@@ -30,6 +30,7 @@ const TvEditModal = dynamic(
   () => import("@/app/component/ui/Modal/TvEditModal"),
   { ssr: false }
 );
+
 interface Provider {
   display_priority: number;
   provider_name: string;
@@ -40,22 +41,13 @@ interface Provider {
 interface ProviderWithServiceType extends Provider {
   service_type: string;
 }
-const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
-  const { data: tv, refetch } = useQuery({
-    queryKey: ["tvEdit", tv_id],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: watchProvider } = useQuery({
-    queryKey: ["watchProvider", tv_id],
-    queryFn: () => fetchTvWatchProvider(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
 
+const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
+  const { tv, isLoading, refetch } = useDramaData(tv_id);
+  const watchProvider = useMemo(
+    () => tv["watch/providers"]?.results || [],
+    [tv]
+  );
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
   const combinedProviders: ProviderWithServiceType[] = useMemo(() => {
     return [
@@ -81,13 +73,13 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       })) || []),
     ];
   }, [selectedProvider]);
+
   const [storedData, setStoredData] = useState<EditDramaPage[]>([]);
   const [tvDatabase, setTvDatabase] = useState<any>(
     (tvDetails?.services?.length || 0) > 0
       ? tvDetails?.services
       : combinedProviders
   );
-
   const [drama, setDrama] = useState<EditDramaPage[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [openEditModal, setOpenEditModal] = useState<boolean>(false);
@@ -101,38 +93,43 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
     Array(tvDetails?.services?.length || 0).fill(false)
   );
-  const [originalValue, setOriginalValue] = useState(null);
-  const [isDragging, setIsDragging] = useState(false); // Track drag state
-  const [hasReordered, setHasReordered] = useState(false); // Track if order has been changed
+  const [originalValue, setOriginalValue] = useState<EditDramaPage[] | null>(
+    null
+  );
+  const [isDragging, setIsDragging] = useState(false);
+  const [hasReordered, setHasReordered] = useState(false);
+
   const { handleSubmit, reset } = useForm<TCreateDetails>({
     resolver: zodResolver(createDetails),
   });
   const router = useRouter();
+
+  // Update tvDatabase when services or providers change
   useEffect(() => {
-    // Check if both tvDetails.services and combinedProviders have values before updating tvDatabase
     if ((tvDetails?.services?.length || 0) > 0) {
-      setTvDatabase(tvDetails?.services || []);
-    } else {
+      setTvDatabase(tvDetails?.services);
+    } else if (combinedProviders.length > 0) {
       setTvDatabase(combinedProviders);
     }
   }, [tvDetails?.services, combinedProviders]);
 
+  // Update drama state when data changes
   useEffect(() => {
-    if ((tvDetails?.services?.length || 0) < 0) {
-      const combinedData = [
-        ...(tvDatabase || []),
-        ...storedData.filter((data) => data !== undefined),
-      ];
-      setDrama(combinedData);
-    } else {
-      if (!tv) return;
-      const combinedData = [
-        ...(tvDatabase || []),
-        ...storedData.filter((data) => data !== undefined),
-      ];
-      setDrama(combinedData);
-    }
+    const combinedData = [
+      ...(tvDatabase || []),
+      ...storedData.filter((data) => data !== undefined),
+    ];
+    setDrama(combinedData);
   }, [tv, tvDetails?.services, storedData, tvDatabase, selectedProvider]);
+
+  // Store original values for reset functionality
+  useEffect(() => {
+    if (tvDatabase?.length > 0) {
+      setOriginalValue(tvDatabase);
+    } else if (storedData?.length > 0) {
+      setOriginalValue(storedData);
+    }
+  }, [tvDatabase, combinedProviders, storedData]);
 
   const onSubmit = async () => {
     try {
@@ -140,14 +137,8 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       const requestData = {
         tv_id: tv_id.toString(),
         services: markedForDeletion.includes(true)
-          ? selectedProvider?.ads?.filter(
-              (item: any, idx: number) =>
-                !markedForDeletion[idx] &&
-                item?.provider_name !== defaultValues?.provider_name
-            )
-          : drama?.map((item) => ({
-              ...item,
-            })),
+          ? drama.filter((_, idx) => !markedForDeletion[idx])
+          : drama,
       };
 
       const res = await fetch(`/api/tv/${tv_id}/services`, {
@@ -159,18 +150,26 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       });
 
       if (res.status === 200) {
-        router.refresh();
+        const updatedData = await res.json();
+        setTvDatabase(updatedData.services || []);
         setStoredData([]);
-        setMarkedForDeletion(Array(drama?.length || 0).fill(false));
+        setMarkedForDeletion(
+          Array(updatedData.services?.length || 0).fill(false)
+        );
+        setIsItemDataChanged(
+          Array(updatedData.services?.length || 0).fill(false)
+        );
+        setHasReordered(false);
+        setOriginalValue(updatedData.services || []);
+
+        router.refresh();
         reset();
         toast.success("Success");
       } else if (res.status === 400) {
         toast.error("Invalid User");
-      } else if (res.status === 500) {
-        console.log("Bad Request");
       }
     } catch (error: any) {
-      console.log("Bad Request");
+      console.error("Error:", error);
       throw new Error(error);
     } finally {
       setLoading(false);
@@ -189,65 +188,52 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     });
   };
 
-  useEffect(() => {
-    if (tvDatabase?.length > 0) {
-      setOriginalValue(tvDatabase);
-    } else if (storedData?.length > 0) {
-      setOriginalValue(storedData as any);
-    }
-  }, [tvDatabase, combinedProviders, storedData]);
   const handleResetItem = (idx: number) => {
+    if (!originalValue) return;
+
     setMarkedForDeletion((prev) =>
       prev.map((marked, index) => (index === idx ? false : marked))
     );
     setIsItemDataChanged((prev) =>
       prev.map((changed, index) => (index === idx ? false : changed))
     );
-    setDrama(originalValue as any);
-  };
-  // Function to get user country based on IP
-  const getUserCountry = async () => {
-    try {
-      const res = await fetch("https://ipinfo.io/json?token=80e3bb75bb316a", {
-        method: "GET",
-      });
-      const data = await res.json();
-      return data.country; // e.g., "US"
-    } catch (error) {
-      console.error("Error fetching user location:", error);
-      return null;
-    }
+
+    setDrama((prev) => {
+      const newDrama = [...prev];
+      newDrama[idx] = originalValue[idx];
+      return newDrama;
+    });
   };
 
-  const handleReorder = (newOrder: any) => {
-    setDrama(newOrder); // Update the reordered items
+  const handleReorder = (newOrder: EditDramaPage[]) => {
+    setDrama(newOrder);
+    if (JSON.stringify(newOrder) !== JSON.stringify(originalValue)) {
+      setHasReordered(true);
+    }
   };
 
   const handleDragStart = () => {
-    setIsDragging(true); // Set dragging state to true when any item starts dragging
+    setIsDragging(true);
   };
 
   const handleDragEnd = () => {
-    setIsDragging(false); // Set dragging state to false after dragging ends
-    // Check if the current order is different from the original order
+    setIsDragging(false);
     if (JSON.stringify(drama) !== JSON.stringify(originalValue)) {
-      setHasReordered(true); // Set to true if items have been reordered
+      setHasReordered(true);
     }
   };
 
-  const handleResetChanges = async (idx: number) => {
+  const handleResetChanges = async () => {
     try {
       setResetLoading(true);
-      // Simulate a delay for the reset operation
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      setMarkedForDeletion((prev) =>
-        prev.map((marked, index) => (index === idx ? false : marked))
-      );
-      setIsItemDataChanged((prev) =>
-        prev.map((changed, index) => (index === idx ? false : changed))
-      );
-      setHasReordered(false);
-      setDrama(originalValue as any);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (originalValue) {
+        setDrama(originalValue);
+        setMarkedForDeletion(Array(originalValue.length).fill(false));
+        setIsItemDataChanged(Array(originalValue.length).fill(false));
+        setHasReordered(false);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -255,14 +241,24 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     }
   };
 
-  // Fetch user location and set the watch provider
+  const getUserCountry = async () => {
+    try {
+      const res = await fetch("https://ipinfo.io/json?token=80e3bb75bb316a");
+      const data = await res.json();
+      return data.country;
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchCountryAndSetProvider = async () => {
       const country = await getUserCountry();
       if (country && watchProvider && watchProvider[country]) {
         setSelectedProvider(watchProvider[country]);
       } else {
-        setSelectedProvider(watchProvider?.US); // Default to US if no match
+        setSelectedProvider(watchProvider?.US);
       }
     };
 
@@ -272,6 +268,16 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   useEffect(() => {
     refetch();
   }, [refetch]);
+
+  if (isLoading) {
+    return <SearchLoading />;
+  }
+
+  const hasChanges =
+    storedData.length > 0 ||
+    markedForDeletion.includes(true) ||
+    isItemDataChanged.includes(true) ||
+    hasReordered;
 
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
@@ -319,14 +325,23 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                     show?.subtitles?.map((sub: any) => sub?.label);
                   const getServiceImage = () => {
                     if (show?.service_logo) {
-                      return `/channel${show.service_logo}`; // Use service_logo if available
+                      return `/channel${show.service_logo}`;
                     } else if (show?.logo_path) {
-                      return `https://image.tmdb.org/t/p/w154/${show.logo_path}`; // Fallback to TMDB logo
+                      return `https://image.tmdb.org/t/p/w154/${show.logo_path}`;
                     } else {
-                      return show?.service_url; // Last resort
+                      return show?.service_url;
                     }
                   };
                   const serviceImage = getServiceImage();
+
+                  const itemStyle = storedData.some((item) => item === show)
+                    ? "text-[#5cb85c]"
+                    : isItemDataChanged[idx]
+                    ? "text-[#2196f3]"
+                    : markedForDeletion[idx]
+                    ? "text-red-500"
+                    : "";
+
                   return (
                     <Reorder.Item
                       as="tr"
@@ -357,51 +372,23 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                             priority
                             className="w-10 h-10 bg-cover bg-center object-cover rounded-full pointer-events-none"
                           />
-                          <p
-                            className={`pl-2 font-semibold ${
-                              storedData.some((item) => item === show)
-                                ? "text-[#5cb85c]"
-                                : ""
-                            } ${
-                              isItemDataChanged[idx] ? "text-[#2196f3]" : ""
-                            } ${markedForDeletion[idx] ? "text-red-500" : ""}`}
-                          >
+                          <p className={`pl-2 font-semibold ${itemStyle}`}>
                             {show?.provider_name}
                           </p>
                         </div>
                       </td>
                       <td className="border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
-                        <p
-                          className={`break-words h-auto ${
-                            storedData.some((item) => item === show)
-                              ? "text-[#5cb85c]"
-                              : ""
-                          } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
-                            markedForDeletion[idx] ? "text-red-500" : ""
-                          }`}
-                        >
+                        <p className={`break-words h-auto ${itemStyle}`}>
                           {show?.link ? show?.link : selectedProvider?.link}
                         </p>
                       </td>
                       <td
-                        className={`border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3 ${
-                          storedData.some((item) => item === show)
-                            ? "text-[#5cb85c]"
-                            : ""
-                        } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
-                          markedForDeletion[idx] ? "text-red-500" : ""
-                        }`}
+                        className={`border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3 ${itemStyle}`}
                       >
                         {show?.service_type}
                       </td>
                       <td
-                        className={`border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3 ${
-                          storedData.some((item) => item === show)
-                            ? "text-[#5cb85c]"
-                            : ""
-                        } ${isItemDataChanged[idx] ? "text-[#2196f3]" : ""} ${
-                          markedForDeletion[idx] ? "text-red-500" : ""
-                        }`}
+                        className={`border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3 ${itemStyle}`}
                       >
                         <div className="font-semibold">Availability</div>
                         {show?.availability?.length > 0 ? (
@@ -469,7 +456,6 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           </button>
                           {openEditModal && deleteIndex === idx && (
                             <TvEditModal
-                              tv={tv}
                               setOpenEditModal={setOpenEditModal}
                               openEditModal={openEditModal}
                               show={[drama[deleteIndex]]}
@@ -491,7 +477,11 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                   );
                 })
               ) : (
-                <div className="p-3">No service available.</div>
+                <tr>
+                  <td colSpan={5} className="p-3">
+                    No service available.
+                  </td>
+                </tr>
               )}
             </AnimatePresence>
           </Reorder.Group>
@@ -525,23 +515,13 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           name="Submit"
           type="submit"
           className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-            storedData?.length > 0 ||
-            markedForDeletion?.includes(true) ||
-            isItemDataChanged?.includes(true) ||
-            hasReordered
+            hasChanges || loading
               ? "cursor-pointer"
               : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
           }`}
-          disabled={
-            storedData?.length > 0 ||
-            markedForDeletion?.includes(true) ||
-            isItemDataChanged?.includes(true) ||
-            hasReordered
-              ? false
-              : true
-          }
+          disabled={!hasChanges || loading}
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
+          {loading ? <Loader2 className="h-6 w-4 animate-spin" /> : "Submit"}
         </button>
         <button
           type="button"
@@ -550,8 +530,8 @@ const TvServices: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
               ? "cursor-pointer"
               : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
           }`}
-          onClick={() => handleResetChanges(0)}
-          disabled={hasReordered ? false : true}
+          onClick={handleResetChanges}
+          disabled={!hasReordered}
         >
           {resetLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

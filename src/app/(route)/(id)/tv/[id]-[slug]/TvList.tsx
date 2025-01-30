@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchImages, fetchTv } from "@/app/actions/fetchMovieApi";
 import ReportModal from "@/app/component/ui/Modal/ReportModal";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import LazyImage from "@/components/ui/lazyimage";
-import { tvId } from "@/helper/type";
-import { useQuery } from "@tanstack/react-query";
+import { DramaDetails, TVShow } from "@/helper/type";
 import { Copy } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,21 +20,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import { toast } from "react-toastify";
 
-const TvList = ({ tv_id }: tvId) => {
-  const { data: tv } = useQuery({
-    queryKey: ["tv"],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: image } = useQuery({
-    queryKey: ["image"],
-    queryFn: () => fetchImages(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+type TvListProps = {
+  tv_id: string;
+  tv: TVShow;
+  drama_poster: string;
+};
+const TvList = ({ tv_id, tv, drama_poster }: TvListProps) => {
   const [hovered, setHovered] = useState<string | null>(null);
   const [currentItem, setCurrentItem] = useState<string>("Overview");
   const [currentUrl, setCurrentUrl] = useState("");
@@ -96,15 +85,18 @@ const TvList = ({ tv_id }: tvId) => {
   return (
     <div className="bg-[#191a20] text-white border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
       <LazyImage
-        src={`https://image.tmdb.org/t/p/w500/${
-          tv?.poster_path || tv?.backdrop_path
-        }`}
+        src={
+          drama_poster ||
+          `https://image.tmdb.org/t/p/w500/${
+            tv?.poster_path || tv?.backdrop_path
+          }`
+        }
         alt={`${tv?.name || tv?.title}'s Poster`}
         width={200}
         height={200}
         quality={100}
         priority
-        className="w-[60px] h-[90px] bg-center object-center rounded-md hidden"
+        className="w-[60px] h-[90px] rounded-md hidden"
       />
       <ul className="relative inline-block m-0 p-0 z-50">
         <li
@@ -194,7 +186,7 @@ const TvList = ({ tv_id }: tvId) => {
                     Report a Problem
                   </li>
                 </DialogTrigger>
-                {isOpen && <ReportModal route="tv" id={tv_id} />}
+                {isOpen && <ReportModal route="tv" id={tv_id} type="tv" />}
               </Dialog>
             </ul>
           </div>

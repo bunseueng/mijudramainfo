@@ -15,12 +15,15 @@ const CastCard = ({ getDrama, cast }: any) => {
               <div className="flex flex-row items-center justify-between">
                 {item?.profile_path !== null ? (
                   <Link
-                    prefetch={true}
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                   >
                     <Image
                       src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                      alt={`${item?.name || item?.title}'s Profile`}
+                      alt={
+                        `${item?.name || item?.title}'s Profile` ||
+                        "Person Profile"
+                      }
                       width={200}
                       height={200}
                       quality={100}
@@ -30,12 +33,15 @@ const CastCard = ({ getDrama, cast }: any) => {
                   </Link>
                 ) : (
                   <Link
-                    prefetch={true}
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                   >
                     <Image
                       src="/placeholder-image.avif"
-                      alt={`${item?.name || item?.title}'s Profile`}
+                      alt={
+                        `${item?.name || item?.title}'s Profile` ||
+                        "Person Profile"
+                      }
                       width={200}
                       height={200}
                       quality={100}
@@ -46,7 +52,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                 )}
                 <div className="flex flex-col items-start ml-2">
                   <Link
-                    prefetch={true}
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="md:inline-block md:max-w-[145px] text-semibold text-sm md:text-md md:overflow-hidden md:whitespace-nowrap md:text-ellipsis truncate text-[#2196f3] hover:opacity-75 transform duraiton-300 font-bold"
                   >
@@ -71,12 +77,15 @@ const CastCard = ({ getDrama, cast }: any) => {
               <div className="flex flex-row items-center justify-between">
                 {item?.profile_path !== null ? (
                   <Link
-                    prefetch={true}
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                   >
                     <Image
                       src={`https://image.tmdb.org/t/p/original/${item?.profile_path}`}
-                      alt={`${item?.name || item?.title}'s Profile`}
+                      alt={
+                        `${item?.name || item?.title}'s Profile` ||
+                        "Person Profile"
+                      }
                       width={200}
                       height={200}
                       quality={100}
@@ -86,12 +95,15 @@ const CastCard = ({ getDrama, cast }: any) => {
                   </Link>
                 ) : (
                   <Link
-                    prefetch={true}
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                   >
                     <Image
                       src="/placeholder-image.avif"
-                      alt={`${item?.name || item?.title}'s Profile`}
+                      alt={
+                        `${item?.name || item?.title}'s Profile` ||
+                        "Person Profile"
+                      }
                       width={200}
                       height={200}
                       quality={100}
@@ -102,7 +114,7 @@ const CastCard = ({ getDrama, cast }: any) => {
                 )}
                 <div className="flex flex-col items-start ml-2">
                   <Link
-                    prefetch={true}
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="md:inline-block md:max-w-[145px] text-semibold text-sm md:text-md md:overflow-hidden md:whitespace-nowrap md:text-ellipsis truncate text-[#2196f3] hover:opacity-75 transform duraiton-300 font-bold"
                   >

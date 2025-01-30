@@ -53,10 +53,10 @@ const MovieResult: React.FC<MovieResultProps> = ({
     queryKey: ["tvAndMovieResult"],
     queryFn: async () => {
       const tvDetails = await Promise.all(
-        tvId.map(async (id: number) => await fetchTv(id))
+        tvId.map(async (id: number) => await fetchTv(id.toString()))
       );
       const movieDetails = await Promise.all(
-        movieId.map(async (id: number) => await fetchMovie(id))
+        movieId.map(async (id: number) => await fetchMovie(id.toString()))
       );
       return [...tvDetails, ...movieDetails];
     },

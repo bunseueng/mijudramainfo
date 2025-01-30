@@ -1,28 +1,27 @@
 import React from "react";
 import Link from "next/link";
-import { IActor } from "@/helper/type";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 
+interface Actor {
+  character: string;
+  id: number;
+  name: string;
+  order: number;
+  popularity: number;
+  profile_path: string;
+}
 type ActorCardT = {
-  result: IActor;
+  result: Actor;
   coverFromDB: any;
-  idx: number;
   className?: string;
 };
 
-const ActorCard = ({ result, coverFromDB, idx, className }: ActorCardT) => {
-  const { cast } = result;
-  const actor = cast.find(
-    (actor: any) => actor.name && actor.profile_path !== null
-  );
+const ActorCard = ({ result, coverFromDB, className }: ActorCardT) => {
+  if (!result) return null;
 
-  if (!actor) return null;
-
-  const { name, id: person, profile_path, known_for_department } = actor;
-  const actorSlug = `${person}-${name.replace(/ /g, "-").toLowerCase()}`;
-  const initials = name
+  const actorSlug = `${result.id}-${result.name.replace(/ /g, "-").toLowerCase()}`;
+  const initials = result.name
     .split(" ")
     .map((n) => n[0])
     .join("");
@@ -34,14 +33,14 @@ const ActorCard = ({ result, coverFromDB, idx, className }: ActorCardT) => {
       <CardContent className="py-4">
         <Link
           href={`/person/${actorSlug}`}
-          prefetch={true}
+          prefetch={false}
           aria-label={`Visit ${name}'s profile page?`}
         >
           <Avatar className="w-[150px] h-[150px] mx-auto mb-4 rounded-full overflow-hidden transition-transform duration-300 hover:scale-105">
             <AvatarImage
               src={
                 coverFromDB?.cover ||
-                `https://image.tmdb.org/t/p/w185/${profile_path}`
+                `https://image.tmdb.org/t/p/w185/${result.profile_path}`
               }
               alt={`${name}'s avatar`}
               className="object-cover"
@@ -55,19 +54,13 @@ const ActorCard = ({ result, coverFromDB, idx, className }: ActorCardT) => {
         <div className="text-center">
           <Link
             href={`/person/${actorSlug}`}
-            prefetch={true}
+            prefetch={false}
             aria-label={`Visit ${name}'s profile page?`}
           >
             <h3 className="font-semibold text-lg mb-1 hover:underline transition-colors duration-300">
-              {name}
+              {result?.name}
             </h3>
           </Link>
-          <Badge
-            variant="secondary"
-            className="mt-2 transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
-          >
-            {known_for_department}
-          </Badge>
         </div>
       </CardContent>
     </Card>

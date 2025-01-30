@@ -23,12 +23,10 @@ import { MdOutlineGroupAdd } from "react-icons/md";
 interface currentUser {
   currentUser: currentUserProps | null;
   user: UserProps | null;
-  users: UserProps[] | null;
 }
 
 const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
   user,
-  users,
   friend,
   currentUser,
   findFriendId,
@@ -38,7 +36,6 @@ const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
   const searchParams = useSearchParams();
   const query = searchParams?.get("friQ");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [modal, setModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const {
@@ -161,6 +158,7 @@ const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
                   }`}
                 >
                   <Link
+                    prefetch={false}
                     href={linkPath}
                     className="relative text-sm md:text-md font-semibold px-2 md:px-4 py-2"
                   >
@@ -211,10 +209,13 @@ const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex">
-                        <Link href={`/profile/${user?.name}`}>
+                        <Link href={`/profile/${user?.name}`} prefetch={false}>
                           <Image
                             src={user?.profileAvatar || (user?.image as any)}
-                            alt={`${user?.displayName || user?.name}'s Profile`}
+                            alt={
+                              `${user?.displayName || user?.name}'s Profile` ||
+                              "User Profile"
+                            }
                             width={200}
                             height={200}
                             quality={100}
@@ -223,7 +224,10 @@ const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
                           />
                         </Link>
                         <div className="pl-3">
-                          <Link href={`/profile/${user?.name}`}>
+                          <Link
+                            href={`/profile/${user?.name}`}
+                            prefetch={false}
+                          >
                             <h1 className="text-[#2490da] font-bold">
                               {user?.name}
                             </h1>

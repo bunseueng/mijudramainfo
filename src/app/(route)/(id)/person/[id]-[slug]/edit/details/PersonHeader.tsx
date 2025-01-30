@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchPerson } from "@/app/actions/fetchMovieApi";
 import { PersonDBType } from "@/helper/type";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { usePersonData } from "@/hooks/usePersonData";
 
 interface PersonHeader {
   person_id: string;
@@ -12,45 +12,23 @@ interface PersonHeader {
 }
 
 const PersonHeader: React.FC<PersonHeader> = ({ person_id, personDB }) => {
-  const { data: person } = useQuery({
-    queryKey: ["personEdit", person_id],
-    queryFn: () => fetchPerson(person_id),
-  });
+  const { person, isLoading } = usePersonData(person_id);
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
-
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
+  const getColorFromImage = useColorFromImage();
 
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        personDB?.cover ||
-          `https://image.tmdb.org/t/p/w45${person?.profile_path}`
-      );
-
-      if (color) {
-        // Use the color string directly
-        setDominantColor(color);
-      } else {
-        console.error("No valid color returned");
-      }
+      const imageUrl =
+        (personDB?.cover as string) ||
+        `https://image.tmdb.org/t/p/w185/${person?.profile_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(rgbaColor);
+    } else {
+      console.error("Image url undefined");
     }
-  }, [personDB, person?.profile_path]);
+  }, [personDB?.cover, person?.profile_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -63,6 +41,10 @@ const PersonHeader: React.FC<PersonHeader> = ({ person_id, personDB }) => {
       };
     }
   }, [extractColor]);
+
+  if (isLoading) {
+    return <div>Fetching Data...</div>;
+  }
 
   return (
     <div

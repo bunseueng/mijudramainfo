@@ -37,6 +37,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
       asChild
     >
       <Link
+        prefetch={false}
         href={item.link}
         onClick={() => {
           setCurrentNav(item.link);

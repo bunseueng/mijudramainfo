@@ -17,6 +17,7 @@ interface ActionButtonsProps {
   onDeleteFavorite: () => void;
   trailer: any;
   textColor: any;
+  video: any;
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -28,6 +29,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   onDeleteFavorite,
   trailer,
   textColor,
+  video,
 }) => {
   const [openList, setOpenList] = React.useState(false);
 
@@ -43,6 +45,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           <div className={`${openList && "tooltiptext"}`}>
             <div className="flex flex-col items-center">
               <Link
+                prefetch={false}
                 href="/lists/create"
                 className="flex items-center justify-center py-1"
               >
@@ -82,7 +85,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         </span>
       </div>
 
-      <PlayTrailerBtn trailer={trailer} textColor={textColor} />
+      <PlayTrailerBtn trailer={trailer} textColor={textColor} video={video} />
     </div>
   );
 };

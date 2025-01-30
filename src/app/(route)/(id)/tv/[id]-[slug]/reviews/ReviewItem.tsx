@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { IoLogoWechat } from "react-icons/io5";
 import { ClipLoader } from "react-spinners";
 import LazyImage from "@/components/ui/lazyimage";
 import { formatDate } from "@/app/actions/formatDate";
@@ -45,7 +44,10 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
               src={`${
                 review?.userInfo?.profileAvatar || review?.userInfo?.image
               }`}
-              alt={`${review?.userInfo?.displayName || review?.userInfo?.name}`}
+              alt={
+                `${review?.userInfo?.displayName || review?.userInfo?.name}` ||
+                "User Profile"
+              }
               width={50}
               height={50}
               quality={100}
@@ -113,7 +115,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
                 src={`https://image.tmdb.org/t/p/${
                   tv?.poster_path ? "w154" : "w300"
                 }/${tv.poster_path || tv.backdrop_path}`}
-                alt={`${tv?.name || tv?.title}`}
+                alt={`${tv?.name || tv?.title}` || "Drama Poster"}
                 width={100}
                 height={150}
                 quality={100}

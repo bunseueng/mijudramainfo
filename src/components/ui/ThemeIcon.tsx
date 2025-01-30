@@ -35,7 +35,7 @@ export default function ThemeSwitch() {
     return (
       <IoMdSunny
         onClick={() => setTheme("light")}
-        className="cursor-pointer text-2xl"
+        className="cursor-pointer text-md md:text-2xl"
       />
     );
   }
@@ -44,7 +44,7 @@ export default function ThemeSwitch() {
     return (
       <PiMoonStarsFill
         onClick={() => setTheme("dark")}
-        className="cursor-pointer text-white text-2xl"
+        className="cursor-pointer text-white text-md md:text-2xl"
       />
     );
   }

@@ -78,7 +78,7 @@ const Watchlist: React.FC<WatchListProps & IList> = ({
       // Fetch TV details and add media_type property
       const tvDetails = await Promise.all(
         tvId.map(async (id: number) => {
-          const tvDetail = await fetchTv(id);
+          const tvDetail = await fetchTv(id.toString());
           return { ...tvDetail, media_type: "tv" }; // Add media_type property
         })
       );
@@ -86,7 +86,7 @@ const Watchlist: React.FC<WatchListProps & IList> = ({
       // Fetch movie details and add media_type property
       const movieDetails = await Promise.all(
         movie_id.map(async (id: number) => {
-          const movieDetail = await fetchMovie(id);
+          const movieDetail = await fetchMovie(id.toString());
           return { ...movieDetail, media_type: "movie" }; // Add media_type property
         })
       );

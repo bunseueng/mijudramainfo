@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaArrowLeft, FaUpload } from "react-icons/fa";
@@ -8,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { DramaDB, PersonDBType } from "@/helper/type";
+import { PersonDBType } from "@/helper/type";
 import ReusedImage from "@/components/ui/allreusedimage";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 import {
@@ -24,13 +23,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
-import {
-  fetchImages,
-  fetchPerson,
-  fetchPersonImages,
-  fetchTv,
-} from "@/app/actions/fetchMovieApi";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { usePersonData } from "@/hooks/usePersonData";
 
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
@@ -43,33 +38,14 @@ type DramaDatabase = {
 };
 
 const PersonPhotoAlbum = ({ getPerson, personId }: DramaDatabase) => {
+  const { person, isLoading, refetch } = usePersonData(personId);
+  const getImage = person?.images || [];
   const searchParams = useSearchParams();
   const route = useRouter();
-
-  const {
-    data: getImage,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["getPersonImage", personId],
-    queryFn: () => fetchPersonImages(personId),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-  const { data: person } = useQuery({
-    queryKey: ["person", personId],
-    queryFn: () => fetchPerson(personId),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [base64Image, setBase64Image] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -88,34 +64,19 @@ const PersonPhotoAlbum = ({ getPerson, personId }: DramaDatabase) => {
   const coverFromDB = getPerson?.find((g: any) =>
     g?.personId?.includes(person?.id)
   );
-
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
+  const getColorFromImage = useColorFromImage();
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        coverFromDB
-          ? (coverFromDB?.cover as string)
-          : `https://image.tmdb.org/t/p/w185/${person?.profile_path}`
-      );
-      setDominantColor(color);
+      const imageUrl =
+        (coverFromDB?.cover as string) ||
+        `https://image.tmdb.org/t/p/w185/${person?.profile_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(rgbaColor);
+    } else {
+      console.error("Image url undefined");
     }
-  }, [person, coverFromDB]);
+  }, [coverFromDB?.cover, person?.profile_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -142,7 +103,6 @@ const PersonPhotoAlbum = ({ getPerson, personId }: DramaDatabase) => {
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      setUploadedImage(file);
       setPreviewUrl(URL.createObjectURL(file));
       try {
         const base64 = await convertToBase64(file);
@@ -177,7 +137,6 @@ const PersonPhotoAlbum = ({ getPerson, personId }: DramaDatabase) => {
       if (response.ok) {
         toast.success("Image uploaded successfully");
         setIsModalOpen(false);
-        setUploadedImage(null);
         setPreviewUrl(null);
         setBase64Image(null);
         setTitle("");
@@ -209,23 +168,24 @@ const PersonPhotoAlbum = ({ getPerson, personId }: DramaDatabase) => {
           <div className="flex items-center lg:items-start px-2 cursor-default">
             <Image
               ref={imgRef}
+              onLoad={extractColor}
               src={
                 coverFromDB?.cover ||
                 `https://image.tmdb.org/t/p/h632/${person?.profile_path}`
               }
-              alt={`${person?.name}'s Poster`}
+              alt={`${person?.name}'s Poster` || "Person Profile"}
               width={80}
               height={90}
               quality={100}
               priority
-              className="w-[80px] h-[90px] bg-center object-center rounded-md"
+              className="w-[80px] h-[90px] bg-center object-cover rounded-md"
             />
             <div className="flex flex-col pl-5 py-2">
               <h1 className="text-white text-xl font-bold">
                 {person?.name} ({getYearFromDate(person?.birthday)})
               </h1>
               <Link
-                prefetch={true}
+                prefetch={false}
                 href={`/person/${personId}-${spaceToHyphen(person.name)}`}
                 className="flex items-center text-sm my-1 opacity-75 hover:opacity-90"
               >
@@ -329,11 +289,15 @@ const PersonPhotoAlbum = ({ getPerson, personId }: DramaDatabase) => {
                         img?.url ||
                         `https://image.tmdb.org/t/p/h632/${img?.file_path}`
                       }
-                      alt={`${person?.name || person?.title}'s Poster`}
+                      alt={
+                        `${person?.name || person?.title}'s Poster` ||
+                        "Perosn Profile"
+                      }
                       width={300}
                       height={300}
                       quality={100}
                       loading="lazy"
+                      priority
                       className="w-full h-full object-cover transition-transform duration-300 hover:scale-110 cursor-grab"
                     />
                   </div>

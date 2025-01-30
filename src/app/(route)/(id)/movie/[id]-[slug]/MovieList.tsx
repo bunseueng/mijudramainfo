@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchMovie, fetchMovieImages } from "@/app/actions/fetchMovieApi";
 import ReportModal from "@/app/component/ui/Modal/ReportModal";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import LazyImage from "@/components/ui/lazyimage";
-import { movieId } from "@/helper/type";
-import { useQuery } from "@tanstack/react-query";
+import { TVShow } from "@/helper/type";
 import { Copy } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,21 +20,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import { toast } from "react-toastify";
 
-const MovieList = ({ movie_id }: movieId) => {
-  const { data: movie } = useQuery({
-    queryKey: ["movie"],
-    queryFn: () => fetchMovie(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: image } = useQuery({
-    queryKey: ["image"],
-    queryFn: () => fetchMovieImages(movie_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+interface MovieListProps {
+  movie_id: string;
+  movie: TVShow;
+}
+const MovieList = ({ movie_id, movie }: MovieListProps) => {
   const [hovered, setHovered] = useState<string | null>(null);
   const [currentItem, setCurrentItem] = useState<string>("Overview");
   const [currentUrl, setCurrentUrl] = useState("");
@@ -202,7 +190,9 @@ const MovieList = ({ movie_id }: movieId) => {
                     Report a Problem
                   </li>
                 </DialogTrigger>
-                {isOpen && <ReportModal route="movie" id={movie_id} />}
+                {isOpen && (
+                  <ReportModal route="movie" id={movie_id} type="movie" />
+                )}
               </Dialog>
             </ul>
           </div>

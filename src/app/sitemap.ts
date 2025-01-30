@@ -1,4 +1,4 @@
-import type { ITmdbDrama, PersonType } from "@/helper/type"
+import type { TVShow, PersonType } from "@/helper/type"
 import { safelyFormatDate } from "@/lib/safetyDate"
 import { spaceToHyphen } from "@/lib/spaceToHyphen"
 import type { MetadataRoute } from "next"
@@ -113,7 +113,7 @@ async function generateNetworkEntry(baseUrl: string, sitemapEntries: MetadataRou
   }
 }
 
-async function fetchTVShows(): Promise<ITmdbDrama[]> {
+async function fetchTVShows(): Promise<TVShow[]> {
   const response = await fetch(
     `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN&without_genres=16,10764,10767,99`,
   )
@@ -122,7 +122,7 @@ async function fetchTVShows(): Promise<ITmdbDrama[]> {
   return data.results
 }
 
-async function fetchMovies(): Promise<ITmdbDrama[]> {
+async function fetchMovies(): Promise<TVShow[]> {
   const response = await fetch(
     `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN`,
   )
@@ -148,7 +148,7 @@ async function fetchNetwork(): Promise<any> {
   return response.json()
 }
 
-async function generateTVKeywordEntries(tvShows: ITmdbDrama[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+async function generateTVKeywordEntries(tvShows: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   const keywordPromises = tvShows.map(async (show) => {
     try {
       const response = await fetch(
@@ -173,7 +173,7 @@ async function generateTVKeywordEntries(tvShows: ITmdbDrama[], baseUrl: string, 
 }
 
 async function generateMovieKeywordEntries(
-  movies: ITmdbDrama[],
+  movies: TVShow[],
   baseUrl: string,
   sitemapEntries: MetadataRoute.Sitemap,
 ) {

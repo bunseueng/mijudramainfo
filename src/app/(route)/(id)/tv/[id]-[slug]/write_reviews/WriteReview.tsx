@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import Image from "next/image";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 
 type RatingCategory = "story" | "acting" | "music" | "rewatchValue" | "overall";
 
@@ -51,6 +52,7 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
     overall: 0,
   });
 
+  const getColorFromImage = useColorFromImage();
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [containsSpoilers, setContainsSpoilers] = useState<boolean | null>(
     null
@@ -85,32 +87,19 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
       }));
     }
   };
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
 
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        `https://image.tmdb.org/t/p/${tv?.backdrop_path ? "w300" : "w92"}/${
-          tv?.backdrop_path || tv?.poster_path
-        }`
-      );
-      setDominantColor(color);
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        tv?.poster_path ? "w92" : "w300"
+      }/${tv?.poster_path || tv?.backdrop_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(rgbaColor);
+    } else {
+      console.error("Image url undefined");
     }
-  }, [tv?.backdrop_path, tv?.poster_path]);
+  }, [tv?.backdrop_path, tv?.poster_path, getColorFromImage]);
 
   const handleDropdownToggle = (dropdown: string) => {
     setOpenDropdown((prev) => (prev === `${dropdown}` ? null : `${dropdown}`));
@@ -565,8 +554,8 @@ const WriteReview: React.FC<WriteReview> = ({ tv_id, currentUser }) => {
                                 currentEpisode
                                   ? currentEpisode
                                   : isEpCounterClicked
-                                  ? epCounter
-                                  : tv?.number_of_episodes
+                                    ? epCounter
+                                    : tv?.number_of_episodes
                               }
                               onChange={(e) =>
                                 setCurrentEpisode(Number(e.target.value))

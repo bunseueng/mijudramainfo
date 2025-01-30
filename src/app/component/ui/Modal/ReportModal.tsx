@@ -18,9 +18,10 @@ import { Loader2 } from "lucide-react";
 type ReportModalType = {
   route: string;
   id: string;
+  type: string;
 };
 
-export default function ReportModal({ route, id }: ReportModalType) {
+export default function ReportModal({ route, id, type }: ReportModalType) {
   const [problemType, setProblemType] = useState<string>("");
   const [extraDetails, setExtraDetails] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -40,6 +41,7 @@ export default function ReportModal({ route, id }: ReportModalType) {
         body: JSON.stringify({
           problemType,
           extraDetails,
+          type,
         }),
       });
 
@@ -47,6 +49,8 @@ export default function ReportModal({ route, id }: ReportModalType) {
         toast.success("Report submitted successfully");
         setProblemType("");
         setExtraDetails("");
+      } else if (response.status === 401) {
+        toast.error("Unauthorized");
       } else {
         toast.error("Failed to submit report");
       }
@@ -123,7 +127,11 @@ export default function ReportModal({ route, id }: ReportModalType) {
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">
+          <Button
+            type="submit"
+            disabled={isLoading ? true : false}
+            className={`${isLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
+          >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (

@@ -182,6 +182,7 @@ const Friend: React.FC<IFriend & currentUser> = ({
                   }`}
                 >
                   <Link
+                    prefetch={false}
                     href={linkPath}
                     className="relative text-sm md:text-md font-semibold px-2 md:px-4 py-2"
                   >
@@ -247,6 +248,7 @@ const Friend: React.FC<IFriend & currentUser> = ({
                             />
                             <div className="pl-3">
                               <Link
+                                prefetch={false}
                                 href={`/profile/${fri?.name}`}
                                 className="text-[#2490da] font-bold"
                               >

@@ -137,7 +137,9 @@ const PersonList = ({ personId }: any) => {
                     Report a Problem
                   </li>
                 </DialogTrigger>
-                {isOpen && <ReportModal route="person" id={personId} />}
+                {isOpen && (
+                  <ReportModal route="person" id={personId} type="person" />
+                )}
               </Dialog>
             </ul>
           </div>

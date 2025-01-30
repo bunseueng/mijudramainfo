@@ -1,20 +1,11 @@
 "use client";
 
 import {
-  fetchAllPopularTvShows,
-  fetchContentRating,
-  fetchLanguages,
-  fetchReview,
-  fetchTv,
-} from "@/app/actions/fetchMovieApi";
-import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import {
   currentUserProps,
   DramaDB,
   ITvReview,
   SearchParamsType,
 } from "@/helper/type";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React, {
   useCallback,
@@ -33,6 +24,8 @@ import TvInfo from "../TvInfo";
 import ReviewHeader from "./ReviewHeader";
 import ReviewFilters from "./ReviewFilters";
 import ReviewItem from "./ReviewItem";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useDramaData } from "@/hooks/useDramaData";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
@@ -51,41 +44,10 @@ const Reviews: React.FC<ReviewType> = ({
   getReview,
   currentUser,
 }) => {
-  const { data: tv, isLoading } = useQuery({
-    queryKey: ["drama", tv_id],
-    queryFn: () => fetchTv(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: language } = useQuery({
-    queryKey: ["tvLanguage", tv_id],
-    queryFn: fetchLanguages,
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: content } = useQuery({
-    queryKey: ["tvContent", tv_id],
-    queryFn: () => fetchContentRating(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: allTvShows } = useQuery({
-    queryKey: ["tvCast", tv_id],
-    queryFn: fetchAllPopularTvShows,
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
-  const { data: review } = useQuery({
-    queryKey: ["review", tv_id],
-    queryFn: () => fetchReview(tv_id),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
-  });
+  const { tv, isLoading, language } = useDramaData(tv_id);
+  const content = tv?.content_ratings?.results || [];
+  const review = tv?.reviews || [];
+  const allTvShows = tv?.similar?.results || [];
   const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>("");
   const [reviewType, setReviewType] = useState<string>("Most Helpful");
@@ -98,6 +60,7 @@ const Reviews: React.FC<ReviewType> = ({
   const [loadingStates, setLoadingStates] = useState<{
     [key: string]: boolean;
   }>({});
+  const getColorFromImage = useColorFromImage();
   const pathname = usePathname();
   const router = useRouter();
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
@@ -235,36 +198,18 @@ const Reviews: React.FC<ReviewType> = ({
     }
   };
 
-  const getColorFromImage = async (imageUrl: string) => {
-    const response = await fetch("/api/extracting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(data.error || "Failed to get color");
-    }
-
-    return data.averageColor;
-  };
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
-      const color = await getColorFromImage(
-        `https://image.tmdb.org/t/p/w92/${tv?.poster_path}`
-      );
-      if (color) {
-        // Use the color string directly
-        setDominantColor(color);
-      } else {
-        console.error("No valid color returned");
-      }
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        tv?.poster_path ? "w92" : "w300"
+      }/${tv?.poster_path || tv?.backdrop_path}`;
+      const [r, g, b] = await getColorFromImage(imageUrl);
+      const rgbaColor = `rgb(${r}, ${g}, ${b})`; // Full opacity
+      setDominantColor(rgbaColor);
+    } else {
+      console.error("Image url undefined");
     }
-  }, [tv?.poster_path]);
+  }, [tv?.backdrop_path, tv?.poster_path, getColorFromImage]);
 
   useEffect(() => {
     if (imgRef.current) {
@@ -290,7 +235,13 @@ const Reviews: React.FC<ReviewType> = ({
   }
   return (
     <div className="bg-slate-100 dark:bg-[#1e1e1e]">
-      <ReviewHeader tv={tv} tv_id={tv_id} dominantColor={dominantColor} />
+      <ReviewHeader
+        tv={tv}
+        tv_id={tv_id}
+        dominantColor={dominantColor}
+        imgRef={imgRef}
+        extractColor={extractColor}
+      />
 
       <div className="max-w-6xl mx-auto mt-0 py-2 lg:py-6 relative overflow-hidden">
         <div className="flex flex-col lg:flex-row items-start px-2">
@@ -323,6 +274,7 @@ const Reviews: React.FC<ReviewType> = ({
                   <div className="flex items-center justify-between text-[#176093] bg-[#a5dafa] px-5 py-2">
                     <h1 className="text-md font-bold">Reviews</h1>
                     <Link
+                      prefetch={false}
                       href={`/tv/${tv_id}/write_reviews`}
                       className="text-md"
                     >
@@ -371,7 +323,7 @@ const Reviews: React.FC<ReviewType> = ({
                 src={`https://image.tmdb.org/t/p/${
                   tv?.poster_path ? "w342" : "w300"
                 }/${tv?.poster_path || tv?.backdrop_path}`}
-                alt={`${tv?.name}'s Poster`}
+                alt={`${tv?.name}'s Poster` || "Drama Poster"}
                 width={350}
                 height={480}
                 quality={100}
