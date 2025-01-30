@@ -23,6 +23,12 @@ const nextConfig = {
     optimizeCss: true,
   },
   reactStrictMode: true,
+  async redirects() {
+    return [];
+  },
+  async rewrites() {
+    return [];
+  },
   async headers() {
     return [
       {
