@@ -21,6 +21,7 @@ const nextConfig = {
     nextScriptWorkers: true,
     optimisticClientCache: false,
     optimizeCss: true,
+    missingSuspenseWithCSRBailout: false,
   },
   reactStrictMode: true,
   async headers() {
