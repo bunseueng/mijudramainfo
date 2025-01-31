@@ -15,12 +15,12 @@ const nextConfig = {
       "static.wikia.nocookie.net",
     ],
     formats: ["image/avif", "image/webp"],
+    unoptimized: true,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
   },
   experimental: {
-    // Remove nextScriptWorkers as it's unstable
     optimisticClientCache: false,
     optimizeCss: true,
   },
@@ -32,7 +32,6 @@ const nextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            // More conservative caching strategy
             value:
               "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
           },
@@ -40,7 +39,6 @@ const nextConfig = {
       },
     ];
   },
-  // Error handling through proper logging
   logging: {
     fetches: {
       fullUrl: true,
@@ -48,4 +46,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
