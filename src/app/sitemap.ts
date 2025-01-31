@@ -66,15 +66,15 @@ async function generateMovieEntries(baseUrl: string, sitemapEntries: MetadataRou
     sitemapEntries.push(
       ...movies.flatMap((movie) => [
         {
-          url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.name)}`,
+          url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}`,
           lastModified: safelyFormatDate(movie.release_date),
         },
         {
-          url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.name)}/cast`,
+          url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/cast`,
           lastModified: safelyFormatDate(movie.release_date),
         },
         {
-          url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.name)}/photos`,
+          url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/photos`,
           lastModified: safelyFormatDate(movie.release_date),
         },
       ]),
