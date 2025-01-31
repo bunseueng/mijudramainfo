@@ -6,6 +6,7 @@ import { cache, Suspense } from "react";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { getPersonData, getPersonDetails } from "@/app/actions/personActions";
 import { notFound } from "next/navigation";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 export const revalidate = 3600;
 
 export async function generateMetadata(props: {
@@ -20,12 +21,14 @@ export async function generateMetadata(props: {
   const data = await getPersonDetails(person_id);
 
   return {
-    title: `${data.person?.results[0]?.original_name}`,
+    title: `${data?.person?.results[0]?.name} (${data.person?.results[0]?.original_name})`,
     description: data.personDetails?.biography,
     keywords: data.personDetails?.also_known_as,
     openGraph: {
       type: "website",
-      url: `https://mijudramainfo.vercel.app/person/${data.person?.results[0]?.id}`,
+      url: `https://mijudramainfo.vercel.app/person/${
+        data.person?.results[0]?.id
+      }-${spaceToHyphen(data?.person?.results[0]?.name)}`,
       title: data.person?.results[0]?.name,
       description: data.personDetails?.biography,
       images: [

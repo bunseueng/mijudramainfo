@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTrending } from "@/app/actions/fetchMovieApi";
 import { useInView } from "react-intersection-observer";
-import { useColorFromImage } from "@/hooks/useColorFromImage";
 import dynamic from "next/dynamic";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 
 const SliderContent = dynamic(() => import("./SliderContent"), { ssr: false });
 const SliderControls = dynamic(() => import("./SliderControls"), {

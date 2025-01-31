@@ -248,6 +248,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
             users={users}
             getComment={getComment}
             tv_id={tv_id}
+            personFullDetails={personFullDetails}
           />
         </div>
       </div>

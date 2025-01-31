@@ -105,6 +105,7 @@ const DramaCast = ({
   if (!tv || !language || !allTvShows || !review || !image) {
     return null;
   }
+
   return (
     <div className="max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5 relative overflow-hidden">
       <div className="flex flex-col md:flex-row items-start">
@@ -125,9 +126,15 @@ const DramaCast = ({
               View All
             </Link>
           </div>
-          <div className="grid grid-cols-1 min-[649px]:grid-cols-2 min-[1350px]:grid-cols-3 ml-5 md:ml-0">
-            <CastCard getDrama={getDrama} cast={cast} />
-          </div>
+          {cast?.cast?.length > 0 ? (
+            <div className="grid grid-cols-1 min-[649px]:grid-cols-2 min-[1350px]:grid-cols-3 ml-5 md:ml-0">
+              <CastCard getDrama={getDrama} cast={cast} />
+            </div>
+          ) : (
+            <div className="w-full mt-5">
+              {tv?.name || "This Drama"} does not have any cast yet.
+            </div>
+          )}
 
           {tv?.homepage !== "" && selectedProvider && (
             <div className="border-t-[1px] border-slate-400 mt-7 mx-2 md:mx-0">

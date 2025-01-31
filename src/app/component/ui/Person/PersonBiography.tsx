@@ -10,8 +10,8 @@ export default function PersonBiography({ persons }: BiographyProps) {
 
   if (!persons?.biography) {
     return (
-      <div className="text-md font-semibold text-center py-5">
-        {persons?.name} currently has no biography.
+      <div className="text-md font-semibold text-start pb-5">
+        {persons?.name} currently has no biography. <Link prefetch={false} href={`/person/${persons?.id}/edit/details`} className="text-blue-500 hover:opacity-80 transform duration-300">Edit Biography</Link>
       </div>
     );
   }

@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/tvActions";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 
 export const maxDuration = 60;
 export const revalidate = 3600;
@@ -55,7 +56,9 @@ export async function generateMetadata(props: {
       keywords: tvDetails?.genres?.map((data: any) => data.name),
       openGraph: {
         type: "website",
-        url: `https://mijudramainfo.vercel.app/tv/${tvDetails?.id}`,
+        url: `https://mijudramainfo.vercel.app/tv/${
+          tvDetails?.id
+        }-${spaceToHyphen(tvDetails?.name)}`,
         title: tvDetails?.name,
         description: tvDetails?.overview,
         siteName: "MijuDramaInfo",

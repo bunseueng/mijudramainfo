@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchPerson } from "@/app/actions/fetchMovieApi";
+import { fetchPerson, fetchPersonLike } from "@/app/actions/fetchMovieApi";
 import { personLove, TPersonLove } from "@/helper/zod";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -28,8 +28,12 @@ export type PersonDb = {
   updatedAt: Date;
 };
 
-export default function Person({ result, currentUser, getPerson }: any) {
-  const [getPersons, setGetPersons] = useState<PersonDb>();
+export default function Person({
+  result,
+  currentUser,
+  getPerson,
+  results,
+}: any) {
   const person_id = result?.id;
   const router = useRouter();
   const { register, handleSubmit } = useForm<TPersonLove>({
@@ -41,34 +45,19 @@ export default function Person({ result, currentUser, getPerson }: any) {
     staleTime: 3600000, // Cache data for 1 hour
     refetchOnWindowFocus: true, // Refetch when window is focused
   });
+
+  const personIds = results?.map((item: any) => item.id);
+  const { data: person_like } = useQuery({
+    queryKey: ["person_like", personIds],
+    queryFn: () => fetchPersonLike(personIds),
+    staleTime: 3600000,
+    enabled: Boolean(personIds?.length),
+  });
+
   const coverFromDB = getPerson?.find((p: any) =>
     p?.personId?.includes(person_id)
   );
 
-  useEffect(() => {
-    const fetchPerson = async () => {
-      try {
-        const res = await fetch(`/api/person/${result?.id}/love`, {
-          method: "GET",
-        });
-        if (res.ok) {
-          const data = await res.json();
-          router.refresh();
-          setGetPersons(data);
-          console.log(data);
-        } else {
-          console.error("Failed to fetch person from API");
-        }
-      } catch (error) {
-        console.error("Failed to fetch person from API:", error);
-      }
-    };
-    fetchPerson();
-  }, [result?.id, router]);
-
-  const isCurrentUserLoved = getPersons?.lovedBy.find((item) =>
-    item.includes(currentUser?.id)
-  );
   const handleLove = async (data: TPersonLove) => {
     try {
       const res = await fetch(`/api/person/${result?.id}/love`, {
@@ -88,10 +77,17 @@ export default function Person({ result, currentUser, getPerson }: any) {
         toast.error("Failed to love");
       }
     } catch (error: any) {
-      console.error("Error:", error);
       toast.error("Failed to love");
     }
   };
+
+  const currentPersonLike = person_like?.find((data: any) =>
+    data.personId.includes(person_id)
+  );
+
+  const isCurrentUserLoved = currentPersonLike?.lovedBy.find(
+    (item: any) => item && item.includes(currentUser?.id)
+  );
   return (
     <div className="p-5 relative box-border h-[90%]">
       <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
@@ -103,7 +99,10 @@ export default function Person({ result, currentUser, getPerson }: any) {
           >
             <LazyImage
               coverFromDB={coverFromDB?.cover}
-              src={`https://image.tmdb.org/t/p/w185/${result.profile_path}`}
+              src={
+                `https://image.tmdb.org/t/p/w185/${result.profile_path}` ||
+                "/default-pf.jpg"
+              }
               alt={`${result?.name}'s Profile` || "Person Profile"}
               width={200}
               height={200}
@@ -134,12 +133,12 @@ export default function Person({ result, currentUser, getPerson }: any) {
               {isCurrentUserLoved ? (
                 <span className="flex items-center text-red-600">
                   <GoHeart {...register("love")} />
-                  <span className="pl-1">{getPersons?.love}</span>
+                  <span className="pl-1">{currentPersonLike?.love}</span>
                 </span>
               ) : (
                 <span className="flex items-center">
                   <GoHeart {...register("love")} />
-                  <span className="pl-1">{getPersons?.love}</span>
+                  <span className="pl-1">{currentPersonLike?.love}</span>
                 </span>
               )}
             </button>

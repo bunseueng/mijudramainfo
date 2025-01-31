@@ -24,9 +24,7 @@ const PersonMovie = ({ data, heading }: any) => {
 
   if (sortedMovie?.length === 0) {
     return (
-      <div className="text-md font-semibold text-start py-5">
-        No data available.
-      </div>
+      <div className="text-md font-semibold text-start">No data available.</div>
     );
   }
   return (
@@ -44,7 +42,8 @@ const PersonMovie = ({ data, heading }: any) => {
               >
                 <div className="w-[130px] h-auto bg-cover">
                   <Link
-                    rel="preload"
+                    prefetch={false}
+                    aria-label="Visit Movie Page"
                     href={`/movie/${item?.id}-${spaceToHyphen(
                       item?.title || item?.name
                     )}`}

@@ -165,7 +165,7 @@ const GradientOverlays = React.memo(({ left, right, center }: any) => (
 GradientOverlays.displayName = "GradientOverlays";
 
 const OptimizedContentWrapper = React.memo(
-  ({ currentItem, itemLink, getRating, genres, contentVariants }: any) => (
+  ({ currentItem, itemLink, getRating, contentVariants }: any) => (
     <motion.div
       variants={contentVariants}
       initial="hidden"

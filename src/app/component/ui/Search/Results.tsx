@@ -88,6 +88,7 @@ export default function Results({
                     <Person
                       key={idx}
                       result={result}
+                      results={results}
                       searchQuery={searchQuery}
                       BASE_URL={BASE_URL}
                       currentUser={currentUser}

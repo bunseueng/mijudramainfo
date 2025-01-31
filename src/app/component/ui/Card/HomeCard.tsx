@@ -6,10 +6,10 @@ import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useColorFromImage } from "@/hooks/useColorFromImage";
 import { HomeDramaT } from "../Main/Section";
 import HomeCardHover from "./HomeCardHover";
 import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 
 const HomeCard = ({
   heading,
