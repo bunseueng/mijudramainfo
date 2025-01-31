@@ -33,8 +33,8 @@ import ReusedImage from "@/components/ui/allreusedimage";
 import { BsStars } from "react-icons/bs";
 import MovieInfo from "../MovieInfo";
 import { handleProfileClick } from "@/app/actions/handleProfileClick";
-import { useColorFromImage } from "@/hooks/useColorFromImage";
 import { useMovieData } from "@/hooks/useMovieData";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }

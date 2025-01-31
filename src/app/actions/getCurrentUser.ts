@@ -1,37 +1,35 @@
-import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next"
+import prisma from "@/lib/db"
+import { authOptions } from "@/lib/auth"
+import { currentUserProps } from "@/helper/type"
 
-async function getSession() {
-  return await getServerSession(authOptions);
-}
-
-export async function getCurrentUser() {
+export async function getCurrentUser():Promise<currentUserProps | null> { 
   try {
-    const session = await getSession();
+    const session = await getServerSession(authOptions)
 
     if (!session?.user?.email) {
-      return null;
+      return null
     }
 
     const currentUser = await prisma.user.findUnique({
       where: {
-        email: session?.user?.email,
+        email: session.user.email,
       },
-      include: { accounts: true },
-    });
+    })
 
     if (!currentUser) {
-      return null;
+      return null
     }
 
     return {
       ...currentUser,
       createdAt: currentUser.createdAt.toISOString(),
-      updateAt: currentUser.updatedAt.toISOString(),
-      emailVerified: currentUser.emailVerified?.toString() || null,
-    };
-  } catch (error: any) {
-    return null;
+      updatedAt: currentUser.updatedAt.toISOString(),
+      emailVerified: currentUser.emailVerified?.toISOString() || null,
+    }
+  } catch (error) {
+    console.error("Error in getCurrentUser:", error)
+    return null
   }
 }
+

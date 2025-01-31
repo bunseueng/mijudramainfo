@@ -81,16 +81,38 @@ export default async function tvPage(props: {
   params: Promise<{ "id]-[slug": string }>;
 }) {
   const params = await props.params;
-  if (!params["id]-[slug"]) {
+  const slug = params["id]-[slug"];
+
+  if (!slug) {
     notFound();
   }
 
   try {
-    const [tv_id] = params["id]-[slug"].split("-");
-    const user = await getCurrentUser();
-    const dramaData = await getDramaData(tv_id, user?.id);
-    // Add an artificial delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const [tv_id] = slug.split("-");
+
+    // Get user data with error handling
+    let user = null;
+    try {
+      user = await getCurrentUser();
+    } catch (authError) {
+      console.error("Authentication error:", authError);
+      // Continue without user data
+    }
+
+    // Get drama data with retry logic
+    const getDramaDataWithRetry = async (retries = 3) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          return await getDramaData(tv_id, user?.id);
+        } catch (error) {
+          if (i === retries - 1) throw error;
+          await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
+        }
+      }
+    };
+
+    const dramaData = await getDramaDataWithRetry();
+
     return (
       <Suspense key={tv_id} fallback={<SearchLoading />}>
         <DramaMain tv_id={tv_id} user={user} {...dramaData} />

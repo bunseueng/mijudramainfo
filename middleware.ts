@@ -1,4 +1,5 @@
 import { getToken } from 'next-auth/jwt';
+import type { JWT } from "next-auth/jwt"
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
@@ -8,10 +9,10 @@ export async function middleware(request: NextRequest) {
     }
 
     // Check authentication for POST, PUT, PATCH, DELETE methods
-    const token = await getToken({
+    const token = (await getToken({
         req: request,
         secret: process.env.NEXTAUTH_SECRET,
-    });
+      })) as JWT | null
 
     if (!token) {
         const response = NextResponse.json(

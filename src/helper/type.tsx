@@ -27,6 +27,19 @@ export interface IFriend {
   friend: FriendRequestProps[];
 }
 
+type popularitySent = {
+  itemId: string;
+  personId: string;
+  starCount: number;
+  actorName: string;
+};
+
+type totalPopularitySent = {
+  personId: string;
+  actorName: string;
+  totalPopularity: number;
+};
+
 export interface currentUserProps {
   id: string;
   public_cover_id: string | null;
@@ -43,11 +56,13 @@ export interface currentUserProps {
   coverPhoto: string | null;
   profileAvatar: string | null;
   coin: number | null;
+  popularitySent: popularitySent[] | JsonValue[];
+  totalPopularitySent: totalPopularitySent[] | JsonValue[];
   followers: string[];
   following: string[];
   lastLogin: Date | null;
   createdAt: string;
-  updatedAt: Date;
+  updatedAt: string;
 }
 
 export interface UserProps {
