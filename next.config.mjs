@@ -15,39 +15,37 @@ const nextConfig = {
       "static.wikia.nocookie.net",
     ],
     formats: ["image/avif", "image/webp"],
-    unoptimized: true,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
   },
   experimental: {
-    nextScriptWorkers: true,
+    // Remove nextScriptWorkers as it's unstable
     optimisticClientCache: false,
     optimizeCss: true,
   },
   reactStrictMode: true,
-  async redirects() {
-    return [];
-  },
-  async rewrites() {
-    return [];
-  },
   async headers() {
     return [
       {
         source: "/api/:path*",
         headers: [
           {
-            key: "cache-control",
-            value: "s-maxage=600, stale-while-revalidate=30",
+            key: "Cache-Control",
+            // More conservative caching strategy
+            value:
+              "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
           },
         ],
       },
     ];
   },
-  onError: (error) => {
-    console.error("Next.js build error:", error);
+  // Error handling through proper logging
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

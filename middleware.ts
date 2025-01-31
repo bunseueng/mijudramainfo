@@ -3,31 +3,47 @@ import type { JWT } from "next-auth/jwt"
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+    // Get the pathname
+    const path = request.nextUrl.pathname;
+
     // Allow GET requests to pass through without authentication
     if (request.method === 'GET') {
         return NextResponse.next();
     }
 
-    // Check authentication for POST, PUT, PATCH, DELETE methods
-    const token = (await getToken({
-        req: request,
-        secret: process.env.NEXTAUTH_SECRET,
-      })) as JWT | null
+    try {
+        // Check authentication for POST, PUT, PATCH, DELETE methods
+        const token = await getToken({
+            req: request,
+            secret: process.env.NEXTAUTH_SECRET,
+        }) as JWT | null;
 
-    if (!token) {
-        const response = NextResponse.json(
-            { error: 'Invalid User' },
-            { status: 401 }
+        if (!token) {
+            return new NextResponse(
+                JSON.stringify({ error: 'Authentication required' }),
+                { 
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+        }
+
+        return NextResponse.next();
+    } catch (error) {
+        console.error('Middleware error:', error);
+        return new NextResponse(
+            JSON.stringify({ error: 'Internal server error' }),
+            { 
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            }
         );
-
-        return response;
     }
-
-    return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/api/approve-paypal', 
+    matcher: [
+        '/api/approve-paypal', 
         '/api/coverphoto', 
         '/api/create-order', 
         '/api/favorite/:path*', 
