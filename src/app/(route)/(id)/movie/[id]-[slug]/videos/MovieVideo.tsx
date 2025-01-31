@@ -15,8 +15,8 @@ import MovieBehindTheScenes from "./behind_the_scenes/BehindTheScenes";
 import MovieBloopers from "./bloopers/Bloopers";
 import MovieFeaturettes from "./featurettes/Featurettes";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
-import { useColorFromImage } from "@/hooks/useColorFromImage";
 import { useMovieData } from "@/hooks/useMovieData";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 
 interface TvTrailerType {
   movie_id: string;

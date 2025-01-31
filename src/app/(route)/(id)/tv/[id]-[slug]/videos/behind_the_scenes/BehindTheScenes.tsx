@@ -16,7 +16,7 @@ interface Youtube {
 const BehindTheScenes: React.FC<TrailerType> = ({ tv, trailer }) => {
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
   const [thumbnails, setThumbnails] = useState<Youtube[]>([]);
-  const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
+  const api = process.env.YOUTUBE_API_KEY;
   useEffect(() => {
     const fetchThumbnails = async () => {
       if (trailer?.results) {
@@ -42,7 +42,7 @@ const BehindTheScenes: React.FC<TrailerType> = ({ tv, trailer }) => {
     };
 
     fetchThumbnails();
-  }, [trailer]);
+  }, [trailer, api]);
   return (
     <>
       {trailer?.results?.filter(

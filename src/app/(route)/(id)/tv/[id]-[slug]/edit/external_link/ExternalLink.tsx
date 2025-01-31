@@ -304,7 +304,7 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           {item?.link_text || item?.id}
                         </span>
                         <a
-                          href={item?.url}
+                          href={isValidUrl(item?.url) ? item?.url : "#"}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -326,7 +326,11 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           {item?.id || item?.link_text}
                         </span>
                         <a
-                          href={`${item?.link_url}${item?.id}`}
+                          href={
+                            isValidUrl(`${item?.link_url}${item?.id}`)
+                              ? `${item?.link_url}${item?.id}`
+                              : "#"
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                         >

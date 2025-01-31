@@ -29,7 +29,6 @@ import { CreatePersonDetails, TCreatePersonDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { PersonExternalID } from "@/helper/type";
-import ClipLoader from "react-spinners/ClipLoader";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
@@ -290,7 +289,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Facebook</span>
                 {initialFacebook !== null ? (
                   <a
-                    href={`https://www.facebook.com/${initialFacebook}`}
+                    href={
+                      isValidUrl(`https://www.facebook.com/${initialFacebook}`)
+                        ? `https://www.facebook.com/${initialFacebook}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -334,7 +337,13 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Instagram</span>
                 {initialInstagram !== null ? (
                   <a
-                    href={`https://www.instagram.com/${initialInstagram}`}
+                    href={
+                      isValidUrl(
+                        `https://www.instagram.com/${initialInstagram}`
+                      )
+                        ? `https://www.instagram.com/${initialInstagram}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -379,7 +388,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Tiktok</span>
                 {initialTiktok !== null ? (
                   <a
-                    href={`https://www.tiktok.com/@${initialTiktok}`}
+                    href={
+                      isValidUrl(`https://www.tiktok.com/@${initialTiktok}`)
+                        ? `https://www.tiktok.com/@${initialTiktok}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -426,7 +439,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 initialDouyin !== "" &&
                 initialDouyin !== undefined ? (
                   <a
-                    href={`https://www.douyin.com/user/${initialDouyin}`}
+                    href={
+                      isValidUrl(`https://www.douyin.com/user/${initialDouyin}`)
+                        ? `https://www.douyin.com/user/${initialDouyin}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -471,7 +488,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Twitter</span>
                 {initialTwitter !== null ? (
                   <a
-                    href={`https://x.com/"${initialTwitter}`}
+                    href={
+                      isValidUrl(`https://x.com/"${initialTwitter}`)
+                        ? `https://x.com/"${initialTwitter}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -517,7 +538,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 initialWeibo !== "" &&
                 initialWeibo !== undefined ? (
                   <a
-                    href={`https://m.weibo.cn/u/${initialWeibo}`}
+                    href={
+                      isValidUrl(`https://m.weibo.cn/u/${initialWeibo}`)
+                        ? `https://m.weibo.cn/u/${initialWeibo}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -561,7 +586,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
               <span className="font-bold px-2">Youtube</span>
               {initialYoutube !== null ? (
                 <a
-                  href={`https://www.youtube.com/${initialYoutube}`}
+                  href={
+                    isValidUrl(`https://www.youtube.com/${initialYoutube}`)
+                      ? `https://www.youtube.com/${initialYoutube}`
+                      : "#"
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -606,7 +635,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">IMDB ID</span>
                 {initialIMDB !== null ? (
                   <a
-                    href={`https://www.imdb.com/name/${initialIMDB}`}
+                    href={
+                      isValidUrl(`https://www.imdb.com/name/${initialIMDB}`)
+                        ? `https://www.imdb.com/name/${initialIMDB}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -650,7 +683,13 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Wikidata ID</span>
                 {initialWikidata !== null ? (
                   <a
-                    href={`https://www.wikidata.org/wiki/${initialWikidata}`}
+                    href={
+                      isValidUrl(
+                        `https://www.wikidata.org/wiki/${initialWikidata}`
+                      )
+                        ? `https://www.wikidata.org/wiki/${initialWikidata}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -697,7 +736,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 initialTrakt !== "" &&
                 initialTrakt !== undefined ? (
                   <a
-                    href={`https://trakt.tv/shows/${initialTrakt}`}
+                    href={
+                      isValidUrl(`https://trakt.tv/shows/${initialTrakt}`)
+                        ? `https://trakt.tv/shows/${initialTrakt}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -749,7 +792,11 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 initialMdl !== "" &&
                 initialMdl !== undefined ? (
                   <a
-                    href={`https://mydramalist.com/people/${initialMdl}`}
+                    href={
+                      isValidUrl(`https://mydramalist.com/people/${initialMdl}`)
+                        ? `https://mydramalist.com/people/${initialMdl}`
+                        : "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -821,5 +868,3 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
 };
 
 export default PersonExternalLink;
-
-//adn-259

@@ -17,7 +17,7 @@ interface Youtube {
 const TvTeasers: React.FC<TrailerType> = ({ trailer, tv }) => {
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
   const [thumbnails, setThumbnails] = useState<Youtube[]>([]);
-  const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
+  const api = process.env.YOUTUBE_API_KEY;
   useEffect(() => {
     const fetchThumbnails = async () => {
       if (trailer?.results) {
@@ -43,7 +43,7 @@ const TvTeasers: React.FC<TrailerType> = ({ trailer, tv }) => {
     };
 
     fetchThumbnails();
-  }, [trailer]);
+  }, [trailer, api]);
 
   return (
     <>

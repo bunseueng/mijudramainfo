@@ -3,8 +3,6 @@
 import React, { lazy, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa6";
-import { useQuery } from "@tanstack/react-query";
-import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { VscQuestion } from "react-icons/vsc";
 import { tvVideoList } from "@/helper/item-list";
 import { usePathname, useRouter } from "next/navigation";
@@ -20,9 +18,9 @@ const Bloopers = lazy(() => import("./bloopers/Bloopers"));
 const Featurettes = lazy(() => import("./featurettes/Featurettes"));
 const OpeningCredits = lazy(() => import("./opening_credits/OpeningCredits"));
 import Image from "next/image";
-import { useColorFromImage } from "@/hooks/useColorFromImage";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { useDramaData } from "@/hooks/useDramaData";
+import { useColorFromImage } from "@/hooks/useColorFromImage";
 
 interface TvTrailerType {
   tv_id: string;
