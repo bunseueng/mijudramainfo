@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
@@ -7,15 +8,14 @@ import "react-toastify/dist/ReactToastify.css";
 import Script from "next/script";
 import Adsense from "./component/ui/Adsense/Adsense";
 import SessionAllPage from "./component/ui/Main/SessionAllPage";
-import dynamic from "next/dynamic";
 import { PHProvider } from "@/provider/PostHogProvider";
 import Provider from "@/provider/Provider";
 import TanstackProvider from "@/provider/TanstackProvider";
 import { ScrollProvider } from "@/provider/UseScroll";
 import { Analytics } from "@vercel/analytics/react";
 import Head from "next/head";
-const Loading = dynamic(() => import("./loading"));
-const Footer = dynamic(() => import("./component/ui/Main/Footer"));
+import Loading from "./loading";
+import Footer from "./component/ui/Main/Footer";
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],

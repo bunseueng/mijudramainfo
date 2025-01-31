@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { Suspense } from "react";
 import prisma from "@/lib/db";
 import Section from "./component/ui/Main/Section";
