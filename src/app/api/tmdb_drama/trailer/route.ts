@@ -1,6 +1,3 @@
-import { withCache } from "@/lib/cache";
-
-// Example: /api/tv/details
 export async function POST(req: Request) {
     const { ids } = await req.json(); // Expect an array of IDs
       const results = await Promise.all(
