@@ -128,7 +128,7 @@ const PersonList = ({ personId }: any) => {
                   prefetch={false}
                   href={`/person/${personId}/edit/external_link`}
                 >
-                  External_Links Credits
+                  External_Links
                 </Link>
               </li>
               <Dialog open={isOpen} onOpenChange={setIsOpen}>

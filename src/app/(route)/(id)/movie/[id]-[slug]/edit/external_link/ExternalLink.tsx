@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import { isValidUrl, sanitizeUrl } from "@/lib/isValidUrl";
 const ExternalEditModal = dynamic(
   () => import("@/app/component/ui/Modal/ExternalEditModal"),
   { ssr: false }
@@ -290,9 +291,14 @@ const ExternalLink: React.FC<movieId & Movie> = ({
                           {item?.link_text || item?.id}
                         </span>
                         <a
-                          href={isValidUrl(item?.url) ? item?.url : "#"}
+                          href={sanitizeUrl(item?.url)}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => {
+                            if (!item?.url || !isValidUrl(item?.url)) {
+                              e.preventDefault();
+                            }
+                          }}
                         >
                           <FaShare />
                         </a>
@@ -313,12 +319,20 @@ const ExternalLink: React.FC<movieId & Movie> = ({
                         </span>
                         <a
                           href={
-                            isValidUrl(`${item?.link_url}${item?.id}`)
+                            sanitizeUrl(`${item?.link_url}${item?.id}`)
                               ? `${item?.link_url}${item?.id}`
                               : "#"
                           }
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => {
+                            if (
+                              !`${item?.link_url}${item?.id}` ||
+                              !isValidUrl(`${item?.link_url}${item?.id}`)
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
                         >
                           <FaShare />
                         </a>

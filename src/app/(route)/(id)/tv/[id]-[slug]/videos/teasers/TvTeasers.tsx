@@ -17,7 +17,7 @@ interface Youtube {
 const TvTeasers: React.FC<TrailerType> = ({ trailer, tv }) => {
   const [openTrailer, setOpenTrailer] = useState<boolean>(true);
   const [thumbnails, setThumbnails] = useState<Youtube[]>([]);
-  const api = process.env.YOUTUBE_API_KEY;
+  const api = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
   useEffect(() => {
     const fetchThumbnails = async () => {
       if (trailer?.results) {

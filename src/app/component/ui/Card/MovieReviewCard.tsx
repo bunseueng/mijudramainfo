@@ -32,7 +32,7 @@ const MovieReviewCard = ({
     new Set()
   );
   const [thumbnails, setThumbnails] = useState<string[]>([]);
-  const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
+  const api = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
   const toggleExpand = (index: number) => {
     setExpandedReviews((prev) => {
       const newSet = new Set(prev);
@@ -72,7 +72,7 @@ const MovieReviewCard = ({
     } catch (error) {
       console.error("Error fetching thumbnails:", error);
     }
-  }, [video]);
+  }, [video, api]);
 
   return (
     <div>

@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import { isValidUrl, sanitizeUrl } from "@/lib/isValidUrl";
 
 const ExternalEditModal = dynamic(
   () => import("@/app/component/ui/Modal/ExternalEditModal"),
@@ -304,9 +305,14 @@ const ExternalLink: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
                           {item?.link_text || item?.id}
                         </span>
                         <a
-                          href={isValidUrl(item?.url) ? item?.url : "#"}
+                          href={sanitizeUrl(item?.url)}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => {
+                            if (!item?.url || !isValidUrl(item?.url)) {
+                              e.preventDefault();
+                            }
+                          }}
                         >
                           <FaShare />
                         </a>

@@ -36,7 +36,7 @@ const ReviewCard = ({
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [detail]: DramaDetails[] = (getDrama?.details ||
     []) as unknown as DramaDetails[];
-  const api = "AIzaSyD18uVRSrbsFPx6EA8n80GZDt3_srgYu8A";
+  const api = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
   const toggleExpand = (index: number) => {
     setExpandedReviews((prev) => {
       const newSet = new Set(prev);
@@ -78,7 +78,7 @@ const ReviewCard = ({
     };
 
     fetchThumbnails();
-  }, [video]);
+  }, [video, api]);
 
   return (
     <div>

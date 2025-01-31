@@ -132,9 +132,7 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                   src={
                     cover ||
                     personDB?.cover ||
-                    `https://image.tmdb.org/t/p/${
-                      person?.backdrop_path ? "w780" : "h632"
-                    }/${person?.backdrop_path || person?.poster_path}`
+                    `https://image.tmdb.org/t/p/h632/${person?.profile_path}`
                   }
                   alt={`${person?.name}'s Backdrop`}
                   width={300}
@@ -149,9 +147,7 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                   src={
                     cover ||
                     personDB?.cover ||
-                    `https://image.tmdb.org/t/p/${
-                      person?.backdrop_path ? "w780" : "w154"
-                    }/${person?.backdrop_path || person?.poster_path}`
+                    `https://image.tmdb.org/t/p/h632/${person?.profile_path}`
                   }
                   alt={`${person?.name}'s Backdrop`}
                   width={300}

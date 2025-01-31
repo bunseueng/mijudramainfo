@@ -31,6 +31,7 @@ import { toast } from "react-toastify";
 import { PersonExternalID } from "@/helper/type";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { isValidUrl, sanitizeUrl } from "@/lib/isValidUrl";
 
 const PersonExternalLink: React.FC<PersonEditList> = ({
   person_id,
@@ -289,13 +290,23 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Facebook</span>
                 {initialFacebook !== null ? (
                   <a
-                    href={
-                      isValidUrl(`https://www.facebook.com/${initialFacebook}`)
+                    href={sanitizeUrl(
+                      initialFacebook
                         ? `https://www.facebook.com/${initialFacebook}`
                         : "#"
-                    }
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (
+                        !initialFacebook ||
+                        !isValidUrl(
+                          `https://www.facebook.com/${initialFacebook}`
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <FaSquareShareNodes />
                   </a>
@@ -337,13 +348,19 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Instagram</span>
                 {initialInstagram !== null ? (
                   <a
-                    href={
-                      isValidUrl(
-                        `https://www.instagram.com/${initialInstagram}`
-                      )
-                        ? `https://www.instagram.com/${initialInstagram}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(
+                      `https://www.instagram.com/${initialInstagram}`
+                    )}
+                    onClick={(e) => {
+                      if (
+                        !initialInstagram ||
+                        !isValidUrl(
+                          `https://www.instagram.com/${initialInstagram}`
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -388,13 +405,19 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Tiktok</span>
                 {initialTiktok !== null ? (
                   <a
-                    href={
-                      isValidUrl(`https://www.tiktok.com/@${initialTiktok}`)
-                        ? `https://www.tiktok.com/@${initialTiktok}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(
+                      `https://www.tiktok.com/@${initialTiktok}`
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (
+                        !initialTiktok ||
+                        !isValidUrl(`https://www.tiktok.com/@${initialTiktok}`)
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <FaSquareShareNodes />
                   </a>
@@ -439,13 +462,21 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 initialDouyin !== "" &&
                 initialDouyin !== undefined ? (
                   <a
-                    href={
-                      isValidUrl(`https://www.douyin.com/user/${initialDouyin}`)
-                        ? `https://www.douyin.com/user/${initialDouyin}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(
+                      `https://www.douyin.com/user/${initialDouyin}`
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (
+                        !initialDouyin ||
+                        !isValidUrl(
+                          `https://www.douyin.com/user/${initialDouyin}`
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <FaSquareShareNodes />
                   </a>
@@ -488,13 +519,17 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Twitter</span>
                 {initialTwitter !== null ? (
                   <a
-                    href={
-                      isValidUrl(`https://x.com/"${initialTwitter}`)
-                        ? `https://x.com/"${initialTwitter}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(`https://x.com/"${initialTwitter}`)}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (
+                        !initialTwitter ||
+                        !isValidUrl(`https://x.com/"${initialTwitter}`)
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <FaSquareShareNodes />
                   </a>
@@ -538,11 +573,15 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 initialWeibo !== "" &&
                 initialWeibo !== undefined ? (
                   <a
-                    href={
-                      isValidUrl(`https://m.weibo.cn/u/${initialWeibo}`)
-                        ? `https://m.weibo.cn/u/${initialWeibo}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(`https://m.weibo.cn/u/${initialWeibo}`)}
+                    onClick={(e) => {
+                      if (
+                        !initialWeibo ||
+                        !isValidUrl(`https://m.weibo.cn/u/${initialWeibo}`)
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -586,11 +625,17 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
               <span className="font-bold px-2">Youtube</span>
               {initialYoutube !== null ? (
                 <a
-                  href={
-                    isValidUrl(`https://www.youtube.com/${initialYoutube}`)
-                      ? `https://www.youtube.com/${initialYoutube}`
-                      : "#"
-                  }
+                  href={sanitizeUrl(
+                    `https://www.youtube.com/${initialYoutube}`
+                  )}
+                  onClick={(e) => {
+                    if (
+                      !initialYoutube ||
+                      !isValidUrl(`https://www.youtube.com/${initialYoutube}`)
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -635,13 +680,19 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">IMDB ID</span>
                 {initialIMDB !== null ? (
                   <a
-                    href={
-                      isValidUrl(`https://www.imdb.com/name/${initialIMDB}`)
-                        ? `https://www.imdb.com/name/${initialIMDB}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(
+                      `https://www.imdb.com/name/${initialIMDB}`
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (
+                        !initialIMDB ||
+                        !isValidUrl(`https://www.imdb.com/name/${initialIMDB}`)
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <FaSquareShareNodes />
                   </a>
@@ -683,15 +734,21 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 <span className="font-bold px-2">Wikidata ID</span>
                 {initialWikidata !== null ? (
                   <a
-                    href={
-                      isValidUrl(
-                        `https://www.wikidata.org/wiki/${initialWikidata}`
-                      )
-                        ? `https://www.wikidata.org/wiki/${initialWikidata}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(
+                      `https://www.wikidata.org/wiki/${initialWikidata}`
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (
+                        !initialWikidata ||
+                        !isValidUrl(
+                          `https://www.wikidata.org/wiki/${initialWikidata}`
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <FaSquareShareNodes />
                   </a>
@@ -736,13 +793,17 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 initialTrakt !== "" &&
                 initialTrakt !== undefined ? (
                   <a
-                    href={
-                      isValidUrl(`https://trakt.tv/shows/${initialTrakt}`)
-                        ? `https://trakt.tv/shows/${initialTrakt}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(`https://trakt.tv/shows/${initialTrakt}`)}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (
+                        !initialTrakt ||
+                        !isValidUrl(`https://trakt.tv/shows/${initialTrakt}`)
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <FaSquareShareNodes />
                   </a>
@@ -792,13 +853,21 @@ const PersonExternalLink: React.FC<PersonEditList> = ({
                 initialMdl !== "" &&
                 initialMdl !== undefined ? (
                   <a
-                    href={
-                      isValidUrl(`https://mydramalist.com/people/${initialMdl}`)
-                        ? `https://mydramalist.com/people/${initialMdl}`
-                        : "#"
-                    }
+                    href={sanitizeUrl(
+                      `https://mydramalist.com/people/${initialMdl}`
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (
+                        !initialMdl ||
+                        !isValidUrl(
+                          `https://mydramalist.com/people/${initialMdl}`
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <FaSquareShareNodes />
                   </a>
