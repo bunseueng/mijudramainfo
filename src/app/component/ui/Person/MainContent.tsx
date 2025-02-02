@@ -8,19 +8,42 @@ import type {
   PersonDBType,
   currentUserProps,
   CommentProps,
+  TVShow,
+  Person,
 } from "@/helper/type";
 import PersonContent from "@/app/(route)/(id)/person/[id]-[slug]/PersonContent";
 
 interface MainContentProps {
-  persons: any;
+  persons: Person;
   currentUser: currentUserProps | null;
   getPersons: PersonDBType | null;
-  drama: any;
-  movie: any;
+  drama: TVShow;
+  movie: TVShow;
   users: UserProps[];
   getComment: CommentProps[];
   tv_id: number;
-  personFullDetails: any;
+  personFullDetails: {
+    results: Array<{
+      known_for_department: string;
+      known_for: Array<{
+        title?: string | null;
+        name?: string | null;
+        media_type: string;
+        id: number;
+        poster_path: string | null;
+        backdrop_path: string | null;
+        first_air_date: string;
+        release_date: string;
+      }>;
+    }>;
+  };
+  sortedChanges: {
+    userId: string;
+    timestamp: string;
+    field: string;
+    oldValue: string | null;
+    newValue: string;
+  }[];
 }
 
 export default function MainContent({
@@ -33,6 +56,7 @@ export default function MainContent({
   getComment,
   tv_id,
   personFullDetails,
+  sortedChanges,
 }: MainContentProps) {
   const router = useRouter();
   const { register, handleSubmit } = useForm<TPersonLove>({
@@ -86,6 +110,7 @@ export default function MainContent({
       isCurrentUserLoved={isCurrentUserLoved}
       handleLove={handleLove}
       personFullDetails={personFullDetails}
+      sortedChanges={sortedChanges}
     />
   );
 }

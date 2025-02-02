@@ -226,25 +226,35 @@ const MovieServices: React.FC<movieId & Movie> = ({
     }
   };
 
-  const handleResetChanges = async (idx: number) => {
+  const handleResetChanges = async () => {
     try {
       setResetLoading(true);
-      // Simulate a delay for the reset operation
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      setMarkedForDeletion((prev) =>
-        prev.map((marked, index) => (index === idx ? false : marked))
-      );
-      setIsItemDataChanged((prev) =>
-        prev.map((changed, index) => (index === idx ? false : changed))
-      );
-      setHasReordered(false);
+
+      // Reset all states to their original values
       setDrama(originalValue as any);
+      setMarkedForDeletion(Array(drama.length).fill(false));
+      setIsItemDataChanged(Array(drama.length).fill(false));
+      setHasReordered(false);
+      setStoredData([]); // Clear any newly added items
+
+      // Wait for state updates to complete
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      toast.info("Form has been reset");
     } catch (error) {
-      console.error(error);
+      console.error("Reset failed:", error);
+      toast.error("Failed to reset form");
     } finally {
       setResetLoading(false);
     }
   };
+  const hasChanges =
+    storedData?.length > 0 ||
+    markedForDeletion?.includes(true) ||
+    isItemDataChanged?.includes(true) ||
+    hasReordered;
+
+  const isLoading = loading || resetLoading;
 
   // Fetch user location and set the watch provider
   useEffect(() => {
@@ -506,33 +516,23 @@ const MovieServices: React.FC<movieId & Movie> = ({
           name="Submit"
           type="submit"
           className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-            storedData?.length > 0 ||
-            markedForDeletion?.includes(true) ||
-            isItemDataChanged?.includes(true) ||
-            hasReordered
-              ? "cursor-pointer"
-              : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+            !hasChanges || isLoading
+              ? "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+              : "cursor-pointer"
           }`}
-          disabled={
-            storedData?.length > 0 ||
-            markedForDeletion?.includes(true) ||
-            isItemDataChanged?.includes(true) ||
-            hasReordered
-              ? false
-              : true
-          }
+          disabled={!hasChanges || isLoading}
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
         </button>
         <button
           type="button"
           className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-4 ${
-            hasReordered
-              ? "cursor-pointer"
-              : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
+            !hasChanges || isLoading
+              ? "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
+              : "cursor-pointer"
           }`}
-          onClick={() => handleResetChanges(0)}
-          disabled={hasReordered ? false : true}
+          onClick={handleResetChanges} // Remove the idx parameter
+          disabled={!hasChanges || isLoading}
         >
           {resetLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

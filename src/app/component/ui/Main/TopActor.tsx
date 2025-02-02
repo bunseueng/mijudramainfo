@@ -21,22 +21,15 @@ type TopActorType = {
 export default function TopActor({ heading, personDB }: TopActorType) {
   const person_ids = personDB.map((person: PersonDBType) => person.personId);
 
-  const fetchAllPersons = async () => {
-    const allPersons = await Promise.all(
-      person_ids.map((id: PersonDBType) => fetchPerson(id.toString()))
-    );
-    return allPersons;
-  };
-
   const { data: persons, isLoading } = useQuery({
     queryKey: ["persons", person_ids],
-    queryFn: fetchAllPersons,
+    queryFn: () => fetchPerson(person_ids),
     staleTime: 3600000,
     refetchOnWindowFocus: true,
   });
 
   const filteredPerson = personDB?.filter((db: PersonDBType) =>
-    persons?.find((p) => db?.personId?.includes(p?.id))
+    persons?.find((p: any) => db?.personId?.includes(p?.id))
   );
 
   const sortedUsers = filteredPerson?.sort(
@@ -47,7 +40,7 @@ export default function TopActor({ heading, personDB }: TopActorType) {
     }
   );
 
-  const getPersonData = persons?.filter((data) =>
+  const getPersonData = persons?.filter((data: any) =>
     sortedUsers?.find(
       (p: PersonDBType) => p?.popularity[0]?.actorName === data?.name
     )

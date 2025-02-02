@@ -1,12 +1,13 @@
 "use client";
 
-import { createDetails, TCreateDetails } from "@/helper/zod";
+import { createDetails, type TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import type React from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { PersonEditList } from "../details/PersonEditList";
+import type { PersonEditList } from "../details/PersonEditList";
 import ReusedImage from "@/components/ui/allreusedimage";
 import { Loader2 } from "lucide-react";
 import { usePersonData } from "@/hooks/usePersonData";
@@ -21,19 +22,43 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
     resolver: zodResolver(createDetails),
   });
 
-  const resizeAndConvertToBase64 = (file: File): Promise<string> => {
+  const validateAndResizeImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
+        // Check aspect ratio
+        const aspectRatio = img.width / img.height;
+        if (Math.abs(aspectRatio - 2 / 3) > 0.01) {
+          reject(new Error("Image aspect ratio must be 2:3 (1:1.5)"));
+          return;
+        }
+
+        // Check dimensions
+        if (img.width < 300 || img.height < 450) {
+          reject(new Error("Image dimensions must be at least 300x450 pixels"));
+          return;
+        }
+        if (img.width > 2000 || img.height > 3000) {
+          reject(
+            new Error("Image dimensions must not exceed 2000x3000 pixels")
+          );
+          return;
+        }
+
+        // Resize image
         const canvas = document.createElement("canvas");
-        canvas.width = 300;
-        canvas.height = 300;
         const ctx = canvas.getContext("2d");
         if (!ctx) {
           reject(new Error("Failed to get canvas context"));
           return;
         }
-        ctx.drawImage(img, 0, 0, 300, 300);
+
+        // Maintain aspect ratio while resizing
+        const scaleFactor = Math.min(300 / img.width, 450 / img.height);
+        canvas.width = img.width * scaleFactor;
+        canvas.height = img.height * scaleFactor;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         const base64String = canvas.toDataURL("image/jpeg", 0.95);
         resolve(base64String);
       };
@@ -42,34 +67,17 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
     });
   };
 
-  const handleProductImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
-        const img = new Image();
-        img.onload = async () => {
-          if (img.width < 300 || img.height < 300) {
-            toast.error("Image dimensions must be at least 300x300 pixels");
-            setCover(undefined);
-          } else {
-            try {
-              const base64String = await resizeAndConvertToBase64(file);
-              setCover(base64String);
-            } catch (resizeError) {
-              console.error("Error resizing image:", resizeError);
-              toast.error("Failed to resize image");
-              setCover(undefined);
-            }
-          }
-        };
-        img.onerror = () => {
-          toast.error("Failed to load image");
-          setCover(undefined);
-        };
-        img.src = URL.createObjectURL(file);
+        const base64String = await validateAndResizeImage(file);
+        setCover(base64String);
+        toast.success("Image uploaded and resized successfully");
       } catch (error) {
-        console.error("Error processing image:", error);
-        toast.error("Failed to process image");
+        toast.error(
+          error instanceof Error ? error.message : "Failed to process image"
+        );
         setCover(undefined);
       }
     } else {
@@ -106,7 +114,6 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
         toast.error("An error occurred");
       }
     } catch (error: any) {
-      console.error("Error updating cover image:", error);
       toast.error("Failed to update cover image");
     } finally {
       setLoading(false);
@@ -120,6 +127,7 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
   if (isLoading) {
     return <div>Fetching Data...</div>;
   }
+
   return (
     <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6">Cover Image</h1>
@@ -136,7 +144,7 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                   }
                   alt={`${person?.name}'s Backdrop`}
                   width={300}
-                  height={300}
+                  height={450}
                   quality={100}
                   priority
                   className="inline-block w-full h-full bg-[#eee] bg-cover bg-center object-cover border-2 border-[#fff] p-1"
@@ -151,7 +159,7 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
                   }
                   alt={`${person?.name}'s Backdrop`}
                   width={300}
-                  height={300}
+                  height={450}
                   quality={100}
                   priority
                   className="inline-block w-full h-full bg-cover bg-center object-cover align-middle"
@@ -173,11 +181,16 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
           </button>
         </div>
         <div className="float-left w-full md:w-[50%] px-3">
-          <p className="bg-[#fcf8e3] border-2 border-[#faf2cc] text-[#8a6d3b] text-sm p-4 rounded-md">
-            Please upload an image with dimensions of at least 300x300 pixels.
-            The image will be automatically resized to 300x300 pixels and
-            converted to base64 format.
-          </p>
+          <div className="bg-[#fcf8e3] border-2 border-[#faf2cc] text-[#8a6d3b] text-sm p-4 rounded-md">
+            Please upload an image that meets the following criteria:
+            <ul className="list-disc pl-5 mt-2">
+              <li>Minimum resolution: 300x450 pixels</li>
+              <li>Maximum resolution: 2000x3000 pixels</li>
+              <li>Aspect ratio: 2:3 (1:1.5)</li>
+            </ul>
+            The image will be automatically resized while maintaining the aspect
+            ratio.
+          </div>
           <div className="relative mt-5">
             <button
               type="button"
@@ -192,13 +205,13 @@ const PersonCover: React.FC<PersonEditList> = ({ person_id, personDB }) => {
               className="hidden"
               type="file"
               name="coverPhoto"
-              onChange={handleProductImage}
+              onChange={handleImageUpload}
               accept="image/*"
             />
           </div>
           {cover && (
             <p className="mt-2 text-sm text-green-600">
-              Image selected, resized to 300x300 pixels
+              Image selected and resized successfully
             </p>
           )}
         </div>

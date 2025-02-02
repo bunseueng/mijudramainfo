@@ -1,22 +1,21 @@
-"use client";
-
-import { fetchMovie } from "@/app/actions/fetchMovieApi";
 import { createDetails, TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import ReusedImage from "@/components/ui/allreusedimage";
 import { Movie, movieId } from "@/helper/type";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { useMovieData } from "@/hooks/useMovieData";
 
 const MovieCover: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
   const [cover, setCover] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { movie } = useMovieData(movie_id);
@@ -59,13 +58,7 @@ const MovieCover: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
         const y = (scaledHeight - targetHeight) / 2;
 
         // Draw the image with proper scaling and cropping
-        ctx.drawImage(
-          img,
-          -x,
-          -y, // Destination x, y
-          scaledWidth,
-          scaledHeight // Destination width, height
-        );
+        ctx.drawImage(img, -x, -y, scaledWidth, scaledHeight);
 
         const base64String = canvas.toDataURL("image/jpeg", 0.95);
         resolve(base64String);
@@ -76,22 +69,19 @@ const MovieCover: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
   };
 
   const validateImageDimensions = (width: number, height: number): boolean => {
-    // Check minimum dimensions
     if (width < 500 || height < 750) {
       toast.error("Image must be at least 500x750 pixels");
       return false;
     }
 
-    // Check maximum dimensions
     if (width > 2000 || height > 3000) {
       toast.error("Image must not exceed 2000x3000 pixels");
       return false;
     }
 
-    // Check aspect ratio (allowing for small rounding differences)
     const aspectRatio = width / height;
     const targetRatio = 2 / 3;
-    const tolerance = 0.1; // 10% tolerance
+    const tolerance = 0.1;
 
     if (Math.abs(aspectRatio - targetRatio) > tolerance) {
       toast.error("Image must have an aspect ratio of 2:3");
@@ -115,6 +105,7 @@ const MovieCover: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
           try {
             const base64String = await resizeAndConvertToBase64(file);
             setCover(base64String);
+            setIsSubmitted(false);
           } catch (resizeError) {
             console.error("Error resizing image:", resizeError);
             toast.error("Failed to resize image");
@@ -144,6 +135,9 @@ const MovieCover: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
 
     try {
       setLoading(true);
+      setIsSubmitting(true);
+      setIsResetting(false);
+
       const res = await fetch(`/api/movie/${movie?.id}/cover`, {
         method: "POST",
         headers: {
@@ -158,6 +152,7 @@ const MovieCover: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
       if (res.status === 200) {
         reset();
         router.refresh();
+        setIsSubmitted(true);
         toast.success("Cover image updated successfully");
       } else if (res.status === 400) {
         toast.error("Invalid request");
@@ -169,6 +164,31 @@ const MovieCover: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
       toast.error("Failed to update cover image");
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReset = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setIsResetting(true);
+    setIsSubmitting(false);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      reset();
+      setCover(undefined);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      setIsSubmitted(false);
+    } catch (error) {
+      console.error("Error resetting:", error);
+    } finally {
+      setResetLoading(false);
+      setIsResetting(false);
     }
   };
 
@@ -219,18 +239,52 @@ const MovieCover: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
               </div>
             </div>
           </div>
-          <button
-            name="Submit"
-            type="submit"
-            className={`flex items-center text-white bg-[#5cb85c] border-2 border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-              cover
-                ? "cursor-pointer"
-                : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
-            }`}
-            disabled={!cover}
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
-          </button>
+          <div className="inline-flex">
+            <button
+              name="Submit"
+              type="submit"
+              className={`flex items-center text-white px-5 py-2 rounded-md mb-10 mr-5 transform duration-300 ${
+                cover
+                  ? "bg-[#5cb85c] border-[1px] border-[#5cb85c] hover:opacity-80 cursor-pointer"
+                  : "bg-[#b3e19d] border-[1px] border-[#b3e19d] cursor-not-allowed"
+              } ${
+                isResetting || isSubmitted
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+              disabled={!cover || isResetting || isSubmitted || loading}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Submit"
+              )}
+            </button>
+            <button
+              name="Reset"
+              type="button"
+              className={`flex items-center px-5 py-2 rounded-md mb-10 transform duration-300 ${
+                cover && !isSubmitted
+                  ? "text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] hover:opacity-80 cursor-pointer"
+                  : "text-[#c0c4cc] border-[1px] border-[#ebeef5] cursor-not-allowed"
+              } ${
+                isSubmitting || isSubmitted
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+              onClick={handleReset}
+              disabled={!cover || isSubmitting || isSubmitted || resetLoading}
+            >
+              {resetLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <span className="mr-1">
+                  <Trash2 className="h-4 w-4" />
+                </span>
+              )}
+              Reset
+            </button>
+          </div>
         </div>
         <div className="float-left w-full md:w-[50%] px-3">
           <div className="bg-[#fcf8e3] border-2 border-[#faf2cc] text-[#8a6d3b] text-sm p-4 rounded-md">

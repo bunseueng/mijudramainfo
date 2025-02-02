@@ -162,8 +162,8 @@ export default function Person({
           </div>
           <div className="mb-2">
             {person?.biography === "" ? (
-              <div className="text-md font-bold text-center py-5">
-                Sorry!! This person currently has no biography.
+              <div className="text-md font-bold text-start pb-5">
+                {results?.name || "This person"} currently has no biography.
               </div>
             ) : (
               <p className="line-clamp-4 text-sm truncate whitespace-normal">

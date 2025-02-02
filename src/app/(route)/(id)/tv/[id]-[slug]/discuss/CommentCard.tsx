@@ -457,7 +457,13 @@ const CommentCard = ({
                   </button>
                 </DialogTrigger>
                 {isReportModalOpen && (
-                  <ReportModal route="person" id={tv_id} type="comment" />
+                  <ReportModal
+                    route="person"
+                    id={tv_id}
+                    type="comment"
+                    isOpen={isReportModalOpen}
+                    onClose={() => setIsReportModalOpen(false)}
+                  />
                 )}
               </Dialog>
             </>

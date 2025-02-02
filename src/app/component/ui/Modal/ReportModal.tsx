@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -15,13 +16,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 
-type ReportModalType = {
+type ReportModalProps = {
   route: string;
   id: string;
   type: string;
+  isOpen: boolean;
+  onClose: () => void;
 };
 
-export default function ReportModal({ route, id, type }: ReportModalType) {
+export default function ReportModal({
+  route,
+  id,
+  type,
+  isOpen,
+  onClose,
+}: ReportModalProps) {
   const [problemType, setProblemType] = useState<string>("");
   const [extraDetails, setExtraDetails] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -38,6 +47,9 @@ export default function ReportModal({ route, id, type }: ReportModalType) {
       setIsLoading(true);
       const response = await fetch(`/api/${route}/${id}/report`, {
         method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           problemType,
           extraDetails,
@@ -49,10 +61,12 @@ export default function ReportModal({ route, id, type }: ReportModalType) {
         toast.success("Report submitted successfully");
         setProblemType("");
         setExtraDetails("");
+        onClose();
       } else if (response.status === 401) {
-        toast.error("Unauthorized");
+        toast.error("Unauthorized. Please log in and try again.");
       } else {
-        toast.error("Failed to submit report");
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to submit report");
       }
     } catch (error) {
       console.error("Error submitting report:", error);
@@ -63,83 +77,74 @@ export default function ReportModal({ route, id, type }: ReportModalType) {
   };
 
   return (
-    <DialogContent className="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>Report a Problem</DialogTitle>
-        <DialogDescription>
-          Please provide details about the issue you&#39;ve encountered.
-        </DialogDescription>
-      </DialogHeader>
-      <form onSubmit={handleSubmit}>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="problem-type">Type of Problem</Label>
-            <RadioGroup
-              id="problem-type"
-              value={problemType}
-              onValueChange={setProblemType}
-              className="grid gap-2"
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Report a Problem</DialogTitle>
+          <DialogDescription>
+            Please provide details about the issue you&#39;ve encountered.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <fieldset className="grid gap-2">
+              <legend className="text-sm font-medium">Type of Problem</legend>
+              <RadioGroup
+                value={problemType}
+                onValueChange={setProblemType}
+                className="grid gap-2"
+              >
+                {[
+                  { value: "Duplicate", label: "Duplicate" },
+                  { value: "Bad Image", label: "Bad Image" },
+                  {
+                    value: "Functionality",
+                    label: "Design or Functionality Issue",
+                  },
+                  { value: "Offensive or Spam", label: "Offensive or Spam" },
+                  { value: "Incorrect Content", label: "Incorrect Content" },
+                ].map((option) => (
+                  <div
+                    key={option.value}
+                    className="flex items-center space-x-2 my-1.5"
+                  >
+                    <RadioGroupItem value={option.value} id={option.value} />
+                    <Label htmlFor={option.value} className="cursor-pointer">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </fieldset>
+            <div className="grid gap-2">
+              <Label htmlFor="extra-details">Extra Details</Label>
+              <Textarea
+                id="extra-details"
+                value={extraDetails}
+                onChange={(e) => setExtraDetails(e.target.value)}
+                placeholder="Provide more information about the problem"
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className={isLoading ? "cursor-not-allowed" : "cursor-pointer"}
             >
-              <div className="flex items-center space-x-2 my-1.5">
-                <RadioGroupItem value="Duplicate" id="duplicate" />
-                <Label htmlFor="duplicate" className="cursor-pointer">
-                  Duplicate
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 my-1.5">
-                <RadioGroupItem value="Bad Image" id="bad_image" />
-                <Label htmlFor="bad_image" className="cursor-pointer">
-                  Bad Image
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 my-1.5">
-                <RadioGroupItem value="Functionality" id="functionality" />
-                <Label htmlFor="functionality" className="cursor-pointer">
-                  Design or Functionality Issue
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 my-1.5">
-                <RadioGroupItem value="Offensive or Spam" id="spam" />
-                <Label htmlFor="spam" className="cursor-pointer">
-                  Offensive or Spam
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 my-1.5">
-                <RadioGroupItem
-                  value="Incorrect Content"
-                  id="incorrect_content"
-                />
-                <Label htmlFor="incorrect_content" className="cursor-pointer">
-                  Incorrect Content
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="extra-details">Extra Details</Label>
-            <Textarea
-              id="extra-details"
-              value={extraDetails}
-              onChange={(e) => setExtraDetails(e.target.value)}
-              placeholder="Provide more information about the problem"
-              className="min-h-[100px]"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            type="submit"
-            disabled={isLoading ? true : false}
-            className={`${isLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Submit Report"
-            )}
-          </Button>
-        </DialogFooter>
-      </form>
-    </DialogContent>
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Report"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

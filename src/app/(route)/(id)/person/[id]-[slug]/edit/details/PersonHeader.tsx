@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { PersonDBType } from "@/helper/type";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
 import { usePersonData } from "@/hooks/usePersonData";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 
 interface PersonHeader {
   person_id: string;
@@ -43,7 +44,7 @@ const PersonHeader: React.FC<PersonHeader> = ({ person_id, personDB }) => {
   }, [extractColor]);
 
   if (isLoading) {
-    return <div>Fetching Data...</div>;
+    return <SearchLoading />;
   }
 
   return (
@@ -64,6 +65,7 @@ const PersonHeader: React.FC<PersonHeader> = ({ person_id, personDB }) => {
             height={200}
             quality={100}
             className="w-[60px] h-[70px] bg-center bg-cover object-cover rounded-md"
+            onLoad={extractColor}
           />
           <div className="flex flex-col pl-5 py-3">
             <h1 className="text-white text-xl font-bold">{person?.name}</h1>

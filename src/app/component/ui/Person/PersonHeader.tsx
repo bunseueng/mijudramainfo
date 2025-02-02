@@ -15,7 +15,11 @@ import { personLove, type TPersonLove } from "@/helper/zod";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import LazyImage from "@/components/ui/lazyimage";
-import type { PersonDBType, currentUserProps } from "@/helper/type";
+import type {
+  PersonDBType,
+  PersonDetail,
+  currentUserProps,
+} from "@/helper/type";
 import PersonInfo from "./PersonInfo";
 import PersonBiography from "./PersonBiography";
 
@@ -35,9 +39,11 @@ export default function PersonHeader({
   personFullDetails,
 }: PersonHeaderProps) {
   const router = useRouter();
-  const { register, handleSubmit } = useForm<TPersonLove>({
+  const { handleSubmit } = useForm<TPersonLove>({
     resolver: zodResolver(personLove),
   });
+  const [detail]: PersonDetail[] = (getPersons?.details ||
+    []) as unknown as PersonDetail[];
 
   const isCurrentUserLoved = getPersons?.lovedBy.find((item: any) =>
     item.includes(currentUser?.id)
@@ -68,7 +74,6 @@ export default function PersonHeader({
 
       router.refresh();
     } catch (error) {
-      console.error("Error:", error);
       toast.error("Failed to love");
     }
   };
@@ -79,7 +84,7 @@ export default function PersonHeader({
         <LazyImage
           coverFromDB={getPersons?.cover}
           src={`https://image.tmdb.org/t/p/h632/${persons?.profile_path}`}
-          alt={`${persons?.name}'s Avatar`}
+          alt={`${persons?.name}'s Avatar` || "Person Profile"}
           width={600}
           height={600}
           quality={100}
@@ -145,8 +150,12 @@ export default function PersonHeader({
               <span>{String(getPersons?.love || 0)}</span>
             </button>
           </div>
-          <PersonInfo persons={persons} personFullDetails={personFullDetails} />
-          <PersonBiography persons={persons} />
+          <PersonInfo
+            persons={persons}
+            personFullDetails={personFullDetails}
+            person_db={getPersons}
+          />
+          <PersonBiography persons={persons} detail={detail} />
         </div>
       </div>
     </div>

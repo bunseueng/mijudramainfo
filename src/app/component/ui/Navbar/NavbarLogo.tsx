@@ -17,7 +17,7 @@ const NavbarLogo: React.FC<NavbarLogoProps> = ({ setCurrentNav }) => {
         aria-label="Homepage"
       >
         <Image
-          src="/MIJUDRAMAINFO.png"
+          src="/MIJUDRAMAINFO.webp"
           alt="Mijudramainfo Logo"
           width={150}
           height={40}

@@ -12,6 +12,14 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
   session,
   outsideRef,
 }) => {
+  const handleSignOut = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await signOut({
+      callbackUrl: "/", // Redirect to home page after sign out
+      redirect: true,
+    });
+  };
+
   return (
     <AnimatePresence>
       <motion.ul
@@ -65,7 +73,7 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
         <li className="w-full border-b-2 border-b-[#78828c21] dark:border-b-slate-700"></li>
         <li
           className="flex items-center hover:bg-[#00000011] transform duration-300 pl-2 my-2 cursor-pointer"
-          onClick={() => signOut()}
+          onClick={handleSignOut}
         >
           <RiLogoutCircleRLine />
           <span className="ml-2">Sign out</span>

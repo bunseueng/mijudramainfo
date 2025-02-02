@@ -92,19 +92,26 @@ const FetchingTv: React.FC<FetchingMediaProps> = ({
     300
   );
 
-  const onClickAddMedia = async (id: string, mediaType: string) => {
-    const parsedId = Number.parseInt(id, 10);
-    if (!mediaIds.includes(parsedId)) {
-      setMediaIds([...mediaIds, parsedId]);
+  const onClickAddMedia = async (item: any) => {
+    const id = item.id.toString();
+    const mediaType = item.first_air_date ? "tv" : "movie";
+
+    if (!mediaIds.includes(item.id)) {
+      setMediaIds([...mediaIds, item.id]);
       setListSearch(""); // Clear the search input
     }
+
     try {
       let mediaDetail;
       if (mediaType === "movie") {
-        mediaDetail = await fetchMovie(parsedId.toString());
+        mediaDetail = await fetchMovie(id);
       } else {
-        mediaDetail = await fetchTv(parsedId.toString());
+        mediaDetail = await fetchTv(id);
       }
+
+      // Add media type to the detail object
+      mediaDetail = { ...mediaDetail, media_type: mediaType };
+
       if (query === "query") {
         setStoredData((prevData: any) => [...prevData, mediaDetail]);
       } else {
@@ -155,7 +162,7 @@ const FetchingTv: React.FC<FetchingMediaProps> = ({
                         listSearch && "force-overflow"
                       }`}
                       key={idx}
-                      onClick={() => onClickAddMedia(item.id, item.media_type)}
+                      onClick={() => onClickAddMedia(item)}
                     >
                       <div className="flex-shrink-0 w-[50px] h-[75px] relative">
                         <LazyImage

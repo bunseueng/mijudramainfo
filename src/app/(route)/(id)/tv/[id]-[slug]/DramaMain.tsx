@@ -90,7 +90,6 @@ const DramaMain = ({
     0
   );
   const calculatedRating = sumRating / existingRatings?.length;
-
   const [detail]: DramaDetails[] = (getDrama?.details ||
     []) as unknown as DramaDetails[];
   const [info]: DramaReleasedInfo[] = (getDrama?.released_information ||

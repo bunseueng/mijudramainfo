@@ -20,7 +20,9 @@ type ActorCardT = {
 const ActorCard = ({ result, coverFromDB, className }: ActorCardT) => {
   if (!result) return null;
 
-  const actorSlug = `${result.id}-${result.name.replace(/ /g, "-").toLowerCase()}`;
+  const actorSlug = `${result.id}-${result.name
+    .replace(/ /g, "-")
+    .toLowerCase()}`;
   const initials = result.name
     .split(" ")
     .map((n) => n[0])
@@ -40,9 +42,10 @@ const ActorCard = ({ result, coverFromDB, className }: ActorCardT) => {
             <AvatarImage
               src={
                 coverFromDB?.cover ||
-                `https://image.tmdb.org/t/p/w185/${result.profile_path}`
+                `https://image.tmdb.org/t/p/w185/${result.profile_path}` ||
+                "/default-pf.webp"
               }
-              alt={`${name}'s avatar`}
+              alt={`${name}'s avatar` || "Person avatar"}
               className="object-cover"
               width={150}
               height={150}

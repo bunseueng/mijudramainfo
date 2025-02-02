@@ -999,7 +999,7 @@ export const fetchMovieKeywords = cache(
   }
 );
 
-export const fetchRatings = async (ids: string[]) => {
+export const fetchRatings = cache(async (ids: string[]) => {
   try {
     const url = `/api/rating/${ids}`;
     const response = await fetch(url, {
@@ -1013,9 +1013,9 @@ export const fetchRatings = async (ids: string[]) => {
     console.error("Error fetching ratings:", error);
     return {};
   }
-};
+});
 
-export const fetchPersonLike = async (ids: string[]) => {
+export const fetchPersonLike = cache(async (ids: string[]) => {
   try {
     const url = `/api/person/${ids}/love`;
     const response = await fetch(url, {
@@ -1029,4 +1029,28 @@ export const fetchPersonLike = async (ids: string[]) => {
     console.error("Error fetching ratings:", error);
     return {};
   }
-};
+});
+
+export const fetchTrailer = cache(async (ids: string[]) => {
+  // Deduplicate IDs
+  const uniqueIds = [...new Set(ids)];
+  
+  try {
+    const url = `/api/trailer`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: uniqueIds }),
+      cache: 'force-cache',
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to fetch video details");
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching video details:", error);
+    return [];
+  }
+});

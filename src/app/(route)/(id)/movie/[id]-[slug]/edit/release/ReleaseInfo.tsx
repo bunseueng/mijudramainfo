@@ -54,12 +54,10 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
     movieDatabase as any[]
   );
   useEffect(() => {
-    if (movieDatabase && movieDatabase.length > 0) {
-      setDrama([...movieDatabase, ...(storedData || [])]);
-    } else {
-      setDrama([movie, ...(storedData || [])]);
-    }
-  }, [movie, movieDatabase, storedData]);
+    const initialDrama =
+      movieDatabase && movieDatabase.length > 0 ? movieDatabase : [movie];
+    setDrama(initialDrama);
+  }, [movie, movieDatabase]); // Remove storedData from dependencies
 
   const handleDropdownToggle = (dropdown: string, uniqueId: string) => {
     setOpenDropdown((prev) =>
@@ -151,11 +149,26 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
   };
 
   const extractMonthNumber = (month: string) => {
-    return month?.split(" - ")[0];
+    // If month is in "MM - Month" format
+    if (month?.includes(" - ")) {
+      return month.split(" - ")[0];
+    }
+
+    // If month is just the month name, find its number
+    const monthIndex = releaseDateByMonth.findIndex((m) => m.label === month);
+    if (monthIndex !== -1) {
+      return (monthIndex + 1).toString();
+    }
+
+    return month; // Return as is if it's already a number
   };
 
   // Function to combine month, day, and year
   const combineDate = (month: string, day: string, year: string) => {
+    if (month === "-" || day === "-" || year === "-") {
+      return `${year}-${month}-${day}`; // Return as is if any part is "-"
+    }
+
     const formattedMonth = extractMonthNumber(month)?.padStart(2, "0");
     const formattedDay = day?.padStart(2, "0");
     return `${year}-${formattedMonth}-${formattedDay}`;
@@ -165,62 +178,86 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
     try {
       e.preventDefault();
       setLoading(true);
-      setResetLoading(true);
-      const releaseDate = {
-        year: selectedValues?.year_release_0,
-        day: selectedValues?.day_release_0,
-        month: selectedValues?.month_release_0,
-      };
 
-      const newReleaseInfo =
-        drama?.map((item: any, idx: number) => {
-          const firstAirDateParts = item.first_air_date
-            ? item.first_air_date.split("-")
-            : ["-", "-", "-"];
-          const [firstAirYear, firstAirMonth, firstAirDay] = firstAirDateParts;
+      // Get only the items that have changed release dates
+      const changedItems = drama?.filter((item: any, idx: number) => {
+        const releaseDate = {
+          year: selectedValues[`year_release_${idx}`],
+          day: selectedValues[`day_release_${idx}`],
+          month: selectedValues[`month_release_${idx}`],
+        };
 
-          return {
-            ...item,
-            release_date:
-              !releaseDate.month && !releaseDate.day && !releaseDate.year
-                ? item?.release_date
-                : combineDate(
-                    releaseDate.month?.length > 0
-                      ? releaseDate?.month
-                      : firstAirMonth,
-                    releaseDate.day?.length > 0
-                      ? releaseDate?.day
-                      : firstAirDay,
-                    releaseDate.year?.length > 0
-                      ? releaseDate?.year
-                      : firstAirYear
-                  ),
-          };
-        }) || [];
+        // If no values were selected, this item hasn't changed
+        if (!releaseDate.year && !releaseDate.day && !releaseDate.month) {
+          return false;
+        }
 
-      const existingReleaseInfo =
-        movieDetails?.released_information || ([] as any);
+        const currentDate = item.release_date?.split("-") || ["-", "-", "-"];
+        const [currentYear, currentMonth, currentDay] = currentDate;
 
-      // Update existing entries or add new entries, filtering out deleted seasons
+        // Compare with original values to check if anything changed
+        const monthChanged =
+          releaseDate.month &&
+          extractMonthNumber(releaseDate.month) !== currentMonth;
+        const dayChanged = releaseDate.day && releaseDate.day !== currentDay;
+        const yearChanged =
+          releaseDate.year && releaseDate.year !== currentYear;
+
+        return monthChanged || dayChanged || yearChanged;
+      });
+
+      // Only process items that have changes
+      const newReleaseInfo = changedItems?.map((item: any, idx: number) => {
+        const currentDate = item.release_date?.split("-") || ["-", "-", "-"];
+        const [currentYear, currentMonth, currentDay] = currentDate;
+
+        const releaseDate = {
+          year: selectedValues[`year_release_${idx}`],
+          day: selectedValues[`day_release_${idx}`],
+          month: selectedValues[`month_release_${idx}`],
+        };
+
+        // Only update fields that have actually changed
+        const month = releaseDate.month || getMonthNameFromNumber(currentMonth);
+        const day = releaseDate.day || currentDay;
+        const year = releaseDate.year || currentYear;
+
+        return {
+          ...item,
+          release_date: combineDate(month, day, year),
+        };
+      });
+
+      // If no changes, don't make the API call
+      if (!newReleaseInfo || newReleaseInfo.length === 0) {
+        toast.info("No changes to submit");
+        setLoading(false);
+        setResetLoading(false);
+        return;
+      }
+
+      // Merge with existing data, only updating changed items
+      const existingReleaseInfo = movieDetails?.released_information || [];
+      const updatedReleaseInfo = [...existingReleaseInfo];
+
       newReleaseInfo.forEach((newItem: any) => {
-        const index = existingReleaseInfo.findIndex(
+        const index = updatedReleaseInfo.findIndex(
           (item: any) => item.name === newItem.name
         );
         if (index !== -1) {
-          // Update existing entry
-          existingReleaseInfo[index] = {
-            ...(existingReleaseInfo[index] as number[]),
-            ...newItem,
+          // Only update the release_date field, preserve all other fields
+          updatedReleaseInfo[index] = {
+            ...(updatedReleaseInfo[index] as any),
+            release_date: newItem.release_date,
           };
         } else {
-          // Add new entry
-          existingReleaseInfo.push(newItem);
+          updatedReleaseInfo.push(newItem);
         }
       });
 
       const requestData = {
         movie_id: movie_id.toString(),
-        released_information: existingReleaseInfo,
+        released_information: updatedReleaseInfo,
       };
 
       const res = await fetch(`/api/movie/${movie_id}/release`, {
@@ -245,7 +282,6 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
       throw new Error(error);
     } finally {
       setLoading(false);
-      setResetLoading(false);
     }
   };
 
@@ -289,7 +325,7 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
       }[type];
 
     return (
-      <div className={`${customWidth} ml-3`}>
+      <div className={`${customWidth} ml-3 w-full`}>
         {openDropdown === `${type}_${uniqueId}` &&
           renderDropdown(
             items,
@@ -320,6 +356,10 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
     );
   };
 
+  // Add this function to check if there are any changes
+  const hasChanges = () => {
+    return Object.keys(selectedValues).length > 0;
+  };
   return (
     <form className="py-3 px-4" onSubmit={onSubmit}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">
@@ -329,21 +369,23 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
         {combinedData?.map((item: TVShow, idx: number) => {
           return (
             <div key={idx} className="text-left mb-4">
-              <div className="float-left w-full lg:w-[50%] relative px-3">
+              <div className="float-left w-full lg:w-[75%] relative px-3">
                 <label
                   htmlFor="release_date"
                   className="inline-block mb-3 ml-3"
                 >
                   Release Date
                 </label>
-                <div className="-px-3 flex flex-col lg:flex-row">
-                  {["month", "day", "year"].map((type) => {
-                    return renderDateFields(
-                      item?.release_date,
-                      type as "month" | "day" | "year",
-                      `release_${idx}`
-                    );
-                  })}
+                <div className="-px-3 flex flex-col lg:flex-row gap-2">
+                  {["month", "day", "year"].map((type, date_index) => (
+                    <span key={date_index} className="w-full flex-1">
+                      {renderDateFields(
+                        item?.release_date,
+                        type as "month" | "day" | "year",
+                        `release_${idx}`
+                      )}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
@@ -355,39 +397,23 @@ const ReleaseInfo: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
           name="Submit"
           type="submit"
           className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-3 mt-5 ${
-            timeValue?.length > 0 ||
-            storedData?.length > 0 ||
-            Object.keys(selectedValues).length > 0
+            hasChanges() && !loading
               ? "cursor-pointer"
-              : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+              : "bg-[#b3e19d] border-[#b3e19d] cursor-not-allowed"
           }`}
-          disabled={
-            timeValue?.length > 0 ||
-            storedData?.length > 0 ||
-            Object.keys(selectedValues).length > 0
-              ? false
-              : true
-          }
+          disabled={!hasChanges() || loading}
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
+          {loading ? <Loader2 className="h-6 w-4 animate-spin" /> : "Submit"}
         </button>
         <button
           type="button"
           className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ml-4 mt-5 ${
-            timeValue?.length > 0 ||
-            storedData?.length > 0 ||
-            Object.keys(selectedValues).length > 0
+            hasChanges() && !resetLoading
               ? "cursor-pointer"
               : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
           }`}
           onClick={handleReset}
-          disabled={
-            timeValue?.length > 0 ||
-            storedData?.length > 0 ||
-            Object.keys(selectedValues).length > 0
-              ? false
-              : true
-          }
+          disabled={!hasChanges() || resetLoading}
         >
           {resetLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

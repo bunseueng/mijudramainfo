@@ -10,11 +10,7 @@ import { IoIosClose } from "react-icons/io";
 import { CiSearch } from "react-icons/ci";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDebouncedCallback } from "use-debounce";
-import {
-  fetchMovie,
-  fetchMovieKeyword,
-  fetchAllKeywords,
-} from "@/app/actions/fetchMovieApi";
+import { fetchAllKeywords } from "@/app/actions/fetchMovieApi";
 import { genre_edit } from "@/helper/item-list";
 import { customStyles, lightTheme } from "@/helper/MuiStyling";
 import { Movie, movieId, SearchParamsType } from "@/helper/type";

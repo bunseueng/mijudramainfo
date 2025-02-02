@@ -86,7 +86,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
 }) => {
   return (
     <div
-      className="relative overflow-hidden bg-cover bg-no-repeat h-auto"
+      className="relative overflow-hidden bg-cover h-full"
       style={{
         backgroundPosition: "calc(45vw - 800px) top",
         backgroundImage: `url(https://image.tmdb.org/t/p/original/${
@@ -95,7 +95,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
       }}
     >
       <div
-        className="w-full flex flex-wrap items-center justify-center h-full"
+        className="w-full h-full"
         style={{
           backgroundImage:
             dominantColor ||
@@ -103,7 +103,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
         }}
       >
         <div className="px-3">
-          <div className="flex flex-col md:flex-row content-center max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5">
+          <div className="flex flex-col md:flex-row content-center max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5">
             <Image
               ref={imgRef}
               onLoad={extractColor}
@@ -121,7 +121,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
               className="block align-middle !w-[300px] md:!min-w-[300px] !h-[440px] rounded-lg md:pl-0"
             />
 
-            <div className="md:pl-4 lg:pl-8 py-5">
+            <div className="md:pl-4 lg:pl-8 pt-5 md:pt-0 pb-5">
               <div className="relative">
                 <h2
                   className="text-3xl font-bold text-white"

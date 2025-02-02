@@ -44,13 +44,6 @@ const Signup = () => {
         }),
       });
 
-      if (response.ok) {
-        router.push("/signin");
-        console.log("sucessfully submitted");
-      } else {
-        console.log("failed");
-      }
-
       if (response.status === 401) {
         toast.error("User already exists");
       }

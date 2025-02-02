@@ -39,10 +39,9 @@ const nextConfig = {
       },
     ];
   },
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
+  auth: {
+    trustHostname: true,
+    secret: process.env.NEXTAUTH_SECRET,
   },
 };
 

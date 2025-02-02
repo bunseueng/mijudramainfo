@@ -4,6 +4,7 @@ import {
   CrewRole,
   DramaDB,
   DramaDetails,
+  DramaReleasedInfo,
   TVShow,
   TitleData,
 } from "@/helper/type";
@@ -19,7 +20,7 @@ interface DramaInfoProps {
   screenwriter: CrewRole;
   formattedKeywordsDB: string;
   formattedKeywords: string[];
-  info: any;
+  info: DramaReleasedInfo;
   matchedLanguage: any;
   formattedDates: any;
   content: any;

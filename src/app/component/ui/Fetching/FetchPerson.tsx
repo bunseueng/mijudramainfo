@@ -214,6 +214,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 persons={person}
                 personFullDetails={personFullDetails}
                 getCredits={getCredits}
+                person_db={getPersons}
               />
             </div>
 
@@ -228,12 +229,13 @@ const FetchPerson: React.FC<IFetchPerson> = ({
               currentUsers={currentUsers}
               currentIndex={currentIndex}
             />
-
-            <TopContributors
-              sortedChanges={sortedChanges}
-              users={users}
-              getPersons={getPersons}
-            />
+            <div className="hidden md:block">
+              <TopContributors
+                sortedChanges={sortedChanges}
+                users={users}
+                getPersons={getPersons}
+              />
+            </div>
           </div>
         </div>
 
@@ -249,6 +251,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
             getComment={getComment}
             tv_id={tv_id}
             personFullDetails={personFullDetails}
+            sortedChanges={sortedChanges}
           />
         </div>
       </div>

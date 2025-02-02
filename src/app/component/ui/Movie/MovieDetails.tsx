@@ -4,11 +4,15 @@ import { formatDuration } from "@/app/actions/formattedDuration";
 import {
   CrewRole,
   DramaDetails,
+  DramaReleasedInfo,
   MovieDB,
   MovieTitles,
+  RelatedTitle,
   SpokenLanguage,
   TMDBMovie,
 } from "@/helper/type";
+import { JsonValue } from "@prisma/client/runtime/library";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 
 interface MovieDetailsProps {
   getMovie: MovieDB | null;
@@ -39,12 +43,11 @@ const MovieDetails = ({
   title,
   formattedKeywords,
   matchedLanguage,
-  formattedLastAirDate,
-  formattedFirstAirDateDB,
-  formattedLastAirDateDB,
   rank,
   formattedKeywordsDB,
 }: MovieDetailsProps) => {
+  const [info]: DramaReleasedInfo[] = (getMovie?.released_information ||
+    []) as unknown as DramaReleasedInfo[];
   return (
     <div>
       <p className="font-bold mb-3 text-2xl mt-3" style={{ color: textColor }}>
@@ -66,7 +69,7 @@ const MovieDetails = ({
         </Link>
       </p>
 
-      <div className="border-t-[1px] pt-4">
+      <div className="border-t-[1px] pt-2">
         <h1 className="font-bold text-md" style={{ color: textColor }}>
           Native Title:
           <span className="text-sm pl-2 font-semibold">
@@ -76,17 +79,42 @@ const MovieDetails = ({
           </span>
         </h1>
       </div>
+      {getMovie?.related_title?.length &&
+        getMovie?.related_title?.length > 0 && (
+          <div className="mt-2">
+            <h1
+              className="text-white font-bold text-md"
+              style={{ color: textColor }}
+            >
+              Related Content:
+            </h1>
+            {(getMovie?.related_title as unknown as RelatedTitle[])?.map(
+              (data) => (
+                <Link
+                  prefetch={false}
+                  aria-label="Visit this title page"
+                  key={data?.id}
+                  href={`/${data?.media_type === "tv" ? "tv" : "movie"}/${
+                    data?.id
+                  }-${spaceToHyphen(data?.name || data?.title)}`}
+                  className="flex flex-wrap items-center"
+                >
+                  <span
+                    className={`text-[${textColor}] hover:text-blue-300 transform duration-300 pr-1`}
+                  >
+                    {data?.name || data?.title}
+                  </span>{" "}
+                  <span className="text-sm">({data?.story})</span>
+                </Link>
+              )
+            )}
+          </div>
+        )}
 
-      <div className="mt-4">
-        <h1
-          className="text-white font-bold text-md"
-          style={{ color: textColor }}
-        >
+      <div className="mt-2">
+        <h1 className={`text-[${textColor}] font-bold text-md`}>
           Also Known As:
-          <span
-            className="text-sm pl-2 font-semibold text-[#1675b6]"
-            style={{ color: textColor }}
-          >
+          <span className={`text-sm pl-2 font-semibold text-[${textColor}]`}>
             {detail?.known_as?.length > 0
               ? detail?.known_as?.map((known, idx) => (
                   <span key={idx}>
@@ -107,7 +135,7 @@ const MovieDetails = ({
       </div>
 
       {/* Additional movie details */}
-      <div className="mt-4 space-y-4">
+      <div className="mt-2 space-y-2">
         <DetailRow
           label="Director"
           value={director?.name || "Director is not yet added!"}
@@ -121,7 +149,15 @@ const MovieDetails = ({
         <DetailRow
           label="Genres"
           value={
-            genres?.map((g) => g.name).join(", ") || "Genres not yet added!"
+            getMovie?.genres_tags?.length && getMovie?.genres_tags?.length > 0
+              ? getMovie?.genres_tags
+                  ?.map((tag: any) =>
+                    tag?.genre?.map((gen: any) => gen?.value).join(", ")
+                  )
+                  .join(", ")
+              : genres?.length > 0
+              ? genres?.map((g) => g.name).join(", ")
+              : "?"
           }
           textColor={textColor}
         />
@@ -138,19 +174,17 @@ const MovieDetails = ({
         />
         <DetailRow
           label="Country"
-          value={matchedLanguage?.english_name || "Not specified"}
+          value={
+            detail?.country || matchedLanguage?.english_name || "Not specified"
+          }
           textColor={textColor}
         />
         <DetailRow
-          label="Aired"
+          label="Release Date"
           value={`${
             getMovie?.released_information &&
             getMovie?.released_information?.length > 0
-              ? formattedLastAirDate
-                ? `${formattedFirstAirDateDB} - ${formattedLastAirDateDB}`
-                : formattedFirstAirDateDB
-              : formattedLastAirDateDB
-              ? movie?.release_date
+              ? info.release_date
               : movie?.release_date
           }`}
           textColor={textColor}
@@ -158,7 +192,7 @@ const MovieDetails = ({
         <DetailRow
           label="Duration"
           value={
-            movie?.runtime
+            detail?.duration || movie?.runtime
               ? formatDuration(movie.runtime)
               : "Duration not yet added."
           }
@@ -167,7 +201,9 @@ const MovieDetails = ({
         <DetailRow
           label="Status"
           value={
-            movie?.status === "Returning Series" ? "Ongoing" : movie?.status
+            detail?.status || movie?.status === "Returning Series"
+              ? "Ongoing"
+              : movie?.status
           }
           textColor={textColor}
         />
@@ -191,12 +227,9 @@ const DetailRow = ({
   textColor: string;
 }) => (
   <div>
-    <h1 className="font-bold text-md" style={{ color: textColor }}>
+    <h1 className={`font-bold text-md text-[${textColor}]`}>
       {label}:
-      <span
-        className="text-sm pl-2 font-semibold text-[#1675b6]"
-        style={{ color: textColor }}
-      >
+      <span className={`text-sm pl-2 font-semibold text-[${textColor}]`}>
         {value}
       </span>
     </h1>

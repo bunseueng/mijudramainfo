@@ -36,7 +36,7 @@ export async function POST(request: Request) {
                     name,
                     hashedPassword,
                     gender: "-",
-                    image: "/default-pf.jpg"
+                    image: "/default-pf.webp"
                 }
             })
                 const {hashedPassword: newUserPassword, ...rest} = newUser

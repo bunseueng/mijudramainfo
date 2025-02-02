@@ -5,7 +5,7 @@ import {
 } from "@/app/actions/fetchMovieApi"
 
 export function useMovieData(movie_id: string) {
-    const { data: movie, isLoading } = useQuery({
+    const { data: movie, isLoading,  refetch } = useQuery({
         queryKey: ["movie", movie_id],
         queryFn: () => fetchMovie(movie_id),
         staleTime: 3600000, // Cache data for 1 hour
@@ -24,6 +24,7 @@ export function useMovieData(movie_id: string) {
     movie,
     isLoading,
     language,
+    refetch
   }
 }
 

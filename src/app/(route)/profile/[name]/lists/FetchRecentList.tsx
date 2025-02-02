@@ -14,7 +14,7 @@ const FetchRecentList: React.FC<FetchRecentListProps> = ({
   listIndex,
 }) => {
   const { data: itemData, isLoading } = useQuery({
-    queryKey: ["media", tvId || movieId],
+    queryKey: ["media", tvId || movieId, tvId ? "tv" : "movie"],
     queryFn: async () => {
       if (tvId) {
         const tv = await fetchTv(tvId.toString());
@@ -26,11 +26,17 @@ const FetchRecentList: React.FC<FetchRecentListProps> = ({
       return null;
     },
     enabled: !!tvId || !!movieId,
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: false, // Don't refetch when window is focused to reduce API calls
+    staleTime: Infinity, // Keep data fresh forever
+    gcTime: 1000 * 60 * 60, // Cache for 1 hour
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   const item = itemData?.item;
+
+  if (!tvId && !movieId) return null;
+
   return (
     <li
       key={index}

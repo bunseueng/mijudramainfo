@@ -116,15 +116,10 @@ const MovieMain = ({
     0
   );
   const calculatedRating = sumRating / existingRatings?.length;
-
   const [detail]: DramaDetails[] = (getMovie?.details ||
     []) as unknown as DramaDetails[];
   const [info]: DramaReleasedInfo[] = (getMovie?.released_information ||
     []) as unknown as DramaReleasedInfo[];
-
-  const formattedFirstAirDate = movie?.first_air_date
-    ? formatDate(movie.first_air_date)
-    : "TBA";
   const formattedLastAirDate = movie?.last_air_date
     ? formatDate(movie.last_air_date)
     : "";
@@ -349,8 +344,12 @@ const MovieMain = ({
 
                 <div className="md:pl-4 lg:pl-8 py-5">
                   <MovieHeader
-                    title={movie?.title || movie?.name}
-                    releaseDate={movie?.first_air_date || movie?.release_date}
+                    title={detail?.title || movie?.title || movie?.name}
+                    releaseDate={
+                      info?.release_date ||
+                      movie?.first_air_date ||
+                      movie?.release_date
+                    }
                     genres={movie?.genres?.map((g: any) => g.name)}
                     textColor={textColor}
                   />

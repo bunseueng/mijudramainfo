@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  fetchMovie,
   fetchMovieSearch,
+  fetchTv,
   fetchTvSearch,
 } from "@/app/actions/fetchMovieApi";
 import FetchingTv from "@/app/component/ui/Fetching/FetchingTv";
 import LazyImage from "@/components/ui/lazyimage";
 import { storyFormat } from "@/helper/item-list";
-import { Movie, movieId } from "@/helper/type";
-import { createDetails, TCreateDetails } from "@/helper/zod";
+import type { Drama, Movie, movieId, tvId } from "@/helper/type";
+import { createDetails, type TCreateDetails } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
@@ -17,27 +17,31 @@ import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { GrPowerReset } from "react-icons/gr";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
 import { toast } from "react-toastify";
+
 const DeleteButton = dynamic(
   () => import("@/app/component/ui/Button/DeleteButton"),
   { ssr: false }
 );
-
 const RelatedTitle: React.FC<movieId & Movie> = ({
   movie_id,
   movieDetails,
 }) => {
+  const [listSearch, setListSearch] = useState<string>("");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openSearch, setOpenSearch] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const [tvIds, setTvIds] = useState<number[]>(movie_id ? [] : []);
+  const [prevStories, setPrevStories] = useState<string[]>([]);
   const [mediaIds, setMediaIds] = useState<number[]>([]);
   const [markedForDeletion, setMarkedForDeletion] = useState<boolean[]>(
     Array(movieDetails?.related_title?.length || 0).fill(false)
@@ -45,6 +49,9 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   const [isItemChanging, setIsItemChanging] = useState<boolean[]>(
     Array(movieDetails?.related_title?.length || 0).fill(false)
   );
+  const [hasReordered, setHasReordered] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const searchResultRef = useRef<HTMLDivElement>(null);
   const searchQuery = useSearchParams();
   const query = searchQuery?.get("q") || "";
   const router = useRouter();
@@ -53,21 +60,21 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   });
 
   const {
-    data: movieAndTvResults = [],
+    data: tvAndMovieResults = [],
     refetch: refetchData,
     isLoading,
   } = useQuery({
-    queryKey: ["movieAndTvResults"],
+    queryKey: ["tvAndMovieResults"],
     queryFn: async () => {
       const movieDetails = await Promise.all(
-        mediaIds.map(async (id: number) => await fetchMovie(id.toString()))
+        tvIds.map(async (id: number) => await fetchTv(id.toString()))
       );
       return [...movieDetails];
     },
     enabled: true,
-    staleTime: 3600000, // Cache data for 1 hour
+    staleTime: 3600000,
     refetchOnWindowFocus: true,
-    refetchOnMount: true, // Refetch on mount to get the latest data
+    refetchOnMount: true,
   });
 
   const {
@@ -94,16 +101,34 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   const [itemStories, setItemStories] = useState<string[]>([]);
   const [itemRelatedStories, setItemRelatedStories] = useState<string[]>([]);
   const prevItemRef = useRef(item);
+  const [newItems, setNewItems] = useState<Set<number>>(new Set());
+  const originalOrderRef = useRef<any[]>([]);
+
+  const getItemStyle = (
+    id: number,
+    isChanging: boolean,
+    isDeleting: boolean
+  ) => {
+    if (newItems.has(id)) return "text-green-500";
+    if (isChanging) return "text-blue-500";
+    if (isDeleting) return "text-red-500 line-through";
+    return "";
+  };
 
   const setItemRelatedStory = (idx: number, story: string) => {
     setItemRelatedStories((prev) => {
       const newStories = [...prev];
-      newStories[idx] = story; // Set only the specific index to the new story
+      newStories[idx] = story;
+      return newStories;
+    });
+    setPrevStories((prev) => {
+      const newStories = [...prev];
+      newStories[idx] = story;
       return newStories;
     });
     setIsItemChanging((prev) => {
       const newStories = [...prev];
-      newStories[idx] = true; // Set to true to indicate a change
+      newStories[idx] = true;
       return newStories;
     });
   };
@@ -125,24 +150,21 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   const onSubmit = async () => {
     try {
       setLoading(true);
-      // Create a map of updated stories by matching indices
       const updatedStoriesMap = itemRelatedStories.reduce(
         (map: any, story, index) => {
           if (story) {
-            map[item[index].id] = story; // assuming each item has a unique id
+            map[item[index].id] = story;
           }
           return map;
         },
         {}
       );
-      // Update the story in existing related titles
       const existingRelatedTitles = (movieDetails?.related_title || []).map(
         (drama: any) => ({
           ...drama,
-          story: updatedStoriesMap[drama.id] || drama.story, // Update story if it exists in the map
+          story: updatedStoriesMap[drama.id] || drama.story,
         })
       );
-      // Add new items
       const newItems = item.filter(
         (drama) =>
           !movieDetails?.related_title.some(
@@ -153,7 +175,6 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
         ...drama,
         story: itemRelatedStories[index] || drama.story,
       }));
-      // Combine existing and new updated items
       const allRelatedTitles = [...existingRelatedTitles, ...updatedItems];
 
       const res = await fetch(`/api/movie/${movie_id}/related`, {
@@ -169,6 +190,8 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
       if (res.status === 200) {
         router.refresh();
         reset();
+        setHasReordered(false);
+        originalOrderRef.current = [...allRelatedTitles];
         toast.success("Success");
       } else if (res.status === 400) {
         toast.error("Invalid User");
@@ -186,12 +209,12 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   const handleResetChanges = (idx: number) => {
     setItemRelatedStories((prevStories) => {
       const newStories = [...prevStories];
-      newStories[idx] = ""; // Set this specific index to an empty string
+      newStories[idx] = "";
       return newStories;
     });
     setIsItemChanging((prevIsItemChanging) => {
       const newIsItemChanging = [...prevIsItemChanging];
-      newIsItemChanging[idx] = false; // Mark this index as unchanged
+      newIsItemChanging[idx] = false;
       return newIsItemChanging;
     });
     setMarkedForDeletion((prev) =>
@@ -199,41 +222,87 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
     );
   };
 
-  useEffect(() => {
-    if (movieAndTvResults.length > 0) {
-      setItemStories(Array(movieAndTvResults.length).fill(""));
-    }
-  }, [movieAndTvResults]);
+  const hasChanges = () => {
+    const hasStoryChanges =
+      itemStories.some((story) => story !== "") ||
+      itemRelatedStories.some((story) => story !== "");
+    const hasDeletedItems = markedForDeletion.some((marked) => marked);
+    const hasNewItems = newItems.size > 0;
+    const hasReorderedItems = hasReordered;
+    const hasModifiedItems = isItemChanging.some((changing) => changing);
+
+    return (
+      hasStoryChanges ||
+      hasDeletedItems ||
+      hasNewItems ||
+      hasReorderedItems ||
+      hasModifiedItems
+    );
+  };
 
   useEffect(() => {
-    // Default to an empty array if storedData is undefined
+    if (tvAndMovieResults.length > 0) {
+      setItemStories(Array(tvAndMovieResults.length).fill(""));
+    }
+  }, [tvAndMovieResults]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node) &&
+        searchResultRef.current &&
+        !searchResultRef.current.contains(event.target as Node)
+      ) {
+        setListSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
     const addingItems =
       storedData?.map((data) => ({
         ...data,
         story: itemRelatedStories,
       })) || [];
 
-    // Default to an empty array if related_title is undefined
-    const newItems = [...addingItems, ...(movieDetails?.related_title || [])];
+    const newItems = addingItems.filter(
+      (item) =>
+        !movieDetails?.related_title.some(
+          (existingItem: any) => existingItem.id === item.id
+        )
+    );
 
-    // Only update the state if there are items to add
-    if (newItems.length > 0) {
-      setItem(newItems);
+    setNewItems(new Set(newItems.map((item) => item.id)));
+
+    const allItems = [...addingItems, ...(movieDetails?.related_title || [])];
+
+    if (allItems.length > 0) {
+      setItem(allItems);
+      if (originalOrderRef.current.length === 0) {
+        originalOrderRef.current = [...allItems];
+      }
     } else {
       setItem(storedData);
     }
   }, [movieDetails?.related_title, storedData, itemRelatedStories]);
+
   useEffect(() => {
     refetchData();
-  }, [mediaIds, refetchData]);
+  }, [refetchData]);
 
   useEffect(() => {
     if (prevItemRef.current !== item) {
+      const isReordered =
+        JSON.stringify(originalOrderRef.current) !== JSON.stringify(item);
+      setHasReordered(isReordered);
     }
-    prevItemRef.current = item; // Update the ref with the current item
+    prevItemRef.current = item;
   }, [item]);
-
-  const isItemChanged = prevItemRef.current !== item;
 
   useEffect(() => {
     refetch();
@@ -242,9 +311,8 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
   if (isLoading) {
     return <div>Fetching...</div>;
   }
-
   return (
-    <form className="py-3 px-4">
+    <form className="py-3 px-4" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-[#1675b6] text-xl font-bold mb-6 px-3">
         Related Titles
       </h1>
@@ -265,20 +333,24 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
             <Reorder.Group
               as="tbody"
               values={item}
-              onReorder={setItem}
+              onReorder={(newOrder) => {
+                setItem(newOrder);
+                const isReordered =
+                  JSON.stringify(originalOrderRef.current) !==
+                  JSON.stringify(newOrder);
+                setHasReordered(isReordered);
+              }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
               <AnimatePresence>
                 {item?.map((related: any, idx) => {
-                  const isNew =
-                    dynamicSearch?.tv?.some(
-                      (result: any) => result.id === related.id
-                    ) ||
-                    dynamicSearch?.movies?.some(
-                      (result: any) => result.id === related.id
-                    );
+                  const itemStyle = getItemStyle(
+                    related.id,
+                    isItemChanging[idx],
+                    markedForDeletion[idx]
+                  );
                   return (
                     <Reorder.Item
                       as="tr"
@@ -295,15 +367,7 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
                       <td className="w-3 border-[#78828c0b] border-t-2 border-t-[#06090c21] dark:border-t-[#3e4042] align-top px-4 p-3">
                         <div className="flex items-start w-full">
                           {!markedForDeletion[idx] && (
-                            <span
-                              className={`pr-2 ${
-                                isNew ? "text-green-500" : ""
-                              } ${isItemChanging[idx] ? "text-blue-500" : ""} ${
-                                markedForDeletion[idx]
-                                  ? "text-red-500 line-through"
-                                  : ""
-                              }`}
-                            >
+                            <span className={`pr-2 ${itemStyle}`}>
                               <GiHamburgerMenu />
                             </span>
                           )}
@@ -315,7 +379,7 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
                                 }/${
                                   related?.backdrop_path || related?.poster_path
                                 }`}
-                                alt={related?.name}
+                                alt={related?.name || "Images"}
                                 width={100}
                                 height={48}
                                 quality={80}
@@ -328,32 +392,14 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
                                 <Link
                                   prefetch={false}
                                   href={`/movie/${related?.id}`}
-                                  className={`pointer-events-none ${
-                                    isNew ? "text-green-500" : ""
-                                  } ${
-                                    isItemChanging[idx] ? "text-blue-500" : ""
-                                  } ${
-                                    markedForDeletion[idx]
-                                      ? "text-red-500 line-through"
-                                      : ""
-                                  }`}
+                                  className={`pointer-events-none ${itemStyle}`}
                                 >
                                   {related?.name || related?.title}
                                 </Link>
                               </b>
                             </div>
                             <div
-                              className={`text-muted-foreground ${
-                                isNew ? "text-green-500 opacity-50" : ""
-                              } ${
-                                isItemChanging[idx]
-                                  ? "text-blue-500 opacity-50"
-                                  : ""
-                              } ${
-                                markedForDeletion[idx]
-                                  ? "text-red-500 opacity-50 line-through"
-                                  : ""
-                              }`}
+                              className={`text-muted-foreground ${itemStyle} opacity-50`}
                             >
                               {related?.type?.join("")}
                             </div>
@@ -405,7 +451,7 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
                                           "related_story",
                                           idx
                                         );
-                                        setItemRelatedStory(idx, items?.value); // Update the story for this item
+                                        setItemRelatedStory(idx, items?.value);
                                       }}
                                       key={idxex}
                                     >
@@ -425,7 +471,7 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
                             type="button"
                             className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
                             onClick={(e) => {
-                              e.preventDefault(); // Prevent form submission
+                              e.preventDefault();
                               handleResetChanges(idx);
                             }}
                           >
@@ -436,7 +482,7 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
                             className="min-w-10 bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] shadow-sm rounded-sm hover:bg-opacity-70 transform duration-300 p-3"
                             onClick={(e) => {
                               setOpen(!open), e.preventDefault();
-                              setDeleteIndex(idx); // Set the idxex of the item to show delete button
+                              setDeleteIndex(idx);
                             }}
                           >
                             <IoCloseOutline />
@@ -492,21 +538,13 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
       </div>
       <button
         name="submit"
-        onClick={handleSubmit(onSubmit)}
+        type="submit"
         className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-          itemStories?.length > 0 ||
-          itemRelatedStories?.length > 0 ||
-          isItemChanged
+          hasChanges() && !loading
             ? "cursor-pointer"
             : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
         }`}
-        disabled={
-          itemStories?.length > 0 ||
-          itemRelatedStories?.length > 0 ||
-          isItemChanged
-            ? false
-            : true
-        }
+        disabled={!hasChanges() || loading}
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
       </button>

@@ -3,7 +3,7 @@
 import Discuss from "@/app/(route)/(id)/tv/[id]-[slug]/discuss/Discuss";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaBookmark } from "react-icons/fa";
 import { IoHeartSharp } from "react-icons/io5";
@@ -13,6 +13,9 @@ import MovieReviewDBCard from "./MovieReviewDBCard";
 import MovieMediaPhoto from "@/app/(route)/(id)/movie/[id]-[slug]/Media";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { handleProfileClick } from "@/app/actions/handleProfileClick";
+import { fetchTrailer } from "@/app/actions/fetchMovieApi";
+import { useQuery } from "@tanstack/react-query";
+import { SkeletonMediaPhoto } from "../Loading/TrailerLoading";
 
 const MovieReviewCard = ({
   review,
@@ -31,8 +34,9 @@ const MovieReviewCard = ({
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
     new Set()
   );
-  const [thumbnails, setThumbnails] = useState<string[]>([]);
-  const api = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const [shouldLoadVideos, setShouldLoadVideos] = useState(false);
+
   const toggleExpand = (index: number) => {
     setExpandedReviews((prev) => {
       const newSet = new Set(prev);
@@ -45,61 +49,75 @@ const MovieReviewCard = ({
     });
   };
 
+  // Deduplicate video keys
+  const uniqueKeys = video
+    ? [...new Set(video.map((item: any) => item.key))]
+    : [];
+
   useEffect(() => {
-    try {
-      const fetchThumbnails = async () => {
-        if (video) {
-          const keys = video?.map((item: any) => item.key);
-          const promises = keys.map((key: string) =>
-            fetch(
-              `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${key}&key=${api}`
-            ).then((response) => response.json())
-          );
-
-          try {
-            const responses = await Promise.all(promises);
-            const thumbnailsData = responses.map(
-              (response: any) => response.items[0].snippet.thumbnails.medium.url
-            );
-            setThumbnails(thumbnailsData);
-          } catch (error) {
-            console.error("Error fetching thumbnails:", error);
-          }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShouldLoadVideos(true);
+          observer.disconnect();
         }
-      };
+      },
+      { threshold: 0.1 }
+    );
 
-      fetchThumbnails();
-    } catch (error) {
-      console.error("Error fetching thumbnails:", error);
+    if (videoContainerRef.current) {
+      observer.observe(videoContainerRef.current);
     }
-  }, [video, api]);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const { data: videos, isLoading } = useQuery({
+    queryKey: ["movie_videos", uniqueKeys],
+    queryFn: () => fetchTrailer(uniqueKeys as string[]),
+    staleTime: 3600000,
+    refetchOnWindowFocus: false,
+    gcTime: 3600000,
+    enabled: !!uniqueKeys.length && shouldLoadVideos,
+  });
+
+  if (isLoading) {
+    return <SkeletonMediaPhoto />;
+  }
+
+  const formatDate = (dateString: string) => {
+    const dateObject = new Date(dateString);
+    return dateObject.toLocaleDateString("en-US", {
+      month: "long",
+      day: "2-digit",
+      year: "numeric",
+    });
+  };
 
   return (
     <div>
-      <MovieMediaPhoto
-        movie={movie}
-        mediaActive={mediaActive}
-        setMediaActive={setMediaActive}
-        image={image}
-        video={video}
-        thumbnails={thumbnails}
-        openTrailer={openTrailer}
-        setOpenTrailer={setOpenTrailer}
-        movie_id={movie_id}
-      />
+      <div ref={videoContainerRef}>
+        <MovieMediaPhoto
+          movie={movie}
+          mediaActive={mediaActive}
+          setMediaActive={setMediaActive}
+          image={image}
+          video={videos}
+          openTrailer={openTrailer}
+          setOpenTrailer={setOpenTrailer}
+          movie_id={movie_id}
+        />
+      </div>
+
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         <div className="border-t-[1px] border-t-slate-400 pt-3">
           <h1 className="text-2xl font-bold py-4">Recommendations</h1>
           {recommend?.length === 0 ? (
             <p className="text-xl font-bold py-5">
-              There no recommendations for {movie?.name} yet !
+              There are no recommendations for {movie?.name} yet!
             </p>
           ) : (
-            <div
-              className={`flex items-center overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4 ${
-                recommend?.length === 0 ? "hidden" : "flex"
-              }`}
-            >
+            <div className="flex items-center overflow-hidden overflow-x overflow-y-hidden whitespace-nowrap pb-4">
               {recommend?.map((item: any, index: number) => (
                 <div className="w-[270px] h-[180px] mr-4" key={index}>
                   <div className="w-[270px] h-[180px] bg-cover">
@@ -123,7 +141,6 @@ const MovieReviewCard = ({
                         priority
                         className="w-[270px] h-[150px] bg-cover object-cover rounded-lg"
                       />
-
                       <div className="absolute bg-slate-100 opacity-80 w-full bottom-0 px-2 py-2 invisible group-hover:visible">
                         <div className="flex items-center justify-between">
                           <p className="flex items-center dark:text-black">
@@ -167,7 +184,7 @@ const MovieReviewCard = ({
               </Link>
             </div>
             <p className="p-5 font-semibold">
-              We don&#39;t have any reviews for In Blossom. Would you like to
+              We don&#39;t have any reviews for {movie?.name}. Would you like to
               write one?
             </p>
           </div>
@@ -183,61 +200,64 @@ const MovieReviewCard = ({
                 Write Review
               </Link>
             </div>
-            {review?.slice(0, 2)?.map((review: any, idx: number) => {
-              const dateObject = new Date(review?.updated_at);
-              const formattedDate = dateObject.toLocaleDateString("en-US", {
-                month: "long", // Display full month name
-                day: "2-digit", // Display two-digit day
-                year: "numeric", // Display full year
-              });
-              return (
-                <div className="flex flex-col" key={idx}>
-                  <div className="flex bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
-                    <Link
-                      href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) =>
-                        handleProfileClick(e, review?.author_details?.username)
+            {review?.slice(0, 2)?.map((review: any, idx: number) => (
+              <div className="flex flex-col" key={idx}>
+                <div className="flex bg-[#f8f8f8] dark:bg-[#1b1c1d] p-2 md:p-5">
+                  <Link
+                    href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) =>
+                      handleProfileClick(e, review?.author_details?.username)
+                    }
+                  >
+                    <Image
+                      src={
+                        review.author_details?.avatar_path
+                          ? `https://image.tmdb.org/t/p/original/${review.author_details?.avatar_path}`
+                          : "/placeholder-image.avif"
                       }
-                    >
-                      {review.author_details?.avatar_path === null ? (
-                        <Image
-                          src="/placeholder-image.avif"
-                          alt={
-                            `${review?.name || review?.title}'s Profile` ||
-                            "Person Profile"
-                          }
-                          width={100}
-                          height={100}
-                          priority
-                          className="size-[50px] object-cover rounded-full border-2 border-slate-500"
-                        />
-                      ) : (
-                        <Image
-                          src={
-                            `https://image.tmdb.org/t/p/original/${review.author_details?.avatar_path}` ||
-                            `${
-                              review?.author_details?.profileAvatar ||
-                              review?.author_details?.image
-                            }`
-                          }
-                          alt={
-                            `${review?.name || review?.title}'s Profile` ||
-                            "Person Profile"
-                          }
-                          width={100}
-                          height={100}
-                          priority
-                          className="size-[50px] object-cover rounded-full"
-                        />
-                      )}
-                    </Link>
+                      alt={
+                        `${review?.name || review?.title}'s Profile` ||
+                        "Person Profile"
+                      }
+                      width={100}
+                      height={100}
+                      priority
+                      className="size-[50px] object-cover rounded-full"
+                    />
+                  </Link>
 
-                    <div className="flex flex-col text-black pl-5">
-                      <h1 className="text-black dark:text-white text-sm md:text-md">
-                        Review by{" "}
+                  <div className="flex flex-col text-black pl-5">
+                    <h1 className="text-black dark:text-white text-sm md:text-md">
+                      Review by{" "}
+                      <Link
+                        href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) =>
+                          handleProfileClick(
+                            e,
+                            review?.author_details?.username
+                          )
+                        }
+                      >
+                        {review?.author_details?.username}
+                      </Link>
+                    </h1>
+                    <div className="flex flex-col md:flex-row md:items-center md:pt-2">
+                      {review?.author_details?.rating && (
+                        <h1 className="w-[60px] text-black dark:text-white bg-black p-1 rounded-full flex flex-row items-center mr-2 my-2 md:my-0">
+                          <BsStars className="text-white" size={15} />
+                          <span className="text-white text-xs px-2">
+                            {review?.author_details?.rating?.toFixed(1)}
+                          </span>
+                        </h1>
+                      )}
+                      <p className="text-black dark:text-white text-sm font-semibold">
+                        Written by{" "}
                         <Link
+                          prefetch={false}
                           href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -249,53 +269,25 @@ const MovieReviewCard = ({
                           }
                         >
                           {review?.author_details?.username}
-                        </Link>
-                      </h1>
-                      <div className="flex flex-col md:flex-row md:items-center md:pt-2">
-                        {review?.author_details?.rating && (
-                          <h1 className="w-[60px] text-black dark:text-white bg-black p-1 rounded-full flex flex-row items-center mr-2 my-2 md:my-0">
-                            <BsStars className="text-white" size={15} />
-                            <span className="text-white text-xs px-2">
-                              {review?.author_details?.rating?.toFixed(1)}
-                            </span>
-                          </h1>
-                        )}
-
-                        <p className="text-black dark:text-white text-sm font-semibold">
-                          Written by{" "}
-                          <Link
-                            prefetch={false}
-                            href={`https://www.themoviedb.org/u/${review?.author_details?.name}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) =>
-                              handleProfileClick(
-                                e,
-                                review?.author_details?.username
-                              )
-                            }
-                          >
-                            {review?.author_details?.username} on{" "}
-                          </Link>
-                          {formattedDate}
-                        </p>
-                      </div>
+                        </Link>{" "}
+                        on {formatDate(review?.updated_at)}
+                      </p>
                     </div>
                   </div>
-                  <p className="bg- dark:bg-[#242526] p-5">
-                    {expandedReviews.has(idx)
-                      ? review?.content
-                      : `${review?.content?.slice(0, 500)}...`}
-                    <button
-                      onClick={() => toggleExpand(idx)}
-                      className="pl-1 font-bold text-[#0275d8]"
-                    >
-                      {expandedReviews.has(idx) ? "Show Less" : "Read More"}
-                    </button>
-                  </p>
                 </div>
-              );
-            })}
+                <p className="bg- dark:bg-[#242526] p-5">
+                  {expandedReviews.has(idx)
+                    ? review?.content
+                    : `${review?.content?.slice(0, 500)}...`}
+                  <button
+                    onClick={() => toggleExpand(idx)}
+                    className="pl-1 font-bold text-[#0275d8]"
+                  >
+                    {expandedReviews.has(idx) ? "Show Less" : "Read More"}
+                  </button>
+                </p>
+              </div>
+            ))}
             <MovieReviewDBCard
               getReview={getReview}
               movie_id={movie_id}
@@ -305,6 +297,7 @@ const MovieReviewCard = ({
           </div>
         )}
       </div>
+
       <div className="border-t-[1px] border-t-slate-400 pt-10 mt-10">
         <h1 className="text-xl font-bold">Social</h1>
         <Discuss

@@ -1,21 +1,19 @@
 import { formatDate } from "@/app/actions/formatDate";
 import { formatDuration } from "@/app/actions/formattedDuration";
-import { DramaReleasedInfo } from "@/helper/type";
+import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
 import React from "react";
 
 const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
+  const [detail]: DramaDetails[] = (getMovie?.details ||
+    []) as unknown as DramaDetails[];
   const [info]: DramaReleasedInfo[] = (getMovie?.released_information ||
     []) as unknown as DramaReleasedInfo[];
-
   const formattedLastAirDate = movie?.last_air_date
     ? formatDate(movie.last_air_date)
     : "";
   const formattedFirstAirDateDB = info?.release_date
     ? formatDate(info.release_date)
     : "TBA";
-  const formattedLastAirDateDB = info?.end_date
-    ? formatDate(info.end_date)
-    : "";
   const original_country = movie?.origin_country && movie?.origin_country[0];
   const matchedLanguage = language?.find(
     (lang: any) => lang?.iso_3166_1 === original_country
@@ -36,16 +34,16 @@ const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
         <div className="flex flex-col p-4 pb-1">
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
-              Drama:
+              Movie:
             </h1>
-            {movie?.title || movie?.name}
+            {detail?.title || movie?.title || movie?.name}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
               Country:
             </h1>
 
-            {matchedLanguage?.english_name}
+            {detail?.country || matchedLanguage?.english_name}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">
@@ -53,10 +51,8 @@ const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
             </h1>
             {getMovie?.released_information?.length > 0
               ? formattedLastAirDate
-                ? `${formattedFirstAirDateDB} - ${formattedLastAirDateDB}`
+                ? `${formattedFirstAirDateDB}`
                 : formattedFirstAirDateDB
-              : formattedLastAirDateDB
-              ? movie?.release_date
               : movie?.release_date}
           </div>
           <div className="pb-1 break-words text-sm">
@@ -82,7 +78,7 @@ const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
               Duration:
             </h1>
 
-            {movie?.runtime
+            {detail?.duration || movie?.runtime
               ? formatDuration(movie?.runtime)
               : "Duration not yet added."}
           </div>
@@ -91,7 +87,9 @@ const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
               Status:
             </h1>
 
-            {movie?.status === "Returning Series" ? "Ongoing" : movie?.status}
+            {detail?.status || movie?.status === "Returning Series"
+              ? "Ongoing"
+              : movie?.status}
           </div>
         </div>
       </div>

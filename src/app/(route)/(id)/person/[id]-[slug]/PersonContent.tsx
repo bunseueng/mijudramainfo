@@ -14,18 +14,28 @@ import type {
   currentUserProps,
   CommentProps,
   TVShow,
+  PersonDetail,
+  Person,
 } from "@/helper/type";
 import PersonBiography from "@/app/component/ui/Person/PersonBiography";
 import type { JsonValue } from "@prisma/client/runtime/library";
+import TopContributors from "@/app/component/ui/Person/TopContributors";
 
 interface PersonContentProps {
-  persons: any;
+  persons: Person;
   currentUser: currentUserProps | null;
   getPersons: PersonDBType | null;
   drama: TVShow;
   movie: TVShow;
   users: UserProps[];
   getComment: CommentProps[];
+  sortedChanges: {
+    userId: string;
+    timestamp: string;
+    field: string;
+    oldValue: string | null;
+    newValue: string;
+  }[];
   tv_id: number;
   register: UseFormRegister<{
     userId?: string | undefined;
@@ -163,8 +173,12 @@ export default function PersonContent({
   isCurrentUserLoved,
   handleLove,
   personFullDetails,
+  sortedChanges,
 }: PersonContentProps) {
   const isActor = persons?.known_for_department.toLowerCase() === "acting";
+
+  const [detail]: PersonDetail[] = (getPersons?.details ||
+    []) as unknown as PersonDetail[];
 
   const renderContent = (data: any, type: "drama" | "movie" | "variety") => {
     let filteredContent;
@@ -271,13 +285,16 @@ export default function PersonContent({
       </ul>
     );
   };
+  const fullName = `${detail?.last_name ?? ""} ${
+    detail?.first_name ?? ""
+  }`.trim();
 
   return (
-    <div className="space-y-8">
+    <div className="mb-5">
       <div className="hidden lg:block">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between">
           <h1 className="text-2xl text-[#2490da] font-bold">
-            {persons?.displayName || persons?.name}
+            {fullName || persons?.name}
           </h1>
           <button
             {...register("love")}
@@ -291,7 +308,7 @@ export default function PersonContent({
             <span>{String(getPersons?.love || 0)}</span>
           </button>
         </div>
-        <PersonBiography persons={persons} />
+        <PersonBiography persons={persons} detail={detail} />
         {personFullDetails &&
           personFullDetails.results.map((personDetails, index) => (
             <div key={index}>{renderKnownFor(personDetails)}</div>
@@ -299,9 +316,9 @@ export default function PersonContent({
       </div>
 
       {isActor && (
-        <section className="space-y-8">
+        <section className="my-8">
           {["Drama", "Movie", "Variety Show"].map((type) => (
-            <div key={type}>
+            <div key={type} className="my-8">
               <h2 className="text-xl font-bold mb-4">{type}</h2>
               <div className="relative top-0 left-0">
                 {renderContent(
@@ -317,7 +334,13 @@ export default function PersonContent({
           ))}
         </section>
       )}
-
+      <div className="block md:hidden">
+        <TopContributors
+          sortedChanges={sortedChanges}
+          users={users}
+          getPersons={getPersons}
+        />
+      </div>
       <section>
         <Suspense
           fallback={<div className="animate-pulse">Loading comments...</div>}

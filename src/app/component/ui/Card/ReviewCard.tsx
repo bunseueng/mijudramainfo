@@ -3,7 +3,7 @@
 import Discuss from "@/app/(route)/(id)/tv/[id]-[slug]/discuss/Discuss";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BsStars } from "react-icons/bs";
 import { FaBookmark } from "react-icons/fa";
 import { IoHeartSharp } from "react-icons/io5";
@@ -14,6 +14,9 @@ import MediaPhoto from "@/app/(route)/(id)/tv/[id]-[slug]/Media";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { handleProfileClick } from "@/app/actions/handleProfileClick";
 import { DramaDetails } from "@/helper/type";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTrailer } from "@/app/actions/fetchMovieApi";
+import { SkeletonMediaPhoto } from "../Loading/TrailerLoading";
 
 const ReviewCard = ({
   review,
@@ -33,10 +36,10 @@ const ReviewCard = ({
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
     new Set()
   );
-  const [thumbnails, setThumbnails] = useState<string[]>([]);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const [shouldLoadVideos, setShouldLoadVideos] = useState(false);
   const [detail]: DramaDetails[] = (getDrama?.details ||
     []) as unknown as DramaDetails[];
-  const api = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
   const toggleExpand = (index: number) => {
     setExpandedReviews((prev) => {
       const newSet = new Set(prev);
@@ -49,51 +52,56 @@ const ReviewCard = ({
     });
   };
 
-  useEffect(() => {
-    const fetchThumbnails = async () => {
-      if (video && video.length > 0) {
-        const keys = video.map((item: any) => item.key);
-        try {
-          const promises = keys.map((key: string) =>
-            fetch(
-              `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${key}&key=${api}`
-            ).then((response) => response.json())
-          );
-          const responses = await Promise.all(promises);
-          const thumbnailsData = responses
-            .map((response: any) => {
-              if (response.items && response.items.length > 0) {
-                return response.items[0].snippet.thumbnails.medium.url;
-              } else {
-                console.warn("No items found in response:", response);
-                return null;
-              }
-            })
-            .filter(Boolean); // Remove null or undefined values
-          setThumbnails(thumbnailsData);
-        } catch (error) {
-          console.error("Error fetching thumbnails:", error);
-        }
-      }
-    };
+  // Deduplicate video keys
+  const uniqueKeys = video
+    ? [...new Set(video.map((item: any) => item.key))]
+    : [];
 
-    fetchThumbnails();
-  }, [video, api]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShouldLoadVideos(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (videoContainerRef.current) {
+      observer.observe(videoContainerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const { data: videos, isLoading } = useQuery({
+    queryKey: ["tv_videos", uniqueKeys],
+    queryFn: () => fetchTrailer(uniqueKeys as string[]),
+    staleTime: 3600000,
+    refetchOnWindowFocus: false,
+    gcTime: 3600000,
+    enabled: !!uniqueKeys.length && shouldLoadVideos,
+  });
+
+  if (isLoading) {
+    return <SkeletonMediaPhoto />;
+  }
 
   return (
     <div>
-      <MediaPhoto
-        tv={tv}
-        mediaActive={mediaActive}
-        setMediaActive={setMediaActive}
-        image={image}
-        video={video}
-        thumbnails={thumbnails}
-        openTrailer={openTrailer}
-        setOpenTrailer={setOpenTrailer}
-        tv_id={tv_id}
-        detail={detail}
-      />
+      <div ref={videoContainerRef}>
+        <MediaPhoto
+          tv={tv}
+          mediaActive={mediaActive}
+          setMediaActive={setMediaActive}
+          image={image}
+          video={videos}
+          openTrailer={openTrailer}
+          setOpenTrailer={setOpenTrailer}
+          tv_id={tv_id}
+        />
+      </div>
       <div className="relative top-0 left-0 mt-5 overflow-hidden">
         <div className="border-t-[1px] border-t-slate-400 pt-3">
           <h1 className="text-2xl font-bold py-4">Recommendations</h1>
@@ -118,9 +126,9 @@ const ReviewCard = ({
                       className="hover:relative transform duration-100 group"
                     >
                       <Image
-                        src={`https://image.tmdb.org/t/p/original/${
-                          item?.backdrop_path || item?.poster_path
-                        }`}
+                        src={`https://image.tmdb.org/t/p/${
+                          item?.backdrop_path ? "w780" : "w342"
+                        }/${item?.backdrop_path || item?.poster_path}`}
                         alt={
                           `${item?.name || item?.title}'s Poster` ||
                           "Drama Poster"

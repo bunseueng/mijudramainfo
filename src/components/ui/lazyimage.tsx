@@ -17,6 +17,7 @@ const LazyImage = ({
   sizes,
   coverFromDB,
   ref,
+  onError,
 }: any) => {
   const [isVisible, setIsVisible] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -70,6 +71,7 @@ const LazyImage = ({
       blurDataURL={blurDataURL}
       onLoad={onLoad}
       sizes={sizes}
+      onError={onError}
     />
   );
 };

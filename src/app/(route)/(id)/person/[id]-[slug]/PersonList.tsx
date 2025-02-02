@@ -1,265 +1,242 @@
 "use client";
 
-import ReportModal from "@/app/component/ui/Modal/ReportModal";
+import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, Share2, Edit, Image, Users, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Copy } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
-import { IoIosArrowDown } from "react-icons/io";
 import { toast } from "react-toastify";
+import ReportModal from "@/app/component/ui/Modal/ReportModal";
 
-const PersonList = ({ personId }: any) => {
-  const [hovered, setHovered] = useState<string | null>(null);
-  const [currentItem, setCurrentItem] = useState<string>("Overview");
-  const [currentUrl, setCurrentUrl] = useState("");
-  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean[]>([]);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+type LucideIcon = typeof ChevronDown;
+
+type DropdownItem =
+  | { label: string; href: string }
+  | { label: string; onClick: () => void };
+
+const PersonList = ({ personId }: { personId: string }) => {
+  const [activeItem, setActiveItem] = useState<string>("Overview");
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
-  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>("");
 
-  const handleNavbarMouseEnter = (label: string) => {
-    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
-    setHovered(label);
-  };
-  const handleNavbarMouseLeave = () => {
-    hoverTimeout.current = setTimeout(() => {
-      setHovered(null);
-    }, 200);
-  };
+  useEffect(() => {
+    setCurrentUrl(`${window.location.origin}${pathname}`);
+  }, [pathname]);
 
-  const shareOnFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-      currentUrl
-    )}`;
+  const menuItems: Array<{
+    label: string;
+    icon: LucideIcon;
+    dropdownItems: DropdownItem[];
+  }> = [
+    {
+      label: "Overview",
+      icon: Edit,
+      dropdownItems: [
+        { label: "Primary Details", href: `/person/${personId}/edit/details` },
+        { label: "Cover Image", href: `/person/${personId}/edit/cover` },
+        { label: "Cast Credits", href: `/person/${personId}/edit/cast` },
+        { label: "Crew Credits", href: `/person/${personId}/edit/crew` },
+        {
+          label: "External Links",
+          href: `/person/${personId}/edit/external_link`,
+        },
+      ],
+    },
+    {
+      label: "Media",
+      icon: Image,
+      dropdownItems: [
+        { label: "Profiles", href: `/person/${personId}/photos` },
+      ],
+    },
+    {
+      label: "Fandom",
+      icon: Users,
+      dropdownItems: [{ label: "Discuss", href: "#comment" }],
+    },
+    {
+      label: "Share",
+      icon: Share2,
+      dropdownItems: [
+        { label: "Share Links", onClick: () => setIsShareModalOpen(true) },
+        { label: "Facebook", onClick: () => shareOnSocialMedia("facebook") },
+        { label: "Twitter", onClick: () => shareOnSocialMedia("twitter") },
+      ],
+    },
+  ];
+
+  const shareOnSocialMedia = (platform: "facebook" | "twitter") => {
+    const url =
+      platform === "facebook"
+        ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+            currentUrl
+          )}`
+        : `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+            currentUrl
+          )}`;
     window.open(url, "_blank", "width=600,height=400");
-  };
-
-  const shareOnTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-      currentUrl
-    )}`;
-    window.open(url, "_blank", "width=600,height=400");
-  };
-  const handleShare = (idx: number) => {
-    setIsShareModalOpen((prev) => {
-      const newShareModal = [...prev];
-      newShareModal[idx] = !newShareModal[idx];
-      // Toggle the specific item
-      return newShareModal;
-    });
   };
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(currentUrl);
       toast.success("Copied to clipboard");
-      setIsShareModalOpen([]);
+      setIsShareModalOpen(false);
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
   };
 
-  useEffect(() => {
-    setCurrentUrl(`${window.location.origin}${pathname}`);
-  }, [pathname]);
   return (
-    <div className="bg dark:bg-[#191a20] border-b-[1px] border-b-[#ffffff] flex items-center justify-center shadow-md m-0 p-0 gap-0">
-      <ul className="relative inline-block m-0 p-0">
-        <li
-          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-2 leading-[1px] -mb-[1px] ${
-            currentItem === "Overview" && "border-b-[4px] border-b-[#01b4e4]"
-          }`}
-          onClick={() => setCurrentItem("Overview")}
-          onMouseEnter={() => handleNavbarMouseEnter("Overview")}
-          onMouseLeave={handleNavbarMouseLeave}
-        >
-          Overview{" "}
-          <span className="inline-flex items-center justify-center ml-1">
-            <IoIosArrowDown />
-          </span>
-        </li>{" "}
-        {hovered === "Overview" && (
-          <div
-            className="absolute top-7 left-2 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
-            onMouseEnter={() => handleNavbarMouseEnter("Overview")}
-            onMouseLeave={handleNavbarMouseLeave}
-          >
-            <ul className="text-black py-2">
-              <li className="text-sm text-muted-foreground opacity-60 my-2 mx-6 cursor-text">
-                Edit Information
-              </li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link
-                  prefetch={false}
-                  href={`/person/${personId}/edit/details`}
-                  onClick={() => setCurrentItem("Overview")}
+    <nav className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+        <div className="flex items-center justify-center h-12 md:h-16">
+          <ul className="flex items-center justify-center space-x-8">
+            {menuItems.map((item) => (
+              <li
+                key={item.label}
+                className="relative"
+                onMouseEnter={() => setHoveredItem(item.label)}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
+                <button
+                  className={`group inline-flex items-center text-sm md:text-base pt-4 pb-3 px-1
+                    ${
+                      activeItem === item.label
+                        ? "text-blue-600 border-b-[3px] border-blue-600"
+                        : "text-gray-700 dark:text-gray-200 hover:text-blue-600"
+                    }`}
+                  onClick={() => setActiveItem(item.label)}
                 >
-                  Primary Details
-                </Link>
+                  <span className="hidden md:inline">{item.label}</span>
+                  <span className="md:hidden">
+                    <item.icon className="w-4 h-4" />
+                  </span>
+                  <ChevronDown
+                    className="w-3 h-3 ml-1 transform transition-transform duration-200 
+                    group-hover:rotate-180"
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {hoveredItem === item.label && item.dropdownItems && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 mt-1 w-48 rounded-md bg-white dark:bg-gray-800 
+                        shadow-lg ring-1 ring-black ring-opacity-5 z-50"
+                    >
+                      <ul className="py-2">
+                        {item.dropdownItems.map((dropdownItem) => (
+                          <li key={dropdownItem.label}>
+                            {"href" in dropdownItem ? (
+                              <Link
+                                href={dropdownItem.href}
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 
+                                  dark:text-gray-300 dark:hover:bg-gray-700"
+                              >
+                                {dropdownItem.label}
+                              </Link>
+                            ) : (
+                              <button
+                                onClick={dropdownItem.onClick}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 
+                                  hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                              >
+                                {dropdownItem.label}
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                        {item.label === "Overview" && (
+                          <li>
+                            <button
+                              onClick={() => setIsReportModalOpen(true)}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 
+                                hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                            >
+                              Report a Problem
+                            </button>
+                          </li>
+                        )}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link prefetch={false} href={`/person/${personId}/edit/cover`}>
-                  Cover Image
-                </Link>
-              </li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link prefetch={false} href={`/person/${personId}/edit/cast`}>
-                  Cast Credits
-                </Link>
-              </li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link prefetch={false} href={`/person/${personId}/edit/crew`}>
-                  Crew Credits
-                </Link>
-              </li>
-              <li className="text-sm my-2 mx-6 cursor-pointer">
-                <Link
-                  prefetch={false}
-                  href={`/person/${personId}/edit/external_link`}
-                >
-                  External_Links
-                </Link>
-              </li>
-              <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger asChild>
-                  <li className="text-sm hover:bg-[#f8f9fa] py-1 px-6 cursor-pointer">
-                    Report a Problem
-                  </li>
-                </DialogTrigger>
-                {isOpen && (
-                  <ReportModal route="person" id={personId} type="person" />
-                )}
-              </Dialog>
-            </ul>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share this page</DialogTitle>
+            <DialogDescription>
+              Copy the link or share directly to social media
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-2 rounded-md">
+            <Input
+              value={currentUrl}
+              ref={inputRef}
+              readOnly
+              className="bg-transparent border-none focus:outline-none"
+            />
+            <Button onClick={copyToClipboard} size="sm" variant="ghost">
+              <Copy className="h-4 w-4 mr-2" />
+              Copy
+            </Button>
           </div>
-        )}
-        <li
-          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
-            currentItem === "Media" && "border-b-[4px] border-b-[#01b4e4]"
-          }`}
-          onClick={() => setCurrentItem("Media")}
-          onMouseEnter={() => handleNavbarMouseEnter("Media")}
-          onMouseLeave={handleNavbarMouseLeave}
-        >
-          Media{" "}
-          <span>
-            <IoIosArrowDown />
-          </span>
-        </li>
-        {hovered === "Media" && (
-          <div
-            className="absolute top-7 left-28 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
-            onMouseEnter={() => handleNavbarMouseEnter("Media")}
-            onMouseLeave={handleNavbarMouseLeave}
-          >
-            <ul className="text-black py-2">
-              <Link href={`/person/${personId}/photos`}>
-                <li className="text-sm my-2 mx-6 cursor-pointer">Profiles</li>
-              </Link>
-            </ul>
-          </div>
-        )}
-        <li
-          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-[0.25rem] ${
-            currentItem === "Fandom" && "border-b-[4px] border-b-[#01b4e4]"
-          }`}
-          onClick={() => setCurrentItem("Fandom")}
-          onMouseEnter={() => handleNavbarMouseEnter("Fandom")}
-          onMouseLeave={handleNavbarMouseLeave}
-        >
-          Fandom{" "}
-          <span>
-            <IoIosArrowDown />
-          </span>
-        </li>{" "}
-        {hovered === "Fandom" && (
-          <div
-            className="absolute top-7 right-16 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
-            onMouseEnter={() => handleNavbarMouseEnter("Fandom")}
-            onMouseLeave={handleNavbarMouseLeave}
-          >
-            <ul className="py-2 text-black">
-              <Link href="#comment">
-                <li className="text-sm my-2 mx-6 cursor-pointer">Discuss</li>
-              </Link>
-            </ul>
-          </div>
-        )}
-        <li
-          className={`inline-flex items-center justify-end text-xs md:text-base mx-2 cursor-pointer pt-4 pb-1 ${
-            currentItem === "Share" && "border-b-[4px] border-b-[#01b4e4]"
-          }`}
-          onClick={() => setCurrentItem("Share")}
-          onMouseEnter={() => handleNavbarMouseEnter("Share")}
-          onMouseLeave={handleNavbarMouseLeave}
-        >
-          Share{" "}
-          <span>
-            <IoIosArrowDown />
-          </span>
-        </li>
-        {hovered === "Share" && (
-          <div
-            className="absolute top-7 right-0 md:-right-14 bg-white border-[1px] border-[#00000026] shadow-md rounded-md mt-2"
-            onMouseEnter={() => handleNavbarMouseEnter("Share")}
-            onMouseLeave={handleNavbarMouseLeave}
-          >
-            <ul className="text-black py-2">
-              <li
-                className="text-sm hover:bg-[#f8f9fa]  py-1 px-6 cursor-pointer"
-                onClick={() => {
-                  handleShare(1);
-                }}
-              >
-                Share Links
-              </li>
-              <Dialog
-                open={isShareModalOpen[1]}
-                onOpenChange={() => handleShare(1)}
-              >
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Share Links</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex items-center space-x-2">
-                    <Input value={currentUrl} ref={inputRef} readOnly />
-                    <Button onClick={copyToClipboard} size="icon">
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={() => handleShare(1)}>Close</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-              <li
-                className="text-sm my-2 mx-6 cursor-pointer"
-                onClick={shareOnFacebook}
-              >
-                Facebook
-              </li>
-              <li
-                className="text-sm my-2 mx-6 cursor-pointer"
-                onClick={shareOnTwitter}
-              >
-                Tweet
-              </li>
-            </ul>
-          </div>
-        )}
-      </ul>
-    </div>
+          <DialogFooter className="flex flex-col sm:flex-row justify-between gap-2">
+            <Button
+              onClick={() => shareOnSocialMedia("facebook")}
+              className="w-full sm:w-auto"
+            >
+              Share on Facebook
+            </Button>
+            <Button
+              onClick={() => shareOnSocialMedia("twitter")}
+              className="w-full sm:w-auto"
+            >
+              Share on Twitter
+            </Button>
+            <Button
+              onClick={() => setIsShareModalOpen(false)}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ReportModal
+        route="person"
+        id={personId}
+        type="person"
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+      />
+    </nav>
   );
 };
 

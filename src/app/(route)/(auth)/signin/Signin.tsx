@@ -1,4 +1,5 @@
 "use client";
+
 import { signInForm, TSignInForm } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
@@ -12,10 +13,12 @@ import { toast } from "react-toastify";
 // @ts-ignore
 import { AnimatedBackground } from "animated-backgrounds";
 import { Input } from "./AuthInput";
+
 const Signin = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -32,38 +35,42 @@ const Signin = () => {
     async (userData: TSignInForm) => {
       setIsLoading(true);
       try {
-        const signInData = await signIn("credentials", {
+        const result = await signIn("credentials", {
           email: userData.email,
           password: userData.password,
           redirect: false,
-          rememberMe,
+          callbackUrl: "/",
         });
 
-        if (!signInData || signInData.ok !== true) {
-          setIsLoading(false);
-          toast.error("Failed to sign in");
-          console.log("Invalid credentials");
-        } else {
-          toast.success("Sign-in successful");
-          router.push("/");
+        if (result?.error) {
+          toast.error(result.error || "Failed to sign in");
+          return;
         }
-      } catch (error: any) {
-        toast.error("Failed to sign in");
+
+        if (result?.ok) {
+          toast.success("Sign-in successful");
+          router.push(result.url || "/");
+          router.refresh();
+        }
+      } catch (error) {
         console.error("Sign-in error:", error);
       } finally {
         setIsLoading(false);
       }
     },
-    [router, rememberMe]
+    [router]
   );
 
-  const handleSignIn = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    type: string,
-    callback: { callbackUrl: string | undefined }
-  ) => {
-    e.preventDefault();
-    signIn(`${type}`, callback);
+  const handleSocialSignIn = async (provider: "google" | "github") => {
+    try {
+      await signIn(provider, {
+        callbackUrl: "/",
+        redirect: true,
+      });
+    } catch (error) {
+      console.error(`${provider} sign-in error:`, error);
+      toast.error(`Failed to sign in with ${provider}`);
+    }
   };
 
   return (
@@ -85,16 +92,14 @@ const Signin = () => {
             <button
               type="button"
               className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200"
-              onClick={(e) =>
-                handleSignIn(e, "google", { callbackUrl: undefined })
-              }
+              onClick={() => handleSocialSignIn("google")}
             >
               <FaGoogle className="text-white" size={20} />
             </button>
             <button
               type="button"
               className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200"
-              onClick={(e) => handleSignIn(e, "github", { callbackUrl: "/" })}
+              onClick={() => handleSocialSignIn("github")}
             >
               <FaGithub className="text-white" size={20} />
             </button>
@@ -117,7 +122,7 @@ const Signin = () => {
                 Email
               </label>
               <Input
-                {...register("email", { required: "Email is required" })}
+                {...register("email")}
                 id="email"
                 name="email"
                 type="email"
@@ -138,7 +143,7 @@ const Signin = () => {
                 Password
               </label>
               <Input
-                {...register("password", { required: "Password is required" })}
+                {...register("password")}
                 id="password"
                 name="password"
                 type="password"

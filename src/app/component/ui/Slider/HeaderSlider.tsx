@@ -7,9 +7,32 @@ import { useInView } from "react-intersection-observer";
 import dynamic from "next/dynamic";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
 
-const SliderContent = dynamic(() => import("./SliderContent"), { ssr: false });
+// Preload the first image
+const preloadFirstImage = async (imageUrl: string) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = imageUrl;
+    img.onload = resolve;
+  });
+};
+
+// Optimize initial load with preloaded content
+const SliderContent = dynamic(() => import("./SliderContent"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-gray-900 animate-pulse">
+      <div className="absolute bottom-20 left-8 w-1/2 space-y-4">
+        <div className="h-8 bg-gray-800 rounded w-3/4 animate-pulse" />
+        <div className="h-4 bg-gray-800 rounded w-1/4 animate-pulse" />
+        <div className="h-4 bg-gray-800 rounded w-1/2 animate-pulse" />
+      </div>
+    </div>
+  ),
+});
+
 const SliderControls = dynamic(() => import("./SliderControls"), {
   ssr: false,
+  loading: () => null,
 });
 
 const HeaderSlider = ({ existingRatings }: any) => {
@@ -17,22 +40,27 @@ const HeaderSlider = ({ existingRatings }: any) => {
   const [direction, setDirection] = useState<number>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isFirstImageLoaded, setIsFirstImageLoaded] = useState(false);
   const [colorState, setColorState] = useState({
     left: "",
     right: "",
     genreBG: "",
     center: "",
   });
+
   const getColorFromImage = useColorFromImage();
   const { ref, inView } = useInView({
     threshold: 0.1,
+    triggerOnce: true,
   });
 
+  // Optimize data fetching with prefetch
   const { data: trending } = useQuery({
     queryKey: ["trending"],
     queryFn: fetchTrending,
     staleTime: 3600000,
     refetchOnWindowFocus: false,
+    gcTime: 3600000,
   });
 
   const filteredData = useMemo(
@@ -56,8 +84,9 @@ const HeaderSlider = ({ existingRatings }: any) => {
   const handleExtractColor = useCallback(async () => {
     const currentItem = filteredData && filteredData[currentIndex];
     if (currentItem?.backdrop_path) {
+      // Use smaller image size for color extraction
       const imageUrl = `https://image.tmdb.org/t/p/${
-        currentItem?.backdrop_path ? "w300" : "w92"
+        currentItem?.backdrop_path ? "w300" : "w154"
       }/${currentItem?.backdrop_path || currentItem?.poster_path}`;
       const [r, g, b] = await getColorFromImage(imageUrl);
 
@@ -69,6 +98,20 @@ const HeaderSlider = ({ existingRatings }: any) => {
       });
     }
   }, [currentIndex, filteredData, getColorFromImage]);
+
+  // Preload first image
+  useEffect(() => {
+    if (filteredData.length > 0 && !isFirstImageLoaded) {
+      const firstItem = filteredData[0];
+      const imageUrl = `https://image.tmdb.org/t/p/${
+        firstItem?.backdrop_path ? "w300" : "w154"
+      }/${firstItem?.backdrop_path || firstItem?.poster_path}`;
+
+      preloadFirstImage(imageUrl).then(() => {
+        setIsFirstImageLoaded(true);
+      });
+    }
+  }, [filteredData, isFirstImageLoaded]);
 
   const nextSlide = useCallback(() => {
     setDirection(1);
@@ -102,31 +145,35 @@ const HeaderSlider = ({ existingRatings }: any) => {
       className="h-[56vw] max-h-[1012px] border-box transition duration-600 delay-400"
       style={{ background: colorState.genreBG }}
     >
-      <div
-        ref={ref}
-        className="max-w-[1808px] mx-auto absolute left-0 right-0 w-full h-[99%]"
-      >
-        <SliderContent
-          currentItem={currentItem}
-          currentIndex={currentIndex}
-          direction={direction}
-          existingRatings={existingRatings}
-          getRating={getRating}
-          {...colorState}
-        />
-      </div>
+      {isFirstImageLoaded && (
+        <>
+          <div
+            ref={ref}
+            className="max-w-[1808px] mx-auto absolute left-0 right-0 w-full h-[99%]"
+          >
+            <SliderContent
+              currentItem={currentItem}
+              currentIndex={currentIndex}
+              direction={direction}
+              existingRatings={existingRatings}
+              getRating={getRating}
+              {...colorState}
+            />
+          </div>
 
-      <SliderControls
-        filteredData={filteredData}
-        currentIndex={currentIndex}
-        setCurrentIndex={setCurrentIndex}
-        setDirection={setDirection}
-        hoveredIndex={hoveredIndex}
-        setHoveredIndex={setHoveredIndex}
-        setIsHovered={setIsHovered}
-        prevSlide={prevSlide}
-        nextSlide={nextSlide}
-      />
+          <SliderControls
+            filteredData={filteredData}
+            currentIndex={currentIndex}
+            setCurrentIndex={setCurrentIndex}
+            setDirection={setDirection}
+            hoveredIndex={hoveredIndex}
+            setHoveredIndex={setHoveredIndex}
+            setIsHovered={setIsHovered}
+            prevSlide={prevSlide}
+            nextSlide={nextSlide}
+          />
+        </>
+      )}
       <div
         className="absolute bottom-0 w-full h-[30%] z-[101]"
         style={{

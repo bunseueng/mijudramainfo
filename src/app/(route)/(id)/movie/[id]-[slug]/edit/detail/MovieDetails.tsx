@@ -140,6 +140,9 @@ const MovieDetails: React.FC<movieId & Movie> = ({
   const [currentTitleResults, setCurrentTitleResults] = useState(titleResults);
   const [currentKnownAsDetails, setCurrentKnownAsDetails] =
     useState(knownAsDetails);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const originalTitle = initialTitle;
   const originalNativeTitle = initialNativeTitle;
   const originalSynopsis = initialSynopsis;
@@ -357,6 +360,8 @@ const MovieDetails: React.FC<movieId & Movie> = ({
   const onSubmit = async (data: TCreateDetails) => {
     try {
       setLoading(true);
+      setIsSubmitting(true);
+      setIsResetting(false);
       const ensureAllStrings = (arr: any[]) =>
         arr.flat().filter((item) => typeof item === "string");
       const newKnownAs = mergeAndRemoveDuplicates(
@@ -379,15 +384,31 @@ const MovieDetails: React.FC<movieId & Movie> = ({
           movie_id: movie?.id.toString(),
           details: [
             {
-              title: currentTitle || data?.details?.title,
-              native_title: currentNativeTitle || data?.details?.native_title,
-              country: currentCountry || country,
+              title:
+                currentTitle !== originalTitle ? currentTitle : detail?.title,
+              native_title:
+                currentNativeTitle !== originalNativeTitle
+                  ? currentNativeTitle
+                  : detail?.native_title,
+              country: country !== originalCountry ? country : detail?.country,
               known_as: formattedKnownAs,
-              synopsis: currentSynopsis || data?.details?.synopsis,
-              content_type: currentType || contentType,
-              content_rating: currentRating || contentRating,
-              status: currentStatus || status,
-              duration: currentDuration || detail?.duration,
+              synopsis:
+                currentSynopsis !== originalSynopsis
+                  ? currentSynopsis
+                  : detail?.synopsis,
+              content_type:
+                contentType !== originalType
+                  ? contentType
+                  : detail?.content_type,
+              content_rating:
+                contentRating !== originalRating
+                  ? contentRating
+                  : detail?.content_rating,
+              status: status !== originalStatus ? status : detail?.status,
+              duration:
+                currentDuration !== originalDuration
+                  ? currentDuration
+                  : detail?.duration,
             },
           ],
         }),
@@ -396,17 +417,20 @@ const MovieDetails: React.FC<movieId & Movie> = ({
       if (res.status === 200) {
         reset();
         setResults([]);
+        setIsSubmitted(true);
         toast.success("Success");
+        setIsSubmitEnabled(false);
       } else if (res.status === 400) {
         toast.error("Invalid User");
       } else if (res.status === 500) {
-        console.log("Bad Request");
+        toast.error("Bad Request");
       }
     } catch (error: any) {
-      console.log("Bad Request");
+      toast.error("Bad Request");
       throw new Error(error);
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -415,10 +439,11 @@ const MovieDetails: React.FC<movieId & Movie> = ({
   ) => {
     e.preventDefault();
     setResetLoading(true);
+    setIsResetting(true);
+    setIsSubmitting(false);
+
     try {
-      // Simulate a delay for the reset operation
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      // reset logic here
       reset();
       setCurrentTitle(originalTitle);
       setCurrentNativeTitle(originalNativeTitle);
@@ -429,12 +454,15 @@ const MovieDetails: React.FC<movieId & Movie> = ({
       setStatus(originalStatus);
       setCurrentDuration(originalDuration);
       setResults([]);
-      setTitleResults(originalTitleResults);
-      setKnownAsDetails(originalKnownAsDetails);
+      setCurrentTitleResults(originalTitleResults);
+      setCurrentKnownAsDetails(originalKnownAsDetails);
+      setIsSubmitted(false);
+      setIsSubmitEnabled(false);
     } catch (error) {
       console.error("Error resetting:", error);
     } finally {
       setResetLoading(false);
+      setIsResetting(false);
     }
   };
 
@@ -477,7 +505,11 @@ const MovieDetails: React.FC<movieId & Movie> = ({
             name="details.title"
             type="text"
             className="w-full bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none py-2 px-4"
-            defaultValue={initialTitle}
+            defaultValue={
+              currentTitle !== originalTitle
+                ? currentTitle
+                : detail?.title || currentTitle
+            }
           />
         </div>
         <small className="text-muted-foreground opacity-80">
@@ -496,7 +528,11 @@ const MovieDetails: React.FC<movieId & Movie> = ({
               type="text"
               name="details.native_title"
               className="w-full bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none py-2 px-4"
-              defaultValue={initialNativeTitle}
+              defaultValue={
+                currentNativeTitle !== originalNativeTitle
+                  ? currentNativeTitle
+                  : detail?.native_title || currentNativeTitle
+              }
             />
           </div>
           <small className="text-muted-foreground opacity-80">
@@ -632,7 +668,11 @@ const MovieDetails: React.FC<movieId & Movie> = ({
             name="details.synopsis"
             ref={textareaRef}
             className="w-full h-auto bg-white text-black dark:text-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#46494a] rounded-md outline-none overflow-hidden px-4 py-1"
-            defaultValue={initialSynopsis}
+            defaultValue={
+              currentSynopsis !== originalSynopsis
+                ? currentSynopsis
+                : detail?.synopsis || currentSynopsis
+            }
           ></textarea>
         </div>
         <small className="text-muted-foreground opacity-80">
@@ -865,24 +905,39 @@ const MovieDetails: React.FC<movieId & Movie> = ({
           <button
             name="Submit"
             type="submit"
-            className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 mr-5 ${
+            className={`flex items-center text-white px-5 py-2 rounded-md mb-10 mr-5 transform duration-300 ${
               isSubmitEnabled || results?.length > 0
-                ? "cursor-pointer"
-                : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+                ? "bg-[#5cb85c] border-[1px] border-[#5cb85c] hover:opacity-80 cursor-pointer"
+                : "bg-[#b3e19d] border-[1px] border-[#b3e19d] cursor-not-allowed"
+            } ${
+              isResetting || isSubmitted ? "opacity-50 cursor-not-allowed" : ""
             }`}
-            disabled={isSubmitEnabled || results?.length > 0 ? false : true}
+            disabled={
+              (!isSubmitEnabled && results?.length === 0) ||
+              isResetting ||
+              isSubmitted ||
+              loading
+            }
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
           </button>
           <button
             name="Reset"
-            className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-              isSubmitEnabled || results?.length > 0
-                ? "cursor-pointer"
-                : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
+            type="button"
+            className={`flex items-center px-5 py-2 rounded-md mb-10 transform duration-300 ${
+              (isSubmitEnabled || results?.length > 0) && !isSubmitted
+                ? "text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] hover:opacity-80 cursor-pointer"
+                : "text-[#c0c4cc] border-[1px] border-[#ebeef5] cursor-not-allowed"
+            } ${
+              isSubmitting || isSubmitted ? "opacity-50 cursor-not-allowed" : ""
             }`}
-            onClick={(e) => handleReset(e)}
-            disabled={isSubmitEnabled || results?.length > 0 ? false : true}
+            onClick={handleReset}
+            disabled={
+              (!isSubmitEnabled && results?.length === 0) ||
+              isSubmitting ||
+              isSubmitted ||
+              resetLoading
+            }
           >
             {resetLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -27,18 +27,35 @@ const SliderContent = ({
     [currentItem?.id, currentItem?.name, currentItem?.title]
   );
 
-  const imageUrl = useMemo(
-    () =>
-      `https://image.tmdb.org/t/p/${
-        currentItem.backdrop_path ? "original" : "w154"
-      }/${currentItem.backdrop_path || currentItem.poster_path}`,
-    [currentItem.backdrop_path, currentItem.poster_path]
-  );
+  // Optimize image loading with progressive enhancement
+  const imageUrl = useMemo(() => {
+    // Start with a smaller size for immediate loading
+    const initialSize = "w300";
+    const width = typeof window !== "undefined" ? window.innerWidth : 0;
+    const optimalSize = width <= 768 ? "w780" : "original";
 
+    return {
+      initial: `https://image.tmdb.org/t/p/${initialSize}/${
+        currentItem.backdrop_path || currentItem.poster_path
+      }`,
+      optimal: `https://image.tmdb.org/t/p/${optimalSize}/${
+        currentItem.backdrop_path || currentItem.poster_path
+      }`,
+    };
+  }, [currentItem.backdrop_path, currentItem.poster_path]);
+
+  // Progressive image loading
   useEffect(() => {
-    const img = new Image();
-    img.src = imageUrl;
-    img.onload = () => setIsContentVisible(true);
+    // Load the initial small image first
+    const smallImg = new Image();
+    smallImg.src = imageUrl.initial;
+    smallImg.onload = () => {
+      setIsContentVisible(true);
+
+      // Then load the optimal size
+      const optimalImg = new Image();
+      optimalImg.src = imageUrl.optimal;
+    };
   }, [imageUrl]);
 
   const getRating = useMemo(() => {
@@ -71,29 +88,19 @@ const SliderContent = ({
   };
 
   const contentVariants = {
-    hidden: {
-      opacity: 0,
-    },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-        staggerChildren: 0.1,
-      },
+      transition: { duration: 0.2, ease: "easeOut" },
     },
     exit: {
       opacity: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeIn",
-      },
+      transition: { duration: 0.1, ease: "easeIn" },
     },
   };
 
   return (
     <>
-      {/* Added overflow-hidden to prevent image border from showing */}
       <div className="w-full h-full absolute top-0 left-0">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
@@ -104,14 +111,15 @@ const SliderContent = ({
             animate="center"
             exit="exit"
             transition={{
-              x: { type: "spring", stiffness: 100, damping: 18, duration: 1 },
-              opacity: { duration: 0.2 },
+              x: { type: "spring", stiffness: 100, damping: 18, duration: 0.6 },
+              opacity: { duration: 0.1 },
             }}
             className="w-full h-full bg-center bg-cover bg-no-repeat absolute top-0 left-0"
             style={{ background: left, borderColor: right }}
           >
             <BackgroundImage
-              imageUrl={imageUrl}
+              initialSrc={imageUrl.initial}
+              optimalSrc={imageUrl.optimal}
               title={currentItem.name || currentItem.title}
             />
             <GradientOverlays left={left} right={right} center={center} />
@@ -131,24 +139,42 @@ const SliderContent = ({
 };
 
 const BackgroundImage = React.memo(
-  ({ imageUrl, title }: { imageUrl: string; title: string }) => (
-    // Increased width to ensure full coverage during slide
-    <div className="w-full h-[98.49%] relative">
-      <Images
-        src={imageUrl || "/placeholder.svg"}
-        alt={`Poster for ${title}` || "Poster"}
-        priority={true}
-        loading="eager"
-        fill
-        className="w-[46.67%] h-[98.49%] absolute top-0 bottom-0 bg-no-repeat bg-cover"
-        sizes="100vw"
-        quality={80}
-        placeholder="blur"
-        fetchPriority="high"
-        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx0fHRsdHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR3/2wBDAR0XFyAeIRshGxsdIR0hHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR3/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-      />
-    </div>
-  )
+  ({
+    initialSrc,
+    optimalSrc,
+    title,
+  }: {
+    initialSrc: string;
+    optimalSrc: string;
+    title: string;
+  }) => {
+    const [currentSrc, setCurrentSrc] = useState(initialSrc);
+
+    useEffect(() => {
+      const img = new Image();
+      img.src = optimalSrc;
+      img.onload = () => {
+        setCurrentSrc(optimalSrc);
+      };
+    }, [optimalSrc]);
+
+    return (
+      <div className="w-full h-[98.49%] relative bg-gray-900">
+        <Images
+          src={currentSrc}
+          alt={`Poster for ${title}`}
+          priority={true}
+          loading="eager"
+          fill
+          className="w-[46.67%] h-[98.49%] absolute top-0 bottom-0 bg-no-repeat bg-cover transition-opacity duration-300"
+          sizes="(max-width: 640px) 100vw, (max-width: 768px) 80vw, (max-width: 1024px) 70vw, 60vw"
+          quality={60}
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx0fHRsdHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR3/2wBDAR0XFyAeIRshGxsdIR0hHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR3/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+        />
+      </div>
+    );
+  }
 );
 BackgroundImage.displayName = "BackgroundImage";
 
@@ -193,11 +219,11 @@ const OptimizedContentWrapper = React.memo(
               },
             },
           }}
-          className="inline text-2xl xl:text-6xl font-bold md:mb-4 text-balance"
+          className="inline text-xl xl:text-6xl font-bold md:mb-4 text-balance"
         >
           {currentItem.name || currentItem.title}
         </motion.h2>
-        <motion.div variants={contentVariants} className="block mt-4">
+        <motion.div variants={contentVariants} className="block mt-2">
           <OptimizedContentDetails
             rating={getRating}
             releaseYear={currentItem?.first_air_date?.split("-")[0]}
@@ -301,7 +327,7 @@ const OptimizedOverview = React.memo(({ overview }: { overview: string }) => (
         },
       },
     }}
-    className="hidden md:flex flex-col content-between w-full h-[118px] mt-2 grow"
+    className="hidden md:flex flex-col content-between w-full h-[118px] grow"
   >
     <p className="w-[31.25vw] min-w-[320px] md:w-[525px] md:h-[72px] md:mt-[16px] md:text-[16px] md:line-clamp-3 overflow-hidden h-[42px] leading-[1.5em] mt-[12px] text-[14px] font-medium text-ellipsis line-clamp-2 -webkit-box-orient-vertical">
       {overview?.length > 400 ? overview.slice(0, 400) + "..." : overview}

@@ -96,7 +96,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={nunito.className}>
       <Head>
-        <link rel="icon" href="data:," />
+        <link rel="icon" href="/favicon.ico" />
         <link rel="preconnect" href="https://app.posthog.com" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
