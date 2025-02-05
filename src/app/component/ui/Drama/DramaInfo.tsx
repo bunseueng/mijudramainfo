@@ -21,7 +21,6 @@ interface DramaInfoProps {
   formattedKeywordsDB: string;
   formattedKeywords: string[];
   info: DramaReleasedInfo;
-  matchedLanguage: any;
   formattedDates: any;
   content: any;
   rank: any;
@@ -38,7 +37,6 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
   formattedKeywordsDB,
   formattedKeywords,
   info,
-  matchedLanguage,
   formattedDates,
   content,
   rank,
@@ -162,7 +160,6 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
           tv={tv}
           textColor={textColor}
           info={info}
-          matchedLanguage={matchedLanguage}
           formattedDates={formattedDates}
           content={content}
           rank={rank}

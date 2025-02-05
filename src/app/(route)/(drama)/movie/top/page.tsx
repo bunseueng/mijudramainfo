@@ -11,6 +11,9 @@ const SearchLoading = dynamic(
 export const metadata: Metadata = {
   title: "Top Rated Movie",
   description: "Find Top Rated movie.",
+  alternates: {
+    canonical: `${process.env.BASE_URL}/movie/top`,
+  },
 };
 
 const TopDramaPage = async () => {

@@ -72,10 +72,6 @@ interface PersonContentProps {
 const renderKnownFor = (
   personDetails: PersonContentProps["personFullDetails"]["results"][0]
 ) => {
-  if (personDetails.known_for_department.toLowerCase() === "acting") {
-    return null;
-  }
-
   const sortedContent = personDetails.known_for?.sort((a: any, b: any) => {
     const dateA = a.first_air_date || a.release_date;
     const dateB = b.first_air_date || b.release_date;
@@ -176,7 +172,6 @@ export default function PersonContent({
   sortedChanges,
 }: PersonContentProps) {
   const isActor = persons?.known_for_department.toLowerCase() === "acting";
-
   const [detail]: PersonDetail[] = (getPersons?.details ||
     []) as unknown as PersonDetail[];
 
@@ -309,10 +304,14 @@ export default function PersonContent({
           </button>
         </div>
         <PersonBiography persons={persons} detail={detail} />
-        {personFullDetails &&
-          personFullDetails.results.map((personDetails, index) => (
-            <div key={index}>{renderKnownFor(personDetails)}</div>
-          ))}
+        {persons?.known_for_department.toLowerCase() !== "acting" && (
+          <>
+            {personFullDetails &&
+              personFullDetails.results.map((personDetails, index) => (
+                <div key={index}>{renderKnownFor(personDetails)}</div>
+              ))}
+          </>
+        )}
       </div>
 
       {isActor && (

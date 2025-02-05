@@ -1,9 +1,11 @@
-import React from "react";
+import type React from "react";
+import { useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { RiLogoutCircleRLine } from "react-icons/ri";
-import { signOut } from "next-auth/react";
-import { SessionDropdownProps } from "./NavbarActions";
+import type { SessionDropdownProps } from "./NavbarActions";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const SessionDropdown: React.FC<SessionDropdownProps> = ({
   sessionItems,
@@ -12,13 +14,27 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
   session,
   outsideRef,
 }) => {
-  const handleSignOut = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    await signOut({
-      callbackUrl: "/", // Redirect to home page after sign out
-      redirect: true,
-    });
-  };
+  const { data: sessionData, status } = useSession();
+  const router = useRouter();
+
+  const handleSignOut = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      try {
+        await signOut({ redirect: false });
+        router.push("/");
+      } catch (error) {
+        console.error("Error signing out:", error);
+      }
+    },
+    [router]
+  );
+
+  if (status === "loading") {
+    return <div className="p-4 text-center">Loading...</div>;
+  }
+
+  const userName = sessionData?.user?.name || "user";
 
   return (
     <AnimatePresence>
@@ -56,10 +72,8 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
               <Link
                 prefetch={false}
                 href={`${
-                  item.link === "/profile"
-                    ? `${item.link}/${session?.user?.name}`
-                    : item.link === "/friends"
-                    ? `${item.link}/${session?.user?.name}`
+                  item.link === "/profile" || item.link === "/friends"
+                    ? `${item.link}/${userName}`
                     : item.link
                 }`}
                 className="flex items-center text-center text-[16px] my-2 ml-2"

@@ -19,16 +19,20 @@ export async function generateMetadata(props: {
 
   const [person_id] = params["id]-[slug"].split("-");
   const data = await getPersonDetails(person_id);
+  const url = `${process.env.BASE_URL}/person/${
+    data.person?.results[0]?.id
+  }-${spaceToHyphen(data?.person?.results[0]?.name)}`;
 
   return {
     title: `${data?.person?.results[0]?.name} (${data.person?.results[0]?.original_name})`,
     description: data.personDetails?.biography,
     keywords: data.personDetails?.also_known_as,
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       type: "website",
-      url: `https://mijudramainfo.vercel.app/person/${
-        data.person?.results[0]?.id
-      }-${spaceToHyphen(data?.person?.results[0]?.name)}`,
+      url: url,
       title: data.person?.results[0]?.name,
       description: data.personDetails?.biography,
       images: [

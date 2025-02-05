@@ -1,10 +1,9 @@
 "use client";
 import { signUpForm, TSignUpForm } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { FaCheck, FaGithub, FaGoogle } from "react-icons/fa6";
+import { FaGithub, FaGoogle } from "react-icons/fa6";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 // @ts-ignore
@@ -12,10 +11,11 @@ import { AnimatedBackground } from "animated-backgrounds";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Input } from "../signin/AuthInput";
+import { useRouter } from "next/navigation";
 
 const Signup = () => {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -36,6 +36,7 @@ const Signup = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          credentials: "omit",
         },
         body: JSON.stringify({
           email: data.email,
@@ -48,6 +49,7 @@ const Signup = () => {
         toast.error("User already exists");
       }
       if (response.status === 200) {
+        router.push("/signin");
         toast.success("Sign-up successfully");
       }
       if (response.status === 500) {
@@ -72,7 +74,11 @@ const Signup = () => {
           </h2>
           <p className="mt-2 text-sm text-gray-200">Create your account with</p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit(onSubmit)}
+          method="POST"
+        >
           <div className="flex justify-center space-x-4">
             <button
               type="button"

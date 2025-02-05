@@ -2,12 +2,23 @@ import { Suspense } from "react";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import dynamic from "next/dynamic";
 import prisma from "@/lib/db";
+import { Metadata } from "next";
 const SearchQuery = dynamic(
   () => import("../../component/ui/Search/SearchQuery")
 );
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading")
 );
+
+export async function generateMetadata(props: any): Promise<Metadata> {
+  const url = `${process.env.BASE_URL}/search`;
+  return {
+    title: "Search",
+    alternates: {
+      canonical: url,
+    },
+  };
+}
 
 const SearchPage = async () => {
   const BASE_URL = "https://api.themoviedb.org/3/search/multi";

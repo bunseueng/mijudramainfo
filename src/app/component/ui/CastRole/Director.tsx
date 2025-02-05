@@ -35,7 +35,7 @@ const Director = ({ directors, directorsDB }: any) => {
                 >
                   {item.profile_path === null ? (
                     <Image
-                      src="/default-pf.jpg"
+                      src="/default-pf.webp"
                       alt={`${item?.name}'s Profile` || "Director Profile"}
                       width={200}
                       height={200}
@@ -76,12 +76,13 @@ const Director = ({ directors, directorsDB }: any) => {
             >
               <div className="w-full h-full flex flex-row">
                 <Link
+                  prefetch={false}
                   href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                   className="cursor-pointer"
                 >
                   {item.profile_path === null ? (
                     <Image
-                      src="/default-pf.jpg"
+                      src="/default-pf.webp"
                       alt={`${item?.name}'s Profile`}
                       width={200}
                       height={200}
@@ -102,6 +103,7 @@ const Director = ({ directors, directorsDB }: any) => {
 
                 <div className="pl-2">
                   <Link
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                   >

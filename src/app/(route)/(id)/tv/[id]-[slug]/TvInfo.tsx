@@ -6,7 +6,7 @@ import {
 } from "@/helper/type";
 import React from "react";
 
-const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
+const TvInfo = ({ getDrama, tv, content, allTvShows }: any) => {
   const [info]: DramaReleasedInfo[] = (getDrama?.released_information ||
     []) as unknown as DramaReleasedInfo[];
   const [detail]: DramaDetails[] = (getDrama?.details ||
@@ -25,10 +25,6 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
   const formattedLastAirDateDB = info?.end_date
     ? formatDate(info.end_date)
     : "";
-  const original_country = tv?.origin_country && tv?.origin_country[0];
-  const matchedLanguage = language?.find(
-    (lang: any) => lang?.iso_3166_1 === original_country
-  );
   const allTvShowsArray = Array.isArray(allTvShows) ? allTvShows : [];
   // Find the index of the matched TV show in allTvShows array
   const matchedIndex = allTvShowsArray.findIndex(
@@ -54,7 +50,7 @@ const TvInfo = ({ getDrama, tv, language, content, allTvShows }: any) => {
               Country:
             </h1>
 
-            {detail?.country || matchedLanguage?.english_name}
+            {detail?.country || tv?.type[0]}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">

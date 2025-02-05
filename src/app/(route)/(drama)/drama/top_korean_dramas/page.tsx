@@ -10,6 +10,9 @@ const SearchLoading = dynamic(
 export const metadata: Metadata = {
   title: "Top 100 Korean Dramas",
   description: "Explore our Top 100 Korean Dramas",
+  alternates: {
+    canonical: `${process.env.BASE_URL}/drama/top_korean_dramas`,
+  },
 };
 
 const TopChineseDramas = async () => {

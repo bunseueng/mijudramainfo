@@ -12,6 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
       user?.biography === null
         ? `${user?.displayName || user?.name}'s page`
         : user?.biography,
+    alternates: {
+      canonical: `${process.env.BASE_URL}/setting/profile`,
+    },
   };
 }
 

@@ -53,7 +53,7 @@ const MovieReview: React.FC<ReviewType> = ({
   getReview,
   currentUser,
 }) => {
-  const { movie, isLoading, language } = useMovieData(movie_id);
+  const { movie, isLoading } = useMovieData(movie_id);
   const review = movie?.reviews || [];
   const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>("");
@@ -1005,12 +1005,7 @@ const MovieReview: React.FC<ReviewType> = ({
               </div>
             </div>
             <div className="mt-5">
-              <MovieInfo
-                getMovie={getMovie}
-                language={language}
-                movie={movie}
-                allmovieShows={[]}
-              />
+              <MovieInfo getMovie={getMovie} movie={movie} allmovieShows={[]} />
             </div>
           </div>
         </div>

@@ -3,9 +3,6 @@ import type { JWT } from "next-auth/jwt"
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-    // Get the pathname
-    const path = request.nextUrl.pathname;
-
     // Allow GET requests to pass through without authentication
     if (request.method === 'GET') {
         return NextResponse.next();

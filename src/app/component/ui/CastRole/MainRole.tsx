@@ -25,7 +25,7 @@ const MainRole = ({ cast, getDrama }: any) => {
                     >
                       {item.profile_path === null ? (
                         <Image
-                          src="/default-pf.jpg"
+                          src="/default-pf.webp"
                           alt={`${item?.name}'s Profile`}
                           width={200}
                           height={200}
@@ -46,6 +46,7 @@ const MainRole = ({ cast, getDrama }: any) => {
                   </div>
                   <div className="flex flex-col items-start ml-2 w-full">
                     <Link
+                      prefetch={false}
                       href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                       className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                     >
@@ -75,12 +76,13 @@ const MainRole = ({ cast, getDrama }: any) => {
                 <div className="w-full h-full flex flex-row">
                   <div className="box-content w-[90px]">
                     <Link
+                      prefetch={false}
                       href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                       className="block outline-none box-content w-[110px] h-full"
                     >
                       {item.profile_path === null ? (
                         <Image
-                          src="/default-pf.jpg"
+                          src="/default-pf.webp"
                           alt={`${item?.name}'s Profile` || "Main Role Profile"}
                           width={200}
                           height={200}

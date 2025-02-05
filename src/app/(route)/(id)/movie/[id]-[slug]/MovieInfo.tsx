@@ -3,7 +3,7 @@ import { formatDuration } from "@/app/actions/formattedDuration";
 import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
 import React from "react";
 
-const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
+const MovieInfo = ({ getMovie, movie, allmovieShows }: any) => {
   const [detail]: DramaDetails[] = (getMovie?.details ||
     []) as unknown as DramaDetails[];
   const [info]: DramaReleasedInfo[] = (getMovie?.released_information ||
@@ -14,10 +14,6 @@ const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
   const formattedFirstAirDateDB = info?.release_date
     ? formatDate(info.release_date)
     : "TBA";
-  const original_country = movie?.origin_country && movie?.origin_country[0];
-  const matchedLanguage = language?.find(
-    (lang: any) => lang?.iso_3166_1 === original_country
-  );
   const allmovieShowsArray = Array.isArray(allmovieShows) ? allmovieShows : [];
   // Find the index of the matched movie show in allmovieShows array
   const matchedIndex = allmovieShowsArray.findIndex(
@@ -43,7 +39,7 @@ const MovieInfo = ({ getMovie, movie, language, allmovieShows }: any) => {
               Country:
             </h1>
 
-            {detail?.country || matchedLanguage?.english_name}
+            {detail?.country || movie?.type[0]}
           </div>
           <div className="pb-1 break-words text-sm">
             <h1 className="inline-block text-sm lg:text-[15px] font-bold pr-1 lg:pr-2">

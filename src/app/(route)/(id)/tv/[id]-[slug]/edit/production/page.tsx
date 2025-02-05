@@ -4,68 +4,68 @@ import TvEdit from "../detail/TvEdit";
 import { Metadata } from "next";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import { getDramaData } from "@/app/actions/tvActions";
+import { getDramaData, getTVDetails } from "@/app/actions/tvActions";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 export const maxDuration = 60;
 export async function generateMetadata(props: {
   params: Promise<{ "id]-[slug": string }>;
 }): Promise<Metadata> {
   const params = await props.params;
   if (!params["id]-[slug"]) {
-    throw new Error("TV ID and slug are missing.");
+    return { title: "TV Drama Not Found" };
   }
 
-  const [tv_id] = params["id]-[slug"].split("-");
-  const response = await fetch(
-    `https://api.themoviedb.org/3/tv/${tv_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&with_original_language=zh&region=CN`
-  );
-  const tvDetails = await response.json();
-  const original_country = tvDetails?.origin_country?.[0];
-  const getLanguage = await fetch(
-    `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
-  );
-  const language = await getLanguage.json();
-  const matchedCountry = language?.find(
-    (lang: any) => lang?.iso_3166_1 === original_country
-  );
+  try {
+    const [tv_id] = params["id]-[slug"].split("-");
+    const tvDetails = await getTVDetails(tv_id);
+    const original_country = tvDetails?.origin_country?.[0];
 
-  const countryToLanguageMap: { [key: string]: string } = {
-    China: "Chinese",
-    Korea: "Korean",
-    Japan: "Japanese",
-    Taiwan: "Taiwanese",
-    Thai: "Thailand",
-    // Add more mappings as needed
-  };
-  // Get the language name
-  const languageName =
-    countryToLanguageMap[matchedCountry?.english_name] ||
-    matchedCountry?.english_name;
-
-  if (!response) {
-    throw new Error("Network response was not ok");
-  }
-
-  return {
-    title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
+    const countryToLanguageMap: { [key: string]: string } = {
+      CN: "Chinese",
+      KR: "Korean",
+      JP: "Japanese",
+      TW: "Taiwanese",
+      TH: "Thai",
+    };
+    const languageName = countryToLanguageMap[original_country] || "Unknown";
+    const title = `Edit ${
+      tvDetails?.name
+    } (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
-    )})'s Edit`,
-    description: tvDetails?.overview,
-    keywords: tvDetails?.genres?.map((data: any) => data.name),
-    openGraph: {
-      type: "website",
-      url: `https://mijudramainfo.vercel.app/tv/${tvDetails?.id}`,
-      title: tvDetails?.name,
+    )})`;
+    const url = `${process.env.BASE_URL}/tv/${tvDetails?.id}-${spaceToHyphen(
+      tvDetails?.name
+    )}/edit/production`;
+    return {
+      title,
       description: tvDetails?.overview,
-      images: [
-        {
-          url: `https://image.tmdb.org/t/p/original/${tvDetails?.backdrop_path}`,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-  };
+      keywords: tvDetails?.genres?.map((data: any) => data.name),
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        type: "website",
+        url: url,
+        title: tvDetails?.name,
+        description: tvDetails?.overview,
+        siteName: "MijuDramaInfo",
+        images: [
+          {
+            url: `https://image.tmdb.org/t/p/original/${tvDetails?.backdrop_path}`,
+            width: 1200,
+            height: 630,
+          },
+        ],
+      },
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Error",
+      description: "There was an error loading the TV drama information.",
+    };
+  }
 }
 const ProductionPage = async (props: {
   params: Promise<{ "id]-[slug": string }>;

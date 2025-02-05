@@ -11,6 +11,9 @@ const SearchLoading = dynamic(
 export const metadata: Metadata = {
   title: "Popular Movie",
   description: "Find Popular movie.",
+  alternates: {
+    canonical: `${process.env.BASE_URL}/movie/popular`,
+  },
 };
 
 const PopularMoviePage = async () => {

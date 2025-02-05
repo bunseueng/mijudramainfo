@@ -9,13 +9,6 @@ import { AnimatePresence, motion, useTransform } from "framer-motion";
 
 // Helper imports
 import { navbar_items, sessionItems, sidebar_items } from "@/helper/item-list";
-import {
-  CommentProps,
-  currentUserProps,
-  findSpecificUserProps,
-  FriendRequestProps,
-  UserProps,
-} from "@/helper/type";
 
 // Component imports
 import SearchInput from "../Search/SearchInput";
@@ -35,26 +28,9 @@ import { Button } from "@/components/ui/button";
 import SidebarItem from "./SidebarItem";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useOutsideClickNav } from "@/hooks/useOutsideClickNav";
+import { useUserData } from "@/hooks/useUserData";
 
-interface NavbarProps {
-  users: UserProps[] | undefined;
-  user: UserProps | undefined;
-  currentUser: currentUserProps | null;
-  friend: FriendRequestProps[];
-  findSpecificUser: findSpecificUserProps[] | null[];
-  yourFriend: findSpecificUserProps[] | null[];
-  comment: CommentProps[];
-}
-
-const Navbar: React.FC<NavbarProps> = ({
-  users,
-  user,
-  currentUser,
-  yourFriend,
-  friend,
-  findSpecificUser,
-  comment,
-}) => {
+const Navbar = () => {
   const { smoothScrollProgress } = useScrollContext();
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [hovered, setHovered] = useState<boolean>(false);
@@ -68,9 +44,14 @@ const Navbar: React.FC<NavbarProps> = ({
   const outsideRef = useRef(null);
   const triggerRef = useRef(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+  const { data } = useUserData();
 
   const { notificationCount, hasUnreadFriends, findRpNoti } =
-    useNotificationStatus(friend, currentUser, comment);
+    useNotificationStatus(
+      data?.friend ?? [],
+      data?.currentUser ?? null,
+      data?.comment ?? []
+    );
 
   const handleNavbarMouseEnter = useCallback((label: string) => {
     if (label === "Explore") {
@@ -171,11 +152,12 @@ const Navbar: React.FC<NavbarProps> = ({
           transition: "background-color 0.3s ease-in-out",
         }}
       >
-        <div className="max-w-[1808px] relative flex flex-wrap items-center justify-between mx-auto px-2 md:px-4 py-3">
+        <div className="max-w-[1808px] relative flex flex-wrap items-center justify-between mx-auto px-2 md:px-4 py-1 md:py-3">
           <div className="flex items-center space-x-2 md:space-x-4">
             <button
               type="button"
               name="Hamburgur"
+              aria-label="Hamburgur Menu"
               onClick={handleNavClick}
               className="lg:hidden hover:bg-[#ffffff] hover:bg-opacity-20 p-[1px] md:p-1 rounded-md"
             >
@@ -198,7 +180,7 @@ const Navbar: React.FC<NavbarProps> = ({
             hasUnreadFriends={hasUnreadFriends}
             findRpNoti={findRpNoti}
             session={session}
-            user={user}
+            user={data?.currentUser ?? null}
             handleSessionDropClick={handleSessionDropClick}
             sessionItems={sessionItems}
             resolvedTheme={resolvedTheme}
@@ -221,12 +203,12 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {notiDrop && (
           <NotificationModal
-            users={users}
-            currentUser={currentUser}
-            findSpecificUser={findSpecificUser}
-            yourFriend={yourFriend}
-            friend={friend}
-            comment={comment}
+            users={data?.users ?? []}
+            currentUser={data?.currentUser ?? null}
+            findSpecificUser={data?.findSpecificUser ?? []}
+            yourFriend={data?.yourFriend ?? []}
+            friend={data?.friend ?? []}
+            comment={data?.comment ?? []}
             outsideRef={outsideRef}
           />
         )}
@@ -304,7 +286,9 @@ const Navbar: React.FC<NavbarProps> = ({
                       onClick={closeSidebar}
                       asChild
                     >
-                      <Link href="/signin">Login</Link>
+                      <Link prefetch={false} aria-label="Signin" href="/signin">
+                        Login
+                      </Link>
                     </Button>
                   )}
                   {session && (
@@ -315,15 +299,19 @@ const Navbar: React.FC<NavbarProps> = ({
                           <Avatar className="h-8 w-8 sm:h-10 sm:w-10 mr-2">
                             <AvatarImage
                               src={
-                                user?.profileAvatar ||
+                                data?.currentUser?.profileAvatar ||
                                 (session?.user?.image as string)
                               }
+                              fetchPriority="high"
                             />
-                            <AvatarFallback>{user?.name}</AvatarFallback>
+                            <AvatarFallback>
+                              {data?.currentUser?.name}
+                            </AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="font-medium text-xs sm:text-sm">
-                              {user?.displayName || user?.name}
+                              {data?.currentUser?.displayName ||
+                                data?.currentUser?.name}
                             </p>
                             <p className="text-[10px] sm:text-xs text-muted-foreground">
                               {session?.user?.email}
@@ -336,7 +324,11 @@ const Navbar: React.FC<NavbarProps> = ({
                           onClick={closeSidebar}
                           asChild
                         >
-                          <Link prefetch={false} href={`/profile/${user?.name}`}>
+                          <Link
+                            prefetch={false}
+                            aria-label="Visit profile page"
+                            href={`/profile/${data?.currentUser?.name}`}
+                          >
                             <User className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                             Profile
                           </Link>

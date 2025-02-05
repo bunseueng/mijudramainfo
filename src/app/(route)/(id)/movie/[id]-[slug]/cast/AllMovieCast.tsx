@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchMovie } from "@/app/actions/fetchMovieApi";
 import { ShareButton } from "@/app/component/ui/Button/ShareButton";
 import Director from "@/app/component/ui/CastRole/Director";
 import MainRole from "@/app/component/ui/CastRole/MainRole";
@@ -10,7 +9,6 @@ import Product from "@/app/component/ui/CastRole/Product";
 import Screenwriter from "@/app/component/ui/CastRole/Screenwriter";
 import Sound from "@/app/component/ui/CastRole/Sound";
 import LazyImage from "@/components/ui/lazyimage";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import MovieInfo from "../MovieInfo";
@@ -26,7 +24,7 @@ const AllMovieCast = ({ movie_id, getMovie }: any) => {
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
   const getColorFromImage = useColorFromImage();
-  const { movie, isLoading, language } = useMovieData(movie_id);
+  const { movie, isLoading } = useMovieData(movie_id);
   const cast = movie?.cast || [];
   const crew = cast?.crew?.map((item: any) => item);
 
@@ -252,12 +250,7 @@ const AllMovieCast = ({ movie_id, getMovie }: any) => {
               </div>
             </div>
             <div className="mt-5 px-3 md:px-0">
-              <MovieInfo
-                getMovie={getMovie}
-                language={language}
-                movie={movie}
-                allmovieShows={[]}
-              />
+              <MovieInfo getMovie={getMovie} movie={movie} allmovieShows={[]} />
             </div>
           </div>
         </div>

@@ -22,7 +22,8 @@ export async function PUT(request: Request) {
         }
 
         const uploadRes = await cloudinary.uploader.upload(profileAvatar, {
-            upload_preset: "mijudrama_avatar"
+            upload_preset: "mijudrama_avatar",
+            format: "avif",
         });
 
         if (uploadRes) {

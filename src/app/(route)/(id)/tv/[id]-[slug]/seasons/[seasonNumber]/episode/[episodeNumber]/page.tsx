@@ -50,7 +50,7 @@ export async function generateMetadata(props: {
     keywords: tvDetails?.genres?.map((data: any) => data.name),
     openGraph: {
       type: "website",
-      url: `https://mijudramainfo.vercel.app/tv/${tvDetails?.id}`,
+      url: `${process.env.BASE_URL}/tv/${tvDetails?.id}`,
       title: tvDetails?.name,
       description: tvDetails?.overview,
       images: [

@@ -11,6 +11,9 @@ const SearchLoading = dynamic(
 export const metadata: Metadata = {
   title: "Top 100 Japanese Dramas",
   description: "Explore our Top 100 Japanese Dramas",
+  alternates: {
+    canonical: `${process.env.BASE_URL}/drama/top_japanese_dramas`,
+  },
 };
 
 const TopJapaneseDrama = async () => {

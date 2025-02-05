@@ -3,11 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import DramaMain from "./DramaMain";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
-import {
-  getTVDetails,
-  getLanguages,
-  getDramaData,
-} from "@/app/actions/tvActions";
+import { getTVDetails, getDramaData } from "@/app/actions/tvActions";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
@@ -26,12 +22,7 @@ export async function generateMetadata(props: {
   try {
     const [tv_id] = params["id]-[slug"].split("-");
     const tvDetails = await getTVDetails(tv_id);
-    const languages = await getLanguages();
-
     const original_country = tvDetails?.origin_country?.[0];
-    const matchedCountry = languages?.find(
-      (lang: any) => lang?.iso_3166_1 === original_country
-    );
 
     const countryToLanguageMap: { [key: string]: string } = {
       CN: "Chinese",
@@ -40,25 +31,23 @@ export async function generateMetadata(props: {
       TW: "Taiwanese",
       TH: "Thai",
     };
-
-    const languageName =
-      countryToLanguageMap[original_country] ||
-      matchedCountry?.english_name ||
-      "Unknown";
-
+    const languageName = countryToLanguageMap[original_country] || "Unknown";
     const title = `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
     )})`;
-
+    const url = `${process.env.BASE_URL}/tv/${
+      tvDetails?.id
+    }-${spaceToHyphen(tvDetails?.name)}`;
     return {
       title,
       description: tvDetails?.overview,
       keywords: tvDetails?.genres?.map((data: any) => data.name),
+      alternates: {
+        canonical: url,
+      },
       openGraph: {
         type: "website",
-        url: `https://mijudramainfo.vercel.app/tv/${
-          tvDetails?.id
-        }-${spaceToHyphen(tvDetails?.name)}`,
+        url: url,
         title: tvDetails?.name,
         description: tvDetails?.overview,
         siteName: "MijuDramaInfo",

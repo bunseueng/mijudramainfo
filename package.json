@@ -35,6 +35,7 @@
     "@stripe/stripe-js": "^4.1.0",
     "@tanstack/react-query": "^5.28.9",
     "@tanstack/react-query-devtools": "^5.28.10",
+    "@tanstack/react-virtual": "^3.12.0",
     "@tiptap/extension-bullet-list": "^2.3.0",
     "@tiptap/extension-color": "^2.3.0",
     "@tiptap/extension-dropcursor": "^2.3.0",

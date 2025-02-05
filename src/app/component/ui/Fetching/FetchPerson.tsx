@@ -11,6 +11,7 @@ import PopularitySection from "../Person/PopularitySection";
 import MainContent from "../Person/MainContent";
 import SearchLoading from "../Loading/SearchLoading";
 import { usePersonData } from "@/hooks/usePersonData";
+import AdBanner from "../Adsense/AdBanner";
 
 interface IFetchPerson {
   tv_id: number;
@@ -236,6 +237,9 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 getPersons={getPersons}
               />
             </div>
+          </div>
+          <div className="w-full h-screen bg-gray-200 dark:bg-black my-10">
+            <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
           </div>
         </div>
 

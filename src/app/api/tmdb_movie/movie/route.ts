@@ -7,7 +7,7 @@ export async function POST(req: Request) {
    try {
        const url = `https://api.themoviedb.org/3/movie/${ids}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&append_to_response=account_states,alternative_titles,changes,credits,external_ids,images,keywords,lists,recommendations,release_dates,reviews,similar,translations,videos,watch/providers`;
        
-       const response = await fetch(url);
+       const response = await fetch(url, { next: { revalidate: 3600 }});
        
        if (!response.ok) {
          throw new Error(`Failed to fetch movie for ID ${ids}`);

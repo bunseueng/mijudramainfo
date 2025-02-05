@@ -17,6 +17,7 @@ import { DramaDetails } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTrailer } from "@/app/actions/fetchMovieApi";
 import { SkeletonMediaPhoto } from "../Loading/TrailerLoading";
+import AdArticle from "../Adsense/AdArticle";
 
 const ReviewCard = ({
   review,
@@ -167,7 +168,6 @@ const ReviewCard = ({
           )}
         </div>
       </div>
-
       <div className="border-t-[1px] border-t-slate-400 pt-3 mt-10">
         {review?.length === 0 && getReview?.length === 0 ? (
           <div className="border-[1px] border-[#00000024] rounded-md mt-8">
@@ -327,7 +327,7 @@ const ReviewCard = ({
           tv_id={tv_id}
           type="tv"
         />
-      </div>
+      </div>{" "}
     </div>
   );
 };

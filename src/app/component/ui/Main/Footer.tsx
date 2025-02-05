@@ -1,10 +1,10 @@
 "use client";
 
 import ThemeSwitch from "@/components/ui/ThemeIcon";
-import { footer, footerRecommend } from "@/helper/item-list";
+import { footer, footer_watch, footerRecommend } from "@/helper/item-list";
 import Image from "next/image";
 import Link from "next/link";
-import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
+import { FaGithubAlt, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -13,13 +13,21 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 h-full">
           {/* Brand Section */}
           <div className="text-white h-full flex flex-col">
+            <div className="pb-2">
+              <Image
+                src="/MIJUDRAMAINFO.webp"
+                alt="Website icon"
+                width={200}
+                height={200}
+              />
+            </div>
             <div className="flex items-center mt-4 h-[36px] flex-shrink-0">
               <ul className="flex space-x-2 h-full">
                 {[
                   {
-                    icon: <FaFacebookF className="w-5 h-5" />,
-                    href: "https://www.facebook.com/YuTuQJJ/",
-                    name: "Facebook",
+                    icon: <FaGithubAlt className="w-5 h-5" />,
+                    href: "https://github.com/bunseujjy",
+                    name: "Github",
                   },
                   {
                     icon: <FaTwitter className="w-5 h-5" />,
@@ -44,7 +52,7 @@ const Footer = () => {
                     <Link
                       aria-label={`Visit ${social.name}`}
                       prefetch={false}
-                      href={social.href}
+                      href={`${social.href}`}
                       className="border border-white rounded-full flex items-center justify-center w-full h-full hover:border-cyan-400 hover:text-cyan-400 transition-colors"
                     >
                       {social.icon}
@@ -64,9 +72,10 @@ const Footer = () => {
               {footer?.map((item: any, idx: number) => (
                 <Link
                   prefetch={false}
-                  href={item?.link}
+                  href={`${item?.link}`}
                   key={idx}
                   className="text-sm h-[20px] flex items-center hover:text-cyan-400 transition-colors flex-shrink-0"
+                  aria-label={`Visit ${item?.label}`}
                 >
                   {item?.label}
                 </Link>
@@ -75,13 +84,32 @@ const Footer = () => {
           </div>
 
           {/* Dark Mode Section */}
-          <div className="text-white h-full">
-            <h2 className="text-md font-bold h-[24px] mb-4 uppercase flex-shrink-0">
-              Dark Mode
-            </h2>
-            <div className="h-[40px] flex items-center flex-shrink-0">
-              <ThemeSwitch />
+          <div className="flex flex-col text-white h-full">
+            <div className="w-full h-full">
+              <h2 className="text-md font-bold h-[24px] mb-4 uppercase flex-shrink-0">
+                Dark Mode
+              </h2>
+              <div className="h-[40px] flex items-center flex-shrink-0">
+                <ThemeSwitch />
+              </div>
             </div>
+            <h2 className="text-md font-bold h-[24px] my-4 uppercase flex-shrink-0">
+              Watch
+            </h2>
+            <ul className="flex flex-col space-y-2">
+              {footer_watch?.map((item: any, idx: number) => (
+                <li className="block" key={idx}>
+                  <Link
+                    aria-label={`Visit Watch Page`}
+                    prefetch={false}
+                    href={`${item.href}`}
+                    className="text-sm h-[20px] flex items-center hover:text-cyan-400 transition-colors flex-shrink-0"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Recommended Section */}
@@ -89,18 +117,19 @@ const Footer = () => {
             <h2 className="text-md font-bold h-[24px] mb-4 uppercase flex-shrink-0">
               Recommended
             </h2>
-            <nav className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-2">
               {footerRecommend?.map((item: any, idx: number) => (
                 <Link
                   prefetch={false}
-                  href={item?.link}
+                  href={`${item?.link}`}
                   key={idx}
                   className="text-sm h-[20px] flex items-center hover:text-cyan-400 transition-colors flex-shrink-0"
+                  aria-label={`Visit ${item?.label}`}
                 >
                   {item?.label}
                 </Link>
               ))}
-            </nav>
+            </div>
           </div>
         </div>
       </div>

@@ -11,7 +11,6 @@ import {
   SpokenLanguage,
   TMDBMovie,
 } from "@/helper/type";
-import { JsonValue } from "@prisma/client/runtime/library";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 
 interface MovieDetailsProps {
@@ -24,7 +23,6 @@ interface MovieDetailsProps {
   genres: TMDBMovie[];
   title: MovieTitles[];
   formattedKeywords: string[];
-  matchedLanguage: SpokenLanguage;
   formattedLastAirDate: string;
   formattedFirstAirDateDB: string;
   formattedLastAirDateDB: string;
@@ -42,7 +40,6 @@ const MovieDetails = ({
   genres,
   title,
   formattedKeywords,
-  matchedLanguage,
   rank,
   formattedKeywordsDB,
 }: MovieDetailsProps) => {
@@ -174,9 +171,7 @@ const MovieDetails = ({
         />
         <DetailRow
           label="Country"
-          value={
-            detail?.country || matchedLanguage?.english_name || "Not specified"
-          }
+          value={detail?.country || movie?.type[0] || "Not specified"}
           textColor={textColor}
         />
         <DetailRow

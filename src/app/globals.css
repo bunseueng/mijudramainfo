@@ -825,3 +825,209 @@ footer {
 .text-balance {
   text-wrap: balance;
 }
+
+@keyframes spinloading {
+  0% {
+    background-position: 0px 0px;
+}
+
+2% {
+    background-position: 100px 0px;
+}
+
+4% {
+    background-position: 200px 0px;
+}
+
+6% {
+    background-position: 300px 0px;
+}
+
+8% {
+    background-position: 400px 0px;
+}
+
+10% {
+    background-position: 500px 0px;
+}
+
+12% {
+    background-position: 600px 0px;
+}
+
+14% {
+    background-position: 700px 0px;
+}
+
+16% {
+    background-position: 800px 0px;
+}
+
+18% {
+    background-position: 900px 0px;
+}
+
+20% {
+    background-position: 1000px 0px;
+}
+
+22% {
+    background-position: 1100px 0px;
+}
+
+24% {
+    background-position: 1200px 0px;
+}
+
+26% {
+    background-position: 1300px 0px;
+}
+
+28% {
+    background-position: 1400px 0px;
+}
+
+30% {
+    background-position: 1500px 0px;
+}
+
+32% {
+    background-position: 1600px 0px;
+}
+
+34% {
+    background-position: 1700px 0px;
+}
+
+36% {
+    background-position: 1800px 0px;
+}
+
+38% {
+    background-position: 1900px 0px;
+}
+
+40% {
+    background-position: 2000px 0px;
+}
+
+42% {
+    background-position: 2100px 0px;
+}
+
+44% {
+    background-position: 2200px 0px;
+}
+
+46% {
+    background-position: 2300px 0px;
+}
+
+48% {
+    background-position: 2400px 0px;
+}
+
+50% {
+    background-position: 2500px 0px;
+}
+
+52% {
+    background-position: 2600px 0px;
+}
+
+54% {
+    background-position: 2700px 0px;
+}
+
+56% {
+    background-position: 2800px 0px;
+}
+
+58% {
+    background-position: 2900px 0px;
+}
+
+60% {
+    background-position: 3000px 0px;
+}
+
+62% {
+    background-position: 3100px 0px;
+}
+
+64% {
+    background-position: 3200px 0px;
+}
+
+66% {
+    background-position: 3300px 0px;
+}
+
+68% {
+    background-position: 3400px 0px;
+}
+
+70% {
+    background-position: 3500px 0px;
+}
+
+72% {
+    background-position: 3600px 0px;
+}
+
+74% {
+    background-position: 3700px 0px;
+}
+
+76% {
+    background-position: 3800px 0px;
+}
+
+78% {
+    background-position: 3900px 0px;
+}
+
+80% {
+    background-position: 4000px 0px;
+}
+
+82% {
+    background-position: 4100px 0px;
+}
+
+84% {
+    background-position: 4200px 0px;
+}
+
+86% {
+    background-position: 4300px 0px;
+}
+
+88% {
+    background-position: 4400px 0px;
+}
+
+90% {
+    background-position: 4500px 0px;
+}
+
+92% {
+    background-position: 4600px 0px;
+}
+
+94% {
+    background-position: 4700px 0px;
+}
+
+96% {
+    background-position: 4800px 0px;
+}
+
+98% {
+    background-position: 4900px 0px;
+}
+
+100% {
+    background-position: 0px 0px;
+}
+}

@@ -7,7 +7,7 @@ export async function POST(req: Request) {
    try {
        const url =`https://api.themoviedb.org/3/person/${ids}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&append_to_response=changes,combined_credits,external_ids,images,latest,movie_credits,tv_credits,tagged_images,translations`;
        
-       const response = await fetch(url);
+       const response = await fetch(url, { next: { revalidate: 3600 }});
        
        if (!response.ok) {
          throw new Error(`Failed to fetch TV for ID ${ids}`);
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   const results = await Promise.all(
     ids.map(async (id: string) => {
       const url = `https://api.themoviedb.org/3/person/${id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&append_to_response=changes,combined_credits,external_ids,images,latest,movie_credits,tv_credits,tagged_images,translations`;
-      const response = await fetch(url);
+      const response = await fetch(url, { next: { revalidate: 3600 }});
       if (!response.ok) throw new Error(`Failed to fetch TV details for ID ${id}`);
       return response.json();
     })

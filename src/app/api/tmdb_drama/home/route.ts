@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     const castPromises = trendingShows.map((show: any) => 
       fetch(`${BASE_URL}/tv/${show.id}/aggregate_credits?api_key=${TMDB_API_KEY}`)
         .then(res => res.json())
-        .then(data => data.cast || [])
+        .then(data => data.cast || []), { next: { revalidate: 3600 }}
     );
 
     const castData = await Promise.all(castPromises);

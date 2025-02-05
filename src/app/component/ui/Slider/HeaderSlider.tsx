@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTrending } from "@/app/actions/fetchMovieApi";
 import { useInView } from "react-intersection-observer";
 import dynamic from "next/dynamic";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
+import Head from "next/head";
 
 // Preload the first image
 const preloadFirstImage = async (imageUrl: string) => {
@@ -19,21 +20,23 @@ const preloadFirstImage = async (imageUrl: string) => {
 // Optimize initial load with preloaded content
 const SliderContent = dynamic(() => import("./SliderContent"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-gray-900 animate-pulse">
-      <div className="absolute bottom-20 left-8 w-1/2 space-y-4">
-        <div className="h-8 bg-gray-800 rounded w-3/4 animate-pulse" />
-        <div className="h-4 bg-gray-800 rounded w-1/4 animate-pulse" />
-        <div className="h-4 bg-gray-800 rounded w-1/2 animate-pulse" />
-      </div>
-    </div>
-  ),
+  loading: () => <SliderContentSkeleton />,
 });
 
 const SliderControls = dynamic(() => import("./SliderControls"), {
   ssr: false,
   loading: () => null,
 });
+
+const SliderContentSkeleton = () => (
+  <div className="w-full h-full bg-gray-900 animate-pulse">
+    <div className="absolute bottom-10 left-6 w-1/2 space-y-4">
+      <div className="h-8 bg-gray-800 rounded w-3/4 animate-pulse" />
+      <div className="h-4 bg-gray-800 rounded w-1/4 animate-pulse" />
+      <div className="h-4 bg-gray-800 rounded w-1/2 animate-pulse" />
+    </div>
+  </div>
+);
 
 const HeaderSlider = ({ existingRatings }: any) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -66,19 +69,6 @@ const HeaderSlider = ({ existingRatings }: any) => {
   const filteredData = useMemo(
     () => trending?.results?.slice(0, 10) || [],
     [trending]
-  );
-
-  const getRating = useCallback(
-    (result: any) => {
-      const existingRating = existingRatings?.find(
-        (item: any) => item.id === result.id
-      )?.rating;
-      if (existingRating) {
-        return existingRating.toFixed(1);
-      }
-      return result.vote_average ? result.vote_average.toFixed(1) : "NR";
-    },
-    [existingRatings]
   );
 
   const handleExtractColor = useCallback(async () => {
@@ -141,45 +131,54 @@ const HeaderSlider = ({ existingRatings }: any) => {
   const currentItem = filteredData[currentIndex];
 
   return (
-    <div
-      className="h-[56vw] max-h-[1012px] border-box transition duration-600 delay-400"
-      style={{ background: colorState.genreBG }}
-    >
-      {isFirstImageLoaded && (
-        <>
-          <div
-            ref={ref}
-            className="max-w-[1808px] mx-auto absolute left-0 right-0 w-full h-[99%]"
-          >
-            <SliderContent
-              currentItem={currentItem}
-              currentIndex={currentIndex}
-              direction={direction}
-              existingRatings={existingRatings}
-              getRating={getRating}
-              {...colorState}
-            />
-          </div>
-
-          <SliderControls
-            filteredData={filteredData}
-            currentIndex={currentIndex}
-            setCurrentIndex={setCurrentIndex}
-            setDirection={setDirection}
-            hoveredIndex={hoveredIndex}
-            setHoveredIndex={setHoveredIndex}
-            setIsHovered={setIsHovered}
-            prevSlide={prevSlide}
-            nextSlide={nextSlide}
-          />
-        </>
-      )}
+    <div className="w-full h-full">
+      <Head>
+        <link
+          rel="preload"
+          href={`https://image.tmdb.org/t/p/${
+            currentItem?.backdrop_path ? "w300" : "w154"
+          }/${currentItem?.backdrop_path || currentItem?.poster_path}`}
+          as="image"
+        />
+      </Head>
       <div
-        className="absolute bottom-0 w-full h-[30%] z-[101]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(17, 19, 25, 0) 2%, rgb(17, 19, 25) 94%)`,
-        }}
-      />
+        className="h-[56vw] max-h-[1012px] border-box transition duration-600 delay-400"
+        style={{ background: colorState.genreBG }}
+      >
+        {isFirstImageLoaded && (
+          <>
+            <div
+              ref={ref}
+              className="max-w-[1808px] mx-auto absolute left-0 right-0 w-full h-[99%]"
+            >
+              <SliderContent
+                currentItem={currentItem}
+                direction={direction}
+                existingRatings={existingRatings}
+                {...colorState}
+              />
+            </div>
+
+            <SliderControls
+              filteredData={filteredData}
+              currentIndex={currentIndex}
+              setCurrentIndex={setCurrentIndex}
+              setDirection={setDirection}
+              hoveredIndex={hoveredIndex}
+              setHoveredIndex={setHoveredIndex}
+              setIsHovered={setIsHovered}
+              prevSlide={prevSlide}
+              nextSlide={nextSlide}
+            />
+          </>
+        )}
+        <div
+          className="absolute bottom-0 w-full h-[30%] z-[101]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(17, 19, 25, 0) 2%, rgb(17, 19, 25) 94%)`,
+          }}
+        />
+      </div>
     </div>
   );
 };

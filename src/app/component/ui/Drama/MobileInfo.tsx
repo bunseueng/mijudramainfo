@@ -13,7 +13,6 @@ interface MobileInfoProps {
   tv: TVShow;
   info: DramaReleasedInfo;
   textColor: string;
-  matchedLanguage: any;
   formattedDates: {
     formattedFirstAirDate: string;
     formattedLastAirDate: string;
@@ -30,7 +29,6 @@ export const MobileInfo: React.FC<MobileInfoProps> = ({
   tv,
   info,
   textColor,
-  matchedLanguage,
   formattedDates,
   content,
   rank,
@@ -53,10 +51,7 @@ export const MobileInfo: React.FC<MobileInfoProps> = ({
 
   return (
     <>
-      <InfoRow
-        label="Country"
-        value={detail?.country || matchedLanguage?.english_name}
-      />
+      <InfoRow label="Country" value={detail?.country || tv?.type[0]} />
 
       <InfoRow
         label="Episode"

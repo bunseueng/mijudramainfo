@@ -2,10 +2,10 @@
 
 import { signInForm, TSignInForm } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaGithub, FaGoogle } from "react-icons/fa6";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -18,6 +18,7 @@ const Signin = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { data: session, status } = useSession();
 
   const {
     register,
@@ -31,37 +32,35 @@ const Signin = () => {
     },
   });
 
-  const onSubmit = useCallback(
-    async (userData: TSignInForm) => {
-      setIsLoading(true);
-      try {
-        const result = await signIn("credentials", {
-          email: userData.email,
-          password: userData.password,
-          redirect: false,
-          callbackUrl: "/",
-        });
+  const onSubmit = useCallback(async (userData: TSignInForm) => {
+    setIsLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email: userData.email,
+        password: userData.password,
+        redirect: false,
+        callbackUrl: "/",
+      });
 
-        if (result?.error) {
-          toast.error(result.error || "Failed to sign in");
-          return;
-        }
-
-        if (result?.ok) {
-          toast.success("Sign-in successful");
-          router.push(result.url || "/");
-          router.refresh();
-        }
-      } catch (error) {
-        console.error("Sign-in error:", error);
-      } finally {
-        setIsLoading(false);
+      if (result?.error) {
+        toast.error(result.error);
+        return;
       }
-    },
-    [router]
-  );
 
-  const handleSocialSignIn = async (provider: "google" | "github") => {
+      if (result?.ok) {
+        toast.success("Sign-in successful");
+      }
+    } catch (error) {
+      console.error("Sign-in error:", error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleSocialSignIn = async (
+    provider: "google" | "github" | "facebook"
+  ) => {
     try {
       await signIn(provider, {
         callbackUrl: "/",
@@ -72,6 +71,13 @@ const Signin = () => {
       toast.error(`Failed to sign in with ${provider}`);
     }
   };
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      console.log("User is authenticated:", session);
+      router.push("/");
+    }
+  }, [status, session, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">

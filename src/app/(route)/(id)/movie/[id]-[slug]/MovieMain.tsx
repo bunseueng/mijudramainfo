@@ -63,7 +63,7 @@ const MovieMain = ({
   const [textColor, setTextColor] = useState("#FFFFFF"); // Default to white text
   const router = useRouter();
   const getColorFromImage = useColorFromImage();
-  const { movie, isLoading, language } = useMovieData(movie_id);
+  const { movie, isLoading } = useMovieData(movie_id);
   const cast = movie?.credits || {};
   const keyword = movie?.keywords || {};
   const title = movie?.alternative_titles?.titles || [];
@@ -82,9 +82,6 @@ const MovieMain = ({
   );
   const original_country = movie?.origin_country?.[0];
   const keywords = keyword?.keywords;
-  const matchedLanguage = language?.find(
-    (lang: any) => lang?.iso_3166_1 === original_country
-  );
   const allTvShowsArray = Array.isArray(allmovieShows) ? allmovieShows : [];
   // Find the index of the matched TV show in allTvShows array
   const matchedIndex = allTvShowsArray.findIndex(
@@ -390,7 +387,6 @@ const MovieMain = ({
                     title={title}
                     formattedKeywords={formattedKeywords}
                     formattedKeywordsDB={formattedKeywordsDB}
-                    matchedLanguage={matchedLanguage}
                     formattedLastAirDate={formattedLastAirDate}
                     formattedFirstAirDateDB={formattedFirstAirDateDB}
                     formattedLastAirDateDB={formattedLastAirDateDB}
@@ -406,7 +402,6 @@ const MovieMain = ({
         <MovieCast
           cast={cast}
           movie={movie}
-          language={language}
           allmovieShows={allmovieShows}
           review={review}
           movie_id={movie_id}

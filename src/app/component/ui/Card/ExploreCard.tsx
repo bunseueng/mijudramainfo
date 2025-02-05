@@ -20,6 +20,7 @@ import {
   PersonDBType,
   TVShow,
 } from "@/helper/type";
+import AdArticle from "../Adsense/AdArticle";
 const PlayTrailer = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
   { ssr: false }
@@ -57,6 +58,9 @@ const ExploreCard = ({
 }: ExploreDramaCardProps) => {
   return (
     <div className="flex flex-col max-w-6xl mx-auto py-4 px-4 lg:px-0 overflow-hidden">
+      <div className="hidden md:block w-full h-[200px] mb-10 order-first">
+        <AdArticle dataAdFormat="auto" dataAdSlot="3527489220" />
+      </div>
       <div className="w-full md:max-w-[1150px] mx-auto py-5 order-last md:order-first">
         <TopActor heading="Top Actors" personDB={personDB} />
       </div>
@@ -207,7 +211,7 @@ const ExploreCard = ({
             })}
           </div>
           <div className="w-full md:w-2/6 pl-1 md:pl-3 lg:pl-3">
-            <div className="py-5 hidden md:block">
+            <div className="w-full h-[200px] mb-10">
               <AdBanner dataAdFormat="auto" dataAdSlot="3527489220" />
             </div>
             <div className="border bg-white dark:bg-[#242424] rounded-lg">
@@ -218,10 +222,8 @@ const ExploreCard = ({
                 <DramaFilter />
               </Suspense>
             </div>
-            <div className="hidden md:block relative bg-black mx-auto my-5">
-              <div className="min-w-auto min-h-screen">
-                <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
-              </div>
+            <div className="hidden md:block h-screen relative mx-auto my-5">
+              <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
             </div>
           </div>
         </div>
@@ -230,6 +232,9 @@ const ExploreCard = ({
             <DramaPagination setPage={setPage} totalItems={items} />
           </Suspense>
         </div>
+      </div>
+      <div className="block md:hidden w-full h-[300px] mx-auto my-5 order-last">
+        <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
       </div>
     </div>
   );

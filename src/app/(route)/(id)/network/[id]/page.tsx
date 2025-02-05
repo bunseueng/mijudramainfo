@@ -11,13 +11,18 @@ export async function generateMetadata(props: any): Promise<Metadata> {
     `https://api.themoviedb.org/3/network/${network_id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&with_original_language=zh&region=CN`
   );
   const network = await response.json();
+  const url = `${process.env.BASE_URL}/network/${network?.id}`;
 
   return {
     title: `TV Shows on ${network?.name}`,
     description: `All TV Shows of ${network?.name}`,
+    keywords: network?.name,
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       type: "website",
-      url: `https://mijudramainfo.vercel.app/network/${network?.id}`,
+      url: url,
       title: network?.name,
       description: `All information of ${network?.name}`,
       images: [

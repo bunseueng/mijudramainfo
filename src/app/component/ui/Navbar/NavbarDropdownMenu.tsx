@@ -26,7 +26,7 @@ const NavbarDropdownMenu: React.FC<NavbarDropdownMenuProps> = ({
         y: hovered ? 0 : 15,
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`absolute top-[60px] left-[20%] w-[600px] bg-gray-100 dark:bg-[#18191a] flex rounded-md mx-3 ${
+      className={`absolute top-[60px] left-[15%] w-[600px] bg-gray-100 dark:bg-[#18191a] flex rounded-md mx-3 ${
         hovered ? "block" : "hidden"
       }`}
       onMouseEnter={() => {

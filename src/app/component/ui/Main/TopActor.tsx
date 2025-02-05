@@ -102,6 +102,7 @@ function ActorCard({
             </Badge>
             <Link
               prefetch={false}
+              aria-label={`Visit ${actor?.name} Page` || "Visit Person Page"}
               href={`/person/${actor?.id}-${spaceToHyphen(actor?.name)}`}
               className="block"
             >
@@ -119,6 +120,7 @@ function ActorCard({
           <div className="flex-1 min-w-0">
             <Link
               prefetch={false}
+              aria-label={`Visit ${actor?.name} Page` || "Visit Person Page"}
               href={`/person/${actor?.id}-${spaceToHyphen(actor?.name)}`}
               className="block"
             >

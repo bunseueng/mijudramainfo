@@ -13,26 +13,31 @@ export const navbar_items = [
     id: 0,
     label: "For You",
     link: "/",
+    icon: "/",
   },
   {
     id: 1,
     label: "Explore",
     link: "",
+    icon: "/explore.avif",
   },
   {
     id: 2,
-    label: "Top Drama",
-    link: "/drama/top",
+    label: "Watch Drama",
+    link: "/watch/tv",
+    icon: "/jjy.webp",
   },
   {
     id: 3,
-    label: "Popular Drama",
-    link: "/drama/popular",
+    label: "Watch Movie",
+    link: "/watch/movie",
+    icon: "/chinese.webp",
   },
   {
     id: 4,
-    label: "Newest",
-    link: "/drama/newest",
+    label: "Watch Anime",
+    link: "/watch/anime",
+    icon: "/anime.jfif",
   },
 ];
 
@@ -86,6 +91,18 @@ export const people_subitems = [
 ];
 
 export const sidebar_items = [
+  {
+    label: "Watch Dramas",
+    link: "/watch/tv",
+  },
+  {
+    label: "Watch Movie",
+    link: "/watch/movie",
+  },
+  {
+    label: "Watch Anime",
+    link: "/watch/anime",
+  },
   {
     label: "Newest Dramas",
     link: "/drama/newest",
@@ -372,6 +389,22 @@ export const footer = [
     label: "Privacy",
   },
 ];
+
+export const footer_watch = [
+  
+  {
+    link: "/watch/tv",
+    label: "Watch Drama",
+  },
+  {
+    link: "/watch/movie",
+    label: "Watch Movie",
+  },
+  {
+    link: "/watch/anime",
+    label: "Watch Anime",
+  },
+]
 
 export const footerRecommend = [
   {

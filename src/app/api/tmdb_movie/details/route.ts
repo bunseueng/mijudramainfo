@@ -3,7 +3,7 @@ export async function POST(req: Request) {
       const results = await Promise.all(
         ids.map(async (id: string) => {
           const url = `https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&append_to_response=credits,videos,images,keywords,recommendations`;
-          const response = await fetch(url);
+          const response = await fetch(url, { next: { revalidate: 3600 }});
           if (!response.ok) throw new Error(`Failed to fetch MOVIE details for ID ${id}`);
           return response.json();
         })

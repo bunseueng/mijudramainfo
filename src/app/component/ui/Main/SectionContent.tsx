@@ -1,76 +1,92 @@
 "use client";
 
-import { Suspense, lazy, useCallback, useEffect, useState } from "react";
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 import { useInView } from "react-intersection-observer";
 import HomeCardSkeleton from "../Loading/HomeLoading";
 import { LoaderCircle } from "lucide-react";
 
-// Lazy load components
 const HomeDrama = lazy(() => import("./HomeDrama"));
-function SectionContent({
-  personDB,
-  getDrama,
-  existingRatings,
-  sections,
-}: any) {
-  const [visibleSections, setVisibleSections] = useState(3);
+
+const CATEGORIES = [
+  { key: "trending", title: "Trending Drama", path: "tv" },
+  { key: "latest", title: "Latest Drama", path: "tv" },
+  { key: "actors", title: "Top Actor", path: "person" },
+  { key: "iqiyi", title: "iQIYI Selection", path: "tv" },
+  { key: "youku", title: "YOUKU Selection", path: "tv" },
+  { key: "tencent", title: "WeTV Selection", path: "tv" },
+  { key: "mongotv", title: "MongoTV Selection", path: "tv" },
+  { key: "korean", title: "Korean Drama", path: "tv" },
+  { key: "japanese", title: "Japanese Drama", path: "tv" },
+  { key: "chineseAnime", title: "Chinese Anime", path: "tv" },
+];
+
+function SectionContent({ personDB, getDrama, existingRatings }: any) {
+  const [visibleCategories, setVisibleCategories] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const { ref, inView } = useInView({
     threshold: 0,
     rootMargin: "100px",
   });
 
-  const sectionComponents = [
-    {
-      Component: HomeDrama,
-      props: {
-        heading: sections.trending,
-        getDrama,
-        existingRatings,
-        personDB,
-      },
-    },
-  ];
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasScrolled && window.scrollY > 100) {
+        setHasScrolled(true);
+      }
+    };
 
-  const loadMoreSections = useCallback(() => {
-    if (inView && visibleSections < sectionComponents.length && !loading) {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasScrolled]);
+
+  const loadMoreCategories = useCallback(() => {
+    if (
+      inView &&
+      hasScrolled &&
+      visibleCategories < CATEGORIES.length &&
+      !loading
+    ) {
       setLoading(true);
-      // Use requestAnimationFrame for smoother loading
-      requestAnimationFrame(() => {
-        setVisibleSections((prev) =>
-          Math.min(prev + 2, sectionComponents.length)
-        );
+      setTimeout(() => {
+        setVisibleCategories((prev) => Math.min(prev + 3, CATEGORIES.length));
         setLoading(false);
-      });
+      }, 300);
     }
-  }, [inView, visibleSections, loading, sectionComponents.length]);
+  }, [inView, visibleCategories, loading, hasScrolled]);
 
   useEffect(() => {
-    loadMoreSections();
-  }, [loadMoreSections, inView]);
+    loadMoreCategories();
+  }, [loadMoreCategories]);
 
-  const hasMoreSections = visibleSections < sectionComponents.length;
+  const hasMoreCategories = visibleCategories < CATEGORIES.length;
 
   return (
     <section
-      className="relative z-[999]"
+      className="min-h-screen z-[999]"
       style={{ transform: "translateZ(10px)" }}
     >
-      {sectionComponents
-        .slice(0, visibleSections)
-        .map(({ Component, props }, index) => (
-          <Suspense key={index} fallback={<HomeCardSkeleton />}>
-            <div className="mb-10">
-              <Component {...(props as any)} />
-            </div>
-          </Suspense>
-        ))}
-
-      {hasMoreSections && (
-        <div ref={ref} className="flex justify-center py-8" aria-hidden="true">
-          {loading && <LoaderCircle className="animate-spin h-8 w-8" />}
-        </div>
-      )}
+      <div className="min-h-[60vh]">
+        <Suspense fallback={<HomeCardSkeleton />}>
+          <HomeDrama
+            getDrama={getDrama}
+            existingRatings={existingRatings}
+            personDB={personDB}
+            visibleCategories={hasScrolled ? visibleCategories : 1}
+            hasMoreCategories={hasMoreCategories}
+            ref={ref}
+          />
+        </Suspense>
+      </div>
     </section>
   );
 }

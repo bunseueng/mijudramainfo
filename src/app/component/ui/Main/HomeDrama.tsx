@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchHomepageDrama } from "@/app/actions/fetchMovieApi";
 import HomeCard from "../Card/HomeCard";
@@ -22,12 +22,18 @@ interface DramaCategoriesProps {
   getDrama: any[];
   existingRatings: any[];
   personDB: any;
+  visibleCategories: number;
+  ref: (node?: Element | null | undefined) => void;
+  hasMoreCategories: boolean;
 }
 
 const HomeDrama: React.FC<DramaCategoriesProps> = ({
   getDrama,
   existingRatings,
   personDB,
+  visibleCategories,
+  hasMoreCategories,
+  ref,
 }) => {
   const { data, isLoading } = useQuery({
     queryKey: ["homepageDrama"],
@@ -41,8 +47,8 @@ const HomeDrama: React.FC<DramaCategoriesProps> = ({
   }
 
   return (
-    <div className="space-y-10">
-      {CATEGORIES.map(({ key, title, path }) => (
+    <div className="min-h-[60vh] overflow-visible whitespace-nowrap relative space-y-10">
+      {CATEGORIES.slice(0, visibleCategories).map(({ key, title, path }) => (
         <div key={key}>
           {key === "actors" ? (
             <Actor
@@ -65,6 +71,16 @@ const HomeDrama: React.FC<DramaCategoriesProps> = ({
           )}
         </div>
       ))}
+      <div ref={ref} className="flex justify-center items-center p-0 w-full">
+        {hasMoreCategories && (
+          <div
+            className="w-[100px] h-[100px] flex items-center justify-center text-primary bg-[url('/ghost-loading.gif')] bg-no-repeat bg-center"
+            style={{
+              transform: "scale(0.60)",
+            }}
+          ></div>
+        )}
+      </div>
     </div>
   );
 };

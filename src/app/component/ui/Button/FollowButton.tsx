@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 
 interface FollowButtonProps {
   currentUser: currentUserProps | null;
-  user: UserProps
+  user: UserProps | null;
 }
 
 const FollowButton: React.FC<FollowButtonProps> = ({ user, currentUser }) => {

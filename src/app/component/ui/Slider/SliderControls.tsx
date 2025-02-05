@@ -33,7 +33,7 @@ const SliderControls = ({
 
   return (
     <>
-      <div className="absolute bottom-5 xl:bottom-[219px] right-2 md:right-10 flex justify-end space-x-[1px] md:space-x-2 mt-8 z-[111]">
+      <div className="absolute bottom-5 xl:bottom-[219px] right-2 md:right-10 flex justify-end space-x-2 mt-8 z-[111]">
         {filteredData.map((tv: TVShow, index: number) => (
           <motion.button
             key={tv.id}
@@ -45,7 +45,7 @@ const SliderControls = ({
             }}
             transition={{ duration: 0.4 }}
             className={cn(
-              "w-6 h-6 rounded-full transition-all duration-500 flex items-center justify-center",
+              "w-2 h-2 md:w-6 md:h-6 rounded-full transition-all duration-500 flex items-center justify-center",
               hoveredIndex === index || currentIndex === index
                 ? "bg-white/20"
                 : "bg-transparent"
@@ -69,7 +69,7 @@ const SliderControls = ({
           </motion.button>
         ))}
       </div>
-      <div className="absolute inset-x-0 top-[36%] mx-2 hidden md:flex items-center justify-between z-[103]">
+      <div className="absolute inset-x-0 top-[36%] mx-2 hidden md:flex items-center justify-between z-[200]">
         <Button
           variant="ghost"
           size="icon"

@@ -10,11 +10,11 @@ import { DramaDB, UserProps } from "@/helper/type";
 import MovieInfo from "./MovieInfo";
 import WatchProvider from "../../tv/[id]-[slug]/WatchProvider";
 import MovieReviewCard from "@/app/component/ui/Card/MovieReviewCard";
+import AdBanner from "@/app/component/ui/Adsense/AdBanner";
 
 const MovieCast = ({
   cast,
   movie,
-  language,
   allTvShows,
   movie_id,
   review,
@@ -85,7 +85,7 @@ const MovieCast = ({
     fetchCountryAndSetProvider();
   }, [watchProvider]);
 
-  if (!movie || !language || !review || !image) {
+  if (!movie || !review || !image) {
     return null;
   }
 
@@ -146,7 +146,6 @@ const MovieCast = ({
         <div className="hidden md:block float-left relative md:w-1/3 px-2 md:px-0 lg:px-2 my-5 md:my-0 lg:ml-5">
           <MovieInfo
             getMovie={getMovie}
-            language={language}
             movie={movie}
             allTvShows={allTvShows}
             certification={certification}
@@ -220,6 +219,9 @@ const MovieCast = ({
             <div className="mt-3">
               <TvListCard list={lists} movieId={movie_id} tvId={[]} />
             </div>
+          </div>
+          <div className="w-full h-screen bg-gray-200 dark:bg-black my-10">
+            <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
           </div>
         </div>
       </div>

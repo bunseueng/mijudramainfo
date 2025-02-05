@@ -44,7 +44,7 @@ const Reviews: React.FC<ReviewType> = ({
   getReview,
   currentUser,
 }) => {
-  const { tv, isLoading, language } = useDramaData(tv_id);
+  const { tv, isLoading } = useDramaData(tv_id);
   const content = tv?.content_ratings?.results || [];
   const review = tv?.reviews || [];
   const allTvShows = tv?.similar?.results || [];
@@ -341,7 +341,6 @@ const Reviews: React.FC<ReviewType> = ({
             <div className="mt-5">
               <TvInfo
                 getDrama={getDrama}
-                language={language}
                 tv={tv}
                 content={content}
                 allTvShows={allTvShows}

@@ -23,16 +23,17 @@ import TvInfo from "../TvInfo";
 import React from "react";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
 import { useDramaData } from "@/hooks/useDramaData";
+import AdBanner from "@/app/component/ui/Adsense/AdBanner";
+import AdArticle from "@/app/component/ui/Adsense/AdArticle";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
 
 const AllTvCast = ({ tv_id, getDrama }: any) => {
-  const { tv, isLoading, language } = useDramaData(tv_id);
+  const { tv, isLoading } = useDramaData(tv_id);
   const cast = tv?.aggregate_credits || [];
   const content = tv?.content_ratings || [];
-  console.log(cast, content);
   const [dominantColor, setDominantColor] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null); // Reference for the image
   const getColorFromImage = useColorFromImage();
@@ -135,7 +136,7 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
               />
             ) : (
               <Image
-                src="/empty-img.jpg"
+                src="/default-pf.webp"
                 alt="Drama image"
                 width={60}
                 height={90}
@@ -160,6 +161,9 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="max-w-[1115px] mx-auto w-full h-[200px] bg-gray-200 dark:bg-black my-10">
+        <AdArticle dataAdFormat="auto" dataAdSlot="4321696148" />
       </div>
       <div className="max-w-6xl mx-auto mt-0 py-2 lg:py-6 relative overflow-hidden">
         <div className="flex flex-col md:flex-row items-start px-2">
@@ -282,11 +286,13 @@ const AllTvCast = ({ tv_id, getDrama }: any) => {
             <div className="mt-5 px-3 md:px-0">
               <TvInfo
                 getDrama={getDrama}
-                language={language}
                 tv={tv}
                 content={content}
                 allTvShows={allTvShows}
               />
+            </div>
+            <div className="w-full h-screen bg-gray-200 dark:bg-black my-10">
+              <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
             </div>
           </div>
         </div>

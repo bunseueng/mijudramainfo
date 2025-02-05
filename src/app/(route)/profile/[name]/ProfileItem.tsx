@@ -20,18 +20,17 @@ import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { IoIosArrowDown } from "react-icons/io";
 import {
-  CommentProps,
+  currentUserProps,
   FriendRequestProps,
-  IFriend,
-  IProfileFeeds,
-  ProfilePageProps,
+  ITvReview,
   UserProps,
 } from "@/helper/type";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarDays, MapPin, Users } from "lucide-react";
 import dynamic from "next/dynamic";
-import { ReviewType } from "../../(id)/tv/[id]-[slug]/reviews/Reviews";
 import Image from "next/image";
+import { useProfileData } from "@/hooks/useProfileData";
+
 const RecentLists = lazy(() => import("./lists/RecentLists"));
 const Watchlist = lazy(() => import("./watchlist/Watchlist"));
 const ProfileList = lazy(() => import("./lists/ProfileList"));
@@ -46,34 +45,19 @@ const AcceptRejectButton = dynamic(
   { ssr: false }
 );
 
+const DEFAULT_PROFILE_IMAGE = "/default-avatar.webp";
+
 export interface User {
   user: UserProps;
   users: UserProps[];
 }
 
-type CommentType = {
-  getComment: CommentProps;
+type ProfileItemType = {
+  name: string;
 };
-const ProfileItem: React.FC<
-  ProfilePageProps & IFriend & User & ReviewType & IProfileFeeds & CommentType
-> = ({
-  user,
-  users,
-  currentUser,
-  tv_id,
-  existedFavorite,
-  list,
-  tvid,
-  movieId,
-  formattedDate,
-  lastLogin,
-  findFriendId,
-  friend,
-  getDrama,
-  getReview,
-  getFeeds,
-  getComment,
-}) => {
+
+const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
+  const { data } = useProfileData(name);
   const [editable, setEditable] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -83,13 +67,14 @@ const ProfileItem: React.FC<
   const router = useRouter();
   const searchParams = useSearchParams();
   const sortby = searchParams?.get("sortby") ?? "";
+
   const editor = useEditor({
     immediatelyRender: false,
     editable,
-    content: user?.biography,
+    content: data?.user?.biography,
     extensions: [
       StarterKit.configure({
-        dropcursor: false, // Disable the built-in dropcursor to avoid duplication
+        dropcursor: false,
       }),
       Underline.configure({
         HTMLAttributes: { class: "text-xl font-bold", levels: [2] },
@@ -113,8 +98,37 @@ const ProfileItem: React.FC<
     ],
   });
 
+  const getUserImage = (user: UserProps | null | undefined) => {
+    if (!user) return DEFAULT_PROFILE_IMAGE;
+    return user.profileAvatar || user.image || DEFAULT_PROFILE_IMAGE;
+  };
+
+  const getAllCurrentUserFriend =
+    data?.friends?.filter(
+      (fri: FriendRequestProps) =>
+        fri?.friendRespondId &&
+        fri?.friendRequestId &&
+        [fri.friendRespondId, fri.friendRequestId].includes(data.user?.id ?? "")
+    ) ?? [];
+
+  const getCurrentUserRespondFri =
+    data?.users?.filter((userFri: UserProps) =>
+      data?.friends
+        ?.filter((stat: FriendRequestProps) => stat?.status === "pending")
+        ?.find(
+          (fri: FriendRequestProps) =>
+            fri?.friendRespondId &&
+            fri.friendRespondId.includes(userFri?.id ?? "")
+        )
+    ) ?? [];
+
   const sendFriendRequest = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Add this line
+    e.preventDefault();
+    if (!data?.user?.id || !data?.currentUser?.id) {
+      toast.error("Unable to send friend request at this time");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch("/api/friend/addFriend", {
@@ -123,12 +137,12 @@ const ProfileItem: React.FC<
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          friendRespondId: user?.id,
-          friendRequestId: currentUser?.id,
-          profileAvatar: currentUser?.profileAvatar,
-          image: currentUser?.image,
-          name: currentUser?.name,
-          country: currentUser?.country,
+          friendRespondId: data.user.id,
+          friendRequestId: data.currentUser.id,
+          profileAvatar: data.currentUser.profileAvatar,
+          image: data.currentUser.image,
+          name: data.currentUser.name,
+          country: data.currentUser.country,
           actionDatetime: new Date(),
         }),
       });
@@ -140,20 +154,24 @@ const ProfileItem: React.FC<
       }
     } catch (error) {
       console.error("Error sending friend request:", error);
+      toast.error("An error occurred while sending friend request");
     }
     setLoading(false);
   };
 
   const deleteFriend = async (friendRequestId: string) => {
+    if (!friendRequestId) {
+      toast.error("Invalid friend request");
+      return;
+    }
+
     try {
       const response = await fetch("/api/friend/addFriend", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          friendRequestId: friendRequestId,
-        }),
+        body: JSON.stringify({ friendRequestId }),
       });
       if (response.ok) {
         router.refresh();
@@ -163,48 +181,36 @@ const ProfileItem: React.FC<
       }
     } catch (error) {
       console.error("Error delete friend:", error);
+      toast.error("An error occurred while removing friend");
     }
   };
 
-  const isPendingOrRejected = friend?.some(
-    (item: any) => item?.status === "pending" || item?.status === "rejected"
+  const isPendingOrRejected = data?.friends?.some(
+    (item: FriendRequestProps) =>
+      item?.status === "pending" || item?.status === "rejected"
   );
 
-  const friendRequestId = friend?.find(
+  const friendRequestId = data?.friends?.find(
     (item: FriendRequestProps) => item?.friendRequestId
   );
 
-  const currentUserFriends = friend.find(
-    (friendItem: any) =>
-      (friendItem.friendRequestId === currentUser?.id ||
-        friendItem.friendRespondId === currentUser?.id) &&
+  const currentUserFriends = data?.friends?.find(
+    (friendItem: FriendRequestProps) =>
+      (friendItem.friendRequestId === data?.currentUser?.id ||
+        friendItem.friendRespondId === data?.currentUser?.id) &&
       friendItem.status === "accepted"
   );
 
-  const getAllCurrentUserFriend = friend?.filter((fri: FriendRequestProps) =>
-    [fri?.friendRespondId, fri?.friendRequestId].includes(user?.id as string)
-  );
-
-  const getCurrentUserRespondFri = users?.filter((userFri: UserProps) =>
-    friend
-      ?.filter((stat: FriendRequestProps) => stat?.status !== "pending")
-      ?.find((fri: FriendRequestProps) =>
-        fri?.friendRespondId?.includes(userFri?.id)
-      )
-  );
-
-  const currentFriendStatus = friend?.find(
+  const currentFriendStatus = data?.friends?.find(
     (fri: FriendRequestProps) =>
-      (fri.friendRequestId === currentUser?.id ||
-        fri.friendRespondId === currentUser?.id) &&
-      (fri.friendRequestId === user?.id || fri.friendRespondId === user?.id)
+      (fri.friendRequestId === data?.currentUser?.id ||
+        fri.friendRespondId === data?.currentUser?.id) &&
+      (fri.friendRequestId === data?.user?.id ||
+        fri.friendRespondId === data?.user?.id)
   )?.status;
 
-  // Manage component mount state to ensure hooks run only on the client
   useEffect(() => {
     setIsMounted(true);
-
-    // Cleanup editor on component unmount
     return () => {
       if (editor) {
         editor.destroy();
@@ -212,23 +218,22 @@ const ProfileItem: React.FC<
     };
   }, [editor]);
 
-  // Prevent rendering until the component has mounted on the client side
   if (!isMounted || !editor) return null;
 
-  if (!editor) {
-    return null;
-  }
   return (
     <div className="max-w-6xl w-full mx-auto py-3 md:px-6">
       <div className="flex flex-col md:block md:-mx-3">
         <div className="order-2 float-left w-full md:w-[33.33333%] relative px-3 mb-10">
           <div className="block">
+            {/* Profile Card */}
             <div className="relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
               <div className="text-center px-3 py-2">
                 <div className="text-center mb-4">
                   <Image
-                    src={user?.profileAvatar || (user?.image as string)}
-                    alt={`${user?.displayName || user?.name}'s Profile`}
+                    src={getUserImage(data?.user)}
+                    alt={`${
+                      data?.user?.displayName || data?.user?.name || "User"
+                    }'s Profile`}
                     width={980}
                     height={980}
                     quality={100}
@@ -237,45 +242,46 @@ const ProfileItem: React.FC<
                   />
                 </div>
                 <Links
-                  href={`/profile/${user?.name}/lists`}
+                  href={`/profile/${data?.user?.name}/lists`}
                   className="block w-full text-black dark:text-[#ffffffde] text-md bg-[#fff] dark:bg-[#3a3b3c] border border-[#d3d3d38c] dark:border-[#3e4042] px-5 py-3 shadow-sm"
                 >
                   <span className="flex items-center justify-center">
-                    <FaList className="mr-2" />{" "}
+                    <FaList className="mr-2" />
                     <span className="pt-[2px]">
-                      {user?.displayName || user?.name}&apos;s List
+                      {data?.user?.displayName || data?.user?.name || "User"}
+                      &apos;s List
                     </span>
                   </span>
                 </Links>
                 <div className="flex justify-around text-md mt-3 p-4 md:p-2 lg:p-4">
                   <div className="min-[56px]">
-                    <Links href="" className="block ">
-                      <span>{user?.following?.length}</span>
+                    <Links href="" className="block">
+                      <span>{data?.user?.following?.length ?? 0}</span>
                       <span className="block text-[#818a91] md:text-sm lg:text-md">
                         Following
                       </span>
                     </Links>
                   </div>
                   <div className="min-[56px]">
-                    <Links href="" className="block ">
-                      <span>{user?.followers?.length}</span>
+                    <Links href="" className="block">
+                      <span>{data?.user?.followers?.length ?? 0}</span>
                       <span className="block text-[#818a91] md:text-sm lg:text-md">
                         Followers
                       </span>
                     </Links>
                   </div>
                   <div className="min-[56px]">
-                    <Links href="" className="block ">
+                    <Links href="" className="block">
                       <span>
-                        {" "}
-                        {friend?.filter((fri: FriendRequestProps) =>
-                          fri?.friendRespondId?.includes(user?.id as string)
+                        {data?.friends &&
+                        data.friends.filter((fri: FriendRequestProps) =>
+                          fri?.friendRespondId?.includes(data.user?.id ?? "")
                         )?.length > 0
                           ? getAllCurrentUserFriend?.filter(
                               (stat: FriendRequestProps) =>
                                 stat?.status !== "pending"
                             )?.length
-                          : getCurrentUserRespondFri?.length}
+                          : getCurrentUserRespondFri?.length ?? 0}
                       </span>
                       <span className="block text-[#818a91] md:text-sm lg:text-md">
                         Friends
@@ -285,6 +291,8 @@ const ProfileItem: React.FC<
                 </div>
               </div>
             </div>
+
+            {/* Details Section */}
             <div className="block relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
               <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
                 <h3>Details</h3>
@@ -296,8 +304,7 @@ const ProfileItem: React.FC<
                     <b className="inline-block text-sm font-semibold">
                       Last Online:{" "}
                       <span className="text-sm font-normal opacity-90">
-                        {" "}
-                        {lastLogin}
+                        {data?.lastLogin ?? "Unknown"}
                       </span>
                     </b>
                   </li>
@@ -306,10 +313,10 @@ const ProfileItem: React.FC<
                     <b className="inline-block text-sm font-semibold">
                       Gender:{" "}
                       <span className="text-sm font-normal opacity-90">
-                        {user?.gender
-                          ? user.gender.charAt(0).toUpperCase() +
-                            user.gender.slice(1)
-                          : ""}
+                        {data?.user?.gender
+                          ? data.user.gender.charAt(0).toUpperCase() +
+                            data.user.gender.slice(1)
+                          : "Not specified"}
                       </span>
                     </b>
                   </li>
@@ -318,8 +325,7 @@ const ProfileItem: React.FC<
                     <b className="inline-block text-sm font-semibold">
                       Location:{" "}
                       <span className="text-sm font-normal opacity-90">
-                        {" "}
-                        {user?.country ? user?.country : "Unknown"}
+                        {data?.user?.country ?? "Unknown"}
                       </span>
                     </b>
                   </li>
@@ -328,7 +334,9 @@ const ProfileItem: React.FC<
                     <b className="inline-block text-sm font-semibold">
                       Roles:{" "}
                       <span className="text-sm font-normal opacity-90">
-                        {user?.role === "USER" && "Member"}
+                        {data?.user?.role === "USER"
+                          ? "Member"
+                          : data?.user?.role ?? "Member"}
                       </span>
                     </b>
                   </li>
@@ -337,36 +345,24 @@ const ProfileItem: React.FC<
                     <b className="inline-block text-sm font-semibold">
                       Join Date:{" "}
                       <span className="text-sm font-normal opacity-90">
-                        {formattedDate}
+                        {data?.formattedDate ?? "Unknown"}
                       </span>
-                    </b>{" "}
+                    </b>
                   </li>
                 </ul>
               </div>
             </div>
 
-            <div className="block relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
-              <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
-                <h3>Recent Lists</h3>
-              </div>
-              <div className="bg-white dark:bg-[#1b1c1d] px-3 py-2">
-                {list?.length !== 0 ? (
-                  <RecentLists list={list} movieId={movieId} tvId={tvid} />
-                ) : (
-                  <div>
-                    {user?.displayName || user?.name} does not have any lists
-                    yet.
-                  </div>
-                )}
-              </div>
-            </div>
-
+            {/* Friends Section */}
             <div className="block relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
               <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
                 <h3>Friends</h3>
               </div>
               <div className="absolute top-2 right-4">
-                <Links href={`/friends/${user?.name}`} className="text-white">
+                <Links
+                  href={`/friends/${data?.user?.name}`}
+                  className="text-white"
+                >
                   View all
                 </Links>
               </div>
@@ -376,70 +372,111 @@ const ProfileItem: React.FC<
                   href=""
                   className="flex flex-wrap items-center relative leading-9 rounded-full whitespace-nowrap"
                 >
-                  {friend?.filter((fri: FriendRequestProps) =>
-                    fri?.friendRespondId?.includes(user?.id as string)
-                  )?.length > 0 ? (
-                    getAllCurrentUserFriend?.filter(
-                      (stat: FriendRequestProps) => stat?.status !== "pending"
-                    )?.length > 0 ? (
-                      getAllCurrentUserFriend
-                        ?.filter(
-                          (stat: FriendRequestProps) =>
-                            stat?.status !== "pending"
-                        )
-                        ?.map((fri: FriendRequestProps) => (
-                          <Image
-                            key={fri?.id}
-                            src={fri?.profileAvatar || fri?.image}
-                            alt={`${fri?.name}`}
-                            width={200}
-                            height={200}
-                            quality={100}
-                            priority
-                            className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
-                          />
-                        ))
+                  {data?.friends && data.friends.length > 0 ? (
+                    data.friends.some((fri: FriendRequestProps) =>
+                      fri?.friendRespondId?.includes(data?.user?.id ?? "")
+                    ) ? (
+                      getAllCurrentUserFriend.filter(
+                        (stat: FriendRequestProps) => stat?.status !== "pending"
+                      ).length > 0 ? (
+                        getAllCurrentUserFriend
+                          .filter(
+                            (stat: FriendRequestProps) =>
+                              stat?.status !== "pending"
+                          )
+                          .map((fri: FriendRequestProps) => (
+                            <Image
+                              key={fri?.id}
+                              src={
+                                fri?.profileAvatar ||
+                                fri?.image ||
+                                DEFAULT_PROFILE_IMAGE
+                              }
+                              alt={fri?.name || "Friend"}
+                              width={200}
+                              height={200}
+                              quality={100}
+                              priority
+                              className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
+                            />
+                          ))
+                      ) : (
+                        <div>
+                          {data.user?.displayName || data.user?.name || "User"}{" "}
+                          does not have any friends yet.
+                        </div>
+                      )
+                    ) : getCurrentUserRespondFri.length > 0 ? (
+                      getCurrentUserRespondFri.map((fri) => (
+                        <Image
+                          key={fri?.id}
+                          src={
+                            fri?.profileAvatar ||
+                            fri?.image ||
+                            DEFAULT_PROFILE_IMAGE
+                          }
+                          alt={fri?.name || "Friend"}
+                          width={200}
+                          height={200}
+                          quality={100}
+                          priority
+                          className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
+                        />
+                      ))
                     ) : (
                       <div>
-                        {user?.displayName || user?.name} does not have any
-                        friends yet.
+                        {data.user?.displayName || data.user?.name || "User"}{" "}
+                        does not have any friends yet.
                       </div>
                     )
-                  ) : getCurrentUserRespondFri?.length !== 0 ? (
-                    getCurrentUserRespondFri?.map((fri) => (
-                      <Image
-                        key={fri?.id}
-                        src={fri?.profileAvatar || (fri?.image as string)}
-                        alt={`${fri?.name}`}
-                        width={200}
-                        height={200}
-                        quality={100}
-                        priority
-                        className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
-                      />
-                    ))
                   ) : (
                     <div>
-                      {user?.displayName || user?.name} does not have any
-                      friends yet.
+                      {data?.user?.displayName || data?.user?.name || "User"}{" "}
+                      does not have any friends yet.
                     </div>
                   )}
                 </Links>
               </div>
             </div>
+
+            {/* Recent Lists Section */}
+            <div className="block relative bg-[#fff] dark:bg-[#242526] border border-[#d3d3d38c] dark:border-[#00000024] rounded-md mb-3 overflow-hidden">
+              <div className="bg-[#1675b6] text-[#ffffffde] relative px-3 py-2">
+                <h3>Recent Lists</h3>
+              </div>
+              <div className="bg-white dark:bg-[#1b1c1d] px-3 py-2">
+                {data?.formattedLists?.length ? (
+                  <RecentLists
+                    list={data.formattedLists}
+                    movieId={data?.movie_id}
+                    tvId={data?.tv_id}
+                  />
+                ) : (
+                  <div>
+                    {data?.user?.displayName || data?.user?.name || "User"} does
+                    not have any lists yet.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Main Content Section */}
         <div className="order-1 float-left w-full md:w-[66.66667%] relative px-3 mb-10">
-          <CoverPhoto user={user} users={users} currentUser={currentUser} />
+          <CoverPhoto user={data?.user} currentUser={data?.currentUser} />
           <div className="inline-block w-full h-full bg-[#fff] dark:bg-[#242526] relative border border-[#d3d3d38c] dark:border-[#00000024] rounded-md shadow-sm mb-3">
             <div className="inline-block w-full h-full relative mt-5 md:mt-2">
+              {/* Profile Header */}
               <div className="float-left relative px-3 mb-2">
                 <div className="md:hidden">
                   <div className="float-left w-[16.66667%] relative">
                     <div className="w-[64px] h-[64px] inline-block relative whitespace-nowrap rounded-full mb-3">
                       <Image
-                        src={user?.profileAvatar || user?.image || ""}
-                        alt={`${user?.displayName || user?.name} Profile`}
+                        src={getUserImage(data?.user)}
+                        alt={`${
+                          data?.user?.displayName || data?.user?.name || "User"
+                        }'s Profile`}
                         width={200}
                         height={200}
                         quality={100}
@@ -450,25 +487,27 @@ const ProfileItem: React.FC<
                   </div>
                   <div className="float-left w-[66.66667%] relative ml-8 md:ml-5 text-start md:text-end">
                     <h1 className="text-xl font-bold mb-2">
-                      {user?.displayName || user?.name}
+                      {data?.user?.displayName || data?.user?.name || "User"}
                     </h1>
-                    <span>{user?.country}</span>
+                    <span>{data?.user?.country}</span>
                   </div>
                 </div>
                 <div className="hidden md:block">
                   <h1 className="text-2xl font-bold pt-2 mb-2">
-                    {user?.displayName || user?.name}
+                    {data?.user?.displayName || data?.user?.name || "User"}
                   </h1>
-                  <span>{user?.country}</span>
+                  <span>{data?.user?.country}</span>
                 </div>
               </div>
 
-              {currentUser?.id !== user?.id && (
+              {/* Friend Actions */}
+              {data?.currentUser?.id !== data?.user?.id && (
                 <div className="flex items-center justify-end mr-5">
                   {!isPendingOrRejected &&
                     currentUserFriends &&
-                    (currentUserFriends.friendRespondId === user?.id ||
-                      currentUserFriends.friendRequestId === user?.id) && (
+                    (currentUserFriends.friendRespondId === data?.user?.id ||
+                      currentUserFriends.friendRequestId ===
+                        data?.user?.id) && (
                       <button
                         className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
                         onClick={() => setModal(!modal)}
@@ -483,7 +522,8 @@ const ProfileItem: React.FC<
                             className="absolute top-[50px] right-[75px] md:right-[83px] dark:bg-[#3a3b3c] dark:bg-opacity-50 rounded-md px-5 md:px-6 py-2"
                             onClick={() =>
                               deleteFriend(
-                                friendRequestId?.friendRequestId?.toString() as string
+                                friendRequestId?.friendRequestId?.toString() ??
+                                  ""
                               )
                             }
                           >
@@ -493,9 +533,9 @@ const ProfileItem: React.FC<
                       </button>
                     )}
 
-                  {friend?.find(
+                  {data?.friends?.find(
                     (fri: FriendRequestProps) =>
-                      currentUser?.id === fri?.friendRequestId
+                      data?.currentUser?.id === fri?.friendRequestId
                   )?.status === "pending" && (
                     <button
                       type="button"
@@ -504,7 +544,7 @@ const ProfileItem: React.FC<
                       onClick={() => setFriRequestModal(!friRequestModal)}
                     >
                       <span className="flex items-center">
-                        {findFriendId ? (
+                        {data?.findFriendId ? (
                           <FaUserCheck className="mr-2" />
                         ) : (
                           <>
@@ -528,7 +568,7 @@ const ProfileItem: React.FC<
                         <span
                           className="text-xs md:text-sm absolute top-[40px] md:top-[50px] right-[89px] md:right-[97px] dark:bg-[#3a3b3c] dark:bg-opacity-50 rounded-md px-5 md:px-6 py-2"
                           onClick={() =>
-                            deleteFriend(currentUser?.id as string)
+                            deleteFriend(data?.currentUser?.id ?? "")
                           }
                         >
                           <p>Cancel Request</p>
@@ -536,6 +576,7 @@ const ProfileItem: React.FC<
                       )}
                     </button>
                   )}
+
                   {currentFriendStatus !== "pending" &&
                     currentFriendStatus !== "accepted" && (
                       <button
@@ -544,7 +585,7 @@ const ProfileItem: React.FC<
                         onClick={sendFriendRequest}
                       >
                         <span className="flex items-center">
-                          {findFriendId ? (
+                          {data?.findFriendId ? (
                             <FaUserCheck className="mr-2" />
                           ) : (
                             <>
@@ -565,30 +606,39 @@ const ProfileItem: React.FC<
                       </button>
                     )}
 
-                  {friend?.filter(
-                    (fri: FriendRequestProps) =>
-                      currentUser?.id === fri?.friendRespondId
-                  )?.length > 0 &&
-                    friend
+                  {data?.friends &&
+                    data?.friends?.filter(
+                      (fri: FriendRequestProps) =>
+                        data?.currentUser?.id === fri?.friendRespondId
+                    )?.length > 0 &&
+                    data?.friends
                       ?.filter(
                         (item: FriendRequestProps) => item?.status === "pending"
                       )
                       .map((item: FriendRequestProps, idx: number) => (
                         <div key={idx} className="mr-3">
-                          <AcceptRejectButton friend={friend} item={item} />
+                          <AcceptRejectButton
+                            friend={data?.friends}
+                            item={item}
+                          />
                         </div>
                       ))}
 
-                  <FollowButton user={user} currentUser={currentUser} />
+                  <FollowButton
+                    user={data?.user as UserProps}
+                    currentUser={data?.currentUser as currentUserProps | null}
+                  />
                 </div>
               )}
-              <Tabs className="inline-block w-full h-full  border-b border-b-[#78828c21] -my-4 mt-4">
+
+              {/* Profile Navigation */}
+              <Tabs className="inline-block w-full h-full border-b border-b-[#78828c21] -my-4 mt-4">
                 {profileList?.map((list: any, idx: number) => (
                   <TabsList
                     key={idx}
                     id={list.id}
                     className={`float-left -mb-1 my-1 cursor-pointer ${
-                      pathname === `/profile/${user?.name}${list.page}`
+                      pathname === `/profile/${data?.user?.name}${list.page}`
                         ? "bg-white rounded-md"
                         : ""
                     }`}
@@ -596,7 +646,7 @@ const ProfileItem: React.FC<
                     <TabsTrigger value={list?.label}>
                       <Links
                         prefetch={true}
-                        href={`${list.link}/${user?.name}/${list.page}`}
+                        href={`${list.link}/${data?.user?.name}/${list.page}`}
                         className="relative text-xs md:text-sm font-bold px-4 py-2"
                       >
                         {list?.label}
@@ -606,10 +656,12 @@ const ProfileItem: React.FC<
                 ))}
               </Tabs>
             </div>
+
+            {/* Profile Content */}
             <div className="px-1 md:px-4 py-2">
-              {pathname === `/profile/${user?.name}` && (
+              {pathname === `/profile/${data?.user?.name}` && (
                 <div className="mt-5">
-                  {user?.biography === null ? (
+                  {data?.user?.biography === null ? (
                     <p className="p-4">
                       This profile does not have biography yet
                     </p>
@@ -621,37 +673,44 @@ const ProfileItem: React.FC<
                 </div>
               )}
 
-              {pathname === `/profile/${user?.name}/watchlist` && (
+              {pathname === `/profile/${data?.user?.name}/watchlist` && (
                 <Watchlist
-                  tv_id={tv_id}
-                  existedFavorite={existedFavorite}
-                  user={user}
-                  list={list}
-                  tvId={tvid}
-                  movieId={movieId}
+                  tv_id={data?.tv_id as any}
+                  existedFavorite={data?.existedFavorite as any}
+                  user={data?.user as any}
+                  list={data?.formattedLists as any}
+                  tvId={data?.tv_id as any}
+                  movieId={data?.movie_id as any}
                 />
               )}
-              {pathname === `/profile/${user?.name}/lists` && (
-                <ProfileList list={list} movieId={movieId} tvId={tvid} />
+
+              {pathname === `/profile/${data?.user?.name}/lists` && (
+                <ProfileList
+                  list={data?.formattedLists as any}
+                  movieId={data?.movie_id as any}
+                  tvId={data?.tv_id as any}
+                />
               )}
-              {pathname === `/profile/${user?.name}/feeds` && (
+
+              {pathname === `/profile/${data?.user?.name}/feeds` && (
                 <Feeds
-                  user={user}
-                  users={users}
-                  currentUser={currentUser}
-                  getFeeds={getFeeds}
-                  getComment={getComment as CommentProps[] | any}
+                  user={data?.user as any}
+                  users={data?.users as any}
+                  currentUser={data?.currentUser as any}
+                  getFeeds={data?.getFeeds as any}
+                  getComment={data?.getComment as any}
                 />
               )}
-            </div>{" "}
-            {pathname === `/profile/${user?.name}/reviews` && (
-              <ProfileReviews
-                getDrama={getDrama}
-                getReview={getReview}
-                currentUser={currentUser}
-                tv_id=""
-              />
-            )}
+
+              {pathname === `/profile/${data?.user?.name}/reviews` && (
+                <ProfileReviews
+                  getDrama={data?.getDrama as any}
+                  getReview={data?.formattedReviews as ITvReview | any}
+                  currentUser={data?.currentUser as any}
+                  tv_id=""
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

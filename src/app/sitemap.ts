@@ -4,7 +4,7 @@ import { spaceToHyphen } from "@/lib/spaceToHyphen"
 import type { MetadataRoute } from "next"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.BASE_URL || "https://mijudramainfo.vercel.app"
+  const baseUrl = process.env.BASE_URL || `${process.env.BASE_URL}`
   const sitemapEntries: MetadataRoute.Sitemap = []
 
   try {
@@ -31,26 +31,38 @@ async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRo
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 1.0,
+          changefreq: "daily",
+        },
+        {
+          url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/watch`,
+          lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 1.0,
+          changefreq: "daily",
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/photos`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 0.5,
+          changefreq: "weekly",
         },
-        {
-          url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/media`,
-          lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
-        },
-        {
+          {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/reviews`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 0.6,
+          changefreq: "daily",
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/seasons`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 0.6,
+          changefreq: "weekly",
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/cast`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 0.7,
+          changefreq: "monthly",
         },
       ]),
     )
@@ -68,14 +80,25 @@ async function generateMovieEntries(baseUrl: string, sitemapEntries: MetadataRou
         {
           url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}`,
           lastModified: safelyFormatDate(movie.release_date),
+          priority: 1.0,
+          changefreq: "daily",
+        }, {
+          url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/watch`,
+          lastModified: safelyFormatDate(movie.release_date),
+          priority: 1.0,
+          changefreq: "daily",
         },
         {
           url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/cast`,
           lastModified: safelyFormatDate(movie.release_date),
+          priority: 0.6,
+          changefreq: "monthly",
         },
         {
           url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/photos`,
           lastModified: safelyFormatDate(movie.release_date),
+          priority: 0.5,
+          changefreq: "weekly",
         },
       ]),
     )
@@ -92,6 +115,8 @@ async function generatePersonEntries(baseUrl: string, sitemapEntries: MetadataRo
       ...persons.map((person) => ({
         url: `${baseUrl}/person/${person.id}-${spaceToHyphen(person.name)}`,
         lastModified: new Date().toISOString(),
+        priority: 0.6,
+        changefreq: "weekly",
       })),
     )
   } catch (error) {
@@ -106,6 +131,7 @@ async function generateNetworkEntry(baseUrl: string, sitemapEntries: MetadataRou
       sitemapEntries.push({
         url: `${baseUrl}/network/${network.id}`,
         lastModified: new Date().toISOString(),
+        priority: 0.5,
       })
     }
   } catch (error) {
@@ -168,15 +194,13 @@ async function generateTVKeywordEntries(tvShows: TVShow[], baseUrl: string, site
     ...keywords.map((keyword: any) => ({
       url: `${baseUrl}/keyword/${keyword.id}/tv`,
       lastModified: new Date().toISOString(),
+      priority: 0.3,
+      changefreq: "monthly",
     })),
   )
 }
 
-async function generateMovieKeywordEntries(
-  movies: TVShow[],
-  baseUrl: string,
-  sitemapEntries: MetadataRoute.Sitemap,
-) {
+async function generateMovieKeywordEntries(movies: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   const keywordPromises = movies.map(async (movie) => {
     try {
       const response = await fetch(
@@ -196,36 +220,42 @@ async function generateMovieKeywordEntries(
     ...keywords.map((keyword: any) => ({
       url: `${baseUrl}/keyword/${keyword.id}/movie`,
       lastModified: new Date().toISOString(),
+      priority: 0.3,
+      changefreq: "monthly",
     })),
   )
 }
 
 function generateStaticPageEntries(baseUrl: string): MetadataRoute.Sitemap {
   const staticPages = [
-    { url: "/", },
-    { url: "/drama/newest",},
-    { url: "/drama/top",},
-    { url: "/drama/upcoming",},
-    { url: "/drama/top_chinese_dramas",  },
-    { url: "/drama/top_korean_dramas",  },
-    { url: "/drama/top_japanese_dramas",  },
-    { url: "/movie/newest",},
-    { url: "/movie/top",},
-    { url: "/movie/upcoming",},
-    { url: "/shows/variety",  },
-    { url: "/people/top",  },
-    { url: "/coin", },
-    { url: "/signin", },
-    { url: "/signup", },
-    { url: "/faq", },
-    { url: "/about", },
-    { url: "/contact", },
-    { url: "/terms", },
+    { url: "/", priority: 1.0, changefreq: "daily" },
+    { url: "/watch/tv", priority: 1.0, changefreq: "daily" },
+    { url: "/watch/movie", priority: 1.0, changefreq: "daily" },
+    { url: "/watch/anime", priority: 1.0, changefreq: "daily" },
+    { url: "/drama/newest", priority: 0.9, changefreq: "daily" },
+    { url: "/drama/top", priority: 0.9, changefreq: "daily" },
+    { url: "/drama/upcoming", priority: 0.9, changefreq: "daily" },
+    { url: "/drama/top_chinese_dramas", priority: 0.9, changefreq: "daily" },
+    { url: "/drama/top_korean_dramas", priority: 0.9, changefreq: "daily" },
+    { url: "/drama/top_japanese_dramas", priority: 0.9, changefreq: "daily" },
+    { url: "/movie/newest", priority: 0.9, changefreq: "daily" },
+    { url: "/movie/top", priority: 0.9, changefreq: "daily" },
+    { url: "/movie/upcoming", priority: 0.9, changefreq: "daily" },
+    { url: "/shows/variety", priority: 0.9, changefreq: "daily" },
+    { url: "/people/top", priority: 0.9, changefreq: "daily" },
+    { url: "/coin", priority: 0.7, changefreq: "weekly" },
+    { url: "/signin", priority: 0.6, changefreq: "monthly" },
+    { url: "/signup", priority: 0.6, changefreq: "monthly" },
+    { url: "/faq", priority: 0.5, changefreq: "monthly" },
+    { url: "/about", priority: 0.5, changefreq: "monthly" },
+    { url: "/contact", priority: 0.5, changefreq: "monthly" },
+    { url: "/terms", priority: 0.5, changefreq: "monthly" },
   ]
 
-  return staticPages.map(({ url }) => ({
+  return staticPages.map(({ url, priority, changefreq }) => ({
     url: `${baseUrl}${url}`,
     lastModified: new Date().toISOString(),
+    priority,
+    changefreq,
   }))
 }
-

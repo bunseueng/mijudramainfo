@@ -10,6 +10,9 @@ const SearchLoading = dynamic(
 export const metadata: Metadata = {
   title: "Popular Drama",
   description: "Find Popular drama.",
+  alternates: {
+    canonical: `${process.env.BASE_URL}/drama/popular`,
+  },
 };
 const PopularDramaPage = async () => {
   const getDrama = await prisma.drama.findMany();

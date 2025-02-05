@@ -11,13 +11,14 @@ import ReviewCard from "@/app/component/ui/Card/ReviewCard";
 import TvInfo from "./TvInfo";
 import TvListCard from "@/app/component/ui/Card/TvListCard";
 import { useEffect, useState } from "react";
+import AdBanner from "@/app/component/ui/Adsense/AdBanner";
+import WatchNowButton from "@/app/component/ui/Button/WatchNowButton";
 const WatchProvider = dynamic(() => import("./WatchProvider"), { ssr: false });
 
 const DramaCast = ({
   getDrama,
   cast,
   tv,
-  language,
   allTvShows,
   tv_id,
   review,
@@ -102,7 +103,7 @@ const DramaCast = ({
 
     fetchCountryAndSetProvider();
   }, [watchProvider]);
-  if (!tv || !language || !allTvShows || !review || !image) {
+  if (!tv || !allTvShows || !review || !image) {
     return null;
   }
 
@@ -176,9 +177,11 @@ const DramaCast = ({
           </div>
         </div>
         <div className="hidden md:block float-left relative md:w-1/3 px-2 md:px-0 lg:px-2 my-5 md:my-0 lg:ml-5">
+          <div className="mb-4">
+            <WatchNowButton link={`/tv/${tv?.id}/watch`} />
+          </div>
           <TvInfo
             getDrama={getDrama}
-            language={language}
             tv={tv}
             content={content}
             allTvShows={allTvShows}
@@ -292,6 +295,9 @@ const DramaCast = ({
             <div className="mt-3">
               <TvListCard list={lists} movieId={[]} tvId={tv_id} />
             </div>
+          </div>
+          <div className="w-full h-screen bg-gray-200 dark:bg-black my-10">
+            <AdBanner dataAdFormat="auto" dataAdSlot="4321696148" />
           </div>
         </div>
       </div>

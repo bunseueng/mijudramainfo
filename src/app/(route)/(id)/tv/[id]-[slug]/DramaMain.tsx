@@ -36,7 +36,7 @@ const DramaMain = ({
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [textColor, setTextColor] = useState("#FFFFFF");
   const getColorFromImage = useColorFromImage();
-  const { tv, isLoading, language } = useDramaData(tv_id);
+  const { tv, isLoading } = useDramaData(tv_id);
   const cast = tv?.aggregate_credits || {};
   const content = tv?.content_ratings?.results || [];
   const keyword = tv?.keywords || {};
@@ -54,11 +54,6 @@ const DramaMain = ({
   );
   const screenwriter = castCredit?.find(
     (cast: any) => cast?.known_for_department === "Creator"
-  );
-  const original_country = tv?.origin_country?.[0];
-
-  const matchedLanguage = language?.find(
-    (lang: any) => lang?.iso_3166_1 === original_country
   );
   const allTvShowsArray = Array.isArray(allTvShows) ? allTvShows : [];
   // Find the index of the matched TV show in allTvShows array
@@ -201,6 +196,16 @@ const DramaMain = ({
     }
   };
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("success") === "true" && tv?.videos?.results?.length === 0) {
+      toast.error("Videos not found", {
+        toastId: "videos-not-found",
+      });
+    }
+  }, [tv]);
+
   if (isLoading) {
     return <SearchLoading />;
   }
@@ -238,7 +243,6 @@ const DramaMain = ({
           formattedKeywordsDB={formattedKeywordsDB}
           formattedKeywords={formattedKeywords}
           info={info}
-          matchedLanguage={matchedLanguage}
           content={content}
           rank={rank}
           formattedDates={{
@@ -255,7 +259,6 @@ const DramaMain = ({
           cast={cast}
           tv={tv}
           content={content}
-          language={language}
           allTvShows={allTvShows}
           review={review}
           tv_id={tv_id}

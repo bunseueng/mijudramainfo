@@ -1,13 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchTv, fetchLanguages } from "@/app/actions/fetchMovieApi";
+import { fetchTv } from "@/app/actions/fetchMovieApi";
 
 async function fetchDramaData(tv_id: string) {
-  const [tv, language] = await Promise.all([
-    fetchTv(tv_id),
-    fetchLanguages()
-  ]);
+  const tv = await fetchTv(tv_id)
 
-  return { tv, language };
+  return { tv };
 }
 
 export function useDramaData(tv_id: string) {
@@ -23,7 +20,6 @@ export function useDramaData(tv_id: string) {
 
   return {
     tv: data?.tv,
-    language: data?.language,
     isLoading,
     refetch
   };

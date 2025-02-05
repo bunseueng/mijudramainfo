@@ -855,6 +855,7 @@ export interface TMDBMovie {
   status: string;
   tagline: string | null;
   title: string;
+  type: string[];
   video: boolean;
   vote_average: number;
   vote_count: number;
@@ -927,6 +928,7 @@ export interface TVShow {
     time: string;
   }[];
   end_date: string;
+  genre_ids: string[];
 }
 
 interface Genre {

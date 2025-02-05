@@ -25,6 +25,7 @@ const nextConfig = {
     optimizeCss: true,
   },
   reactStrictMode: true,
+  productionBrowserSourceMaps: true,
   async headers() {
     return [
       {
@@ -38,10 +39,6 @@ const nextConfig = {
         ],
       },
     ];
-  },
-  auth: {
-    trustHostname: true,
-    secret: process.env.NEXTAUTH_SECRET,
   },
 };
 

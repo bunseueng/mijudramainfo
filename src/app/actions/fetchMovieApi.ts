@@ -6,6 +6,7 @@ const currentYear = new Date().getFullYear();
 const startDate = moment(`${currentYear}-01-01`).format("YYYY-MM-DD");
 const endDate = moment(`${currentYear}-12-31`).format("YYYY-MM-DD");
 const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+const TMDB_URL = "https://api.themoviedb.org/3";
 // Get the current date
 const currentDate = moment();
 // Subtract 7 days from the current date
@@ -165,12 +166,70 @@ export const fetchTv = cache(async (ids: string | string[]) => {
       };
     };
 
-    // If input was array, return array of processed shows
-    // If input was single ID, return single processed show
-    return Array.isArray(ids) 
+    return Array.isArray(ids)
       ? tvData.map(processShow)
       : processShow(tvData[0]);
+  } catch (error) {
+    console.error("Error fetching TV details:", error);
+    throw error;
+  }
+});
 
+// fetch movie
+export const fetchMovie = cache(async (ids: string | string[]) => {
+  try {
+    const url = `/api/tmdb_movie/movie`;
+    const countryUrl = `https://api.themoviedb.org/3/configuration/countries?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=3600",
+      },
+      body: JSON.stringify({ ids: Array.isArray(ids) ? ids : [ids] }),
+      next: {
+        revalidate: 3600,
+        tags: ["movie-details"],
+      },
+    };
+
+    const [response, countryResponse] = await Promise.all([
+      fetch(url, options),
+      fetch(countryUrl, {
+        next: {
+          revalidate: 86400,
+        },
+      }),
+    ]);
+
+    if (!response.ok || !countryResponse.ok) {
+      throw new Error("Failed to fetch TV details or countries");
+    }
+
+    const [movieData, countryData] = await Promise.all([
+      response.json(),
+      countryResponse.json(),
+    ]);
+
+    const processShow = (show: any) => {
+      const originCountries = show.origin_country || [];
+      const countryNames = originCountries.map((countryCode: string) => {
+        const country = countryData.find(
+          (c: any) => c.iso_3166_1 === countryCode
+        );
+        return country ? country.english_name : countryCode;
+      });
+
+      return {
+        ...show,
+        type: countryNames,
+      };
+    };
+
+    return Array.isArray(ids)
+      ? movieData.map(processShow)
+      : processShow(movieData[0]);
   } catch (error) {
     console.error("Error fetching TV details:", error);
     throw error;
@@ -356,13 +415,13 @@ export const fetchPerson = cache(async (ids: string | string[]) => {
         revalidate: 3600,
         tags: ["movie-details"],
       },
-    }
+    };
     const res = await fetch(url, options);
-  
+
     if (!res.ok) {
       console.log("Failed to fetch movies");
     }
-  
+
     const json = await res.json();
     return json;
   } catch (error) {
@@ -843,32 +902,6 @@ export const fetchUpcomingMovie = cache(async (pages = 1) => {
   return json;
 });
 
-// fetch movie
-export const fetchMovie = cache(async (ids: string | string[]) => {
-  const url = `/api/tmdb_movie/movie`;
-  const options = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "public, max-age=3600",
-    },
-    body: JSON.stringify({ ids }),
-    next: {
-      revalidate: 3600,
-      tags: ["movie-details"],
-    },
-  };
-
-  const res = await fetch(url, options);
-
-  if (!res.ok) {
-    console.log("Failed to fetch movies");
-  }
-
-  const json = await res.json();
-  return json;
-});
-
 // Fetch movie keyword
 export const fetchMovieKeyword = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
@@ -934,7 +967,7 @@ export const fetchHomepageDrama = cache(async () => {
     console.error("Error fetching ratings:", error);
     return {};
   }
-})
+});
 
 export const fetchTvKeywords = cache(
   async (
@@ -1034,23 +1067,69 @@ export const fetchPersonLike = cache(async (ids: string[]) => {
 export const fetchTrailer = cache(async (ids: string[]) => {
   // Deduplicate IDs
   const uniqueIds = [...new Set(ids)];
-  
+
   try {
     const url = `/api/trailer`;
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: uniqueIds }),
-      cache: 'force-cache',
+      cache: "force-cache",
     });
-    
+
     if (!response.ok) {
       throw new Error("Failed to fetch video details");
     }
-    
+
     return response.json();
   } catch (error) {
     console.error("Error fetching video details:", error);
     return [];
   }
 });
+
+const fetchApi = async (endpoint: string, params: Record<string, any> = {}) => {
+  const searchParams = new URLSearchParams({
+    api_key: apiKey!,
+    ...params,
+  });
+
+  const response = await fetch(`${TMDB_URL}${endpoint}?${searchParams}`);
+
+  if (!response.ok) {
+    throw new Error(`API call failed: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export interface FilterParams {
+  page?: number;
+  with_genres?: string;
+  with_origin_country?: string;
+  "first_air_date.gte"?: string;
+  "first_air_date.lte"?: string;
+  sort_by?: string;
+}
+
+export const getPopularByParams = async (
+  type: string,
+  params: FilterParams
+) => {
+  return fetchApi(`/discover/${type}`, params);
+};
+export const getImageUrl = (
+  path: string,
+  backdrop: string,
+  size = "original"
+) => {
+  return `https://image.tmdb.org/t/p/${size}${path || backdrop}`;
+};
+
+export const getGenres = async (type: string) => {
+  return fetchApi(`/genre/${type}/list`);
+};
+
+export const getCountries = async () => {
+  return fetchApi("/configuration/countries");
+};

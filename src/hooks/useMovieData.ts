@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import {
-  fetchLanguages,
   fetchMovie,
 } from "@/app/actions/fetchMovieApi"
 
@@ -9,21 +8,15 @@ export function useMovieData(movie_id: string) {
         queryKey: ["movie", movie_id],
         queryFn: () => fetchMovie(movie_id),
         staleTime: 3600000, // Cache data for 1 hour
-        refetchOnWindowFocus: true,
-        refetchOnMount: true, // Refetch on mount to get the latest data
-      });
-      const { data: language } = useQuery({
-        queryKey: ["movieLanguage", movie_id],
-        queryFn: () => fetchLanguages(),
-        staleTime: 3600000, // Cache data for 1 hour
-        refetchOnWindowFocus: true,
-        refetchOnMount: true, // Refetch on mount to get the latest data
+        gcTime: 1000 * 60 * 60, // Cache for 1 hour
+        refetchOnWindowFocus: false, // Prevent refetch on window focus
+        refetchOnReconnect: false, // Prevent refetch on reconnect
+        refetchOnMount: false, // Prevent refetch on mount
       });
 
   return {
     movie,
     isLoading,
-    language,
     refetch
   }
 }

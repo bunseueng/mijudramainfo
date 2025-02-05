@@ -12,6 +12,9 @@ export const revalidate = 0;
 export const metadata: Metadata = {
   title: "Variety Show",
   description: "Find Variety Show.",
+  alternates: {
+    canonical: `${process.env.BASE_URL}/shows/variety`,
+  },
 };
 
 const VarietyShowPage = async () => {

@@ -2,10 +2,10 @@ import React from "react";
 import MovieVideo from "../MovieVideo";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { getMovieData, getMovieDetails } from "@/app/actions/movieActions";
-import { getLanguages } from "@/app/actions/tvActions";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { Metadata } from "next";
 import { MovieDB } from "@/helper/type";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 export async function generateMetadata(props: {
   params: Promise<{ "id]-[slug": string }>;
 }): Promise<Metadata> {
@@ -17,23 +17,17 @@ export async function generateMetadata(props: {
   const [movie_id] = params["id]-[slug"].split("-");
   const tvDetails = await getMovieDetails(movie_id);
   const original_country = tvDetails?.origin_country?.[0];
-  const language = await getLanguages();
-  const matchedCountry = language?.find(
-    (lang: any) => lang?.iso_3166_1 === original_country
-  );
-
   const countryToLanguageMap: { [key: string]: string } = {
-    China: "Chinese",
-    Korea: "Korean",
-    Japan: "Japanese",
-    Taiwan: "Taiwanese",
-    Thai: "Thailand",
-    // Add more mappings as needed
+    CN: "Chinese",
+    KR: "Korean",
+    JP: "Japanese",
+    TW: "Taiwanese",
+    TH: "Thai",
   };
-  // Get the language name
-  const languageName =
-    countryToLanguageMap[matchedCountry?.english_name] ||
-    matchedCountry?.english_name;
+  const languageName = countryToLanguageMap[original_country] || "Unknown";
+  const url = `${process.env.BASE_URL}/tv/${tvDetails?.id}-${spaceToHyphen(
+    tvDetails?.title
+  )}/videos/bloopers`;
 
   return {
     title: `${tvDetails?.title} (${languageName} Movie ${getYearFromDate(
@@ -41,9 +35,12 @@ export async function generateMetadata(props: {
     )})'s Bloopers`,
     description: tvDetails?.overview,
     keywords: tvDetails?.genres?.map((data: any) => data?.name),
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       type: "website",
-      url: `https://mijudramainfo.vercel.app/tv/${tvDetails?.id}`,
+      url: url,
       title: tvDetails?.title,
       description: tvDetails?.overview,
       images: [

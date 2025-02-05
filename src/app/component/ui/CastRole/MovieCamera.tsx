@@ -30,12 +30,13 @@ const MovieCamera = ({ camera, cameraDB }: any) => {
               <div className="w-full h-full flex flex-row">
                 <div className="box-content w-[90px]">
                   <Link
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="block outline-none box-content w-[110px] h-full"
                   >
                     {item.profile_path === null ? (
                       <Image
-                        src="/default-pf.jpg"
+                        src="/default-pf.webp"
                         alt={`${item?.name}'s Profile`}
                         width={200}
                         height={200}
@@ -57,6 +58,7 @@ const MovieCamera = ({ camera, cameraDB }: any) => {
 
                 <div className="pl-2">
                   <Link
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                   >
@@ -77,12 +79,13 @@ const MovieCamera = ({ camera, cameraDB }: any) => {
               <div className="w-full h-full flex flex-row">
                 <div className="box-content w-[90px]">
                   <Link
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="block outline-none box-content w-[110px] h-full"
                   >
                     {item.profile_path === null ? (
                       <Image
-                        src="/default-pf.jpg"
+                        src="/default-pf.webp"
                         alt={`${item?.name}'s Profile` || "Person Profile"}
                         width={200}
                         height={200}
@@ -104,6 +107,7 @@ const MovieCamera = ({ camera, cameraDB }: any) => {
 
                 <div className="pl-2">
                   <Link
+                    prefetch={false}
                     href={`/person/${item?.id}-${spaceToHyphen(item?.name)}`}
                     className="text-md font-bold truncate text-sky-700 dark:text-[#2196f3] cursor-pointer"
                   >

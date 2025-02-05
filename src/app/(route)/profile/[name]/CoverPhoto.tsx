@@ -7,15 +7,16 @@ import { coverPhoto, TCoverPhoto } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
-import { User } from "./ProfileItem";
-import { currentUserProps } from "@/helper/type";
+import { UserProps } from "@/helper/type";
 import Image from "next/image";
+import { User } from "./ProfileItem";
 
-interface currentUser {
-  currentUser: currentUserProps | null;
+interface CoverPhotoProps {
+  currentUser: UserProps | any;
+  user: User | any;
 }
 
-const CoverPhoto: React.FC<User & currentUser> = ({ user, currentUser }) => {
+const CoverPhoto: React.FC<CoverPhotoProps> = ({ user, currentUser }) => {
   const [cover, setCover] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const { register, handleSubmit, reset } = useForm<TCoverPhoto>({

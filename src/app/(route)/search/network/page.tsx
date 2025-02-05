@@ -1,11 +1,22 @@
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
+import { Metadata } from "next";
 const FilterQuery = dynamic(
   () => import("@/app/component/ui/Search/FilterQuery")
 );
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading")
 );
+
+export async function generateMetadata(): Promise<Metadata> {
+  const url = `${process.env.BASE_URL}/search/network`;
+  return {
+    title: "Search Network",
+    alternates: {
+      canonical: url,
+    },
+  };
+}
 const Network = () => {
   const BASE_URL = "https://api.themoviedb.org/3/discover/tv";
   return (

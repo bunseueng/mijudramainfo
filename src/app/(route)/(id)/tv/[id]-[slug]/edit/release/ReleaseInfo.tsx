@@ -15,7 +15,6 @@ import { CiEdit } from "react-icons/ci";
 import { FaCheck } from "react-icons/fa6";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import { TimePicker } from "antd";
 import moment from "moment";
@@ -70,7 +69,6 @@ const ReleaseInfo: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [isItemDataChanged, setIsItemDataChanged] = useState<boolean[]>(
     Array(tvDetails?.released_information?.length || 0).fill(false)
   );
-  const router = useRouter();
 
   const mergeAndRemoveDuplicates = (
     array1: TVShow[],

@@ -16,6 +16,7 @@ import {
   TrailerResponse,
   UserProps,
 } from "@/helper/type";
+import WatchNowButton from "../Button/WatchNowButton";
 
 interface DramaHeaderProps {
   tv: TVShow;
@@ -44,7 +45,6 @@ interface DramaHeaderProps {
   formattedKeywordsDB: string;
   formattedKeywords: string[];
   info: any;
-  matchedLanguage: any;
   formattedDates: any;
   content: any;
   rank: any;
@@ -78,7 +78,6 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
   formattedKeywordsDB,
   formattedKeywords,
   info,
-  matchedLanguage,
   formattedDates,
   content,
   rank,
@@ -95,7 +94,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
       }}
     >
       <div
-        className="w-full h-full"
+        className="w-full h-full pt-4 md:pt-0"
         style={{
           backgroundImage:
             dominantColor ||
@@ -104,22 +103,27 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
       >
         <div className="px-3">
           <div className="flex flex-col md:flex-row content-center max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5">
-            <Image
-              ref={imgRef}
-              onLoad={extractColor}
-              src={
-                getDrama?.cover ||
-                `https://image.tmdb.org/t/p/w780/${
-                  tv?.poster_path || tv?.backdrop_path
-                }`
-              }
-              alt={detail?.title || tv?.name || "Drama Poster"}
-              width={300}
-              height={440}
-              quality={100}
-              priority
-              className="block align-middle !w-[300px] md:!min-w-[300px] !h-[440px] rounded-lg md:pl-0"
-            />
+            <div className="w-full h-full">
+              <Image
+                ref={imgRef}
+                onLoad={extractColor}
+                src={
+                  getDrama?.cover ||
+                  `https://image.tmdb.org/t/p/w780/${
+                    tv?.poster_path || tv?.backdrop_path
+                  }`
+                }
+                alt={detail?.title || tv?.name || "Drama Poster"}
+                width={300}
+                height={440}
+                quality={100}
+                priority
+                className="block align-middle !w-[300px] md:!min-w-[300px] !h-[440px] rounded-lg md:pl-0"
+              />
+              <div className="!w-[300px] md:!min-w-[300px] my-3">
+                <WatchNowButton link={`/tv/${tv?.id}/watch`} />
+              </div>
+            </div>
 
             <div className="md:pl-4 lg:pl-8 pt-5 md:pt-0 pb-5">
               <div className="relative">
@@ -225,7 +229,6 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
                 formattedKeywordsDB={formattedKeywordsDB}
                 formattedKeywords={formattedKeywords}
                 info={info}
-                matchedLanguage={matchedLanguage}
                 formattedDates={formattedDates}
                 content={content}
                 rank={rank}
