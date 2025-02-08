@@ -3,6 +3,7 @@ import { safelyFormatDate } from "@/lib/safetyDate"
 import { spaceToHyphen } from "@/lib/spaceToHyphen"
 import type { MetadataRoute } from "next"
 
+// This will ensure Next.js generates a proper XML sitemap
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.BASE_URL || `${process.env.BASE_URL}`
   const sitemapEntries: MetadataRoute.Sitemap = []
@@ -20,9 +21,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Error generating sitemap:", error)
   }
 
+  // Next.js will automatically convert this to proper XML format
   return sitemapEntries
 }
 
+// Rest of your code remains exactly the same
 async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
     const tvShows = await fetchTVShows()
@@ -46,7 +49,7 @@ async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRo
           priority: 0.5,
           changefreq: "weekly",
         },
-          {
+        {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/reviews`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.6,

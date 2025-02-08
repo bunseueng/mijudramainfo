@@ -10,7 +10,6 @@ import { StyledRating } from "@/app/actions/StyleRating";
 import dynamic from "next/dynamic";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { fetchRatings, fetchTv } from "@/app/actions/fetchMovieApi";
-import SearchLoading from "../Loading/SearchLoading";
 import { DramaDetails, DramaReleasedInfo } from "@/helper/type";
 const LazyImage = dynamic(() => import("@/components/ui/lazyimage"), {
   ssr: false,
@@ -35,14 +34,14 @@ export default function Card({
     ?.filter((item: any) => item.media_type === "tv")
     .map((data: any) => data.id.toString());
 
-  const { data: tmdb_drama, isLoading: isTopDramaLoading } = useQuery({
+  const { data: tmdb_drama } = useQuery({
     queryKey: ["tmdb_drama", tvIds],
     queryFn: () => fetchTv(tvIds),
     staleTime: 3600000,
     enabled: Boolean(tvIds?.length),
   });
 
-  const { data: tvRating, isLoading: isRatingLoading } = useQuery({
+  const { data: tvRating } = useQuery({
     queryKey: ["tvRating", tvIds],
     queryFn: () => fetchRatings(tvIds),
     staleTime: 3600000,
@@ -113,11 +112,6 @@ export default function Card({
   );
   const rating = currentDramaRating?.rating;
   const number_of_episodes = currentDrama?.number_of_episodes;
-  const isLoading = isRatingLoading || isTopDramaLoading;
-
-  if (isLoading) {
-    return <SearchLoading />;
-  }
 
   return (
     <div className="p-5 relative box-border h-[90%]">

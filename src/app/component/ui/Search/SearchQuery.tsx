@@ -6,6 +6,7 @@ import React, { Suspense, useState } from "react";
 import { SearchPagination } from "../Pagination/SearchPagination";
 import dynamic from "next/dynamic";
 import { useDatabase } from "@/hooks/useDatabase";
+import TopDrama from "@/app/(route)/(drama)/drama/top/TopDrama";
 const Results = dynamic(() => import("@/app/component/ui/Search/Results"));
 const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
   ssr: false,
@@ -50,7 +51,7 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
 
       return resultsWithCountryType;
     } catch (error: any) {
-      console.log(error, "Failed to fetch");
+      throw new Error("Failed to fetch");
     }
   };
 
@@ -63,7 +64,7 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
       const data = await res.json();
       return data;
     } catch (error: any) {
-      console.log(error, "Failed to fetch");
+      throw new Error("Failed to fetch");
     }
   };
 
@@ -91,9 +92,8 @@ const SearchQuery = ({ BASE_URL, currentUser }: any) => {
 
   return (
     <div className="min-h-screen mt-10">
-      {totalItems?.length === 0 && (
-        <h1 className="h-screen text-xl text-center mt-20">No results found</h1>
-      )}
+      {searchQuery === "" && <TopDrama />}
+      {totalItems?.length === 0 && <div>Results not found</div>}
       {totalItems?.length > 0 && (
         <Suspense fallback={<SearchLoading />}>
           <Results

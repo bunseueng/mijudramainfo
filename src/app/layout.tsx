@@ -123,7 +123,19 @@ export default function RootLayout({
     <html lang="en" className={`${nunito.variable} font-sans`}>
       <head>
         <link rel="canonical" href={`${process.env.BASE_URL}`} />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
         <meta name="google-adsense-account" content="ca-pub-3369705912051027" />
         <script
           type="application/ld+json"
