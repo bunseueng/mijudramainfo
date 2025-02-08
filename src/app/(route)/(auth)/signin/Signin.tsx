@@ -38,8 +38,7 @@ const Signin = () => {
       const result = await signIn("credentials", {
         email: userData.email,
         password: userData.password,
-        redirect: false,
-        callbackUrl: "/",
+        redirectTo: "/",
       });
 
       if (result?.error) {
@@ -63,8 +62,7 @@ const Signin = () => {
   ) => {
     try {
       await signIn(provider, {
-        callbackUrl: "/",
-        redirect: true,
+        redirectTo: "/",
       });
     } catch (error) {
       console.error(`${provider} sign-in error:`, error);

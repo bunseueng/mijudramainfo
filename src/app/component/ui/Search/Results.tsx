@@ -72,29 +72,25 @@ export default function Results({
                 key={idx}
               >
                 {!result.gender && !result.known_for ? (
-                  <Suspense fallback={<SearchLoading />}>
-                    <Card
-                      key={idx}
-                      result={result}
-                      results={results}
-                      searchQuery={searchQuery}
-                      BASE_URL={BASE_URL}
-                      getDrama={getDrama}
-                      getMovie={getMovie}
-                    />
-                  </Suspense>
+                  <Card
+                    key={idx}
+                    result={result}
+                    results={results}
+                    searchQuery={searchQuery}
+                    BASE_URL={BASE_URL}
+                    getDrama={getDrama}
+                    getMovie={getMovie}
+                  />
                 ) : (
-                  <Suspense fallback={<SearchLoading />}>
-                    <Person
-                      key={idx}
-                      result={result}
-                      results={results}
-                      searchQuery={searchQuery}
-                      BASE_URL={BASE_URL}
-                      currentUser={currentUser}
-                      getPerson={getPerson}
-                    />
-                  </Suspense>
+                  <Person
+                    key={idx}
+                    result={result}
+                    results={results}
+                    searchQuery={searchQuery}
+                    BASE_URL={BASE_URL}
+                    currentUser={currentUser}
+                    getPerson={getPerson}
+                  />
                 )}
               </div>
             ))}

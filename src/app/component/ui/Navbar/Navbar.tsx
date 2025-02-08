@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useScrollContext } from "@/provider/UseScroll";
 import { AnimatePresence, motion, useTransform } from "framer-motion";
-
 // Helper imports
 import { navbar_items, sessionItems, sidebar_items } from "@/helper/item-list";
 
@@ -27,8 +26,8 @@ import { Bell, LogOut, Search, Settings, Text, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarItem from "./SidebarItem";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useOutsideClickNav } from "@/hooks/useOutsideClickNav";
 import { useUserData } from "@/hooks/useUserData";
+import { useOutsideClickNav } from "@/hooks/useOutsideClickNav";
 
 const Navbar = () => {
   const { smoothScrollProgress } = useScrollContext();
@@ -41,8 +40,8 @@ const Navbar = () => {
   const { setTheme, resolvedTheme } = useTheme();
   const pathname = usePathname();
   const { data: session } = useSession();
-  const outsideRef = useRef(null);
-  const triggerRef = useRef(null);
+  const outsideRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
   const { data } = useUserData();
 
@@ -84,12 +83,17 @@ const Navbar = () => {
     closeSidebar();
   }, [closeSidebar]);
 
-  const handleNotiDropClick = useCallback(() => {
-    setNotiDrop((prev) => !prev);
-    setSessionDrop(false);
-    setShowSearch(false);
-    closeSidebar();
-  }, [closeSidebar]);
+  const handleNotiDropClick = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
+      setNotiDrop((prev) => !prev);
+      setSessionDrop(false);
+      setShowSearch(false);
+      closeSidebar();
+    },
+    [closeSidebar]
+  );
 
   const handleSessionDropClick = useCallback(() => {
     setSessionDrop((prev) => !prev);
@@ -130,11 +134,37 @@ const Navbar = () => {
       if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
     };
   }, []);
+  // Close dropdowns when pathname changes
+  useEffect(() => {
+    setSessionDrop(false);
+    setNotiDrop(false);
+    setShowSearch(false);
+    closeSidebar();
+  }, [pathname, closeSidebar]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        outsideRef.current &&
+        triggerRef.current &&
+        !outsideRef.current.contains(target) &&
+        !triggerRef.current.contains(target)
+      ) {
+        setNotiDrop(false);
+      }
+    };
+
+    if (notiDrop) {
+      document.addEventListener("click", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [notiDrop]);
 
   useOutsideClickNav(outsideRef, triggerRef, () => {
-    if (notiDrop) {
-      setNotiDrop(false);
-    }
     if (sessionDrop) {
       setSessionDrop(false);
     }
@@ -188,6 +218,7 @@ const Navbar = () => {
             sessionDrop={sessionDrop}
             outsideRef={outsideRef}
             triggerRef={triggerRef}
+            notiDrop={notiDrop} // Pass the notiDrop state
           />
         </div>
 

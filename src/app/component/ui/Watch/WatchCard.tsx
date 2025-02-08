@@ -123,7 +123,7 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
         <h1 className="text-3xl font-bold">{title}</h1>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors mt-4 md:mt-0"
+          className="flex items-center gap-2 px-4 py-2 text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors mt-4 md:mt-0"
         >
           <SlidersHorizontal className="w-5 h-5" />
           Filters
@@ -132,7 +132,9 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
       {showFilters && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 p-4 bg-gray-800 rounded-lg">
           <div className="space-y-2">
-            <label className="block text-sm font-medium">Sort By</label>
+            <label className="block text-sm font-medium text-white">
+              Sort By
+            </label>
             <select
               value={filters.sort_by}
               onChange={(e) => handleFilterChange("sort_by", e.target.value)}
@@ -147,7 +149,9 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium">Genre</label>
+            <label className="block text-sm font-medium text-white">
+              Genre
+            </label>
             <select
               value={filters.with_genres}
               onChange={(e) =>
@@ -165,7 +169,9 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium">Country</label>
+            <label className="block text-sm font-medium text-white">
+              Country
+            </label>
             <select
               value={filters.with_origin_country}
               onChange={(e) =>
@@ -183,7 +189,9 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium">Air Date From</label>
+            <label className="block text-sm font-medium text-white">
+              Air Date From
+            </label>
             <input
               type="date"
               value={filters["first_air_date.gte"]}
@@ -195,7 +203,9 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium">Air Date To</label>
+            <label className="block text-sm font-medium text-white">
+              Air Date To
+            </label>
             <input
               type="date"
               value={filters["first_air_date.lte"]}
@@ -219,7 +229,7 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
                 });
                 setCurrentPage(1);
               }}
-              className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              className="w-full px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
             >
               Reset Filters
             </button>

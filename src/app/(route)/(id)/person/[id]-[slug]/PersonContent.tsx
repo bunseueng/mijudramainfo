@@ -75,9 +75,14 @@ const renderKnownFor = (
   const sortedContent = personDetails.known_for?.sort((a: any, b: any) => {
     const dateA = a.first_air_date || a.release_date;
     const dateB = b.first_air_date || b.release_date;
-    if (!dateA && dateB) return -1;
-    if (dateA && !dateB) return 1;
-    return 0;
+
+    // If either is upcoming (no date), sort it first
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return -1; // a is upcoming
+    if (!dateB) return 1; // b is upcoming
+
+    // Otherwise sort by newest date
+    return new Date(dateB).getTime() - new Date(dateA).getTime();
   });
 
   if (sortedContent?.length === 0) {
@@ -207,9 +212,14 @@ export default function PersonContent({
     const sortedContent = filteredContent?.sort((a: any, b: any) => {
       const dateA = a.first_air_date || a.release_date;
       const dateB = b.first_air_date || b.release_date;
-      if (!dateA && dateB) return -1;
-      if (dateA && !dateB) return 1;
-      return 0;
+
+      // If either is upcoming (no date), sort it first
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return -1; // a is upcoming
+      if (!dateB) return 1; // b is upcoming
+
+      // Otherwise sort by newest date
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
     });
 
     if (sortedContent?.length === 0) {

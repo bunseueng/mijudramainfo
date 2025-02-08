@@ -82,7 +82,7 @@ const SeasonEpisode = ({ tv_id }: tvId) => {
   if (isLoading) {
     return <SearchLoading />;
   }
-
+  console.log(season);
   return (
     <div className="w-full h-full">
       <div
@@ -94,8 +94,8 @@ const SeasonEpisode = ({ tv_id }: tvId) => {
             <Image
               ref={imgRef} // Set the reference to the image
               src={`https://image.tmdb.org/t/p/${
-                season?.poster_path ? "w92" : "w300"
-              }/${season?.poster_path}`}
+                tv?.poster_path || season?.poster_path ? "w92" : "w300"
+              }/${tv?.poster_path || season?.poster_path || tv?.backdrop_path}`}
               alt={`${tv?.name || tv?.title}'s Poster` || "Drama Poster"}
               width={200}
               height={200}

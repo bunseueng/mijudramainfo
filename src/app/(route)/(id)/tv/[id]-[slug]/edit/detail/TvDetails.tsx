@@ -40,6 +40,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const [epCounter, setEpCounter] = useState<number>(1);
   const [isCounterClicked, setIsCounterClicked] = useState<boolean>(false);
   const [isEpCounterClicked, setIsEpCounterClicked] = useState<boolean>(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [country, setCountry] = useState<string>(""); // Add state for status
   const [contentType, setContentType] = useState<string>(""); // Add state for status
   const [status, setStatus] = useState<string>(""); // Add state for status
@@ -286,7 +287,6 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const handleRemoveKnownAsDetail = (index: number) => {
     setKnownAsDetails((prevDetails) => {
       const updatedDetails = prevDetails.filter((_, i) => i !== index);
-      console.log("Updated Known As Details:", updatedDetails); // Debug output
       return updatedDetails;
     });
   };
@@ -346,10 +346,8 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           ?.filter((title) => !knownAsDetails?.includes(title?.title))
           ?.flatMap((item) => item?.title)
       );
-      // Flatten and ensure all items are strings
       const formattedKnownAs = ensureAllStrings(newKnownAs);
 
-      // Create an object with only the fields that have changed
       const updatedFields = {
         title: currentTitle !== originalTitle ? currentTitle : detail?.title,
         native_title:
@@ -389,6 +387,8 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       });
 
       if (res.status === 200) {
+        setIsSubmitted(true);
+        setIsSubmitEnabled(false);
         reset();
         setResults([]);
         toast.success("Success");
@@ -411,9 +411,7 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
     e.preventDefault();
     setResetLoading(true);
     try {
-      // Simulate a delay for the reset operation
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      // reset logic here
       reset();
       setCurrentTitle(originalTitle);
       setCurrentNativeTitle(originalNativeTitle);
@@ -427,6 +425,8 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
       setResults([]);
       setTitleResults(originalTitleResults);
       setKnownAsDetails(originalKnownAsDetails);
+      setIsSubmitted(false);
+      setIsSubmitEnabled(false);
     } catch (error) {
       console.error("Error resetting:", error);
     } finally {
@@ -920,35 +920,70 @@ const TvDetails: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
           <button
             name="Submit"
             type="submit"
-            className={`flex items-center text-white bg-[#5cb85c] border-[1px] border-[#5cb85c] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 mr-5 ${
-              loading || isSubmitEnabled || results?.length > 0
+            className={`flex items-center text-white ${
+              loading || resetLoading || isSubmitted
+                ? "bg-[#b3e19d] border-[#b3e19d]"
+                : "bg-[#5cb85c] border-[#5cb85c]"
+            } border-[1px] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 mr-5 ${
+              !loading &&
+              !resetLoading &&
+              !isSubmitted &&
+              (isSubmitEnabled || results?.length > 0)
                 ? "cursor-pointer"
-                : "bg-[#b3e19d] border-[#b3e19d] hover:bg-[#5cb85c] hover:border-[#5cb85c] cursor-not-allowed"
+                : "hover:bg-[#b3e19d] hover:border-[#b3e19d] cursor-not-allowed"
             }`}
             disabled={
-              isSubmitEnabled || results?.length > 0 || loading ? false : true
+              loading ||
+              resetLoading ||
+              isSubmitted ||
+              (!isSubmitEnabled && results?.length === 0)
             }
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit"}
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span className="text-gray-700">Submitting...</span>
+              </>
+            ) : (
+              "Submit"
+            )}
           </button>
           <button
             name="Reset"
-            className={`flex items-center text-black dark:text-white bg-white dark:bg-[#3a3b3c] border-[1px] border-[#dcdfe6] dark:border-[#3e4042] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
-              isSubmitEnabled || results?.length > 0
+            type="button"
+            className={`flex items-center text-black dark:text-white ${
+              loading || resetLoading
+                ? "bg-gray-200 dark:bg-[#4a4b4d] border-gray-300 dark:border-[#4a4b4d]"
+                : "bg-white dark:bg-[#3a3b3c] border-[#dcdfe6] dark:border-[#3e4042]"
+            } border-[1px] px-5 py-2 hover:opacity-80 transform duration-300 rounded-md mb-10 ${
+              !loading &&
+              !resetLoading &&
+              (isSubmitEnabled || results?.length > 0 || isSubmitted)
                 ? "cursor-pointer"
-                : "hover:text-[#c0c4cc] border-[#ebeef5] cursor-not-allowed"
+                : "opacity-50 cursor-not-allowed"
             }`}
+            disabled={
+              loading ||
+              resetLoading ||
+              (!isSubmitEnabled && results?.length === 0 && !isSubmitted)
+            }
             onClick={(e) => handleReset(e)}
-            disabled={isSubmitEnabled || results?.length > 0 ? false : true}
           >
             {resetLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span className="text-gray-700 dark:text-gray-300">
+                  Resetting...
+                </span>
+              </>
             ) : (
-              <span className="mr-1">
-                <FaRegTrashAlt />
-              </span>
+              <>
+                <span className="mr-1">
+                  <FaRegTrashAlt />
+                </span>
+                Reset
+              </>
             )}
-            Reset
           </button>
         </div>
       </div>

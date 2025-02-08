@@ -1,44 +1,112 @@
 "use client";
 
-import { User } from "@/app/(route)/profile/[name]/ProfileItem";
 import { currentUserProps, UserProps } from "@/helper/type";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import { FaExclamation } from "react-icons/fa6";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface FollowButtonProps {
   currentUser: currentUserProps | null;
   user: UserProps | null;
+  onFollowerUpdate?: (count: number) => void;
 }
 
-const FollowButton: React.FC<FollowButtonProps> = ({ user, currentUser }) => {
+interface ProfileData {
+  user: UserProps;
+  currentUser: currentUserProps;
+  followers: string[];
+  following: string[];
+}
+
+const FollowButton: React.FC<FollowButtonProps> = ({
+  user,
+  currentUser,
+  onFollowerUpdate,
+}) => {
+  const queryClient = useQueryClient();
   const [followLoading, setFollowLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
-  const router = useRouter();
+  const [localIsFollowing, setLocalIsFollowing] = useState<boolean>(false);
+  const [unfollowLoading, setUnfollowLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLocalIsFollowing(
+      currentUser?.following?.includes(user?.id ?? "") ?? false
+    );
+  }, [currentUser?.following, user?.id]);
 
   const handleFollow = async () => {
-    if (currentUser?.following.includes(user?.id as string)) {
+    if (!currentUser || !user) return;
+
+    if (localIsFollowing) {
       setModal(true);
     } else {
       setFollowLoading(true);
+      setLocalIsFollowing(true);
+
+      const previousData = queryClient.getQueryData([
+        "profile_data",
+        user.name,
+      ]) as ProfileData;
+
+      // Calculate new followers count
+      const newFollowers = [
+        ...(previousData?.user?.followers || []),
+        currentUser.id,
+      ];
+
+      // Update follower count immediately
+      onFollowerUpdate?.(newFollowers.length);
+
+      // Optimistically update UI
+      queryClient.setQueryData(
+        ["profile_data", user.name],
+        (oldData: ProfileData | undefined) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            currentUser: {
+              ...oldData.currentUser,
+              following: [...(oldData.currentUser?.following || []), user.id],
+            },
+            user: {
+              ...oldData.user,
+              followers: newFollowers,
+            },
+          };
+        }
+      );
 
       try {
-        const res = await fetch(`/api/follow/${user?.name}`, {
+        const res = await fetch(`/api/follow/${user.name}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ followId: user?.id }),
+          body: JSON.stringify({ followId: user.id }),
         });
 
         if (res.ok) {
-          router.refresh();
-          toast.success("Success");
+          await queryClient.invalidateQueries({
+            queryKey: ["profile_data", user.name],
+          });
+          toast.success("Successfully followed user");
+        } else {
+          // Revert optimistic updates
+          setLocalIsFollowing(false);
+          queryClient.setQueryData(["profile_data", user.name], previousData);
+          onFollowerUpdate?.(previousData?.user?.followers?.length ?? 0);
+          toast.error("Failed to follow user");
         }
-      } catch (error: any) {
-        throw new Error(error);
+      } catch (error) {
+        // Revert optimistic updates
+        setLocalIsFollowing(false);
+        queryClient.setQueryData(["profile_data", user.name], previousData);
+        onFollowerUpdate?.(previousData?.user?.followers?.length ?? 0);
+        toast.error("An error occurred");
       } finally {
         setFollowLoading(false);
       }
@@ -46,28 +114,82 @@ const FollowButton: React.FC<FollowButtonProps> = ({ user, currentUser }) => {
   };
 
   const handleUnfollow = async () => {
-    setFollowLoading(true);
+    if (!user) return;
+
+    setUnfollowLoading(true);
+    setLocalIsFollowing(false);
+
+    const previousData = queryClient.getQueryData([
+      "profile_data",
+      user.name,
+    ]) as ProfileData;
+
+    // Calculate new followers count
+    const newFollowers = (previousData?.user?.followers || []).filter(
+      (id: string) => id !== currentUser?.id
+    );
+
+    // Update follower count immediately
+    onFollowerUpdate?.(newFollowers.length);
+
+    // Optimistically update UI
+    queryClient.setQueryData(
+      ["profile_data", user.name],
+      (oldData: ProfileData | undefined) => {
+        if (!oldData) return oldData;
+
+        return {
+          ...oldData,
+          currentUser: {
+            ...oldData.currentUser,
+            following: (oldData.currentUser?.following || []).filter(
+              (id: string) => id !== user.id
+            ),
+          },
+          user: {
+            ...oldData.user,
+            followers: newFollowers,
+          },
+        };
+      }
+    );
 
     try {
-      const res = await fetch(`/api/follow/${user?.name}`, {
+      const res = await fetch(`/api/follow/${user.name}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ followId: user?.id }),
+        body: JSON.stringify({ followId: user.id }),
       });
 
       if (res.ok) {
         setModal(false);
-        router.refresh();
-        toast.success("Success");
+        await queryClient.invalidateQueries({
+          queryKey: ["profile_data", user.name],
+        });
+        toast.success("Successfully unfollowed user");
+      } else {
+        // Revert optimistic updates
+        setLocalIsFollowing(true);
+        queryClient.setQueryData(["profile_data", user.name], previousData);
+        onFollowerUpdate?.(previousData?.user?.followers?.length ?? 0);
+        toast.error("Failed to unfollow user");
       }
-    } catch (error: any) {
-      throw new Error(error);
+    } catch (error) {
+      // Revert optimistic updates
+      setLocalIsFollowing(true);
+      queryClient.setQueryData(["profile_data", user.name], previousData);
+      onFollowerUpdate?.(previousData?.user?.followers?.length ?? 0);
+      toast.error("Failed to unfollow");
     } finally {
-      setFollowLoading(false);
+      setUnfollowLoading(false);
     }
   };
+
+  if (!currentUser || !user) {
+    return null;
+  }
 
   return (
     <>
@@ -78,7 +200,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({ user, currentUser }) => {
         onClick={handleFollow}
         disabled={followLoading}
       >
-        {currentUser?.following.includes(user?.id as string) ? (
+        {localIsFollowing ? (
           <span className="flex items-center">
             <span className="pt-[2px]">Following</span>
           </span>
@@ -97,10 +219,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({ user, currentUser }) => {
         )}
       </button>
       {modal && (
-        <div
-          id={currentUser?.id}
-          className="fixed z-50 inset-0 overflow-y-auto"
-        >
+        <div id={currentUser.id} className="fixed z-50 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div
               className="fixed inset-0 transition-opacity"
@@ -156,7 +275,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({ user, currentUser }) => {
                     className="text-lg leading-6 font-medium text-gray-900"
                     id="modal-headline"
                   >
-                    Warining
+                    Warning
                   </h3>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
@@ -175,11 +294,11 @@ const FollowButton: React.FC<FollowButtonProps> = ({ user, currentUser }) => {
                   <ClipLoader
                     color="#fff"
                     size={20}
-                    loading={followLoading}
+                    loading={unfollowLoading}
                     className="mr-1"
                   />
                   <span className="pt-[2px]">
-                    {followLoading ? "Confirming..." : "Confirm"}
+                    {unfollowLoading ? "Confirming..." : "Confirm"}
                   </span>
                 </button>
                 <button

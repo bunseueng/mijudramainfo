@@ -5,7 +5,7 @@ import OptimizedContentDetails from "./OptimizedContentDetails";
 interface OptimizedContentWrapperProps {
   currentItem: any;
   itemLink: string;
-  getRating: string; // Changed from () => string to string
+  getRating: number; // Changed from () => string to string
   contentVariants: any;
 }
 
@@ -24,7 +24,7 @@ const OptimizedContentWrapper: React.FC<OptimizedContentWrapperProps> = ({
     className="w-auto absolute inset-x-0 bottom-0 sm:bottom-16 md:bottom-24 lg:bottom-32 xl:bottom-40 2xl:bottom-48 px-4 md:px-4 min-w-[1888px]:px-4 z-[200]"
   >
     <div className="md:max-w-7xl lg:max-w-[1808px] mx-auto relative text-left text-white font-bold">
-      <div className="absolute bottom-0 left-0 w-full pb-4 sm:pb-6 md:pb-8 lg:pb-10">
+      <div className="absolute bottom-0 left-0 md:left-10 w-full pb-4 sm:pb-6 md:pb-8 lg:pb-10">
         <motion.h2
           variants={{
             hidden: { opacity: 0 },

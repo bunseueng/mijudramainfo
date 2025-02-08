@@ -38,7 +38,7 @@ const SliderContentSkeleton = () => (
   </div>
 );
 
-const HeaderSlider = ({ existingRatings }: any) => {
+const HeaderSlider = () => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [direction, setDirection] = useState<number>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -50,8 +50,8 @@ const HeaderSlider = ({ existingRatings }: any) => {
     genreBG: "",
     center: "",
   });
-
   const getColorFromImage = useColorFromImage();
+
   const { ref, inView } = useInView({
     threshold: 0.1,
     triggerOnce: true,
@@ -154,7 +154,7 @@ const HeaderSlider = ({ existingRatings }: any) => {
               <SliderContent
                 currentItem={currentItem}
                 direction={direction}
-                existingRatings={existingRatings}
+                filteredData={filteredData}
                 {...colorState}
               />
             </div>

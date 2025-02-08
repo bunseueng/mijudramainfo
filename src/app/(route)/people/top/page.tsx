@@ -4,8 +4,6 @@ import React, { Suspense } from "react";
 import TopPeople from "./TopPeople";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import { currentUserProps } from "@/helper/type";
-import prisma from "@/lib/db";
-import { PersonDb } from "@/app/component/ui/Fetching/Person";
 
 export const metadata: Metadata = {
   title: "Top People",

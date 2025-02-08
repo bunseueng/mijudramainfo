@@ -80,7 +80,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, session, trigger }) {
+    async jwt({ token, user, session, trigger, account }) {
       if (user) {
         const sanitizedUsername = user.name ? user.name.replace(/\s+/g, "") : user.name
         return {
@@ -108,7 +108,10 @@ export const authOptions: NextAuthOptions = {
           image: token.image as string,
           lastLogin: new Date(),
         },
-      })
+      })  
+      if (account) {
+        token.accessToken = account.access_token;
+      }
       return token
     },
 
@@ -123,10 +126,11 @@ export const authOptions: NextAuthOptions = {
       } else {
         session.expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 1 day (default)
       }
+      session.accessToken = token.accessToken;
       return session
     },
 
-    async signIn({ account, profile }: any) {
+    async signIn({account, profile }: any) {
       try {
         if (account?.provider === "google") {
           const existingUser = await prisma.user.findUnique({ where: { email: profile.email } })
@@ -146,7 +150,6 @@ export const authOptions: NextAuthOptions = {
             })
           }
         }
-
         return true
       } catch (error: any) {
         console.error("Error signing in with provider:", account?.provider, "Error message:", error.message)

@@ -56,9 +56,9 @@ const HomeCard = ({
   }, [emblaApi]);
 
   const getRating = (result: any) => {
-    const existingRating = existingRatings?.find(
-      (item: any) => item.id === result.id
-    )?.rating;
+    const existingRating =
+      Array.isArray(existingRatings) &&
+      existingRatings?.find((item: any) => item.id === result.id)?.rating;
     if (existingRating) {
       return existingRating.toFixed(1);
     }
@@ -98,7 +98,7 @@ const HomeCard = ({
           [id]: `linear-gradient(rgba(${r},${g},${b},0) 1%, rgb(${r},${g},${b}) 100%)`,
         }));
       } catch (error) {
-        console.error("Error extracting color:", error);
+        throw new Error("Failed to extracted image");
       }
     },
     [getColorFromImage]

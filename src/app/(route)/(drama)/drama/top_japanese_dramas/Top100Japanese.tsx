@@ -10,13 +10,16 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import dynamic from "next/dynamic";
 import ExploreCard from "@/app/component/ui/Card/ExploreCard";
-import { Drama } from "../top/TopDrama";
+import { DramaDB, PersonDBType } from "@/helper/type";
+import { useDatabase } from "@/hooks/useDatabase";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
   { ssr: false }
 );
 
-const Top100Japanese = ({ getDrama, personDB }: Drama) => {
+const Top100Japanese = () => {
+  const { data } = useDatabase();
+  const { getDrama, personDB } = { ...data };
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams?.get("page") || "1");
@@ -85,8 +88,8 @@ const Top100Japanese = ({ getDrama, personDB }: Drama) => {
         title={title}
         total_results={total_results}
         currentPage={currentPage}
-        getDrama={getDrama}
-        personDB={personDB}
+        getDrama={getDrama as DramaDB[] | []}
+        personDB={personDB as PersonDBType[] | []}
         tvRating={tvRating}
         top_drama={top_drama}
         items={total_results}

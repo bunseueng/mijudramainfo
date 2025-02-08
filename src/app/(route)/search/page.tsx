@@ -1,16 +1,15 @@
 import { Suspense } from "react";
-import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import dynamic from "next/dynamic";
-import prisma from "@/lib/db";
 import { Metadata } from "next";
-const SearchQuery = dynamic(
-  () => import("../../component/ui/Search/SearchQuery")
-);
+import { getCurrentUser } from "@/app/actions/getCurrentUser";
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading")
 );
+const SearchQuery = dynamic(
+  () => import("../../component/ui/Search/SearchQuery")
+);
 
-export async function generateMetadata(props: any): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   const url = `${process.env.BASE_URL}/search`;
   return {
     title: "Search",
@@ -23,19 +22,10 @@ export async function generateMetadata(props: any): Promise<Metadata> {
 const SearchPage = async () => {
   const BASE_URL = "https://api.themoviedb.org/3/search/multi";
   const currentUser = await getCurrentUser();
-  const getMovie = await prisma.movie.findMany();
-  const getDrama = await prisma.drama.findMany();
-  const getPerson = await prisma.person.findMany();
   return (
-    <div>
+    <div className="mt-10">
       <Suspense fallback={<SearchLoading />}>
-        <SearchQuery
-          BASE_URL={BASE_URL}
-          currentUser={currentUser}
-          getMovie={getMovie}
-          getDrama={getDrama}
-          getPerson={getPerson}
-        />
+        <SearchQuery BASE_URL={BASE_URL} currentUser={currentUser} />
       </Suspense>
     </div>
   );

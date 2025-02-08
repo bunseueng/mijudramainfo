@@ -23,7 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { IList, SearchParamsType, WatchListProps } from "@/helper/type";
+import { List, SearchParamsType, UserProps } from "@/helper/type";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -43,7 +43,15 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
-const Watchlist: React.FC<WatchListProps & IList> = ({
+interface WatchListProps {
+  tv_id: { id: number; updatedAt: Date } | { id: number; updatedAt: Date }[];
+  existedFavorite: any[] | undefined;
+  user: UserProps | null;
+  list: List[];
+  movieId: { id: number; updatedAt: Date } | { id: number; updatedAt: Date }[];
+}
+
+const Watchlist: React.FC<WatchListProps> = ({
   tv_id,
   existedFavorite,
   user,
@@ -73,7 +81,7 @@ const Watchlist: React.FC<WatchListProps & IList> = ({
         : [tv_id.id];
       const movie_id = Array.isArray(movieId)
         ? movieId.map((item) => item?.id)
-        : [movieId.movieId];
+        : [movieId.id];
 
       // Fetch TV details and add media_type property
       const tvDetails = await Promise.all(

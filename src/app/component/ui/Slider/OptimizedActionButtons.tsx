@@ -28,7 +28,7 @@ const OptimizedActionButtons: React.FC<OptimizedActionButtonsProps> = ({
   >
     <ActionButton
       href={`${itemLink}?success=true`}
-      className="bg-orange-700 hover:bg-orange-800 text-white relative z-[250]"
+      className="bg-cyan-700 hover:bg-cyan-600 text-white relative z-[250]"
       icon={<Play className="mr-3 h-5 w-5 sm:h-6 sm:w-6" />}
       text="Watch Trailer"
       ariaLabel={`Watch trailer for ${title}`}
@@ -36,7 +36,7 @@ const OptimizedActionButtons: React.FC<OptimizedActionButtonsProps> = ({
     />
     <ActionButton
       href={itemLink}
-      className="border border-white/20 text-white hover:bg-white hover:text-gray-900 relative z-[250]"
+      className="bg-white text-gray-900 hover:bg-gray-100 hover:text-gray-800 border border-gray-300 relative z-[250]"
       icon={<Info className="mr-3 h-5 w-5 sm:h-6 sm:w-6" />}
       text="More Info"
       ariaLabel={`View more information about ${title}`}

@@ -11,6 +11,7 @@ import { Suspense, useState } from "react";
 import dynamic from "next/dynamic";
 import ExploreCard from "@/app/component/ui/Card/ExploreCard";
 import { DramaDB, PersonDBType } from "@/helper/type";
+import { useDatabase } from "@/hooks/useDatabase";
 
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading"),
@@ -22,7 +23,9 @@ export type Drama = {
   personDB: PersonDBType[] | any;
 };
 
-const TopDrama = ({ getDrama, personDB }: Drama) => {
+const TopDrama = () => {
+  const { data } = useDatabase();
+  const { getDrama, personDB } = { ...data };
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams?.get("page") || "1");
@@ -72,8 +75,8 @@ const TopDrama = ({ getDrama, personDB }: Drama) => {
         title={title}
         total_results={topDramas.total_results}
         currentPage={currentPage}
-        getDrama={getDrama}
-        personDB={personDB}
+        getDrama={getDrama as DramaDB[] | []}
+        personDB={personDB as PersonDBType[] | []}
         tvRating={tvRating}
         top_drama={top_drama}
         items={topDramas.total_results}

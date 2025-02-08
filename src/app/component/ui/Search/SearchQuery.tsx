@@ -5,18 +5,15 @@ import { useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
 import { SearchPagination } from "../Pagination/SearchPagination";
 import dynamic from "next/dynamic";
+import { useDatabase } from "@/hooks/useDatabase";
 const Results = dynamic(() => import("@/app/component/ui/Search/Results"));
 const SearchLoading = dynamic(() => import("../Loading/SearchLoading"), {
   ssr: false,
 });
 
-const SearchQuery = ({
-  BASE_URL,
-  currentUser,
-  getMovie,
-  getDrama,
-  getPerson,
-}: any) => {
+const SearchQuery = ({ BASE_URL, currentUser }: any) => {
+  const { data } = useDatabase();
+  const { getDrama, getMovie, personDB } = { ...data };
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams(); // Assuming you have this declared somewhere
   const currentPage = parseInt(searchParams?.get("page") || "1");
@@ -107,7 +104,7 @@ const SearchQuery = ({
             currentUser={currentUser}
             getDrama={getDrama}
             getMovie={getMovie}
-            getPerson={getPerson}
+            getPerson={personDB}
             BASE_URL={BASE_URL}
           />
           <div className="flex flex-wrap items-start justify-start max-w-6xl mx-auto px-1 md:px-2 pb-10">

@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: [
+    matcher: ['/(api/(?!auth).*)/:path*',
         '/api/approve-paypal', 
         '/api/coverphoto', 
         '/api/create-order', 

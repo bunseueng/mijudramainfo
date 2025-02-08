@@ -71,144 +71,150 @@ const ExploreCard = ({
               <h1 className="text-2xl font-bold">{title}</h1>
               <p>{total_results} results</p>
             </div>
-            {top_drama?.map((drama: any, idx: number) => {
-              const startCal = (currentPage - 1) * per_page;
-              const overallIndex = startCal + idx + 1;
-              const drama_db = getDrama?.find(
-                (d: any) => d?.tv_id && d?.tv_id?.includes(drama?.id)
-              );
-              const currentDramaRating = tvRating?.find((data: any) =>
-                data.tvId.includes(drama?.id)
-              );
-              const rating = currentDramaRating?.rating;
-              const [detail]: DramaDetails[] = (drama_db?.details ||
-                []) as unknown as DramaDetails[];
-              const [info]: DramaReleasedInfo[] =
-                (drama_db?.released_information ||
-                  []) as unknown as DramaReleasedInfo[];
-              return (
-                <div
-                  className="flex border-2 bg-white dark:bg-[#242424] dark:border-[#272727] rounded-lg p-4 mb-10"
-                  key={drama?.id}
-                >
-                  <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
-                    <div className="relative">
-                      <Link
-                        prefetch={false}
-                        href={`/tv/${drama?.id}-${spaceToHyphen(
-                          drama?.title || drama?.name
-                        )}`}
-                      >
-                        {drama?.poster_path || drama?.backdrop_path !== null ? (
-                          <Image
-                            src={
-                              drama_db
-                                ? (drama_db?.cover as string)
-                                : `https://image.tmdb.org/t/p/original/${
-                                    drama.poster_path || drama.backdrop_path
-                                  }`
-                            }
-                            alt={drama?.name || drama?.title || "Drama Poster"}
-                            width={200}
-                            height={200}
-                            style={{ width: "100%", height: "100%" }}
-                            priority
-                            className="w-full object-cover align-middle overflow-clip"
-                          />
-                        ) : (
-                          <Image
-                            src="/placeholder-image.avif"
-                            alt={drama?.name || drama?.title || "Drama Poster"}
-                            width={200}
-                            height={200}
-                            style={{ width: "100%", height: "100%" }}
-                            priority
-                            className="w-full h-full align-middle overflow-clip"
-                          />
-                        )}
-                      </Link>
+            {top_drama &&
+              top_drama?.map((drama: any, idx: number) => {
+                const startCal = (currentPage - 1) * per_page;
+                const overallIndex = startCal + idx + 1;
+                const drama_db = getDrama?.find(
+                  (d: any) => d?.tv_id && d?.tv_id?.includes(drama?.id)
+                );
+                const currentDramaRating = tvRating?.find((data: any) =>
+                  data.tvId.includes(drama?.id)
+                );
+                const rating = currentDramaRating?.rating;
+                const [detail]: DramaDetails[] = (drama_db?.details ||
+                  []) as unknown as DramaDetails[];
+                const [info]: DramaReleasedInfo[] =
+                  (drama_db?.released_information ||
+                    []) as unknown as DramaReleasedInfo[];
+                return (
+                  <div
+                    className="flex border-2 bg-white dark:bg-[#242424] dark:border-[#272727] rounded-lg p-4 mb-10"
+                    key={drama?.id}
+                  >
+                    <div className="float-left w-[25%] md:w-[20%] px-1 md:px-3 align-top table-cell">
+                      <div className="relative">
+                        <Link
+                          prefetch={false}
+                          href={`/tv/${drama?.id}-${spaceToHyphen(
+                            drama?.title || drama?.name
+                          )}`}
+                        >
+                          {drama?.poster_path ||
+                          drama?.backdrop_path !== null ? (
+                            <Image
+                              src={
+                                drama_db?.cover
+                                  ? (drama_db?.cover as string)
+                                  : `https://image.tmdb.org/t/p/original/${
+                                      drama.poster_path || drama.backdrop_path
+                                    }`
+                              }
+                              alt={
+                                drama?.name || drama?.title || "Drama Poster"
+                              }
+                              width={200}
+                              height={200}
+                              style={{ width: "100%", height: "100%" }}
+                              priority
+                              className="w-full object-cover align-middle overflow-clip"
+                            />
+                          ) : (
+                            <Image
+                              src="/placeholder-image.avif"
+                              alt={
+                                drama?.name || drama?.title || "Drama Poster"
+                              }
+                              width={200}
+                              height={200}
+                              style={{ width: "100%", height: "100%" }}
+                              priority
+                              className="w-full h-full align-middle overflow-clip"
+                            />
+                          )}
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                  <div className="pl-2 md:pl-3 w-[80%]">
-                    <div className="flex items-center justify-between">
-                      <Link
-                        prefetch={false}
-                        href={`/tv/${drama?.id}-${spaceToHyphen(
-                          drama?.title || drama?.name
-                        )}`}
-                        className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
-                      >
-                        {detail?.title || drama?.name || drama?.title}
-                      </Link>
-                      <p>#{overallIndex}</p>
-                    </div>
-                    <p className="text-sm text-slate-400 py-1">
-                      {drama?.type[0] === "Japan"
-                        ? "Japanese"
-                        : drama?.type[0] === "China"
-                        ? "Chinese"
-                        : drama?.type[0] === "Korean"
-                        ? "Korean"
-                        : drama?.type[0]}{" "}
-                      Drama
-                      <span> - </span>
-                      <span>
-                        {getYearFromDate(
-                          info?.release_date?.slice(0, 4) ||
-                            drama?.first_air_date ||
-                            drama?.release_date
-                        )}
+                    <div className="pl-2 md:pl-3 w-[80%]">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          prefetch={false}
+                          href={`/tv/${drama?.id}-${spaceToHyphen(
+                            drama?.title || drama?.name
+                          )}`}
+                          className="text-lg text-sky-700 dark:text-[#2196f3] font-bold"
+                        >
+                          {detail?.title || drama?.name || drama?.title}
+                        </Link>
+                        <p>#{overallIndex}</p>
+                      </div>
+                      <p className="text-sm text-slate-400 py-1">
+                        {drama?.type[0] === "Japan"
+                          ? "Japanese"
+                          : drama?.type[0] === "China"
+                          ? "Chinese"
+                          : drama?.type[0] === "Korean"
+                          ? "Korean"
+                          : drama?.type[0]}{" "}
+                        Drama
                         <span> - </span>
                         <span>
-                          {detail?.episode || drama?.number_of_episodes}{" "}
-                          Episodes
+                          {getYearFromDate(
+                            info?.release_date?.slice(0, 4) ||
+                              drama?.first_air_date ||
+                              drama?.release_date
+                          )}
+                          <span> - </span>
+                          <span>
+                            {detail?.episode || drama?.number_of_episodes}{" "}
+                            Episodes
+                          </span>
                         </span>
-                      </span>
-                    </p>
-                    <div className="flex items-center">
-                      <StyledRating
-                        name="customized-color"
-                        value={convertToFiveStars(
-                          drama && drama.vote_average && rating && rating
-                            ? (drama.vote_average + rating) / 2
-                            : rating && rating
-                            ? rating / 2
-                            : drama && drama.vote_average,
-                          10
-                        )}
-                        readOnly
-                        icon={<FavoriteIcon fontSize="inherit" />}
-                        emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
-                        precision={0.5}
-                      />
-                      <p className="pl-2 pt-1">
-                        {drama && drama.vote_average && rating && rating
-                          ? (
-                              (drama.vote_average * (drama.vote_count || 0) +
-                                (rating || 0) * 10) /
-                              ((drama.vote_count || 0) + 10)
-                            ).toFixed(1)
-                          : rating && rating
-                          ? rating.toFixed(1)
-                          : drama && drama.vote_average
-                          ? drama.vote_average.toFixed(1)
-                          : "0.0"}
                       </p>
-                    </div>
-                    <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
-                      {detail?.synopsis ||
-                        drama?.overview ||
-                        "This drama currently has no synosis."}
-                    </p>
-                    <div className="flex items-center">
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <PlayTrailer tv_id={drama?.id} />
-                      </Suspense>
+                      <div className="flex items-center">
+                        <StyledRating
+                          name="customized-color"
+                          value={convertToFiveStars(
+                            drama && drama.vote_average && rating && rating
+                              ? (drama.vote_average + rating) / 2
+                              : rating && rating
+                              ? rating / 2
+                              : drama && drama.vote_average,
+                            10
+                          )}
+                          readOnly
+                          icon={<FavoriteIcon fontSize="inherit" />}
+                          emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
+                          precision={0.5}
+                        />
+                        <p className="pl-2 pt-1">
+                          {drama && drama.vote_average && rating && rating
+                            ? (
+                                (drama.vote_average * (drama.vote_count || 0) +
+                                  (rating || 0) * 10) /
+                                ((drama.vote_count || 0) + 10)
+                              ).toFixed(1)
+                            : rating && rating
+                            ? rating.toFixed(1)
+                            : drama && drama.vote_average
+                            ? drama.vote_average.toFixed(1)
+                            : "0.0"}
+                        </p>
+                      </div>
+                      <p className="text-md font-semibold line-clamp-3 truncate whitespace-normal my-2">
+                        {detail?.synopsis ||
+                          drama?.overview ||
+                          "This drama currently has no synosis."}
+                      </p>
+                      <div className="flex items-center">
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <PlayTrailer tv_id={drama?.id} />
+                        </Suspense>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
           <div className="w-full md:w-2/6 pl-1 md:pl-3 lg:pl-3">
             <div className="w-full h-[200px] mb-10">

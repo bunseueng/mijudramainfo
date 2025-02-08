@@ -13,16 +13,19 @@ import StarterKit from "@tiptap/starter-kit";
 import React, { lazy, useEffect, useState } from "react";
 import ImageResize from "tiptap-extension-resize-image";
 import Links from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FaCheck, FaList, FaUserCheck } from "react-icons/fa6";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { IoIosArrowDown } from "react-icons/io";
 import {
+  CommentProps,
   currentUserProps,
   FriendRequestProps,
   ITvReview,
+  List,
+  ProfileFeedsTypes,
   UserProps,
 } from "@/helper/type";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +33,8 @@ import { CalendarDays, MapPin, Users } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useProfileData } from "@/hooks/useProfileData";
+import { useUserFriendData } from "@/hooks/useUserFriendData";
+import { useQueryClient } from "@tanstack/react-query";
 
 const RecentLists = lazy(() => import("./lists/RecentLists"));
 const Watchlist = lazy(() => import("./watchlist/Watchlist"));
@@ -45,7 +50,7 @@ const AcceptRejectButton = dynamic(
   { ssr: false }
 );
 
-const DEFAULT_PROFILE_IMAGE = "/default-avatar.webp";
+const DEFAULT_PROFILE_IMAGE = "/default-pf.webp";
 
 export interface User {
   user: UserProps;
@@ -57,16 +62,28 @@ type ProfileItemType = {
 };
 
 const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
   const { data } = useProfileData(name);
+  const { data: friend } = useUserFriendData(data?.user?.id as string);
   const [editable, setEditable] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false);
   const [friRequestModal, setFriRequestModal] = useState<boolean>(false);
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const sortby = searchParams?.get("sortby") ?? "";
+  const [friendRequests, setFriendRequests] = useState(data?.friend);
+  const [followerLength, setFollowerLength] = useState<number>(0);
+
+  // Update follower count when data changes or when follow/unfollow happens
+  useEffect(() => {
+    if (data?.user?.followers) {
+      setFollowerLength(data.user.followers.length);
+    }
+  }, [data?.user?.followers]);
+
+  const handleFollowerUpdate = (count: number) => {
+    setFollowerLength(count);
+  };
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -102,15 +119,13 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
     if (!user) return DEFAULT_PROFILE_IMAGE;
     return user.profileAvatar || user.image || DEFAULT_PROFILE_IMAGE;
   };
-
   const getAllCurrentUserFriend =
     data?.friends?.filter(
       (fri: FriendRequestProps) =>
-        fri?.friendRespondId &&
-        fri?.friendRequestId &&
-        [fri.friendRespondId, fri.friendRequestId].includes(data.user?.id ?? "")
+        (fri.friendRespondId === data.user?.id ||
+          fri.friendRequestId === data.user?.id) &&
+        fri.status === "accepted"
     ) ?? [];
-
   const getCurrentUserRespondFri =
     data?.users?.filter((userFri: UserProps) =>
       data?.friends
@@ -130,40 +145,106 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
     }
 
     setLoading(true);
+
+    // Optimistically update UI
+    const newFriendRequest = {
+      friendRespondId: data.user.id,
+      friendRequestId: data.currentUser.id,
+      profileAvatar: data.currentUser.profileAvatar,
+      image: data.currentUser.image,
+      name: data.currentUser.name,
+      country: data.currentUser.country,
+      status: "pending",
+      actionDatetime: new Date(),
+    };
+
+    // Optimistically update the cache
+    queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
+      ...oldData,
+      friends: [...(oldData?.friends || []), newFriendRequest],
+    }));
+
     try {
       const response = await fetch("/api/friend/addFriend", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          friendRespondId: data.user.id,
-          friendRequestId: data.currentUser.id,
-          profileAvatar: data.currentUser.profileAvatar,
-          image: data.currentUser.image,
-          name: data.currentUser.name,
-          country: data.currentUser.country,
-          actionDatetime: new Date(),
-        }),
+        body: JSON.stringify(newFriendRequest),
       });
+
       if (response.ok) {
-        router.refresh();
+        // Invalidate and refetch queries to ensure data consistency
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: ["profile_data", name],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ["user_friend_data", data?.user?.id],
+          }),
+        ]);
         toast.success("Friend request sent!");
       } else {
+        // Revert optimistic update on error
+        queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
+          ...oldData,
+          friends: oldData.friends.filter(
+            (f: any) =>
+              f.friendRequestId !== data.currentUser?.id ||
+              f.friendRespondId !== data.user?.id
+          ),
+        }));
         toast.error("Failed to send friend request");
       }
     } catch (error) {
-      console.error("Error sending friend request:", error);
+      // Revert optimistic update on error
+      queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
+        ...oldData,
+        friends: oldData.friends.filter(
+          (f: any) =>
+            f.friendRequestId !== data.currentUser?.id ||
+            f.friendRespondId !== data.user?.id
+        ),
+      }));
       toast.error("An error occurred while sending friend request");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const deleteFriend = async (friendRequestId: string) => {
+  const deleteFriend = async (
+    friendRequestId: string,
+    currentUserId: string
+  ) => {
     if (!friendRequestId) {
       toast.error("Invalid friend request");
       return;
     }
+
+    setLoading(true);
+
+    // Store the current state for potential rollback
+    const previousData = queryClient.getQueryData(["profile_data", name]);
+    const previousFriendData = queryClient.getQueryData([
+      "user_friend_data",
+      data?.user?.id,
+    ]);
+
+    // Optimistically update UI
+    queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
+      ...oldData,
+      friends: oldData.friends.filter(
+        (f: any) =>
+          f.friendRequestId !== friendRequestId &&
+          f.friendRespondId !== friendRequestId
+      ),
+    }));
+
+    queryClient.setQueryData(
+      ["user_friend_data", data?.user?.id],
+      (oldData: any) =>
+        oldData?.filter((f: any) => f.friendId !== friendRequestId)
+    );
 
     try {
       const response = await fetch("/api/friend/addFriend", {
@@ -171,17 +252,41 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ friendRequestId }),
+        body: JSON.stringify({ friendRequestId, currentUserId }),
       });
+
       if (response.ok) {
-        router.refresh();
-        toast.success("Success");
+        // Invalidate and refetch queries to ensure data consistency
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: ["profile_data", name],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ["user_friend_data", data?.user?.id],
+          }),
+        ]);
+        setModal(false);
+        toast.success("Friend removed successfully");
       } else {
-        toast.error("Failed to delete friend");
+        // Revert optimistic updates on error
+        queryClient.setQueryData(["profile_data", name], previousData);
+        queryClient.setQueryData(
+          ["user_friend_data", data?.user?.id],
+          previousFriendData
+        );
+        toast.error("Failed to remove friend");
       }
     } catch (error) {
-      console.error("Error delete friend:", error);
+      // Revert optimistic updates on error
+      queryClient.setQueryData(["profile_data", name], previousData);
+      queryClient.setQueryData(
+        ["user_friend_data", data?.user?.id],
+        previousFriendData
+      );
+      console.error("Error removing friend:", error);
       toast.error("An error occurred while removing friend");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -209,6 +314,9 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
         fri.friendRespondId === data?.user?.id)
   )?.status;
 
+  const uniqueFriends = Array.from(
+    new Map(friend?.map((friend) => [friend.friendId, friend])).values()
+  );
   useEffect(() => {
     setIsMounted(true);
     return () => {
@@ -264,7 +372,7 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
                   </div>
                   <div className="min-[56px]">
                     <Links href="" className="block">
-                      <span>{data?.user?.followers?.length ?? 0}</span>
+                      <span>{followerLength}</span>
                       <span className="block text-[#818a91] md:text-sm lg:text-md">
                         Followers
                       </span>
@@ -368,74 +476,41 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
               </div>
               <div className="border-b border-b-[#78828c21] m-0"></div>
               <div className="text-center px-3 py-2">
-                <Links
-                  href=""
-                  className="flex flex-wrap items-center relative leading-9 rounded-full whitespace-nowrap"
-                >
-                  {data?.friends && data.friends.length > 0 ? (
-                    data.friends.some((fri: FriendRequestProps) =>
-                      fri?.friendRespondId?.includes(data?.user?.id ?? "")
-                    ) ? (
-                      getAllCurrentUserFriend.filter(
-                        (stat: FriendRequestProps) => stat?.status !== "pending"
-                      ).length > 0 ? (
-                        getAllCurrentUserFriend
-                          .filter(
-                            (stat: FriendRequestProps) =>
-                              stat?.status !== "pending"
-                          )
-                          .map((fri: FriendRequestProps) => (
-                            <Image
-                              key={fri?.id}
-                              src={
-                                fri?.profileAvatar ||
-                                fri?.image ||
-                                DEFAULT_PROFILE_IMAGE
-                              }
-                              alt={fri?.name || "Friend"}
-                              width={200}
-                              height={200}
-                              quality={100}
-                              priority
-                              className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
-                            />
-                          ))
-                      ) : (
-                        <div>
-                          {data.user?.displayName || data.user?.name || "User"}{" "}
-                          does not have any friends yet.
+                {uniqueFriends.length > 0 ? (
+                  uniqueFriends.map((fri) => {
+                    return (
+                      <Links
+                        key={fri.id}
+                        href={`/profile/${fri.name}`}
+                        className="inline-block"
+                      >
+                        <div className="relative group">
+                          <Image
+                            src={
+                              fri.profileAvatar ||
+                              fri.image ||
+                              DEFAULT_PROFILE_IMAGE
+                            }
+                            alt={fri.name || "Friend"}
+                            width={200}
+                            height={200}
+                            quality={100}
+                            priority
+                            className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full"
+                          />
+                          <div className="absolute bottom-[-20px] left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity">
+                            {fri.name}
+                          </div>
                         </div>
-                      )
-                    ) : getCurrentUserRespondFri.length > 0 ? (
-                      getCurrentUserRespondFri.map((fri) => (
-                        <Image
-                          key={fri?.id}
-                          src={
-                            fri?.profileAvatar ||
-                            fri?.image ||
-                            DEFAULT_PROFILE_IMAGE
-                          }
-                          alt={fri?.name || "Friend"}
-                          width={200}
-                          height={200}
-                          quality={100}
-                          priority
-                          className="w-[40px] h-[40px] bg-center bg-cover object-cover align-middle rounded-full mr-3"
-                        />
-                      ))
-                    ) : (
-                      <div>
-                        {data.user?.displayName || data.user?.name || "User"}{" "}
-                        does not have any friends yet.
-                      </div>
-                    )
-                  ) : (
-                    <div>
-                      {data?.user?.displayName || data?.user?.name || "User"}{" "}
-                      does not have any friends yet.
-                    </div>
-                  )}
-                </Links>
+                      </Links>
+                    );
+                  })
+                ) : (
+                  <div className="w-full text-center">
+                    {data?.user?.displayName || data?.user?.name || "User"} does
+                    not have any friends yet.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -523,7 +598,8 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
                             onClick={() =>
                               deleteFriend(
                                 friendRequestId?.friendRequestId?.toString() ??
-                                  ""
+                                  "",
+                                data?.currentUser?.id ?? ""
                               )
                             }
                           >
@@ -568,7 +644,10 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
                         <span
                           className="text-xs md:text-sm absolute top-[40px] md:top-[50px] right-[89px] md:right-[97px] dark:bg-[#3a3b3c] dark:bg-opacity-50 rounded-md px-5 md:px-6 py-2"
                           onClick={() =>
-                            deleteFriend(data?.currentUser?.id ?? "")
+                            deleteFriend(
+                              data?.currentUser?.id ?? "",
+                              data?.currentUser?.id ?? ""
+                            )
                           }
                         >
                           <p>Cancel Request</p>
@@ -618,7 +697,7 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
                       .map((item: FriendRequestProps, idx: number) => (
                         <div key={idx} className="mr-3">
                           <AcceptRejectButton
-                            friend={data?.friends}
+                            setFriendRequests={setFriendRequests}
                             item={item}
                           />
                         </div>
@@ -627,6 +706,7 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
                   <FollowButton
                     user={data?.user as UserProps}
                     currentUser={data?.currentUser as currentUserProps | null}
+                    onFollowerUpdate={handleFollowerUpdate}
                   />
                 </div>
               )}
@@ -675,39 +755,40 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
 
               {pathname === `/profile/${data?.user?.name}/watchlist` && (
                 <Watchlist
-                  tv_id={data?.tv_id as any}
-                  existedFavorite={data?.existedFavorite as any}
-                  user={data?.user as any}
-                  list={data?.formattedLists as any}
-                  tvId={data?.tv_id as any}
-                  movieId={data?.movie_id as any}
+                  tv_id={
+                    data?.tv_id as
+                      | { id: number; updatedAt: Date }
+                      | { id: number; updatedAt: Date }[]
+                  }
+                  existedFavorite={data?.existedFavorite}
+                  user={data?.user as UserProps}
+                  list={data?.formattedLists as List[] | []}
+                  movieId={
+                    data?.movie_id as
+                      | { id: number; updatedAt: Date }
+                      | { id: number; updatedAt: Date }[]
+                  }
                 />
               )}
 
               {pathname === `/profile/${data?.user?.name}/lists` && (
-                <ProfileList
-                  list={data?.formattedLists as any}
-                  movieId={data?.movie_id as any}
-                  tvId={data?.tv_id as any}
-                />
+                <ProfileList list={data?.formattedLists as List[] | []} />
               )}
 
               {pathname === `/profile/${data?.user?.name}/feeds` && (
                 <Feeds
-                  user={data?.user as any}
-                  users={data?.users as any}
-                  currentUser={data?.currentUser as any}
-                  getFeeds={data?.getFeeds as any}
-                  getComment={data?.getComment as any}
+                  user={data?.user as UserProps}
+                  users={data?.users as UserProps[]}
+                  currentUser={data?.currentUser as currentUserProps}
+                  getFeeds={data?.getFeeds as ProfileFeedsTypes[] | []}
+                  getComment={data?.getComment as CommentProps[]}
                 />
               )}
 
               {pathname === `/profile/${data?.user?.name}/reviews` && (
                 <ProfileReviews
-                  getDrama={data?.getDrama as any}
-                  getReview={data?.formattedReviews as ITvReview | any}
-                  currentUser={data?.currentUser as any}
-                  tv_id=""
+                  getReview={data?.formattedReviews as ITvReview[]}
+                  currentUser={data?.currentUser as currentUserProps}
                 />
               )}
             </div>

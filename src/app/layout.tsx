@@ -113,11 +113,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "MijuDramaInfo",
+    url: "https://mijudramainfo.vercel.app/",
+  };
   return (
     <html lang="en" className={`${nunito.variable} font-sans`}>
       <head>
         <link rel="canonical" href={`${process.env.BASE_URL}`} />
+        <link rel="icon" href="/favicon.ico" />
         <meta name="google-adsense-account" content="ca-pub-3369705912051027" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
       </head>
       <body className="bg-white dark:bg-[#111319]" suppressHydrationWarning>
         <Providers>

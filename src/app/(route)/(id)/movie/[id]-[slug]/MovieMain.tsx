@@ -27,6 +27,7 @@ import MovieDetails from "@/app/component/ui/Movie/MovieDetails";
 import { useMovieData } from "@/hooks/useMovieData";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
+import WatchNowButton from "@/app/component/ui/Button/WatchNowButton";
 
 type MovieMainProps = {
   movie_id: string;
@@ -322,23 +323,27 @@ const MovieMain = ({
           >
             <div className="px-3">
               <div className="flex flex-col md:flex-row content-center max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5 mt-5">
-                <Image
-                  ref={imgRef}
-                  onLoad={extractColor}
-                  src={
-                    getMovie?.cover ||
-                    `https://image.tmdb.org/t/p/${
-                      movie?.poster_path ? "w500" : "w780"
-                    }/${movie?.poster_path || movie?.backdrop_path}`
-                  }
-                  alt={movie?.name || "Movie Poster"}
-                  width={300}
-                  height={440}
-                  quality={100}
-                  priority
-                  className="block align-middle !w-[300px] md:!min-w-[300px] !h-[440px] bg-cover object-cover rounded-lg md:pl-0"
-                />
-
+                <div className="w-auto h-full">
+                  <Image
+                    ref={imgRef}
+                    onLoad={extractColor}
+                    src={
+                      getMovie?.cover ||
+                      `https://image.tmdb.org/t/p/${
+                        movie?.poster_path ? "w500" : "w780"
+                      }/${movie?.poster_path || movie?.backdrop_path}`
+                    }
+                    alt={movie?.name || "Movie Poster"}
+                    width={300}
+                    height={440}
+                    quality={100}
+                    priority
+                    className="block align-middle !w-[300px] md:!min-w-[300px] !h-[440px] bg-cover object-cover rounded-lg md:pl-0"
+                  />
+                  <div className="!w-[300px] md:!min-w-[300px] my-3">
+                    <WatchNowButton link={`/movie/${movie?.id}/watch`} />
+                  </div>
+                </div>
                 <div className="md:pl-4 lg:pl-8 py-5">
                   <MovieHeader
                     title={detail?.title || movie?.title || movie?.name}

@@ -1043,7 +1043,7 @@ export const fetchRatings = cache(async (ids: string[]) => {
     if (!response.ok) throw new Error("Failed to fetch ratings");
     return response.json();
   } catch (error) {
-    console.error("Error fetching ratings:", error);
+    throw new Error("Failed to fetch ratings");
     return {};
   }
 });

@@ -6,7 +6,7 @@ import OptimizedOverview from "./OptimizedOverview";
 import OptimizedActionButtons from "./OptimizedActionButtons";
 
 interface OptimizedContentDetailsProps {
-  rating: string;
+  rating: number;
   releaseYear: string;
   currentItem: any;
   overview: string;

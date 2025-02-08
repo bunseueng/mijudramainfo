@@ -11,7 +11,7 @@ const PopularityModal = dynamic(() => import("../Modal/PopularityModal"), {
   ssr: false,
 });
 
-interface Popularity {
+export interface Popularity {
   itemId: string;
   personId: string;
   starCount: number;

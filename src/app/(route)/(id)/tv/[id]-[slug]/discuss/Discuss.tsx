@@ -226,7 +226,7 @@ const Discuss = ({ user, users, tv_id, getComment, type }: DiscussProps) => {
             <div className="text-md font-bold">
               <div className="relative inline-block float-left w-[38px] h-[38px] md:w-[48px] md:h-[48px] bg-[#3e4042] mr-3 rounded-full">
                 <ReusedImage
-                  src={user?.profileAvatar || user?.image || "/default-pf.jpg"}
+                  src={user?.profileAvatar || user?.image || "/default-pf.webp"}
                   alt={`${user?.displayName || user?.name}'s profile avatar`}
                   width={48}
                   height={48}

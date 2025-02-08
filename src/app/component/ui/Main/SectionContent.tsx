@@ -1,16 +1,10 @@
 "use client";
 
-import {
-  Suspense,
-  lazy,
-  useCallback,
-  useEffect,
-  useState,
-  useRef,
-} from "react";
+import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import HomeCardSkeleton from "../Loading/HomeLoading";
-import { LoaderCircle } from "lucide-react";
+import { useDatabase } from "@/hooks/useDatabase";
+import { DramaDB, IRating } from "@/helper/type";
 
 const HomeDrama = lazy(() => import("./HomeDrama"));
 
@@ -27,11 +21,12 @@ const CATEGORIES = [
   { key: "chineseAnime", title: "Chinese Anime", path: "tv" },
 ];
 
-function SectionContent({ personDB, getDrama, existingRatings }: any) {
+function SectionContent() {
+  const { data } = useDatabase();
+  const { getDrama, personDB, rating } = { ...data };
   const [visibleCategories, setVisibleCategories] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -78,8 +73,8 @@ function SectionContent({ personDB, getDrama, existingRatings }: any) {
       <div className="min-h-[60vh]">
         <Suspense fallback={<HomeCardSkeleton />}>
           <HomeDrama
-            getDrama={getDrama}
-            existingRatings={existingRatings}
+            getDrama={getDrama as DramaDB[] | []}
+            existingRatings={rating as unknown as IRating[] | []}
             personDB={personDB}
             visibleCategories={hasScrolled ? visibleCategories : 1}
             hasMoreCategories={hasMoreCategories}

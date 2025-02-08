@@ -391,7 +391,6 @@ export const footer = [
 ];
 
 export const footer_watch = [
-  
   {
     link: "/watch/tv",
     label: "Watch Drama",
@@ -404,7 +403,7 @@ export const footer_watch = [
     link: "/watch/anime",
     label: "Watch Anime",
   },
-]
+];
 
 export const footerRecommend = [
   {
@@ -423,11 +422,6 @@ export const footerRecommend = [
 
 export const sessionItems = [
   {
-    icon: <IoMailOutline />,
-    link: "",
-    label: "Message",
-  },
-  {
     icon: <LiaUserFriendsSolid />,
     link: "/friends",
     label: "Friends",
@@ -439,7 +433,7 @@ export const sessionItems = [
   },
   {
     icon: <FaRegRectangleList />,
-    link: "",
+    link: "/profile/",
     label: "My Watchlist",
   },
   {

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import Link from "next/link";
 
-interface WatchNowProps {
+export interface WatchNowProps {
   link: string;
 }
 
@@ -45,7 +45,7 @@ export default function WatchNowButton({ link }: WatchNowProps) {
           </motion.div>
           <motion.span
             initial={{ y: 0 }}
-            animate={{ y: isHovered ? -30 : 0 }}
+            animate={{ y: isHovered ? -38 : 0 }}
             transition={{ type: "tween", duration: 0.2 }}
           >
             Watch Now

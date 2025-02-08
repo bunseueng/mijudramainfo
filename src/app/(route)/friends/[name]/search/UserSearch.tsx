@@ -2,91 +2,96 @@
 
 import { friendItems } from "@/helper/item-list";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { IoPersonAddSharp, IoSearch } from "react-icons/io5";
 import Image from "next/image";
 import { FaUserCheck } from "react-icons/fa6";
-import {
-  currentUserProps,
-  IFriend,
-  ProfilePageProps,
-  SearchParamsType,
-  UserProps,
-} from "@/helper/type";
+import { UserProps } from "@/helper/type";
 import { useDebouncedCallback } from "use-debounce";
-import { useQuery } from "@tanstack/react-query";
-import RingLoader from "react-spinners/RingLoader";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { MdOutlineGroupAdd } from "react-icons/md";
-interface currentUser {
-  currentUser: currentUserProps | null;
-  user: UserProps | null;
+import { useQuery } from "@tanstack/react-query";
+import { useProfileData } from "@/hooks/useProfileData";
+import FriendList from "../FriendList";
+import { getPendingFriendRequests, getUniqueFriends } from "@/lib/friendUtils";
+import { useUserFriendData } from "@/hooks/useUserFriendData";
+
+interface ProfileSearchProps {
+  name: string;
 }
 
-const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
-  user,
-  friend,
-  currentUser,
-  findFriendId,
-}) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const query = searchParams?.get("friQ");
+const UserSearch: React.FC<ProfileSearchProps> = ({ name }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [search, setSearch] = useState<string>("");
-  const {
-    data: friends,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["friends", query], // Add user ID to the key for refetching
+  const [loadingStates, setLoadingStates] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [pendingRequests, setPendingRequests] = useState<Set<string>>(
+    new Set()
+  );
+  const [inputValue, setInputValue] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const { data } = useProfileData(name);
+  const { user, friends, currentUser } = { ...data };
+  const { data: userFriends } = useUserFriendData(user?.id as string);
+  // Get unique friends list
+  const uniqueFriends = getUniqueFriends(userFriends || []);
+  const pendingFriendRequests = getPendingFriendRequests(
+    friends,
+    currentUser?.id as string
+  );
+
+  const { data: searchResults, isLoading: searchLoading } = useQuery({
+    queryKey: ["users", searchTerm],
     queryFn: async () => {
-      const response = await fetch(`/api/user?friQ=${query || ""}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch friends");
-      }
-      return await response.json();
+      const response = await fetch(
+        `/api/friend/search?q=${encodeURIComponent(searchTerm)}`,
+        {
+          headers: {
+            "Cache-Control": "max-age=300",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Search failed");
+      return response.json();
     },
+    enabled: Boolean(searchTerm && searchTerm.length >= 2), // More explicit condition
+    staleTime: 0,
+    gcTime: 300000,
+    retry: false,
+    initialData: { users: [] },
   });
 
-  const updateURLParams = useDebouncedCallback((value: string) => {
-    const params = new URLSearchParams(
-      searchParams as unknown as SearchParamsType
-    );
-    if (value) {
-      params.set("friQ", value);
-    } else {
-      params.delete("friQ");
-    }
-    router.push(`${pathname}/?${params.toString()}`, { scroll: false });
+  // Simplified debounced search
+  const debouncedSearch = useDebouncedCallback((value: string) => {
+    setSearchTerm(value);
   }, 300);
 
-  // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setSearch(value);
-    updateURLParams(value); // Only update the URL with debounced callback
+    setInputValue(value);
+
+    if (!value.trim()) {
+      setSearchTerm(""); // Immediately clear search results
+    } else {
+      debouncedSearch(value.trim());
+    }
   };
 
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isLoading]);
+  }, []);
 
-  const sendFriendRequest = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Add this line
-    setLoading(true);
-    const findUserId = friends?.users?.find((user: UserProps) => user?.id);
+  const sendFriendRequest = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    friendId: string
+  ) => {
+    e.preventDefault();
+    setLoadingStates((prev) => ({ ...prev, [friendId]: true }));
+
     try {
       const response = await fetch("/api/friend/addFriend", {
         method: "POST",
@@ -94,7 +99,7 @@ const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          friendRespondId: findUserId?.id,
+          friendRespondId: friendId,
           friendRequestId: currentUser?.id,
           profileAvatar: currentUser?.profileAvatar,
           image: currentUser?.image,
@@ -104,70 +109,36 @@ const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
         }),
       });
       if (response.ok) {
-        router.refresh();
+        setPendingRequests((prev) => new Set([...prev, friendId]));
         toast.success("Friend request sent!");
       } else {
         toast.error("Failed to send friend request");
       }
     } catch (error) {
       console.error("Error sending friend request:", error);
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [friendId]: false }));
     }
-    setLoading(false);
   };
-  useEffect(() => {
-    if (query) {
-      refetch(); // Refetch data when the query changes
-    }
-  }, [query, refetch]);
 
+  // Helper function to check if a user has a pending request
+  const hasPendingRequest = (userId: string) => {
+    return (
+      pendingRequests.has(userId) ||
+      friends?.find((fri) => userId === fri?.friendRespondId)?.status ===
+        "pending"
+    );
+  };
   return (
-    <div className="max-w-4xl mx-auto my-10 h-screen">
-      <div className="bg-white dark:bg-[#242526] h-[500px] border-2 border-[#d3d3d38c] dark:border-[#00000024] shadow-md border-sm rounded-md">
+    <div className="max-w-6xl mx-auto my-10">
+      <div className="bg-white dark:bg-[#242526] h-screen border-2 border-[#d3d3d38c] dark:border-[#00000024] shadow-md border-sm rounded-md">
         <h1 className="text-2xl font-bold px-5 pt-4">Friends</h1>
-        <ul className="inline-block w-full border-b-2 border-b-[#78828c21] -my-4 pb-1 mt-4">
-          {friendItems
-            ?.filter((item) => {
-              // Conditionally hide "Friend Request" and "User Search" when users don't match
-              if (
-                (item.label === "Friend Request" ||
-                  item.label === "User Search") &&
-                currentUser?.name !== user?.name
-              ) {
-                return false; // Hide these items
-              }
-              return true; // Show all other items
-            })
-            ?.map((list: any, idx: number) => {
-              // Determine the href based on the label
-              let linkPath = `${list?.link}/${user?.name}`;
-              if (list?.label === "Friend Request") {
-                linkPath = `${list?.link}/${user?.name}/request`;
-              } else if (list?.label === "User Search") {
-                linkPath = `${list?.link}/${user?.name}/search`;
-              }
-
-              // Determine if the current path matches the link
-              const isActive = pathname === linkPath;
-
-              return (
-                <li
-                  key={idx}
-                  id={list.id}
-                  className={`float-left -mb-1 cursor-pointer hover:border-b-[1px] hover:border-b-[#3f3f3f] hover:pb-[5px] ${
-                    isActive ? "border-b border-b-[#1d9bf0] pb-1" : ""
-                  }`}
-                >
-                  <Link
-                    prefetch={false}
-                    href={linkPath}
-                    className="relative text-sm md:text-md font-semibold px-2 md:px-4 py-2"
-                  >
-                    {list?.label}
-                  </Link>
-                </li>
-              );
-            })}
-        </ul>
+        <FriendList
+          user={user}
+          currentUser={currentUser}
+          allFriendsCount={uniqueFriends?.length || 0}
+          friendRequestCount={pendingFriendRequests?.length || 0}
+        />
 
         <div className="px-4 py-5">
           <label htmlFor="search" className="text-md font-normal">
@@ -177,14 +148,13 @@ const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
             <input
               type="search"
               name="Friend Search"
+              value={inputValue}
               className="relative m-0 -mr-0.5 block w-[1px] min-w-0 flex-auto rounded-l border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-[#46494a] dark:bg-[#3a3b3c] dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-[#2490da]"
               placeholder="Search"
-              value={search}
               onChange={handleInputChange}
               ref={inputRef}
             />
 
-            {/* <!--Search button--> */}
             <button
               name="Search Button"
               className="relative z-[2] flex items-center rounded-r bg-primary px-5 py-[0.25rem] text-xs font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-primary-700 hover:shadow-lg focus:bg-primary-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-primary-800 active:shadow-lg dark:bg-[#3a3b3c] border-2 dark:border-[#3e4042]"
@@ -193,117 +163,107 @@ const UserSearch: React.FC<IFriend & currentUser & ProfilePageProps> = ({
             </button>
           </div>
         </div>
-        <div className="relative">
-          {isLoading ? (
-            <div className="absolute right-0 left-0 top-0 flex items-center justify-center">
-              {/* Use absolute inset-0 for full coverage */}
-              <RingLoader color="#36d7b7" />
-            </div>
-          ) : (
-            <div className="px-4 pb-5">
-              {friends?.users?.length !== 0 ? (
-                friends?.users?.map((user: UserProps) => (
-                  <div
-                    key={user?.id}
-                    className="relative float-left w-full md:w-[50%] px-2.5 mb-5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex">
-                        <Link href={`/profile/${user?.name}`} prefetch={false}>
-                          <Image
-                            src={user?.profileAvatar || (user?.image as any)}
-                            alt={
-                              `${user?.displayName || user?.name}'s Profile` ||
-                              "User Profile"
-                            }
-                            width={200}
-                            height={200}
-                            quality={100}
-                            className="w-[50px] h-[50px] bg-center bg-cover object-cover rounded-full"
-                            priority
-                          />
-                        </Link>
-                        <div className="pl-3">
+        {inputValue !== "" && (
+          <div className="relative">
+            {searchLoading ? (
+              <div className="flex items-center justify-center">
+                <div
+                  className="w-[100px] h-[100px] flex items-center justify-center text-primary bg-[url('/ghost-loading.gif')] bg-no-repeat bg-center"
+                  style={{
+                    transform: "scale(0.60)",
+                  }}
+                ></div>
+              </div>
+            ) : (
+              <div className="px-4 pb-5">
+                {searchResults?.users?.length !== 0 ? (
+                  searchResults?.users?.map((user: UserProps) => (
+                    <div
+                      key={user?.id}
+                      className="relative float-left w-full md:w-[50%] px-2.5 mb-5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex">
                           <Link
                             href={`/profile/${user?.name}`}
                             prefetch={false}
                           >
-                            <h1 className="text-[#2490da] font-bold">
-                              {user?.name}
-                            </h1>
+                            <Image
+                              src={user?.profileAvatar || (user?.image as any)}
+                              alt={
+                                `${
+                                  user?.displayName || user?.name
+                                }'s Profile` || "User Profile"
+                              }
+                              width={200}
+                              height={200}
+                              quality={100}
+                              className="w-[50px] h-[50px] bg-center bg-cover object-cover rounded-full"
+                              priority
+                            />
                           </Link>
-                          <p>{user?.country}</p>
+                          <div className="pl-3">
+                            <Link
+                              href={`/profile/${user?.name}`}
+                              prefetch={false}
+                            >
+                              <h1 className="text-[#2490da] font-bold">
+                                {user?.name}
+                              </h1>
+                            </Link>
+                            <p>{user?.country}</p>
+                          </div>
                         </div>
-                      </div>{" "}
-                      {friend?.find((fri) => user?.id === fri?.friendRespondId)
-                        ?.status === "pending" && (
-                        <button
-                          name="friend button"
-                          className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
-                        >
-                          <span className="flex items-center">
-                            {findFriendId ? (
+                        {hasPendingRequest(user?.id) ? (
+                          <button
+                            name="friend button"
+                            className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
+                          >
+                            <span className="flex items-center">
                               <FaUserCheck className="mr-2" />
-                            ) : (
-                              <>
-                                {loading ? (
-                                  <ClipLoader
-                                    color="#272727"
-                                    size={20}
-                                    loading={loading}
-                                    className="mr-1"
-                                  />
-                                ) : (
-                                  <IoPersonAddSharp className="mr-2" />
-                                )}
-                              </>
-                            )}
-                            <span className="pt-[2px]">
-                              Friend Request Sent
+                              <span className="pt-[2px]">
+                                Friend Request Sent
+                              </span>
                             </span>
-                          </span>
-                        </button>
-                      )}
-                      {friend?.filter(
-                        (fri) => user?.id === fri?.friendRespondId
-                      )?.length >
-                        0 ===
-                      false ? (
-                        <button
-                          name="Add friend button"
-                          className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
-                          onClick={sendFriendRequest}
-                        >
-                          <span className="flex items-center">
-                            {findFriendId ? (
-                              <MdOutlineGroupAdd className="mr-2" />
-                            ) : (
-                              <>
-                                {loading ? (
-                                  <ClipLoader
-                                    color="#fff"
-                                    size={20}
-                                    loading={loading}
-                                    className="mr-1"
-                                  />
-                                ) : (
-                                  <IoPersonAddSharp className="mr-2" />
-                                )}
-                              </>
-                            )}
-                            <span className="pt-[2px]">Add Friend</span>
-                          </span>
-                        </button>
-                      ) : null}
+                          </button>
+                        ) : friends &&
+                          friends?.filter(
+                            (fri) => user?.id === fri?.friendRespondId
+                          )?.length >
+                            0 ===
+                            false ? (
+                          <button
+                            name="Add friend button"
+                            className="bg-white dark:bg-[#3a3b3c] text-black dark:text-[#ffffffde] text-sm border border-[#c3c3c3] dark:border-[#3e4042] rounded-md mr-2 p-1 md:p-2 cursor-pointer"
+                            onClick={(e) =>
+                              sendFriendRequest(e, user?.id as string)
+                            }
+                          >
+                            <span className="flex items-center">
+                              {loadingStates[user?.id] ? (
+                                <ClipLoader
+                                  color="#fff"
+                                  size={20}
+                                  loading={loadingStates[user?.id]}
+                                  className="mr-1"
+                                />
+                              ) : (
+                                <IoPersonAddSharp className="mr-2" />
+                              )}
+                              <span className="pt-[2px]">Add Friend</span>
+                            </span>
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex justify-center">User not found.</div>
-              )}
-            </div>
-          )}
-        </div>
+                  ))
+                ) : (
+                  <div className="flex justify-center">User not found.</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

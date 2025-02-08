@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchTv } from "@/app/actions/fetchMovieApi";
-import { ITvReview, SearchParamsType } from "@/helper/type";
+import { currentUserProps, ITvReview, SearchParamsType } from "@/helper/type";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +15,6 @@ import { formatDate } from "@/app/actions/formatDate";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
-import { ReviewType } from "@/app/(route)/(id)/tv/[id]-[slug]/reviews/Reviews";
 import dynamic from "next/dynamic";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 const SearchLoading = dynamic(
@@ -23,8 +22,12 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
-const ProfileReviews: React.FC<ReviewType> = ({
-  getDrama,
+interface ProfileReview {
+  getReview: ITvReview[];
+  currentUser: currentUserProps;
+}
+
+const ProfileReviews: React.FC<ProfileReview> = ({
   getReview,
   currentUser,
 }) => {

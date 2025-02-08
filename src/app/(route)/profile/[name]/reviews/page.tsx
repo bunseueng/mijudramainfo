@@ -1,13 +1,24 @@
 import React from "react";
 import ProfilePage from "../page";
-import prisma from "@/lib/db";
 import { Metadata } from "next";
+import { getProfileData } from "@/app/actions/getProfileData";
 
 export const maxDuration = 60;
 export async function generateMetadata(props: any): Promise<Metadata> {
   const params = await props.params;
-  const user = await prisma?.user?.findUnique({ where: { name: params.name } });
+  const userData = await getProfileData(params.name);
+  const user = userData.user;
   const url = `${process.env.BASE_URL}/profile/${user?.name}/reviews`;
+
+  const isUserExisted = userData?.users?.some((u) => u.name === params.name);
+  if (!isUserExisted) {
+    return {
+      title: "User's Profile",
+      alternates: {
+        canonical: `${process.env.BASE_URL}`,
+      },
+    };
+  }
   return {
     title: `${user?.displayName || user?.name}'s reviews` || "User's reviews",
     description:

@@ -3,10 +3,14 @@
 import React, { useState } from "react";
 import { RiComputerLine } from "react-icons/ri";
 import Link from "next/link";
-import { IList } from "@/helper/type";
+import { List } from "@/helper/type";
 import FetchList from "./FetchList";
 
-const ProfileList: React.FC<IList> = ({ list }) => {
+interface ProfileListProps {
+  list: List[] | [];
+}
+
+const ProfileList: React.FC<ProfileListProps> = ({ list }) => {
   const [hoveredIndexes, setHoveredIndexes] = useState<(number | null)[]>([]);
 
   const handleMouseEnter = (listIndex: number, index: number) => {

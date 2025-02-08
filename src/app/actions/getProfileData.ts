@@ -65,6 +65,7 @@ export const getProfileData = async (name: string) => {
         OR: [{ friendRequestId: user?.id }, { friendRespondId: user?.id }],
       },
     });
+    const friend = await prisma.friend.findMany({});
     const getDrama = await prisma.drama.findMany({});
     const getReview = await prisma.tvReview.findMany({
       where: { userId: user?.id },
@@ -112,6 +113,7 @@ export const getProfileData = async (name: string) => {
       formattedReviews,
       getFeeds,
       getComment,
+      friend
     };
   } catch (error) {
     throw new Error("Failed to fetch user data");

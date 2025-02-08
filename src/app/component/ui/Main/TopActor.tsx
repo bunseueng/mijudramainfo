@@ -14,12 +14,19 @@ import Link from "next/link";
 import Image from "next/image";
 
 type TopActorType = {
-  personDB: PersonDBType[] | any;
+  personDB: PersonDBType[];
   heading: string;
 };
 
+interface PersonData {
+  id: number;
+  name: string;
+  profile_path: string;
+  place_of_birth: string;
+}
+
 export default function TopActor({ heading, personDB }: TopActorType) {
-  const person_ids = personDB.map((person: PersonDBType) => person.personId);
+  const person_ids = personDB?.map((person: PersonDBType) => person.personId);
 
   const { data: persons, isLoading } = useQuery({
     queryKey: ["persons", person_ids],
@@ -40,11 +47,13 @@ export default function TopActor({ heading, personDB }: TopActorType) {
     }
   );
 
-  const getPersonData = persons?.filter((data: any) =>
-    sortedUsers?.find(
-      (p: PersonDBType) => p?.popularity[0]?.actorName === data?.name
-    )
-  );
+  const getPersonData = Array.isArray(persons)
+    ? persons?.filter((data: any) =>
+        sortedUsers?.find(
+          (p: PersonDBType) => p?.popularity[0]?.actorName === data?.name
+        )
+      )
+    : [];
 
   if (isLoading) {
     return <TopActorSkeleton />;
@@ -61,9 +70,9 @@ export default function TopActor({ heading, personDB }: TopActorType) {
         {[0, 1, 2].map((index) => (
           <ActorCard
             key={index}
-            actor={getPersonData?.[index]}
+            actor={getPersonData[index] as PersonData}
             rank={index + 1}
-            popularity={sortedUsers?.[index]?.totalPopularity}
+            popularity={sortedUsers?.[index]?.totalPopularity ?? 0}
           />
         ))}
       </div>
@@ -73,17 +82,17 @@ export default function TopActor({ heading, personDB }: TopActorType) {
   );
 }
 
-function ActorCard({
-  actor,
-  rank,
-  popularity,
-}: {
-  actor: any;
+interface ActorCardProps {
+  actor: PersonData;
   rank: number;
   popularity: number;
-}) {
+}
+
+function ActorCard({ actor, rank, popularity }: ActorCardProps) {
   const bgColor =
     rank === 1 ? "bg-[#8B4513]" : rank === 2 ? "bg-[#1a2332]" : "bg-[#8B2513]";
+
+  if (!actor) return null;
 
   return (
     <motion.div

@@ -11,6 +11,7 @@ import MovieInfo from "./MovieInfo";
 import WatchProvider from "../../tv/[id]-[slug]/WatchProvider";
 import MovieReviewCard from "@/app/component/ui/Card/MovieReviewCard";
 import AdBanner from "@/app/component/ui/Adsense/AdBanner";
+import WatchNowButton2 from "@/app/component/ui/Button/WatchNowButton2";
 
 const MovieCast = ({
   cast,
@@ -144,6 +145,9 @@ const MovieCast = ({
           </div>
         </div>
         <div className="hidden md:block float-left relative md:w-1/3 px-2 md:px-0 lg:px-2 my-5 md:my-0 lg:ml-5">
+          <div className="mb-4">
+            <WatchNowButton2 link={`/movie/${movie?.id}/watch`} />
+          </div>
           <MovieInfo
             getMovie={getMovie}
             movie={movie}

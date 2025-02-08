@@ -4,6 +4,7 @@ import { fetchHomepageDrama } from "@/app/actions/fetchMovieApi";
 import HomeCard from "../Card/HomeCard";
 import Actor from "../Card/Actor";
 import SearchLoading from "../Loading/SearchLoading";
+import { DramaDB, IRating } from "@/helper/type";
 
 const CATEGORIES = [
   { key: "trending", title: "Trending Drama", path: "tv" },
@@ -19,8 +20,8 @@ const CATEGORIES = [
 ];
 
 interface DramaCategoriesProps {
-  getDrama: any[];
-  existingRatings: any[];
+  getDrama: DramaDB[];
+  existingRatings: IRating[];
   personDB: any;
   visibleCategories: number;
   ref: (node?: Element | null | undefined) => void;

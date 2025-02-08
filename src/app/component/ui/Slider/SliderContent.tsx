@@ -5,6 +5,8 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import dynamic from "next/dynamic";
+import { fetchRatings } from "@/app/actions/fetchMovieApi";
+import { useQuery } from "@tanstack/react-query";
 
 const DynamicOptimizedContentWrapper = dynamic(
   () => import("./OptimizedContentWrapper"),
@@ -16,7 +18,7 @@ const DynamicGradientOverlays = dynamic(() => import("./GradientOverlays"), {
 
 interface SliderContentProps {
   currentItem: any;
-  existingRatings: any[];
+  filteredData: any[];
   left: string;
   right: string;
   center: string;
@@ -25,14 +27,20 @@ interface SliderContentProps {
 
 const SliderContent: React.FC<SliderContentProps> = ({
   currentItem,
-  existingRatings,
+  filteredData,
   left,
   right,
   center,
   direction,
 }) => {
+  const result_id = filteredData?.map((data) => data.id);
+  // Only fetch ratings when we have result_ids
+  const { data: tvRating } = useQuery({
+    queryKey: ["home_tvRating", result_id],
+    queryFn: () => fetchRatings(result_id),
+    staleTime: 3600000,
+  });
   const [isContentVisible, setIsContentVisible] = useState(false);
-
   const itemLink = useMemo(
     () =>
       `/tv/${currentItem?.id}-${spaceToHyphen(
@@ -60,16 +68,24 @@ const SliderContent: React.FC<SliderContentProps> = ({
   }, []);
 
   const getRating = useMemo(() => {
-    const existingRating = existingRatings?.find(
-      (item: any) => item.id === currentItem.id
+    const existingRating = tvRating?.find(
+      (data: any) => data.tvId === currentItem?.id.toString()
     )?.rating;
-    if (existingRating) {
-      return existingRating.toFixed(1);
-    }
-    return currentItem.vote_average
+    return currentItem &&
+      currentItem.vote_average &&
+      existingRating &&
+      existingRating
+      ? (
+          (currentItem.vote_average * (currentItem.vote_count || 0) +
+            (existingRating || 0) * 10) /
+          ((currentItem.vote_count || 0) + 10)
+        ).toFixed(1)
+      : existingRating && existingRating
+      ? existingRating.toFixed(1)
+      : currentItem && currentItem.vote_average
       ? currentItem.vote_average.toFixed(1)
-      : "NR";
-  }, [currentItem.id, currentItem.vote_average, existingRatings]);
+      : "0.0";
+  }, [tvRating, currentItem]);
 
   const slideVariants = {
     enter: (direction: number) => ({

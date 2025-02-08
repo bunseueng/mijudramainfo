@@ -5,7 +5,7 @@ type AdsenseType = {
   pId: string;
 };
 
-const Adsense = ({ pId }: AdsenseType) => {
+const Adsense = async ({ pId }: AdsenseType) => {
   return (
     <Script
       defer

@@ -1,8 +1,7 @@
-import React from "react";
-import prisma from "@/lib/db";
-import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 const UserSearch = dynamic(() => import("./UserSearch"));
 
 export const metadata: Metadata = {
@@ -12,36 +11,12 @@ export const metadata: Metadata = {
 
 const SearchPag = async (props: { params: Promise<{ name: string }> }) => {
   const params = await props.params;
-  const currentUser = await getCurrentUser();
-  const user = await prisma?.user?.findUnique({
-    where: { name: params?.name },
-  });
-  const findFriendId = await prisma.friend?.findFirst({
-    where: {
-      friendRequestId: currentUser?.id as string,
-      friendRespondId: user?.id as string,
-    },
-  });
-  const friends = await prisma?.friend?.findMany({
-    where: {
-      OR: [{ friendRequestId: user?.id }, { friendRespondId: user?.id }],
-    },
-  });
-
   return (
-    <UserSearch
-      user={user}
-      friend={friends}
-      findFriendId={findFriendId}
-      currentUser={currentUser}
-      list={null}
-      tvid={[]}
-      movieId={[]}
-      tv_id={[]}
-      formattedDate={""}
-      lastLogin={""}
-      existedFavorite={[]}
-    />
+    <Suspense key={params.name} fallback={<SearchLoading />}>
+      <div>
+        <UserSearch name={params.name} />
+      </div>
+    </Suspense>
   );
 };
 

@@ -13,13 +13,22 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 h-full">
           {/* Brand Section */}
           <div className="text-white h-full flex flex-col">
-            <div className="pb-2">
-              <Image
-                src="/MIJUDRAMAINFO.webp"
-                alt="Website icon"
-                width={200}
-                height={200}
-              />
+            <div className="flex items-center py-1">
+              <Link
+                prefetch={false}
+                href="/"
+                className="flex-shrink-0 font-bold text-xl text-gray-900 dark:text-white"
+                aria-label="Website Logo"
+              >
+                <Image
+                  src="/MIJUDRAMAINFO.webp"
+                  alt="Mijudramainfo Logo"
+                  width={150}
+                  height={40}
+                  className="w-[100px] h-[27px] sm:w-[120px] sm:h-[32px] md:w-[150px] md:h-[40px] lg:w-[150px] lg:h-[40px] object-contain"
+                  priority
+                />
+              </Link>
             </div>
             <div className="flex items-center mt-4 h-[36px] flex-shrink-0">
               <ul className="flex space-x-2 h-full">
@@ -102,7 +111,7 @@ const Footer = () => {
                   <Link
                     aria-label={`Visit Watch Page`}
                     prefetch={false}
-                    href={`${item.href}`}
+                    href={`${item.link}`}
                     className="text-sm h-[20px] flex items-center hover:text-cyan-400 transition-colors flex-shrink-0"
                   >
                     {item.label}

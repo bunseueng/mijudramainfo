@@ -1,5 +1,5 @@
 import type React from "react";
-import { useCallback } from "react";
+import { Ref, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { RiLogoutCircleRLine } from "react-icons/ri";
@@ -11,8 +11,8 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
   sessionItems,
   resolvedTheme,
   setTheme,
-  session,
   outsideRef,
+  sessionDrop,
 }) => {
   const { data: sessionData, status } = useSession();
   const router = useRouter();
@@ -29,7 +29,12 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
     },
     [router]
   );
-
+  const handleLinkClick = () => {
+    // Close dropdown after navigation
+    if (sessionDrop) {
+      router.refresh();
+    }
+  };
   if (status === "loading") {
     return <div className="p-4 text-center">Loading...</div>;
   }
@@ -44,7 +49,7 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
         exit={{ scale: 0.8, opacity: 0 }}
         transition={{ duration: 0.3 }}
         className="w-[300px] h-auto flex flex-col absolute top-[51.5px] right-[20%] bg-white dark:bg-[#242424] rounded-md shadow-md m-0 p-0"
-        ref={outsideRef}
+        ref={outsideRef as Ref<HTMLUListElement> | undefined}
       >
         {sessionItems?.map((item: any, idx: number) => (
           <li
@@ -71,8 +76,11 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
             ) : (
               <Link
                 prefetch={false}
+                onClick={handleLinkClick}
                 href={`${
-                  item.link === "/profile" || item.link === "/friends"
+                  item?.label === "My Watchlist"
+                    ? `${item?.link}/${userName}/watchlist`
+                    : item.link === "/profile" || item.link === "/friends"
                     ? `${item.link}/${userName}`
                     : item.link
                 }`}

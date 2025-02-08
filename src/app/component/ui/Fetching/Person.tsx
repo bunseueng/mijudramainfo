@@ -101,7 +101,7 @@ export default function Person({
               coverFromDB={coverFromDB?.cover}
               src={
                 `https://image.tmdb.org/t/p/w185/${result.profile_path}` ||
-                "/default-pf.jpg"
+                "/default-pf.webp"
               }
               alt={`${result?.name}'s Profile` || "Person Profile"}
               width={200}

@@ -147,7 +147,7 @@ const CommentCard = ({
           <Link prefetch={false} href={`/profile/${eachUser?.name}`}>
             <ReusedImage
               src={
-                eachUser?.profileAvatar || eachUser?.image || "/default-pf.jpg"
+                eachUser?.profileAvatar || eachUser?.image || "/default-pf.webp"
               }
               alt={`${eachUser?.name}'s Profile`}
               width={36}

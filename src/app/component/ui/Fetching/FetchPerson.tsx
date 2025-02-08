@@ -1,36 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPersonSearch } from "@/app/actions/fetchMovieApi";
 import type { CommentProps, PersonDBType, UserProps } from "@/helper/type";
 import PersonHeader from "../Person/PersonHeader";
 import PersonInfo from "../Person/PersonInfo";
 import TopContributors from "../Person/TopContributors";
-import PopularitySection from "../Person/PopularitySection";
+import PopularitySection, { Popularity } from "../Person/PopularitySection";
 import MainContent from "../Person/MainContent";
 import SearchLoading from "../Loading/SearchLoading";
 import { usePersonData } from "@/hooks/usePersonData";
 import AdBanner from "../Adsense/AdBanner";
+import { usePersonDatabase } from "@/hooks/usePersonDatabase";
 
 interface IFetchPerson {
-  tv_id: number;
+  person_id: number;
   currentUser: UserProps | any;
-  users: UserProps[];
-  getComment: CommentProps[] | any;
-  getPersons: PersonDBType | null;
-  sortedUsers: UserProps[] | null;
 }
 
-const FetchPerson: React.FC<IFetchPerson> = ({
-  tv_id,
-  currentUser,
-  users,
-  getComment,
-  getPersons,
-  sortedUsers,
-}) => {
-  const { person } = usePersonData(tv_id.toString());
+interface PopularityItem {
+  personId: string;
+  [key: string]: any;
+}
+
+const FetchPerson: React.FC<IFetchPerson> = ({ person_id, currentUser }) => {
+  const { data } = usePersonDatabase(person_id.toString());
+  const { users, getComment, getPersons, sortedUsers } = { ...data };
+  const { person } = usePersonData(person_id.toString());
   const drama = person?.tv_credits || [];
   const movie = person?.movie_credits || [];
   const getCredits = person?.combined_credits || [];
@@ -38,8 +35,8 @@ const FetchPerson: React.FC<IFetchPerson> = ({
   const [currentUserIndex, setCurrentUserIndex] = useState(0);
   const [getPerson, setGetPerson] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
-  const hasFetched = useRef(false); // Track if the request has been made
-  const currentPage = `https://mijudramalist.com/person/${tv_id}`;
+  const hasFetched = useRef(false);
+  const currentPage = `https://mijudramalist.com/person/${person_id}`;
 
   const { data: personFullDetails } = useQuery({
     queryKey: ["personFullDetails", person?.name],
@@ -55,22 +52,29 @@ const FetchPerson: React.FC<IFetchPerson> = ({
     ).values()
   );
 
-  const userContributions =
-    getPersons?.changes?.reduce((acc: Record<string, number>, change) => {
-      acc[change.userId] = (acc[change.userId] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>) || {};
+  const userContributions = useMemo(
+    () =>
+      getPersons?.changes?.reduce((acc: Record<string, number>, change) => {
+        acc[change.userId] = (acc[change.userId] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>) || {},
+    [getPersons?.changes]
+  );
 
-  const sortedChanges = uniqueChanges?.sort((a, b) => {
-    const countA = userContributions[a.userId] || 0;
-    const countB = userContributions[b.userId] || 0;
-    return countB - countA;
-  });
+  const sortedChanges = useMemo(
+    () =>
+      uniqueChanges?.sort((a, b) => {
+        const countA = userContributions[a.userId] || 0;
+        const countB = userContributions[b.userId] || 0;
+        return countB - countA;
+      }),
+    [uniqueChanges, userContributions]
+  );
 
   const fetchRandomPerson = useCallback(async () => {
-    if (isLoading || hasFetched.current) return; // Prevent multiple requests
+    if (isLoading || hasFetched.current) return;
     setIsLoading(true);
-    hasFetched.current = true; // Mark that the request has been made
+    hasFetched.current = true;
 
     try {
       const response = await fetch(
@@ -103,12 +107,12 @@ const FetchPerson: React.FC<IFetchPerson> = ({
     } catch (err: any) {
       console.error("Error fetching random person:", err.message);
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
   }, [person?.id, isLoading]);
 
   useEffect(() => {
-    hasFetched.current = false; // Reset the flag when persons?.id changes
+    hasFetched.current = false;
   }, [person?.id]);
 
   useEffect(() => {
@@ -117,9 +121,10 @@ const FetchPerson: React.FC<IFetchPerson> = ({
     }
   }, [person?.id, fetchRandomPerson]);
 
-  const sentByIds = getPerson?.sentBy || [];
-  const getPersonDetail = users?.filter((user: any) =>
-    sentByIds.includes(user?.id)
+  const sentByIds = useMemo(() => getPerson?.sentBy || [], [getPerson?.sentBy]);
+  const getPersonDetail = useMemo(
+    () => users?.filter((user: any) => sentByIds.includes(user?.id)) || [],
+    [users, sentByIds]
   );
 
   useEffect(() => {
@@ -132,12 +137,22 @@ const FetchPerson: React.FC<IFetchPerson> = ({
   }, [fetchRandomPerson]);
 
   const currentUsers = getPersonDetail[currentUserIndex];
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const currentPopularityItem = currentUsers?.popularitySent?.flat() || [];
-  const filteredPopularity =
-    currentPopularityItem?.filter(
-      (p: any) => p?.personId === getPersons?.personId
-    ) || [];
+  const currentPopularityItem = useMemo(
+    () => currentUsers?.popularitySent?.flat() || [],
+    [currentUsers?.popularitySent]
+  );
+
+  const filteredPopularity = useMemo(
+    () =>
+      (currentPopularityItem as PopularityItem[])?.filter(
+        (p): p is PopularityItem =>
+          p !== null &&
+          typeof p === "object" &&
+          "personId" in p &&
+          p.personId === getPersons?.personId
+      ) || [],
+    [currentPopularityItem, getPersons?.personId]
+  );
 
   useEffect(() => {
     if (getPersonDetail?.length > 0) {
@@ -165,7 +180,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
     currentIndex,
     currentUserIndex,
     getPersonDetail,
-    filteredPopularity?.length,
+    filteredPopularity.length,
   ]);
 
   useEffect(() => {
@@ -173,18 +188,21 @@ const FetchPerson: React.FC<IFetchPerson> = ({
       return;
     }
 
-    let validItems;
+    let validItems: PopularityItem[] = [];
     if (Array.isArray(currentPopularityItem)) {
-      validItems = currentPopularityItem.filter(
-        (item) => item !== undefined && Object.keys(item).length > 0
+      validItems = (currentPopularityItem as any[]).filter(
+        (item): item is PopularityItem =>
+          item !== null &&
+          item !== undefined &&
+          typeof item === "object" &&
+          Object.keys(item).length > 0
       );
     } else if (
       typeof currentPopularityItem === "object" &&
+      currentPopularityItem !== null &&
       Object.keys(currentPopularityItem).length > 0
     ) {
-      validItems = [currentPopularityItem];
-    } else {
-      return;
+      validItems = [currentPopularityItem as PopularityItem];
     }
 
     if (validItems.length === 0) {
@@ -205,7 +223,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({
             <PersonHeader
               persons={person}
               currentUser={currentUser}
-              getPersons={getPersons}
+              getPersons={getPersons as PersonDBType | null}
               currentPage={currentPage}
               personFullDetails={personFullDetails}
             />
@@ -215,26 +233,28 @@ const FetchPerson: React.FC<IFetchPerson> = ({
                 persons={person}
                 personFullDetails={personFullDetails}
                 getCredits={getCredits}
-                person_db={getPersons}
+                person_db={getPersons as PersonDBType | null}
               />
             </div>
 
             <PopularitySection
               currentUser={currentUser}
               persons={person}
-              getPersons={getPersons}
-              tv_id={tv_id}
-              sortedUsers={sortedUsers}
-              currentPopularityItem={currentPopularityItem}
-              filteredPopularity={filteredPopularity}
+              getPersons={getPersons as PersonDBType | null}
+              tv_id={person_id}
+              sortedUsers={sortedUsers as UserProps[] | null}
+              currentPopularityItem={
+                currentPopularityItem as unknown as Popularity
+              }
+              filteredPopularity={filteredPopularity as Popularity[]}
               currentUsers={currentUsers}
               currentIndex={currentIndex}
             />
             <div className="hidden md:block">
               <TopContributors
                 sortedChanges={sortedChanges}
-                users={users}
-                getPersons={getPersons}
+                users={users as UserProps[]}
+                getPersons={getPersons as PersonDBType | null}
               />
             </div>
           </div>
@@ -248,12 +268,12 @@ const FetchPerson: React.FC<IFetchPerson> = ({
           <MainContent
             persons={person}
             currentUser={currentUser}
-            getPersons={getPersons}
+            getPersons={getPersons as PersonDBType | null}
             drama={drama}
             movie={movie}
-            users={users}
-            getComment={getComment}
-            tv_id={tv_id}
+            users={users as UserProps[]}
+            getComment={getComment as CommentProps[]}
+            tv_id={person_id}
             personFullDetails={personFullDetails}
             sortedChanges={sortedChanges}
           />

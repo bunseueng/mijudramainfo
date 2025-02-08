@@ -21,7 +21,8 @@ interface NavbarActionsProps {
   session: any;
   user: any;
   handleSessionDropClick: () => void;
-  triggerRef: MutableRefObject<null>;
+  triggerRef: MutableRefObject<HTMLButtonElement | null>;
+  notiDrop: boolean; // Add this prop
 }
 
 export interface SessionDropdownProps {
@@ -30,7 +31,7 @@ export interface SessionDropdownProps {
   resolvedTheme: string | undefined;
   setTheme: (theme: string) => void;
   session: any;
-  outsideRef: MutableRefObject<null>;
+  outsideRef: MutableRefObject<HTMLDivElement | null>;
 }
 
 const NavbarActions: React.FC<NavbarActionsProps & SessionDropdownProps> = ({
@@ -49,13 +50,17 @@ const NavbarActions: React.FC<NavbarActionsProps & SessionDropdownProps> = ({
   sessionDrop,
   outsideRef,
   triggerRef,
+  notiDrop,
 }) => {
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
       <button
+        ref={triggerRef}
         name="Notification"
         aria-label="Notification"
-        className="relative p-1.5 sm:p-2 hover:bg-white/10 rounded-full transition-colors"
+        className={`relative p-1.5 sm:p-2 hover:bg-white/10 rounded-full transition-colors ${
+          notiDrop ? "bg-white/10" : ""
+        }`}
         onClick={handleNotiDropClick}
       >
         <span className="relative inline-block align-middle">

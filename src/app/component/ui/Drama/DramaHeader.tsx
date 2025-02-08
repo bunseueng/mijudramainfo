@@ -103,7 +103,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
       >
         <div className="px-3">
           <div className="flex flex-col md:flex-row content-center max-w-6xl mx-auto md:py-8 md:px-2 lg:px-5">
-            <div className="w-full h-full">
+            <div className="w-auto h-full">
               <Image
                 ref={imgRef}
                 onLoad={extractColor}

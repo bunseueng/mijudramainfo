@@ -1,11 +1,9 @@
 import React, { Suspense } from "react";
-import prisma from "@/lib/db";
-import { getCurrentUser } from "@/app/actions/getCurrentUser";
-import moment from "moment";
-import { CommentProps, IProfileFeeds, ITvReview } from "@/helper/type";
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
 import ProfileItem from "./ProfileItem";
+import { getProfileData } from "@/app/actions/getProfileData";
+import { notFound } from "next/navigation";
 export const revalidate = 0;
 const SearchLoading = dynamic(
   () => import("@/app/component/ui/Loading/SearchLoading")
@@ -14,8 +12,20 @@ const SearchLoading = dynamic(
 export const maxDuration = 60;
 export async function generateMetadata(props: any): Promise<Metadata> {
   const params = await props.params;
-  const user = await prisma?.user?.findUnique({ where: { name: params.name } });
+  const userData = await getProfileData(params.name);
+  const user = userData.user;
   const url = `${process.env.BASE_URL}/profile/${user?.name}`;
+
+  const isUserExisted = userData?.users?.some((u) => u.name === params.name);
+
+  if (!isUserExisted) {
+    return {
+      title: "User's Profile",
+      alternates: {
+        canonical: `${process.env.BASE_URL}`,
+      },
+    };
+  }
   return {
     title: `${user?.displayName || user?.name}'s Profile` || "User's Profile",
     description:
@@ -43,13 +53,21 @@ export async function generateMetadata(props: any): Promise<Metadata> {
 }
 
 const ProfilePage = async (props: { params: Promise<{ name: string }> }) => {
-  const params = await props.params;
+  const name = (await props.params).name; // Extract name from params
+  const userData = await getProfileData(name);
+
+  const isUserExisted = userData?.users?.some((u) => u.name === name);
+
+  if (!isUserExisted) {
+    // Show "Not Found" only if user does NOT exist
+    return notFound();
+  }
   return (
     <main className="w-full h-full">
       <div className="relative">
         <div className="my-10">
-          <Suspense key={params?.name} fallback={<SearchLoading />}>
-            <ProfileItem name={params.name} />
+          <Suspense key={name} fallback={<SearchLoading />}>
+            <ProfileItem name={name} />
           </Suspense>
         </div>
       </div>

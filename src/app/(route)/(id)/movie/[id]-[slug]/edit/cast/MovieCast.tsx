@@ -660,7 +660,7 @@ const MovieCast: React.FC<movieId & Movie> = ({ movie_id, movieDetails }) => {
                             <Image
                               src={
                                 cast?.profile_path === null
-                                  ? "/default-pf.jpg"
+                                  ? "/default-pf.webp"
                                   : `https://image.tmdb.org/t/p/h632/${cast?.profile_path}`
                               }
                               alt={`${cast?.name}'s Profile`}

@@ -68,10 +68,8 @@ model User {
   totalPopularitySent      Json[]
   followers                String[]
   following                String[]
-  sentRequests             Friend[]    @relation("FriendRequestRelation")
-  receivedRequests         Friend[]    @relation("FriendRespondRelation")
-  friends                  Friend[]    @relation("UserFriends")
-  friendsAsFriend          Friend[]    @relation("UserFriendsAsFriend")
+  sentRequests             Friend[]    @relation("FriendRequests")
+  receivedRequests         Friend[]    @relation("FriendResponds")
   accounts                 Account[]
   sessions                 Session[]
   Watchlist                Watchlist[]
@@ -84,17 +82,16 @@ model Friend {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   friendRespondId String   @db.ObjectId
   friendRequestId String   @db.ObjectId
-  status          String // 'pending', 'accepted', 'rejected'
+  status          String
   actionDatetime  DateTime
   profileAvatar   String?
   image           String
   name            String
   country         String?
   notification    String   @default("unread")
-  friendRequest   User     @relation("FriendRequestRelation", fields: [friendRequestId], references: [id])
-  friendRespond   User     @relation("FriendRespondRelation", fields: [friendRespondId], references: [id])
-  user            User     @relation("UserFriends", fields: [friendRequestId], references: [id])
-  friend          User     @relation("UserFriendsAsFriend", fields: [friendRespondId], references: [id])
+  // Simplify to just two relations instead of four
+  requester       User     @relation("FriendRequests", fields: [friendRequestId], references: [id])
+  responder       User     @relation("FriendResponds", fields: [friendRespondId], references: [id])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

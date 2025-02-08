@@ -90,16 +90,21 @@ export const MobileInfo: React.FC<MobileInfoProps> = ({
         label="Duration"
         value={`${detail?.duration || tv?.episode_run_time?.[0] || "?"} min.`}
       />
-
       <InfoRow
         label="Content Rating"
         value={
-          detail?.content_rating ||
-          (content?.results?.length === 0
-            ? "Not Yet Rated"
-            : `${content?.results && content?.results[0]?.rating} + - Teens ${
-                content?.results && content?.results[0]?.rating
-              } or older`)
+          detail?.content_rating ? (
+            <span>{detail?.content_rating}</span>
+          ) : (
+            <span>
+              {content?.length === 0
+                ? "Not Yet Rated"
+                : content && content[0]?.rating}
+              {content?.length !== 0 && (
+                <span>+ - Teens {content && content[0]?.rating} or older</span>
+              )}
+            </span>
+          )
         }
       />
 

@@ -13,6 +13,7 @@ import TvListCard from "@/app/component/ui/Card/TvListCard";
 import { useEffect, useState } from "react";
 import AdBanner from "@/app/component/ui/Adsense/AdBanner";
 import WatchNowButton from "@/app/component/ui/Button/WatchNowButton";
+import WatchNowButton2 from "@/app/component/ui/Button/WatchNowButton2";
 const WatchProvider = dynamic(() => import("./WatchProvider"), { ssr: false });
 
 const DramaCast = ({
@@ -36,7 +37,7 @@ const DramaCast = ({
 }: any) => {
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
   const seasons = tv?.seasons?.map((drama: any) => drama);
-  const watchProvider = tv["watch/providers"] && tv["watch/providers"]?.results;
+  const watchProvider = tv?.["watch/providers"]?.results;
 
   // Determine which season to display based on the number of seasons
   let displaySeason;
@@ -178,7 +179,7 @@ const DramaCast = ({
         </div>
         <div className="hidden md:block float-left relative md:w-1/3 px-2 md:px-0 lg:px-2 my-5 md:my-0 lg:ml-5">
           <div className="mb-4">
-            <WatchNowButton link={`/tv/${tv?.id}/watch`} />
+            <WatchNowButton2 link={`/tv/${tv?.id}/watch`} />
           </div>
           <TvInfo
             getDrama={getDrama}

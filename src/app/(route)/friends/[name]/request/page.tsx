@@ -1,8 +1,7 @@
-import React from "react";
-import prisma from "@/lib/db";
-import { getCurrentUser } from "@/app/actions/getCurrentUser";
+import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
+import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 const FriendRequest = dynamic(() => import("./FriendRequest"));
 
 export const metadata: Metadata = {
@@ -14,15 +13,12 @@ const FriendRequestPage = async (props: {
   params: Promise<{ name: string }>;
 }) => {
   const params = await props.params;
-  const currentUser = await getCurrentUser();
-  const user = await prisma.user.findUnique({ where: { name: params.name } });
-  const friend = await prisma.friend.findMany({});
-  if (!currentUser || friend.length === 0) {
-    // Render loading state or skeleton here
-    return <div>Loading...</div>;
-  }
   return (
-    <FriendRequest friend={friend} currentUser={currentUser} user={user} />
+    <Suspense key={params.name} fallback={<SearchLoading />}>
+      <div>
+        <FriendRequest name={params.name} />
+      </div>
+    </Suspense>
   );
 };
 

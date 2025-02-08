@@ -27,7 +27,7 @@ interface Notification {
   findSpecificUser: findSpecificUserProps[] | null[];
   yourFriend: findSpecificUserProps[] | null[];
   comment: CommentProps[];
-  outsideRef: MutableRefObject<null>;
+  outsideRef: MutableRefObject<HTMLDivElement | null>;
 }
 
 const NotificationModal: React.FC<Notification> = ({
