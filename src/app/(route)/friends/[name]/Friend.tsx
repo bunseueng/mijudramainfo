@@ -190,7 +190,7 @@ const Friend: React.FC<FriendProps> = ({ name }) => {
                           src={
                             friend.profileAvatar ||
                             friend.image ||
-                            "/default-pf.jpg"
+                            "/default-pf.webp"
                           }
                           alt={`${friend.name}'s Profile`}
                           width={200}

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 
 const LazyImage = ({
   src,
@@ -22,8 +22,22 @@ const LazyImage = ({
   const [isVisible, setIsVisible] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
+  // Valid TMDB image sizes
+  const validSizes = [
+    "w92",
+    "w154",
+    "w185",
+    "w342",
+    "w500",
+    "w780",
+    "original",
+  ];
+
+  // Ensure we're using a valid size parameter
+  const sizeParam = validSizes.includes(w) ? w : "w500";
+
   useEffect(() => {
-    const observerTarget = imgRef.current; // Store ref value
+    const observerTarget = imgRef.current;
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
@@ -43,17 +57,32 @@ const LazyImage = ({
     };
   }, []);
 
-  // Determine the correct size parameter
-  const sizeParam = w.startsWith("w") ? w : "w500";
-
   // Determine the final image source
   const imageSrc = (() => {
+    // If we have a cover from DB, use that
     if (coverFromDB) return coverFromDB;
-    if (!src) return "/placeholder-image.avif";
-    if (src.startsWith("/")) {
-      if (src === "/placeholder-image.avif") return src;
-      return `https://image.tmdb.org/t/p/${sizeParam}${src}`;
+
+    // If src is null, undefined, contains "null", or has invalid size, use placeholder
+    if (!src || src === "null" || src === null || src.includes("/null")) {
+      return "/placeholder-image.avif";
     }
+
+    // If it's already a full URL (including TMDB base), use placeholder if it contains invalid patterns
+    if (src.startsWith("https://")) {
+      if (src.includes("/null") || src.includes("undefined")) {
+        return "/placeholder-image.avif";
+      }
+      return src;
+    }
+
+    // If it's a local path starting with /, return as is
+    if (src.startsWith("/")) {
+      return src === "/placeholder-image.avif"
+        ? src
+        : `https://image.tmdb.org/t/p/${sizeParam}${src}`;
+    }
+
+    // Otherwise, construct the TMDB URL
     return `https://image.tmdb.org/t/p/${sizeParam}/${src}`;
   })();
 

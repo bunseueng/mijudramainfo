@@ -148,46 +148,6 @@ export interface IList {
   movieId: any[] | { movieId: number };
 }
 
-export interface ProfilePageProps {
-  currentUser: currentUserProps | null;
-  list: List[] | null;
-  tvid:
-    | {
-        tvid: number;
-      }
-    | any[];
-  movieId:
-    | {
-        movieId: number;
-      }
-    | any[];
-  tv_id:
-    | {
-        id: number;
-        updatedAt: Date;
-      }
-    | any[];
-  formattedDate: string;
-  lastLogin: string;
-  existedFavorite:
-    | {
-        existedFavorite: number;
-      }
-    | any[];
-  findFriendId: {
-    id: string;
-    friendRespondId: string;
-    friendRequestId: string | null;
-    status: string;
-    profileAvatar: string | null;
-    image: string;
-    name: string;
-    country: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  } | null;
-}
-
 export interface FetchRecentListProps {
   tvId: number;
   movieId: number;
@@ -196,12 +156,6 @@ export interface FetchRecentListProps {
   handleMouseEnter: (listIndex: number, idx: number) => void;
   handleMouseLeave: (listIndex: number) => void;
   hoveredIndexes: (number | null)[];
-}
-
-export interface WatchListProps {
-  tv_id: { id: number; updatedAt: Date } | { id: number; updatedAt: Date }[];
-  existedFavorite: number[] | { existedFavorite: number };
-  user: UserProps | null;
 }
 
 export interface UploadAvatarProps {
@@ -736,11 +690,6 @@ export type ProfileFeedsTypes = {
   createdAt: string;
   updatedAt: string;
 };
-
-export interface IProfileFeeds {
-  getFeeds: ProfileFeedsTypes[];
-  currentUser: currentUserProps | null;
-}
 
 interface TrailerResult {
   id: string;

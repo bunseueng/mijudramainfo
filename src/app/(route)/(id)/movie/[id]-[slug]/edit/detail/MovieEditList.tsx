@@ -23,7 +23,7 @@ const MovieEditList: React.FC<movieId & Movie> = ({
   movie_id,
   movieDetails,
 }) => {
-  const [currentPage, setCurrentPage] = useState("/detail");
+  const [currentPage, setCurrentPage] = useState("/edit");
   const { data: movie, isLoading } = useQuery({
     queryKey: ["movieEdit", movie_id],
     queryFn: () => fetchMovie(movie_id),
@@ -62,6 +62,7 @@ const MovieEditList: React.FC<movieId & Movie> = ({
   }
 
   const components = {
+    "/edit": MovieDetails,
     "/detail": MovieDetails,
     "/cover": MovieCover,
     "/related": RelatedTitle,

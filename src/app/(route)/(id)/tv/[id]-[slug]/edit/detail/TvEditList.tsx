@@ -22,7 +22,7 @@ const ExternalLink = lazy(() => import("../external_link/ExternalLink"));
 
 const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
   const { tv, isLoading } = useDramaData(tv_id);
-  const [currentPage, setCurrentPage] = useState("/detail");
+  const [currentPage, setCurrentPage] = useState("/edit");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,6 +55,7 @@ const TvEditList: React.FC<tvId & Drama> = ({ tv_id, tvDetails }) => {
 
   const renderContent = () => {
     const components = {
+      "/edit": TvDetails,
       "/detail": TvDetails,
       "/cover": TvCover,
       "/related": RelatedTitle,

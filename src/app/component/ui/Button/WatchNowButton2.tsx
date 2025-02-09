@@ -4,10 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import Link from "next/link";
-
-export interface WatchNowProps {
-  link: string;
-}
+import { WatchNowProps } from "./WatchNowButton";
 
 export default function WatchNowButton2({ link }: WatchNowProps) {
   const [isHovered, setIsHovered] = useState(false);

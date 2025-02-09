@@ -24,7 +24,7 @@ export interface PersonEditList {
 }
 
 const PersonEditList: React.FC<PersonEditList> = ({ person_id, personDB }) => {
-  const [currentPage, setCurrentPage] = useState("/detail");
+  const [currentPage, setCurrentPage] = useState("/edit");
 
   const router = useRouter();
   const pathname = usePathname();
@@ -85,7 +85,9 @@ const PersonEditList: React.FC<PersonEditList> = ({ person_id, personDB }) => {
           </ul>
         </div>
         <div className="relative float-left w-full md:w-[75%] -px-3">
-          {currentPage === "/details" ? (
+          {currentPage === "/edit" ? (
+            <PersonDetails person_id={person_id} personDB={personDB} />
+          ) : currentPage === "/details" ? (
             <PersonDetails person_id={person_id} personDB={personDB} />
           ) : currentPage === "/cover" ? (
             <PersonCover person_id={person_id} personDB={personDB} />
