@@ -31,32 +31,36 @@ const Signin = () => {
       password: "",
     },
   });
+  const onSubmit = useCallback(
+    async (userData: TSignInForm) => {
+      setIsLoading(true);
+      try {
+        const result = await signIn("credentials", {
+          email: userData.email,
+          password: userData.password,
+          redirect: false, // Important: handle redirect manually
+        });
 
-  const onSubmit = useCallback(async (userData: TSignInForm) => {
-    setIsLoading(true);
-    try {
-      const result = await signIn("credentials", {
-        email: userData.email,
-        password: userData.password,
-        redirectTo: "/",
-      });
+        if (result?.error) {
+          toast.error(result.error);
+          return;
+        }
 
-      if (result?.error) {
-        toast.error(result.error);
-        return;
+        if (result?.ok) {
+          toast.success("Sign-in successful");
+          router.push("/"); // Manually redirect after successful signin
+        } else {
+          toast.error("Sign-in failed");
+        }
+      } catch (error) {
+        console.error("Sign-in error:", error);
+        toast.error("An unexpected error occurred");
+      } finally {
+        setIsLoading(false);
       }
-
-      if (result?.ok) {
-        toast.success("Sign-in successful");
-      }
-    } catch (error) {
-      console.error("Sign-in error:", error);
-      toast.error("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+    },
+    [router]
+  );
   const handleSocialSignIn = async (
     provider: "google" | "github" | "facebook"
   ) => {
@@ -65,14 +69,12 @@ const Signin = () => {
         redirectTo: "/",
       });
     } catch (error) {
-      console.error(`${provider} sign-in error:`, error);
       toast.error(`Failed to sign in with ${provider}`);
     }
   };
 
   useEffect(() => {
     if (status === "authenticated") {
-      console.log("User is authenticated:", session);
       router.push("/");
     }
   }, [status, session, router]);

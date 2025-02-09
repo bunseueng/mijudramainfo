@@ -43,6 +43,7 @@ const Signup = () => {
           name: data.name,
           password: data.password,
         }),
+        cache: "no-store",
       });
 
       if (response.status === 401) {
