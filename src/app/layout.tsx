@@ -12,7 +12,7 @@ import { ScrollProvider } from "@/provider/UseScroll";
 import { Analytics } from "@vercel/analytics/react";
 import Loading from "./loading";
 import Footer from "./component/ui/Main/Footer";
-import type React from "react"; // Import React
+import type React from "react";
 import Navbar from "./component/ui/Navbar/Navbar";
 
 // Optimize font loading
@@ -118,12 +118,13 @@ export default function RootLayout({
     "@type": "WebSite",
     name: "MijuDramaInfo",
     url: "https://mijudramainfo.vercel.app/",
+    alternateName: ["MijuDrama"],
   };
   return (
     <html lang="en" className={`${nunito.variable} font-sans`}>
       <head>
         <link rel="canonical" href={`${process.env.BASE_URL}`} />
-        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link
           rel="icon"
           type="image/png"

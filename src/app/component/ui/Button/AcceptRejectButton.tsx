@@ -26,11 +26,13 @@ interface FriendRequestProps {
       | undefined
     >
   >;
+  onActionComplete: () => void;
 }
 
 const AcceptRejectButton: React.FC<FriendRequestProps> = ({
   item,
   setFriendRequests,
+  onActionComplete,
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -59,6 +61,10 @@ const AcceptRejectButton: React.FC<FriendRequestProps> = ({
             (request) => request.friendRequestId !== friendRequestId
           )
         );
+
+        // Call onActionComplete to trigger data refetch
+        onActionComplete();
+
         toast.success(`Friend request ${status}`);
       } else {
         toast.error("Failed to respond to friend request");

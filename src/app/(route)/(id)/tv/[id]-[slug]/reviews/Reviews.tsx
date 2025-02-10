@@ -31,7 +31,7 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
-export type ReviewType = {
+type ReviewType = {
   tv_id: string;
   getDrama: DramaDB | null;
   getReview: ITvReview[];

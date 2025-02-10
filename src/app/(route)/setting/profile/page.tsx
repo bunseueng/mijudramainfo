@@ -1,9 +1,9 @@
+export const dynamic = "force-dynamic";
 import React, { lazy } from "react";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 const ProfileSetting = lazy(() => import("./ProfileSetting"));
 import { Metadata } from "next";
 
-export const maxDuration = 60;
 export async function generateMetadata(): Promise<Metadata> {
   const user = await getCurrentUser();
   return {

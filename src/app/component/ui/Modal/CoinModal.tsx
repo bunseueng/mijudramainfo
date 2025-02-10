@@ -9,7 +9,7 @@ const PaymentModal = dynamic(() => import("./PaymentModal"), { ssr: false });
 
 interface CoinType {
   setOpenModal: (open: boolean) => void;
-  getCoin: currentUserProps;
+  getCoin: currentUserProps | null;
   paypalClientID: string | undefined;
 }
 

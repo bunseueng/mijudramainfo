@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       generateTVShowEntries(baseUrl, sitemapEntries),
       generateMovieEntries(baseUrl, sitemapEntries),
       generatePersonEntries(baseUrl, sitemapEntries),
+      generatePopularPersonEntries(baseUrl, sitemapEntries),
       generateNetworkEntry(baseUrl, sitemapEntries),
     ])
   } catch (error) {
@@ -127,6 +128,23 @@ async function generatePersonEntries(baseUrl: string, sitemapEntries: MetadataRo
   }
 }
 
+async function generatePopularPersonEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  try {
+    const persons = await fetchPopularPersons()
+    sitemapEntries.push(
+      ...persons.map((person) => ({
+        url: `${baseUrl}/person/${person.id}-${spaceToHyphen(person.name)}`,
+        lastModified: new Date().toISOString(),
+        priority: 0.6,
+        changefreq: "weekly",
+      })),
+    )
+  } catch (error) {
+    console.error("Error generating person entries:", error)
+  }
+}
+
+
 async function generateNetworkEntry(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
     const network = await fetchNetwork()
@@ -163,6 +181,15 @@ async function fetchMovies(): Promise<TVShow[]> {
 async function fetchPersons(): Promise<PersonType[]> {
   const response = await fetch(
     `https://api.themoviedb.org/3/trending/person/day?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
+  )
+  if (!response.ok) throw new Error("Failed to fetch persons")
+  const data = await response.json()
+  return data.results
+}
+
+async function fetchPopularPersons(): Promise<PersonType[]> {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/person/popular?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
   )
   if (!response.ok) throw new Error("Failed to fetch persons")
   const data = await response.json()

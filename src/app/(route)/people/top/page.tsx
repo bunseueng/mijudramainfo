@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { Metadata } from "next";
 import React, { Suspense } from "react";

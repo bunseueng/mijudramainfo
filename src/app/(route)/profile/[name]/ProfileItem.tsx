@@ -64,8 +64,10 @@ type ProfileItemType = {
 const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
   const pathname = usePathname();
   const queryClient = useQueryClient();
-  const { data } = useProfileData(name);
-  const { data: friend } = useUserFriendData(data?.user?.id as string);
+  const { data, refetch: refetchProfileData } = useProfileData(name);
+  const { data: friend, refetch: refetchFriendData } = useUserFriendData(
+    data?.user?.id as string
+  );
   const [editable, setEditable] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -74,12 +76,15 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
   const [friendRequests, setFriendRequests] = useState(data?.friend);
   const [followerLength, setFollowerLength] = useState<number>(0);
 
-  // Update follower count when data changes or when follow/unfollow happens
   useEffect(() => {
     if (data?.user?.followers) {
       setFollowerLength(data.user.followers.length);
     }
   }, [data?.user?.followers]);
+
+  useEffect(() => {
+    setFriendRequests(data?.friend);
+  }, [data?.friend]);
 
   const handleFollowerUpdate = (count: number) => {
     setFollowerLength(count);
@@ -119,23 +124,47 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
     if (!user) return DEFAULT_PROFILE_IMAGE;
     return user.profileAvatar || user.image || DEFAULT_PROFILE_IMAGE;
   };
-  const getAllCurrentUserFriend =
-    data?.friends?.filter(
-      (fri: FriendRequestProps) =>
-        (fri.friendRespondId === data.user?.id ||
-          fri.friendRequestId === data.user?.id) &&
-        fri.status === "accepted"
-    ) ?? [];
-  const getCurrentUserRespondFri =
-    data?.users?.filter((userFri: UserProps) =>
-      data?.friends
-        ?.filter((stat: FriendRequestProps) => stat?.status === "pending")
-        ?.find(
-          (fri: FriendRequestProps) =>
-            fri?.friendRespondId &&
-            fri.friendRespondId.includes(userFri?.id ?? "")
-        )
-    ) ?? [];
+
+  const updateFriendCache = (newFriend: any) => {
+    // Update profile data cache
+    queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
+      ...oldData,
+      friends: oldData?.friends ? [...oldData.friends, newFriend] : [newFriend],
+    }));
+
+    // Update friend data cache
+    queryClient.setQueryData(
+      ["user_friend_data", data?.user?.id],
+      (oldData: any) => {
+        const newFriendData = {
+          friendId: newFriend.friendRequestId,
+          name: newFriend.name,
+          profileAvatar: newFriend.profileAvatar,
+          image: newFriend.image,
+        };
+        return oldData ? [...oldData, newFriendData] : [newFriendData];
+      }
+    );
+  };
+
+  const removeFriendFromCache = (friendRequestId: string) => {
+    // Update profile data cache
+    queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
+      ...oldData,
+      friends: oldData?.friends?.filter(
+        (f: any) =>
+          f.friendRequestId !== friendRequestId &&
+          f.friendRespondId !== friendRequestId
+      ),
+    }));
+
+    // Update friend data cache
+    queryClient.setQueryData(
+      ["user_friend_data", data?.user?.id],
+      (oldData: any) =>
+        oldData?.filter((f: any) => f.friendId !== friendRequestId)
+    );
+  };
 
   const sendFriendRequest = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -146,7 +175,6 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
 
     setLoading(true);
 
-    // Optimistically update UI
     const newFriendRequest = {
       friendRespondId: data.user.id,
       friendRequestId: data.currentUser.id,
@@ -158,11 +186,8 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
       actionDatetime: new Date(),
     };
 
-    // Optimistically update the cache
-    queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
-      ...oldData,
-      friends: [...(oldData?.friends || []), newFriendRequest],
-    }));
+    // Optimistically update cache
+    updateFriendCache(newFriendRequest);
 
     try {
       const response = await fetch("/api/friend/addFriend", {
@@ -174,38 +199,17 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
       });
 
       if (response.ok) {
-        // Invalidate and refetch queries to ensure data consistency
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: ["profile_data", name],
-          }),
-          queryClient.invalidateQueries({
-            queryKey: ["user_friend_data", data?.user?.id],
-          }),
-        ]);
+        // Refetch data to ensure consistency
+        await Promise.all([refetchProfileData(), refetchFriendData()]);
         toast.success("Friend request sent!");
       } else {
-        // Revert optimistic update on error
-        queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
-          ...oldData,
-          friends: oldData.friends.filter(
-            (f: any) =>
-              f.friendRequestId !== data.currentUser?.id ||
-              f.friendRespondId !== data.user?.id
-          ),
-        }));
+        // Revert optimistic update
+        removeFriendFromCache(data.currentUser.id);
         toast.error("Failed to send friend request");
       }
     } catch (error) {
-      // Revert optimistic update on error
-      queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
-        ...oldData,
-        friends: oldData.friends.filter(
-          (f: any) =>
-            f.friendRequestId !== data.currentUser?.id ||
-            f.friendRespondId !== data.user?.id
-        ),
-      }));
+      // Revert optimistic update
+      removeFriendFromCache(data.currentUser.id);
       toast.error("An error occurred while sending friend request");
     } finally {
       setLoading(false);
@@ -223,28 +227,18 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
 
     setLoading(true);
 
-    // Store the current state for potential rollback
-    const previousData = queryClient.getQueryData(["profile_data", name]);
+    // Store current cache state
+    const previousProfileData = queryClient.getQueryData([
+      "profile_data",
+      name,
+    ]);
     const previousFriendData = queryClient.getQueryData([
       "user_friend_data",
       data?.user?.id,
     ]);
 
-    // Optimistically update UI
-    queryClient.setQueryData(["profile_data", name], (oldData: any) => ({
-      ...oldData,
-      friends: oldData.friends.filter(
-        (f: any) =>
-          f.friendRequestId !== friendRequestId &&
-          f.friendRespondId !== friendRequestId
-      ),
-    }));
-
-    queryClient.setQueryData(
-      ["user_friend_data", data?.user?.id],
-      (oldData: any) =>
-        oldData?.filter((f: any) => f.friendId !== friendRequestId)
-    );
+    // Optimistically remove friend from cache
+    removeFriendFromCache(friendRequestId);
 
     try {
       const response = await fetch("/api/friend/addFriend", {
@@ -256,20 +250,13 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
       });
 
       if (response.ok) {
-        // Invalidate and refetch queries to ensure data consistency
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: ["profile_data", name],
-          }),
-          queryClient.invalidateQueries({
-            queryKey: ["user_friend_data", data?.user?.id],
-          }),
-        ]);
+        // Refetch data to ensure consistency
+        await Promise.all([refetchProfileData(), refetchFriendData()]);
         setModal(false);
         toast.success("Friend removed successfully");
       } else {
-        // Revert optimistic updates on error
-        queryClient.setQueryData(["profile_data", name], previousData);
+        // Revert cache to previous state
+        queryClient.setQueryData(["profile_data", name], previousProfileData);
         queryClient.setQueryData(
           ["user_friend_data", data?.user?.id],
           previousFriendData
@@ -277,8 +264,8 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
         toast.error("Failed to remove friend");
       }
     } catch (error) {
-      // Revert optimistic updates on error
-      queryClient.setQueryData(["profile_data", name], previousData);
+      // Revert cache to previous state
+      queryClient.setQueryData(["profile_data", name], previousProfileData);
       queryClient.setQueryData(
         ["user_friend_data", data?.user?.id],
         previousFriendData
@@ -317,6 +304,7 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
   const uniqueFriends = Array.from(
     new Map(friend?.map((friend) => [friend.friendId, friend])).values()
   );
+
   useEffect(() => {
     setIsMounted(true);
     return () => {
@@ -380,17 +368,7 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
                   </div>
                   <div className="min-[56px]">
                     <Links href="" className="block">
-                      <span>
-                        {data?.friends &&
-                        data.friends.filter((fri: FriendRequestProps) =>
-                          fri?.friendRespondId?.includes(data.user?.id ?? "")
-                        )?.length > 0
-                          ? getAllCurrentUserFriend?.filter(
-                              (stat: FriendRequestProps) =>
-                                stat?.status !== "pending"
-                            )?.length
-                          : getCurrentUserRespondFri?.length ?? 0}
-                      </span>
+                      <span>{uniqueFriends?.length}</span>
                       <span className="block text-[#818a91] md:text-sm lg:text-md">
                         Friends
                       </span>
@@ -468,6 +446,7 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
               </div>
               <div className="absolute top-2 right-4">
                 <Links
+                  prefetch={false}
                   href={`/friends/${data?.user?.name}`}
                   className="text-white"
                 >
@@ -699,6 +678,10 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
                           <AcceptRejectButton
                             setFriendRequests={setFriendRequests}
                             item={item}
+                            onActionComplete={() => {
+                              refetchProfileData();
+                              refetchFriendData();
+                            }}
                           />
                         </div>
                       ))}
@@ -725,7 +708,7 @@ const ProfileItem: React.FC<ProfileItemType> = ({ name }) => {
                   >
                     <TabsTrigger value={list?.label}>
                       <Links
-                        prefetch={true}
+                        prefetch={false}
                         href={`${list.link}/${data?.user?.name}/${list.page}`}
                         className="relative text-xs md:text-sm font-bold px-4 py-2"
                       >

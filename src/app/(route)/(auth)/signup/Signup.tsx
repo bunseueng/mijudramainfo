@@ -63,10 +63,17 @@ const Signup = () => {
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="relative min-h-screen flex items-center justify-center px-4">
       <AnimatedBackground
         animationName="starryNight"
-        style={{ position: "absolute", zIndex: "0" }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+        }}
       />
       <div className="max-w-md w-full space-y-8 p-10 bg-white bg-opacity-10 rounded-xl shadow-lg backdrop-filter backdrop-blur-lg mt-20 mb-36 mx-4 md:mx-0">
         <div className="text-center">

@@ -3,16 +3,18 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { useCoinData } from "@/hooks/useCoinData";
+import { currentUserProps } from "@/helper/type";
 const CoinModal = dynamic(() => import("@/app/component/ui/Modal/CoinModal"), {
   ssr: false,
 });
 
 interface UserI {
-  getCoin: any;
   paypalClientID: string | undefined;
 }
 
-const Coin: React.FC<UserI> = ({ getCoin, paypalClientID }) => {
+const Coin: React.FC<UserI> = ({ paypalClientID }) => {
+  const { data: getCoin } = useCoinData();
   const [openModal, setOpenModal] = useState<boolean>(false);
   useEffect(() => {
     // Lock body scroll when modal is open
@@ -80,7 +82,7 @@ const Coin: React.FC<UserI> = ({ getCoin, paypalClientID }) => {
                 {openModal && (
                   <CoinModal
                     setOpenModal={setOpenModal}
-                    getCoin={getCoin}
+                    getCoin={getCoin as currentUserProps | null}
                     paypalClientID={paypalClientID}
                   />
                 )}

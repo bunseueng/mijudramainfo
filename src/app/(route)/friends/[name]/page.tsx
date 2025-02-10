@@ -1,8 +1,8 @@
-import React, { Suspense } from "react";
-import dynamic from "next/dynamic";
+export const dynamic = "force-dynamic";
+import React, { lazy, Suspense } from "react";
 import { Metadata } from "next";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
-const Friend = dynamic(() => import("./Friend"));
+const Friend = lazy(() => import("./Friend"));
 
 export const metadata: Metadata = {
   title: "Friends",

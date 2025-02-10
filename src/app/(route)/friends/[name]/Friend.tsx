@@ -121,7 +121,6 @@ const Friend: React.FC<FriendProps> = ({ name }) => {
         toast.error("Failed to remove friend");
       }
     } catch (error) {
-      console.error("Error removing friend:", error);
       toast.error("An error occurred while removing friend");
     } finally {
       setLoading(false);

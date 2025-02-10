@@ -1,9 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { friendItems } from "@/helper/item-list";
 import dynamic from "next/dynamic";
 import { useProfileData } from "@/hooks/useProfileData";
 import { useState, useEffect } from "react";
@@ -21,10 +18,11 @@ interface FriendRequestProps {
 }
 
 const FriendRequest: React.FC<FriendRequestProps> = ({ name }) => {
-  const { data } = useProfileData(name);
+  const { data, refetch: refetchProfileData } = useProfileData(name);
   const { user, friend, currentUser } = { ...data };
-  const { data: userFriends } = useUserFriendData(user?.id as string);
-  const pathname = usePathname();
+  const { data: userFriends, refetch: refetchFriendData } = useUserFriendData(
+    user?.id as string
+  );
   const [friendRequests, setFriendRequests] = useState(friend);
 
   // Update friendRequests when friend data changes
@@ -71,6 +69,10 @@ const FriendRequest: React.FC<FriendRequestProps> = ({ name }) => {
                 <AcceptRejectButton
                   setFriendRequests={setFriendRequests}
                   item={item}
+                  onActionComplete={() => {
+                    refetchProfileData();
+                    refetchFriendData();
+                  }}
                 />
               </div>
             ))

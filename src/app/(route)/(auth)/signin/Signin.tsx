@@ -1,11 +1,11 @@
 "use client";
 
-import { signInForm, TSignInForm } from "@/helper/zod";
+import { signInForm, type TSignInForm } from "@/helper/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaGithub, FaGoogle } from "react-icons/fa6";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -31,6 +31,7 @@ const Signin = () => {
       password: "",
     },
   });
+
   const onSubmit = useCallback(
     async (userData: TSignInForm) => {
       setIsLoading(true);
@@ -61,6 +62,7 @@ const Signin = () => {
     },
     [router]
   );
+
   const handleSocialSignIn = async (
     provider: "google" | "github" | "facebook"
   ) => {
@@ -77,16 +79,24 @@ const Signin = () => {
     if (status === "authenticated") {
       router.push("/");
     }
-  }, [status, session, router]);
+  }, [status, router]); // Removed unnecessary session dependency
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="relative min-h-screen flex items-center justify-center px-4">
       <AnimatedBackground
         animationName="starryNight"
-        style={{ position: "absolute", zIndex: "0" }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+        }}
       />
-      {/* Left Section */}
-      <div className="max-w-md w-full space-y-8 p-10 bg-white bg-opacity-10 rounded-xl shadow-lg backdrop-filter backdrop-blur-lg z-50 mt-20 mb-36 mx-4: md:mx-0">
+
+      {/* Content */}
+      <div className="max-w-md w-full space-y-8 p-10 bg-white bg-opacity-10 rounded-xl shadow-lg backdrop-filter backdrop-blur-lg z-10 my-8">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-white">
             Welcome to MijuDramaInfo

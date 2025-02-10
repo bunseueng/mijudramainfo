@@ -1,13 +1,11 @@
-import { Suspense } from "react";
-import dynamic from "next/dynamic";
+export const dynamic = "force-dynamic";
+import { lazy, Suspense } from "react";
 import { Metadata } from "next";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
-const SearchLoading = dynamic(
+const SearchLoading = lazy(
   () => import("@/app/component/ui/Loading/SearchLoading")
 );
-const SearchQuery = dynamic(
-  () => import("../../component/ui/Search/SearchQuery")
-);
+const SearchQuery = lazy(() => import("../../component/ui/Search/SearchQuery"));
 
 export async function generateMetadata(): Promise<Metadata> {
   const url = `${process.env.BASE_URL}/search`;
