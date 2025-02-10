@@ -4,8 +4,40 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import type { SessionDropdownProps } from "./NavbarActions";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
+async function fetchCsrfToken() {
+  const response = await fetch("/api/auth/csrf");
+  const data = await response.json();
+  return data.csrfToken;
+}
+
+async function manualSignOut() {
+  const csrfToken = await fetchCsrfToken();
+
+  const formData = new URLSearchParams();
+  formData.append("csrfToken", csrfToken);
+  formData.append("json", "true");
+
+  const response = await fetch("/api/auth/signout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: formData.toString(),
+  });
+
+  if (response.ok) {
+    console.log("Signed out successfully");
+
+    // Additional post processing after signout and the session is cleared...
+
+    window.location.href = "/";
+  } else {
+    console.error("Failed to sign out");
+  }
+}
 
 const SessionDropdown: React.FC<SessionDropdownProps> = ({
   sessionItems,
@@ -21,7 +53,7 @@ const SessionDropdown: React.FC<SessionDropdownProps> = ({
     async (e: React.MouseEvent) => {
       e.preventDefault();
       try {
-        await signOut({ redirect: false });
+        manualSignOut();
         router.push("/");
       } catch (error) {
         console.error("Error signing out:", error);

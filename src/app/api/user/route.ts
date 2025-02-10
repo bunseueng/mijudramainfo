@@ -51,10 +51,13 @@ export async function POST(request: Request) {
     const { hashedPassword: _, ...userWithoutPassword } = newUser;
 
     // Return user data without the password
-    return NextResponse.json(
+    const response = NextResponse.json(
       { message: "User created successfully", user: userWithoutPassword },
-      { status: 200 }
-    );
+      { status: 201 },
+    )
+
+    response.headers.set("x-apply-cache", "false")
+    return response
   } catch (err) {
     return NextResponse.json({ message: "Failed to create user" }, { status: 500 });
   }

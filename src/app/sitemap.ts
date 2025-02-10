@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       generateTVShowEntries(baseUrl, sitemapEntries),
       generateMovieEntries(baseUrl, sitemapEntries),
       generatePersonEntries(baseUrl, sitemapEntries),
+      generateKoreanTVShowEntries(baseUrl, sitemapEntries),
       generatePopularPersonEntries(baseUrl, sitemapEntries),
       generateNetworkEntry(baseUrl, sitemapEntries),
     ])
@@ -30,6 +31,56 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
     const tvShows = await fetchTVShows()
+    sitemapEntries.push(
+      ...tvShows.flatMap((tvShow) => [
+        {
+          url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}`,
+          lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 1.0,
+          changefreq: "daily",
+        },
+        {
+          url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/watch`,
+          lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 1.0,
+          changefreq: "daily",
+        },
+        {
+          url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/photos`,
+          lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 0.5,
+          changefreq: "weekly",
+        },
+        {
+          url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/reviews`,
+          lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 0.6,
+          changefreq: "daily",
+        },
+        {
+          url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/seasons`,
+          lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 0.6,
+          changefreq: "weekly",
+        },
+        {
+          url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/cast`,
+          lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
+          priority: 0.7,
+          changefreq: "monthly",
+        },
+      ]),
+    )
+    await generateTVKeywordEntries(tvShows, baseUrl, sitemapEntries)
+  } catch (error) {
+    console.error("Error generating TV show entries:", error)
+  }
+}
+
+
+async function generateKoreanTVShowEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  try {
+    const tvShows = await fetchKoreanTVShows()
     sitemapEntries.push(
       ...tvShows.flatMap((tvShow) => [
         {
@@ -169,6 +220,15 @@ async function fetchTVShows(): Promise<TVShow[]> {
   return data.results
 }
 
+async function fetchKoreanTVShows(): Promise<TVShow[]> {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=KR&without_genres=16,10764,10767,99`,
+  )
+  if (!response.ok) throw new Error("Failed to fetch TV shows")
+  const data = await response.json()
+  return data.results
+}
+
 async function fetchMovies(): Promise<TVShow[]> {
   const response = await fetch(
     `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN`,
@@ -289,3 +349,4 @@ function generateStaticPageEntries(baseUrl: string): MetadataRoute.Sitemap {
     changefreq,
   }))
 }
+

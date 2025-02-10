@@ -12,7 +12,6 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60,
   },
   pages: {
     signIn: "/signin",
@@ -130,16 +129,6 @@ export const authOptions: NextAuthOptions = {
       session.user.image = token.image;
       session.user.role = token.role;
       session.user.profileAvatar = token.profileAvatar; // Add this line
-      if (token.rememberMe) {
-        session.expires = new Date(
-          Date.now() + 30 * 24 * 60 * 60 * 1000
-        ).toISOString(); // 30 days
-      } else {
-        session.expires = new Date(
-          Date.now() + 24 * 60 * 60 * 1000
-        ).toISOString(); // 1 day (default)
-      }
-      session.accessToken = token.accessToken;
       return session;
     },
 

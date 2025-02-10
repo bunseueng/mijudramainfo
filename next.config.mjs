@@ -30,6 +30,13 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
+        has: [
+          {
+            type: "header",
+            key: "x-apply-cache",
+            value: "(?!false)",
+          },
+        ],
         headers: [
           {
             key: "Cache-Control",
