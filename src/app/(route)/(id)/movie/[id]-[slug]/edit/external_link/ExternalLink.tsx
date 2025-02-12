@@ -128,7 +128,7 @@ const ExternalLink: React.FC<movieId & Movie> = ({
       setSelectedExternal("");
       setOpenExternal(false);
       reset();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error);
     }
   };
