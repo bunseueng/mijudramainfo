@@ -18,6 +18,7 @@ const LazyImage = ({
   coverFromDB,
   ref,
   onError,
+  fetchPriority,
 }: any) => {
   const [isVisible, setIsVisible] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -101,6 +102,7 @@ const LazyImage = ({
       onLoad={onLoad}
       sizes={sizes}
       onError={onError}
+      fetchPriority={fetchPriority}
     />
   );
 };

@@ -82,7 +82,6 @@ const SeasonEpisode = ({ tv_id }: tvId) => {
   if (isLoading) {
     return <SearchLoading />;
   }
-  console.log(season);
   return (
     <div className="w-full h-full">
       <div

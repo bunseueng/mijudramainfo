@@ -17,6 +17,8 @@ import {
   UserProps,
 } from "@/helper/type";
 import WatchNowButton from "../Button/WatchNowButton";
+import Link from "next/link";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 
 interface DramaHeaderProps {
   tv: TVShow;
@@ -49,6 +51,7 @@ interface DramaHeaderProps {
   content: any;
   rank: any;
   video: any;
+  keyword: any;
 }
 
 const DramaHeader: React.FC<DramaHeaderProps> = ({
@@ -82,6 +85,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
   content,
   rank,
   video,
+  keyword,
 }) => {
   return (
     <div
@@ -108,12 +112,14 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
                 ref={imgRef}
                 onLoad={extractColor}
                 src={
-                  getDrama?.cover ||
-                  `https://image.tmdb.org/t/p/w780/${
-                    tv?.poster_path || tv?.backdrop_path
-                  }`
+                  tv?.poster_path === null
+                    ? "/placeholder-image.avif"
+                    : getDrama?.cover ||
+                      `https://image.tmdb.org/t/p/w780/${
+                        tv?.poster_path || tv?.backdrop_path
+                      }`
                 }
-                alt={detail?.title || tv?.name || "Drama Poster"}
+                alt={`${detail?.title || tv?.name}'s Poster` || "Drama Poster"}
                 width={300}
                 height={440}
                 quality={100}
@@ -138,24 +144,45 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
                 </h2>
               </div>
               <div className="mb-2 text-1xl font-bold text-white">
-                <span
-                  className="cursor-pointer hover:opacity-50 duration-300"
-                  style={{ color: textColor }}
-                >
+                <div style={{ color: textColor }}>
                   {getDrama?.genres_tags?.length > 0
                     ? getDrama?.genres_tags
                         ?.map((tag: any) =>
-                          tag?.genre?.map((gen: any) => gen?.value).join(", ")
+                          tag?.genre
+                            ?.map((gen: any) => (
+                              <Link
+                                key={tag?.id}
+                                prefetch={false}
+                                href={`/genre/${gen?.id}-${spaceToHyphen(
+                                  gen?.value
+                                )}/tv`}
+                                className="cursor-pointer hover:opacity-50 duration-300"
+                              >
+                                {gen?.value}
+                              </Link>
+                            ))
+                            .join(", ")
                         )
                         .join(", ")
                     : tv?.genres?.length > 0
                     ? tv?.genres?.map((genre: any, index: number) => {
-                        return index === tv.genres.length - 1
-                          ? genre.name
-                          : genre.name + ", ";
+                        return (
+                          <Link
+                            className="cursor-pointer hover:opacity-50 duration-300"
+                            key={genre?.id}
+                            prefetch={false}
+                            href={`/genre/${genre?.id}-${spaceToHyphen(
+                              genre?.name
+                            )}/tv`}
+                          >
+                            {index === tv.genres.length - 1
+                              ? genre.name
+                              : genre.name + ", "}
+                          </Link>
+                        );
                       })
                     : null}
-                </span>
+                </div>
               </div>
 
               <div className="flex flex-col md:flex-row items-start md:items-center py-5">
@@ -232,6 +259,7 @@ const DramaHeader: React.FC<DramaHeaderProps> = ({
                 formattedDates={formattedDates}
                 content={content}
                 rank={rank}
+                keyword={keyword}
               />
             </div>
           </div>

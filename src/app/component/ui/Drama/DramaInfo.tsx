@@ -1,6 +1,8 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
-import {
+import type {
   CrewRole,
   DramaDB,
   DramaDetails,
@@ -9,6 +11,7 @@ import {
   TitleData,
 } from "@/helper/type";
 import { MobileInfo } from "./MobileInfo";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 
 interface DramaInfoProps {
   detail: DramaDetails;
@@ -24,6 +27,7 @@ interface DramaInfoProps {
   formattedDates: any;
   content: any;
   rank: any;
+  keyword: any;
 }
 
 const DramaInfo: React.FC<DramaInfoProps> = ({
@@ -40,7 +44,18 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
   formattedDates,
   content,
   rank,
+  keyword,
 }) => {
+  const [hoveredItem, setHoveredItem] = useState<{
+    type: string;
+    id: number | null;
+  }>({ type: "", id: null });
+  const director_db = getDrama?.crew?.find(
+    (crew: any) => crew?.department === "Directing"
+  );
+  const writer = getDrama?.crew?.find(
+    (crew: any) => crew?.jobs && crew?.jobs[0]?.job === "Screenstory"
+  );
   return (
     <div className="drama-info">
       <p className="font-bold mb-3 text-2xl mt-3" style={{ color: textColor }}>
@@ -101,13 +116,27 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
       <InfoSection
         label="Director"
         value={
-          getDrama?.crew?.length > 0
-            ? getDrama?.crew?.find(
-                (crew: any) => crew?.department === "Directing"
-              )?.name
-            : director?.name?.length > 0
-            ? director?.name
-            : "Director is not yet added!"
+          <Link
+            prefetch={false}
+            href={
+              getDrama?.crew?.length > 0 || director?.name?.length > 0
+                ? `/person/${director_db?.id || director?.id}-${
+                    director_db?.name || director?.name
+                  }`
+                : "#"
+            }
+            onMouseEnter={() => setHoveredItem({ type: "director", id: null })}
+            onMouseLeave={() => setHoveredItem({ type: "", id: null })}
+            style={{
+              color: hoveredItem.type === "director" ? "#2490da" : textColor,
+            }}
+          >
+            {getDrama?.crew?.length > 0
+              ? director_db?.name
+              : director?.name?.length > 0
+              ? director?.name
+              : "Director is not yet added!"}
+          </Link>
         }
         textColor={textColor}
       />
@@ -115,14 +144,27 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
       <InfoSection
         label="Screenwriter"
         value={
-          getDrama?.crew?.length > 0
-            ? getDrama?.crew?.find(
-                (crew: any) =>
-                  crew?.jobs && crew?.jobs[0]?.job === "Screenstory"
-              )?.name
-            : screenwriter?.name?.length > 0
-            ? screenwriter?.name
-            : "Screenwriter is not yet added!"
+          <Link
+            prefetch={false}
+            href={
+              getDrama?.crew?.length > 0 || screenwriter?.name?.length > 0
+                ? `/person/${writer?.id || screenwriter?.id}-${
+                    writer?.name || screenwriter?.name
+                  }`
+                : "#"
+            }
+            onMouseEnter={() => setHoveredItem({ type: "writer", id: null })}
+            onMouseLeave={() => setHoveredItem({ type: "", id: null })}
+            style={{
+              color: hoveredItem.type === "writer" ? "#2490da" : textColor,
+            }}
+          >
+            {getDrama?.crew?.length > 0
+              ? writer?.name
+              : screenwriter?.name?.length > 0
+              ? screenwriter?.name
+              : "Screenwriter is not yet added!"}
+          </Link>
         }
         textColor={textColor}
       />
@@ -131,27 +173,98 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
         label="Genres"
         value={
           getDrama?.genres_tags?.length > 0
-            ? getDrama?.genres_tags
-                ?.map((tag: any) =>
-                  tag?.genre?.map((gen: any) => gen?.value).join(", ")
-                )
-                .join(", ")
+            ? getDrama.genres_tags.flatMap((tag: any, tagIndex: number) =>
+                tag?.genre?.map((gen: any, genIndex: number) => (
+                  <React.Fragment key={gen?.id}>
+                    <Link
+                      href={`/genre/${gen?.id}-${spaceToHyphen(gen?.value)}/tv`}
+                      prefetch={false}
+                      onMouseEnter={() =>
+                        setHoveredItem({ type: "genre", id: gen?.id })
+                      }
+                      onMouseLeave={() =>
+                        setHoveredItem({ type: "", id: null })
+                      }
+                      style={{
+                        color:
+                          hoveredItem.type === "genre" &&
+                          hoveredItem.id === gen?.id
+                            ? "#2490da"
+                            : textColor,
+                      }}
+                    >
+                      {gen?.value}
+                    </Link>
+                    {genIndex < tag.genre.length - 1 ||
+                    tagIndex < getDrama.genres_tags.length - 1
+                      ? ", "
+                      : ""}
+                  </React.Fragment>
+                ))
+              )
             : tv?.genres?.length > 0
-            ? tv?.genres?.map((genre: any) => genre.name).join(", ")
-            : "Genres not yet added!"
+            ? tv.genres.map((genre: any, index: number) => (
+                <React.Fragment key={genre?.id}>
+                  <Link
+                    href={`/genre/${genre?.id}-${spaceToHyphen(
+                      genre?.name
+                    )}/tv`}
+                    prefetch={false}
+                    onMouseEnter={() =>
+                      setHoveredItem({ type: "genre", id: genre?.id })
+                    }
+                    onMouseLeave={() => setHoveredItem({ type: "", id: null })}
+                    style={{
+                      color:
+                        hoveredItem.type === "genre" &&
+                        hoveredItem.id === genre?.id
+                          ? "#2490da"
+                          : textColor,
+                    }}
+                  >
+                    {genre.name}
+                  </Link>
+                  {index < tv.genres.length - 1 ? ", " : ""}
+                </React.Fragment>
+              ))
+            : "?"
         }
         textColor={textColor}
       />
 
       <InfoSection
         label="Tags"
-        value={
-          getDrama?.genres_tags?.length > 0
-            ? formattedKeywordsDB
-            : formattedKeywords?.length > 0
-            ? formattedKeywords.join("")
-            : "Tags is not yet added!"
-        }
+        value={keyword?.map(
+          (key: { name: string; id: number }, index: number) => {
+            const capitalizedKeyword =
+              key.name.charAt(0).toUpperCase() + key.name.slice(1);
+            return (
+              <span key={key?.id}>
+                <Link
+                  href={`/keyword/${key?.id}/tv`}
+                  prefetch={false}
+                  onMouseEnter={() =>
+                    setHoveredItem({ type: "tag", id: key?.id })
+                  }
+                  onMouseLeave={() => setHoveredItem({ type: "", id: null })}
+                  style={{
+                    color:
+                      hoveredItem.type === "tag" && hoveredItem.id === key?.id
+                        ? "#2490da"
+                        : textColor,
+                  }}
+                >
+                  {getDrama?.genres_tags?.length > 0
+                    ? formattedKeywordsDB
+                    : formattedKeywords?.length > 0
+                    ? capitalizedKeyword
+                    : "?"}
+                </Link>
+                {index < keyword.length - 1 && ", "}
+              </span>
+            );
+          }
+        )}
         textColor={textColor}
       />
       <div className="md:hidden">
@@ -172,14 +285,14 @@ const DramaInfo: React.FC<DramaInfoProps> = ({
 
 const InfoSection: React.FC<{
   label: string;
-  value: string | undefined;
+  value: React.ReactNode;
   textColor: string;
 }> = ({ label, value, textColor }) => (
   <div className="mt-4">
-    <h1 className="font-bold text-md" style={{ color: textColor }}>
+    <h1 className={`font-bold text-md`} style={{ color: textColor }}>
       {label}:
       <span
-        className="text-sm pl-2 font-semibold text-[#1675b6]"
+        className={`text-sm pl-2 font-semibold transform duration-300 cursor-pointer`}
         style={{ color: textColor }}
       >
         {value}

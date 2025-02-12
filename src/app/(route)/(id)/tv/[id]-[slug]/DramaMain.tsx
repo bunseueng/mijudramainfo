@@ -251,6 +251,7 @@ const DramaMain = ({
             formattedFirstAirDateDB,
             formattedLastAirDateDB,
           }}
+          keyword={keyword?.results}
         />
 
         <DramaCast

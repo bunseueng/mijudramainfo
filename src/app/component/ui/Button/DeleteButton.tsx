@@ -40,13 +40,11 @@ const DeleteButton = <T extends CrewType | CastType>({
 
   const handleDeleteStoredData = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log("Deleting item at index:", ind);
 
     // Remove the item at the specified index (idx) from the storedData array
     const updatedStoredData = storedData.filter(
       (items, index) => items?.name !== item[ind]?.name
     );
-    console.log("Updated storedData:", updatedStoredData);
     setStoredData(updatedStoredData);
     setOpen(false);
     // Close the modal after deletion

@@ -17,10 +17,8 @@ const fulfillOrder = async (data: Stripe.LineItem[], customerEmail: string) => {
                 paymentMethod: "Stripe"
             }
         });
-        console.log(JSON.stringify(user));
         return !!user; // Returns true if user is created, false otherwise
     } catch (error: any) {
-        console.log(error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 };
@@ -43,9 +41,6 @@ const saveCoinToUser = async (lineItems: Stripe.LineItem[], metadata: any) => {
                 const addingSpecificCoin = coinMap[product.name] || 0;
 
                 if (addingSpecificCoin > 0) {
-                    // Log before updating user
-                    console.log(`Updating user with email: ${metadata.email}, adding coins: ${addingSpecificCoin}`);
-
                     // First, retrieve the user to check their current coin balance
                     const user = await prisma.user.findUnique({
                         where: { email: metadata.email },
@@ -65,9 +60,6 @@ const saveCoinToUser = async (lineItems: Stripe.LineItem[], metadata: any) => {
                         where: { email: metadata.email },
                         data: { coin: currentCoinBalance + addingSpecificCoin }
                     });
-
-                    // Log after updating user
-                    console.log("Updated user:", updatedUser);
 
                     if (updatedUser) {
                         console.log("Success adding coin");
@@ -92,13 +84,11 @@ const saveCoinToUser = async (lineItems: Stripe.LineItem[], metadata: any) => {
 
 const saveCheckoutSession = async (eventDataObject: any) => {
     try {
-        console.log("Saving checkout session:", eventDataObject); // Log eventDataObject
         const res = await prisma.checkoutSession.create({
             data: {
                 order: eventDataObject // Pass JSON object directly
             }
         });
-        console.log("Saved checkout session:", res); // Log the response
         return res;
     } catch (error) {
         console.error("Error saving checkout session:", error);
@@ -179,7 +169,6 @@ export async function POST(req: NextRequest) {
     try {
         event = stripe.webhooks.constructEvent(rawBody, sig!, endPointSecret!);
     } catch (error: any) {
-        console.log(error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
     

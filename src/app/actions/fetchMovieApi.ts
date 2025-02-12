@@ -1032,6 +1032,56 @@ export const fetchMovieKeywords = cache(
   }
 );
 
+export const fetchTvGenre = cache(
+  async (
+    page: number,
+    genre: string,
+    sortBy: string | undefined,
+    withoutGenre: string,
+    country: string
+  ) => {
+    const url = new URL("https://api.themoviedb.org/3/discover/tv");
+    url.searchParams.append(
+      "api_key",
+      process.env.NEXT_PUBLIC_API_KEY as string
+    );
+    url.searchParams.append("language", "en-US");
+    url.searchParams.append("with_genres", genre);
+    url.searchParams.append("page", page.toString());
+    if (sortBy) url.searchParams.append("sort_by", sortBy);
+    url.searchParams.append("without_genres", withoutGenre);
+    url.searchParams.append("with_origin_country", country);
+
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error("Failed to fetch TV shows");
+    return response.json();
+  }
+);
+
+export const fetchMovieGenre = cache(
+  async (
+    page: number,
+    genre: string,
+    sortBy: string | undefined,
+    country: string
+  ) => {
+    const url = new URL("https://api.themoviedb.org/3/discover/movie");
+    url.searchParams.append(
+      "api_key",
+      process.env.NEXT_PUBLIC_API_KEY as string
+    );
+    url.searchParams.append("language", "en-US");
+    url.searchParams.append("with_genres", genre);
+    url.searchParams.append("page", page.toString());
+    if (sortBy) url.searchParams.append("sort_by", sortBy);
+    url.searchParams.append("with_origin_country", country);
+
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error("Failed to fetch TV shows");
+    return response.json();
+  }
+);
+
 export const fetchRatings = cache(async (ids: string[]) => {
   try {
     const url = `/api/rating/${ids}`;

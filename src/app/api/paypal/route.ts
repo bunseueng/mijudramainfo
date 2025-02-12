@@ -11,7 +11,6 @@ interface PayPalOrder {
 export async function POST(req: NextRequest) {
     const { action, id, price, orderId, value } = await req.json();
 
-    console.log('OrderId:', orderId);
     
     try {
         if (action === "createOrder") {

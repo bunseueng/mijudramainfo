@@ -14,7 +14,7 @@ export async function generateMetadata(props: any): Promise<Metadata> {
   const url = `${process.env.BASE_URL}/${keyword_id}/tv`;
   return {
     title: `${keyword?.name}`,
-    description: `All TV Shows of keyword ${keyword?.name}`,
+    description: `Explore TV Shows of keyword (${keyword?.name}) and more...`,
     keywords: keyword?.name,
     alternates: {
       canonical: url,
@@ -23,7 +23,7 @@ export async function generateMetadata(props: any): Promise<Metadata> {
       type: "website",
       url: url,
       title: keyword?.name,
-      description: `All Tv Shows of ${keyword?.name}`,
+      description: `Explore TV Shows of keyword (${keyword?.name}) and more...`,
       images: [
         {
           url: `/opengraph-image.png`,

@@ -196,7 +196,7 @@ const RelatedTitle: React.FC<movieId & Movie> = ({
       } else if (res.status === 400) {
         toast.error("Invalid User");
       } else if (res.status === 500) {
-        console.log("Server Error");
+        throw new Error("Server Error");
       }
     } catch (error: any) {
       console.error("Error:", error.message);

@@ -24,6 +24,8 @@ import { countryFilter } from "@/helper/item-list";
 import { useInView } from "react-intersection-observer";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import AdArticle from "@/app/component/ui/Adsense/AdArticle";
+import AdBanner from "@/app/component/ui/Adsense/AdBanner";
 
 const PlayMovieTrailer = dynamic(
   () => import("@/app/(route)/(id)/movie/[id]-[slug]/PlayMovieTrailer"),
@@ -190,9 +192,25 @@ const MovieKeyword: React.FC<Network> = ({ keyword_id }) => {
   }
   return (
     <div className="max-w-6xl mx-auto my-10 flex flex-col w-full h-auto mb-10 px-2 md:px-5">
+      {" "}
+      <div className="relative w-full min-h-[200px]">
+        <div className="absolute inset-0">
+          <AdBanner dataAdFormat="auto" dataAdSlot="3527489220" />
+        </div>
+      </div>
       <div className="mt-10">
         <div className="flex flex-col md:flex-row mt-10 w-full">
-          <div className="w-full md:w-[70%] px-1 md:px-3">
+          <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3 order-1 md:order-2">
+            <FilterSection
+              genre={genre}
+              setGenre={setGenre}
+              country={country}
+              setCountry={setCountry}
+              sortby={sortby}
+              setSortby={setSortby}
+            />
+          </div>
+          <div className="w-full md:w-[70%] px-1 md:px-3 order-2 md:order-1">
             <div className="flex items-center justify-between mb-5">
               <p>{keywordDetails?.total_results} results</p>
             </div>
@@ -214,20 +232,8 @@ const MovieKeyword: React.FC<Network> = ({ keyword_id }) => {
               );
             })}
           </div>
-
-          <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3">
-            <FilterSection
-              genre={genre}
-              setGenre={setGenre}
-              country={country}
-              setCountry={setCountry}
-              sortby={sortby}
-              setSortby={setSortby}
-            />
-          </div>
         </div>
       </div>
-
       <div className="flex flex-wrap items-center justify-between px-1 md:px-2 mt-3">
         <SearchPagination
           setPage={setPage}
@@ -249,88 +255,149 @@ const FilterSection: React.FC<{
 }> = ({ genre, setGenre, country, setCountry, sortby, setSortby }) => {
   return (
     <>
-      <div className="inline-block">
-        <BiSort className="inline-block" />{" "}
-        <span className="align-middle">Sort By</span>
+      {" "}
+      <div className="hidden md:block relative w-full min-h-[200px] mb-10">
+        <div className="absolute inset-0">
+          <AdArticle dataAdFormat="auto" dataAdSlot="4321696148" />
+        </div>
       </div>
-      <div className="mt-4">
-        <div className="border-b border-b-slate-400">Type:</div>
-        <div className="relative float-left w-full text-left mb-4 my-5">
-          <div className="-mx-3">
-            <div className="relative float-left w-full px-3">
-              <label
-                className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                  genre === "movie" ? "text-[#409eff] font-bold" : ""
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="movie"
-                  value="movie"
-                  checked={genre === "movie"}
-                  onChange={() => setGenre("movie")}
-                  className="transform duration-300 cursor-pointer mr-2"
-                />
-                <span>Movie</span>
-              </label>
-            </div>
+      <div className="md:hidden mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <BiSort className="inline-block" />
+          <span className="font-semibold">Sort By</span>
+        </div>
+        <select
+          className="w-full border rounded-md p-2 text-sm"
+          value={sortby}
+          onChange={(e) => setSortby(e.target.value)}
+        >
+          <option value="">Select</option>
+          <option value="popularity.desc">Popularity (High to Low)</option>
+          <option value="popularity.asc">Popularity (Low to High)</option>
+          <option value="vote_average.desc">Rating (High to Low)</option>
+          <option value="vote_average.asc">Rating (Low to High)</option>
+          <option value="release_date.desc">Newest First</option>
+          <option value="release_date.asc">Oldest First</option>
+        </select>
+      </div>
+      <div className="md:hidden mb-4">
+        <div className="flex flex-wrap -mx-2">
+          <div className="w-1/2 px-2 mb-2">
+            <label className="block text-sm font-medium mb-1">Type</label>
+            <select
+              className="w-full border rounded-md p-2 text-sm"
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+            >
+              <option value="movie">Movie</option>
+            </select>
+          </div>
+          <div className="w-1/2 px-2 mb-2">
+            <label className="block text-sm font-medium mb-1">Country</label>
+            <select
+              className="w-full border rounded-md p-2 text-sm"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            >
+              <option value="">All Countries</option>
+              {countryFilter?.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
-      <div className="mt-4">
-        <div className="border-b border-b-slate-400">Country:</div>
-        <div className="relative float-left w-full text-left mb-4 my-5">
-          <div className="-mx-3">
-            <div className="relative float-left w-full px-3">
-              {countryFilter?.map((c, idx) => (
+      <div className="hidden md:block">
+        <div className="inline-block">
+          <BiSort className="inline-block" />{" "}
+          <span className="align-middle">Sort By</span>
+        </div>
+        <div className="mt-4">
+          <div className="border-b border-b-slate-400">Type:</div>
+          <div className="relative float-left w-full text-left mb-4 my-5">
+            <div className="-mx-3">
+              <div className="relative float-left w-full px-3">
                 <label
-                  key={idx}
                   className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                    country === c?.value ? "text-[#409eff] font-bold" : ""
+                    genre === "movie" ? "text-[#409eff] font-bold" : ""
                   }`}
                 >
                   <input
                     type="radio"
-                    name={c?.value}
-                    value={c?.value}
-                    checked={country === c?.value}
-                    onChange={() => setCountry(c?.value)}
+                    name="movie"
+                    value="movie"
+                    checked={genre === "movie"}
+                    onChange={() => setGenre("movie")}
                     className="transform duration-300 cursor-pointer mr-2"
                   />
-                  <span>{c?.label}</span>
+                  <span>Movie</span>
                 </label>
-              ))}
+              </div>
             </div>
           </div>
         </div>
+        <div className="mt-4">
+          <div className="border-b border-b-slate-400">Country:</div>
+          <div className="relative float-left w-full text-left mb-4 my-5">
+            <div className="-mx-3">
+              <div className="relative float-left w-full px-3">
+                {countryFilter?.map((c, idx) => (
+                  <label
+                    key={idx}
+                    className={`flex items-center text-sm transform duration-300 cursor-pointer ${
+                      country === c?.value ? "text-[#409eff] font-bold" : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={c?.value}
+                      value={c?.value}
+                      checked={country === c?.value}
+                      onChange={() => setCountry(c?.value)}
+                      className="transform duration-300 cursor-pointer mr-2"
+                    />
+                    <span>{c?.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <SortOption
+          title="Popularity"
+          options={[
+            { value: "popularity.asc", label: "Ascending" },
+            { value: "popularity.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
+        <SortOption
+          title="Rating"
+          options={[
+            { value: "vote_average.asc", label: "Ascending" },
+            { value: "vote_average.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
+        <SortOption
+          title="Release Date"
+          options={[
+            { value: "release_date.asc", label: "Ascending" },
+            { value: "release_date.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
+      </div>{" "}
+      <div className="hidden md:block relative w-full min-h-[200px] mt-24">
+        <div className="absolute inset-0">
+          <AdArticle dataAdFormat="auto" dataAdSlot="4321696148" />
+        </div>
       </div>
-      <SortOption
-        title="Popularity"
-        options={[
-          { value: "popularity.asc", label: "Ascending" },
-          { value: "popularity.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />
-      <SortOption
-        title="Rating"
-        options={[
-          { value: "vote_average.asc", label: "Ascending" },
-          { value: "vote_average.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />
-      <SortOption
-        title="Release Date"
-        options={[
-          { value: "release_date.asc", label: "Ascending" },
-          { value: "release_date.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />
     </>
   );
 };
@@ -342,7 +409,7 @@ const SortOption: React.FC<{
   setSortby: (sortby: string) => void;
 }> = ({ title, options, sortby, setSortby }) => {
   return (
-    <div className="mt-5">
+    <div className="hidden md:block mt-5">
       <div className="border-b border-b-slate-400">{title}:</div>
       <div className="relative float-left w-full text-left mb-4 my-5">
         <div className="-mx-3">

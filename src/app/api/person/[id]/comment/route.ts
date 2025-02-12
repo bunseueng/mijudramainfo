@@ -92,7 +92,6 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
                     type: "person"
                 },
             });
-            console.log("Created new comment:", creatingComment);
 
             if (!creatingComment) {
                 console.error("Failed to create comment");

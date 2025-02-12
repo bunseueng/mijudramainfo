@@ -81,7 +81,6 @@ const MovieMain = ({
   const screenwriter = castCredit?.find(
     (cast: any) => cast?.known_for_department === "Creator"
   );
-  const original_country = movie?.origin_country?.[0];
   const keywords = keyword?.keywords;
   const allTvShowsArray = Array.isArray(allmovieShows) ? allmovieShows : [];
   // Find the index of the matched TV show in allTvShows array
@@ -251,7 +250,6 @@ const MovieMain = ({
   const getCertificationByCountry = useCallback(
     async (countryCode: string) => {
       if (!movie?.releases?.countries) {
-        console.log("Movie releases or countries data not available");
         return "N/A";
       }
       // Normalize to uppercase to avoid case sensitivity issues
@@ -328,12 +326,14 @@ const MovieMain = ({
                     ref={imgRef}
                     onLoad={extractColor}
                     src={
-                      getMovie?.cover ||
-                      `https://image.tmdb.org/t/p/${
-                        movie?.poster_path ? "w500" : "w780"
-                      }/${movie?.poster_path || movie?.backdrop_path}`
+                      movie?.poster_path === null
+                        ? "/placeholder-image.avif"
+                        : getMovie?.cover ||
+                          `https://image.tmdb.org/t/p/${
+                            movie?.poster_path ? "w500" : "w780"
+                          }/${movie?.poster_path || movie?.backdrop_path}`
                     }
-                    alt={movie?.name || "Movie Poster"}
+                    alt={`${movie?.title}'s Poster` || "Movie Poster"}
                     width={300}
                     height={440}
                     quality={100}
@@ -346,13 +346,13 @@ const MovieMain = ({
                 </div>
                 <div className="md:pl-4 lg:pl-8 py-5">
                   <MovieHeader
-                    title={detail?.title || movie?.title || movie?.name}
+                    title={detail?.title || movie?.title}
                     releaseDate={
                       info?.release_date ||
                       movie?.first_air_date ||
                       movie?.release_date
                     }
-                    genres={movie?.genres?.map((g: any) => g.name)}
+                    genres={movie?.genres}
                     textColor={textColor}
                   />
 

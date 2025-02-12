@@ -56,7 +56,6 @@ const MovieDetails: React.FC<movieId & Movie> = ({
   const getCertificationByCountry = useCallback(
     async (countryCode: string) => {
       if (!movie?.releases?.countries) {
-        console.log("Movie releases or countries data not available");
         return "N/A";
       }
       // Normalize to uppercase to avoid case sensitivity issues
@@ -328,7 +327,6 @@ const MovieDetails: React.FC<movieId & Movie> = ({
   const handleRemoveKnownAsDetail = (index: number) => {
     setKnownAsDetails((prevDetails) => {
       const updatedDetails = prevDetails.filter((_, i) => i !== index);
-      console.log("Updated Known As Details:", updatedDetails); // Debug output
       return updatedDetails;
     });
   };

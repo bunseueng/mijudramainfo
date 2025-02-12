@@ -2,9 +2,9 @@
 
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import {
-  fetchTvKeywords,
-  fetchTv,
   fetchRatings,
+  fetchMovie,
+  fetchMovieGenre,
 } from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { StyledRating } from "@/app/actions/StyleRating";
@@ -24,16 +24,16 @@ import { countryFilter } from "@/helper/item-list";
 import { useInView } from "react-intersection-observer";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
-import AdBanner from "@/app/component/ui/Adsense/AdBanner";
 import AdArticle from "@/app/component/ui/Adsense/AdArticle";
+import AdBanner from "@/app/component/ui/Adsense/AdBanner";
 
 const PlayTrailer = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
   { ssr: false }
 );
 
-interface Network {
-  keyword_id: string;
+interface Genre {
+  genre_id: string;
 }
 
 const DramaCard = ({ drama, tvDetail, ratings, overallIndex }: any) => {
@@ -112,14 +112,11 @@ const DramaCard = ({ drama, tvDetail, ratings, overallIndex }: any) => {
               <p>#{overallIndex}</p>
             </div>
             <p className="text-slate-400 py-1">
-              {getDramaType(drama)}
+              {getDramaType(tvDetail)}
               <span>
                 {" "}
                 -{" "}
                 {getYearFromDate(drama?.first_air_date || drama?.release_date)}
-                {tvDetail?.number_of_episodes ? ", " : ""}{" "}
-                {tvDetail?.number_of_episodes}{" "}
-                {tvDetail?.number_of_episodes ? "Episodes" : ""}
               </span>
             </p>
             <div className="flex items-center">
@@ -150,54 +147,39 @@ const DramaCard = ({ drama, tvDetail, ratings, overallIndex }: any) => {
   );
 };
 
-const Keyword: React.FC<Network> = ({ keyword_id }) => {
+const MovieGenre: React.FC<Genre> = ({ genre_id }) => {
   const [sortby, setSortby] = useState<string>();
-  const [genre, setGenre] = useState<string>("18");
+  const [type, setType] = useState<string>("28");
   const [country, setCountry] = useState<string>("CN");
-  const [withoutGenre, setWithoutGenre] = useState<string>("16|10767|10764|35");
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
   const currentPage = Number.parseInt(searchParams.get("page") || "1");
   const per_page = Number.parseInt(searchParams?.get("per_page") || "20");
 
   // Update the component to use the TV details again
-  const { data: keywordDetails, isLoading: isKeywordLoading } = useQuery({
-    queryKey: [
-      "keywordDetails",
-      currentPage,
-      keyword_id,
-      sortby,
-      genre,
-      withoutGenre,
-      country,
-    ],
-    queryFn: () =>
-      fetchTvKeywords(
-        currentPage,
-        keyword_id,
-        sortby,
-        genre,
-        withoutGenre,
-        country
-      ),
+  const { data: genreDetails, isLoading: isKeywordLoading } = useQuery({
+    queryKey: ["genre_details", currentPage, genre_id, sortby, country],
+    queryFn: () => fetchMovieGenre(currentPage, genre_id, sortby, country),
     staleTime: 3600000,
+    gcTime: 3600000,
   });
 
-  const totalItems = keywordDetails?.results?.slice(0, per_page) || [];
-  const tvIds = totalItems.map((item: any) => item.id.toString());
-
-  const { data: tvDetails, isLoading: isTvDetailsLoading } = useQuery({
-    queryKey: ["tvDetails", tvIds],
-    queryFn: () => fetchTv(tvIds),
+  const totalItems = genreDetails?.results?.slice(0, per_page) || [];
+  const movie_id = totalItems.map((item: any) => item.id.toString());
+  const { data: movieDetails, isLoading: isTvDetailsLoading } = useQuery({
+    queryKey: ["movieDetails", movie_id],
+    queryFn: () => fetchMovie(movie_id),
     staleTime: 3600000,
-    enabled: !!tvIds.length,
+    gcTime: 3600000,
+    enabled: !!movie_id.length,
   });
 
   const { data: ratings, isLoading: isRatingsLoading } = useQuery({
-    queryKey: ["ratings", tvIds],
-    queryFn: () => fetchRatings(tvIds),
+    queryKey: ["ratings", movie_id],
+    queryFn: () => fetchRatings(movie_id),
     staleTime: 3600000,
-    enabled: !!tvIds.length,
+    gcTime: 3600000,
+    enabled: !!movie_id.length,
   });
 
   if (isKeywordLoading) {
@@ -230,9 +212,8 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
         <div className="flex flex-col md:flex-row mt-10 w-full">
           <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3 order-1 md:order-2">
             <FilterSection
-              genre={genre}
-              setGenre={setGenre}
-              setWithoutGenre={setWithoutGenre}
+              type={type}
+              setType={setType}
               country={country}
               setCountry={setCountry}
               sortby={sortby}
@@ -241,19 +222,19 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
           </div>
           <div className="w-full md:w-[70%] px-1 md:px-3 order-2 md:order-1">
             <div className="flex items-center justify-between mb-5">
-              <p>{keywordDetails?.total_results} results</p>
+              <p>{genreDetails?.total_results} results</p>
             </div>
-            {totalItems?.map((drama: any, idx: number) => {
+            {totalItems?.map((movie: any, idx: number) => {
               const startCal = (currentPage - 1) * per_page;
               const overallIndex = startCal + idx + 1;
-              const tvDetail = tvDetails?.find(
-                (data: any) => data.id === drama.id
+              const tvDetail = movieDetails?.find(
+                (data: any) => data.id === movie.id
               );
 
               return (
                 <DramaCard
-                  key={drama?.id}
-                  drama={drama}
+                  key={movie?.id}
+                  drama={movie}
                   tvDetail={tvDetail}
                   ratings={ratings}
                   overallIndex={overallIndex}
@@ -267,7 +248,7 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
       <div className="flex flex-wrap items-center justify-between px-1 md:px-2 mt-3">
         <SearchPagination
           setPage={setPage}
-          totalItems={keywordDetails?.total_results}
+          totalItems={genreDetails?.total_results}
           per_page={per_page.toString()}
         />
       </div>
@@ -276,25 +257,15 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
 };
 
 const FilterSection: React.FC<{
-  genre: string;
-  setGenre: (genre: string) => void;
-  setWithoutGenre: (withoutGenre: string) => void;
+  type: string;
+  setType: (type: string) => void;
   country: string;
   setCountry: (country: string) => void;
   sortby: string | undefined;
   setSortby: (sortby: string) => void;
-}> = ({
-  genre,
-  setGenre,
-  setWithoutGenre,
-  country,
-  setCountry,
-  sortby,
-  setSortby,
-}) => {
+}> = ({ type, setType, country, setCountry, sortby, setSortby }) => {
   return (
     <>
-      {" "}
       <div className="hidden md:block relative w-full min-h-[200px] mb-10">
         <div className="absolute inset-0">
           <AdArticle dataAdFormat="auto" dataAdSlot="4321696148" />
@@ -315,8 +286,8 @@ const FilterSection: React.FC<{
           <option value="popularity.asc">Popularity (Low to High)</option>
           <option value="vote_average.desc">Rating (High to Low)</option>
           <option value="vote_average.asc">Rating (Low to High)</option>
-          <option value="first_air_date.desc">Newest First</option>
-          <option value="first_air_date.asc">Oldest First</option>
+          <option value="release_date.desc">Newest First</option>
+          <option value="release_date.asc">Oldest First</option>
         </select>
       </div>
       <div className="md:hidden mb-4">
@@ -325,16 +296,10 @@ const FilterSection: React.FC<{
             <label className="block text-sm font-medium mb-1">Type</label>
             <select
               className="w-full border rounded-md p-2 text-sm"
-              value={genre}
-              onChange={(e) => {
-                setGenre(e.target.value);
-                setWithoutGenre(
-                  e.target.value === "18" ? "16|10767|10764|35" : "10767|10764"
-                );
-              }}
+              value={type}
+              onChange={(e) => setType(e.target.value)}
             >
-              <option value="18">Drama</option>
-              <option value="16">Anime</option>
+              <option value="28">Movie</option>
             </select>
           </div>
           <div className="w-1/2 px-2 mb-2">
@@ -365,41 +330,20 @@ const FilterSection: React.FC<{
               <div className="relative float-left w-full px-3">
                 <label
                   className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                    genre === "18" ? "text-[#409eff] font-bold" : ""
+                    type === "28" ? "text-[#409eff] font-bold" : ""
                   }`}
                 >
                   <input
                     type="radio"
-                    name="18"
-                    value="18"
-                    checked={genre === "18"}
+                    name="28"
+                    value="28"
+                    checked={type === "28"}
                     onChange={() => {
-                      setGenre("18");
-                      setWithoutGenre("16|10767|10764|35");
+                      setType("28");
                     }}
                     className="transform duration-300 cursor-pointer mr-2"
                   />
-                  <span>Drama</span>
-                </label>
-              </div>
-              <div className="relative float-left w-full px-3 mt-2">
-                <label
-                  className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                    genre === "16" ? "text-[#409eff] font-bold" : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="16"
-                    value="16"
-                    checked={genre === "16"}
-                    onChange={() => {
-                      setGenre("16");
-                      setWithoutGenre("10767|10764");
-                    }}
-                    className="transform duration-300 cursor-pointer mr-2"
-                  />
-                  <span>Anime</span>
+                  <span>Movie</span>
                 </label>
               </div>
             </div>
@@ -432,35 +376,35 @@ const FilterSection: React.FC<{
             </div>
           </div>
         </div>
-      </div>
-      <SortOption
-        title="Popularity"
-        options={[
-          { value: "popularity.asc", label: "Ascending" },
-          { value: "popularity.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />
-      <SortOption
-        title="Rating"
-        options={[
-          { value: "vote_average.asc", label: "Ascending" },
-          { value: "vote_average.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />
-      <SortOption
-        title="First Air Date"
-        options={[
-          { value: "first_air_date.asc", label: "Ascending" },
-          { value: "first_air_date.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />{" "}
-      <div className="hidden md:block relative w-full min-h-[200px] mt-24">
+        <SortOption
+          title="Popularity"
+          options={[
+            { value: "popularity.asc", label: "Ascending" },
+            { value: "popularity.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
+        <SortOption
+          title="Rating"
+          options={[
+            { value: "vote_average.asc", label: "Ascending" },
+            { value: "vote_average.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
+        <SortOption
+          title="First Air Date"
+          options={[
+            { value: "first_air_date.asc", label: "Ascending" },
+            { value: "first_air_date.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
+      </div>{" "}
+      <div className="relative w-full min-h-[200px] mt-24 hidden md:block">
         <div className="absolute inset-0">
           <AdArticle dataAdFormat="auto" dataAdSlot="4321696148" />
         </div>
@@ -510,58 +454,26 @@ const SortOption: React.FC<{
   );
 };
 
-const getDramaType = (drama: any) => {
-  const { origin_country, genre_ids } = drama;
+const getDramaType = (movie: any) => {
+  const { origin_country } = movie;
   const country = origin_country?.[0];
-  const isDrama =
-    !genre_ids?.includes(10764) &&
-    !genre_ids?.includes(10767) &&
-    !genre_ids?.includes(16) &&
-    (genre_ids?.includes(18) ||
-      genre_ids?.includes(10765) ||
-      genre_ids?.includes(35));
-  const isTVShow =
-    (genre_ids.includes(10764) || genre_ids.includes(10767)) &&
-    !genre_ids?.includes(18) &&
-    !genre_ids?.includes(16) &&
-    !genre_ids?.includes(10765);
-  const isAnime =
-    genre_ids?.includes(16) &&
-    !genre_ids?.includes(10764) &&
-    !genre_ids?.includes(10767);
 
-  if (isDrama) {
-    switch (country) {
-      case "CN":
-        return "Chinese Drama";
-      case "JP":
-        return "Japanese Drama";
-      case "KR":
-        return "Korean Drama";
-      case "TW":
-        return "Taiwanese Drama";
-      case "HK":
-        return "Hong Kong Drama";
-      case "TH":
-        return "Thailand Drama";
-      default:
-        return "Drama";
-    }
-  } else if (isTVShow) {
-    switch (country) {
-      case "CN":
-        return "Chinese TV Show";
-      case "JP":
-        return "Japanese TV Show";
-      case "KR":
-        return "Korean TV Show";
-      default:
-        return "TV Show";
-    }
-  } else if (isAnime) {
-    return "Anime";
+  switch (country) {
+    case "CN":
+      return "Chinese Movie";
+    case "JP":
+      return "Japanese Movie";
+    case "KR":
+      return "Korean Movie";
+    case "TW":
+      return "Taiwanese Movie";
+    case "HK":
+      return "Hong Kong Movie";
+    case "TH":
+      return "Thailand Movie";
+    default:
+      return "Movie";
   }
-  return "Other";
 };
 
-export default Keyword;
+export default MovieGenre;

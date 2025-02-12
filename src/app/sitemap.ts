@@ -18,6 +18,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       generateKoreanTVShowEntries(baseUrl, sitemapEntries),
       generatePopularPersonEntries(baseUrl, sitemapEntries),
       generateNetworkEntry(baseUrl, sitemapEntries),
+      generateTvGenresEntries(baseUrl, sitemapEntries),
+      generateMovieGenresEntries(baseUrl, sitemapEntries),
     ])
   } catch (error) {
     console.error("Error generating sitemap:", error)
@@ -48,7 +50,7 @@ async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRo
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/photos`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
-          priority: 0.5,
+          priority: 0.8,
           changefreq: "weekly",
         },
         {
@@ -72,6 +74,7 @@ async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRo
       ]),
     )
     await generateTVKeywordEntries(tvShows, baseUrl, sitemapEntries)
+    await generateTvCastEntries(tvShows, baseUrl, sitemapEntries)
   } catch (error) {
     console.error("Error generating TV show entries:", error)
   }
@@ -98,7 +101,7 @@ async function generateKoreanTVShowEntries(baseUrl: string, sitemapEntries: Meta
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/photos`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
-          priority: 0.5,
+          priority: 0.8,
           changefreq: "weekly",
         },
         {
@@ -122,6 +125,7 @@ async function generateKoreanTVShowEntries(baseUrl: string, sitemapEntries: Meta
       ]),
     )
     await generateTVKeywordEntries(tvShows, baseUrl, sitemapEntries)
+    await generateTvCastEntries(tvShows, baseUrl, sitemapEntries)
   } catch (error) {
     console.error("Error generating TV show entries:", error)
   }
@@ -152,12 +156,13 @@ async function generateMovieEntries(baseUrl: string, sitemapEntries: MetadataRou
         {
           url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/photos`,
           lastModified: safelyFormatDate(movie.release_date),
-          priority: 0.5,
+          priority: 0.8,
           changefreq: "weekly",
         },
       ]),
     )
     await generateMovieKeywordEntries(movies, baseUrl, sitemapEntries)
+    await generateMovieCastEntries(movies, baseUrl, sitemapEntries)
   } catch (error) {
     console.error("Error generating movie entries:", error)
   }
@@ -170,7 +175,7 @@ async function generatePersonEntries(baseUrl: string, sitemapEntries: MetadataRo
       ...persons.map((person) => ({
         url: `${baseUrl}/person/${person.id}-${spaceToHyphen(person.name)}`,
         lastModified: new Date().toISOString(),
-        priority: 0.6,
+        priority: 1.0,
         changefreq: "weekly",
       })),
     )
@@ -186,7 +191,7 @@ async function generatePopularPersonEntries(baseUrl: string, sitemapEntries: Met
       ...persons.map((person) => ({
         url: `${baseUrl}/person/${person.id}-${spaceToHyphen(person.name)}`,
         lastModified: new Date().toISOString(),
-        priority: 0.6,
+        priority: 1.0,
         changefreq: "weekly",
       })),
     )
@@ -195,6 +200,57 @@ async function generatePopularPersonEntries(baseUrl: string, sitemapEntries: Met
   }
 }
 
+async function generateTvCastEntries(tvShows: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  const castPromises = tvShows.map(async (show) => {
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/tv/${show.id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
+      )
+      if (!response.ok) throw new Error(`Failed to fetch keywords for TV show with id ${show.id}`)
+      const data = await response.json()
+      return data.cast
+    } catch (error) {
+      console.error(`Error fetching keywords for TV show ${show.id}:`, error)
+      return []
+    }
+  })
+
+  const casts = (await Promise.all(castPromises)).flat()
+  sitemapEntries.push(
+    ...casts.map((cast: any) => ({
+      url: `${baseUrl}/person/${cast.id}-${spaceToHyphen(cast.name)}`,
+      lastModified: new Date().toISOString(),
+      priority: 1.0,
+      changefreq: "monthly",
+    })),
+  )
+}
+
+async function generateMovieCastEntries(tvShows: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  const castPromises = tvShows.map(async (show) => {
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/${show.id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
+      )
+      if (!response.ok) throw new Error(`Failed to fetch keywords for movie with id ${show.id}`)
+      const data = await response.json()
+      return data.cast
+    } catch (error) {
+      console.error(`Error fetching keywords for movie ${show.id}:`, error)
+      return []
+    }
+  })
+
+  const casts = (await Promise.all(castPromises)).flat()
+  sitemapEntries.push(
+    ...casts.map((cast: any) => ({
+      url: `${baseUrl}/person/${cast.id}-${spaceToHyphen(cast.name)}`,
+      lastModified: new Date().toISOString(),
+      priority: 1.0,
+      changefreq: "monthly",
+    })),
+  )
+}
 
 async function generateNetworkEntry(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
@@ -208,6 +264,95 @@ async function generateNetworkEntry(baseUrl: string, sitemapEntries: MetadataRou
     }
   } catch (error) {
     console.error("Error generating network entry:", error)
+  }
+}
+
+async function generateTVKeywordEntries(tvShows: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  const keywordPromises = tvShows.map(async (show) => {
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/tv/${show.id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
+      )
+      if (!response.ok) throw new Error(`Failed to fetch keywords for TV show with id ${show.id}`)
+      const data = await response.json()
+      return data.results
+    } catch (error) {
+      console.error(`Error fetching keywords for TV show ${show.id}:`, error)
+      return []
+    }
+  })
+
+  const keywords = (await Promise.all(keywordPromises)).flat()
+  sitemapEntries.push(
+    ...keywords.map((keyword: any) => ({
+      url: `${baseUrl}/keyword/${keyword.id}/tv`,
+      lastModified: new Date().toISOString(),
+      priority: 0.5,
+      changefreq: "monthly",
+    })),
+  )
+}
+
+async function generateTvGenresEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  try {
+    const genres = await fetchTvGenres(); // Fetch genres
+    if (!genres || genres.length === 0) return; // Handle empty response
+    // Correctly map over genres and push each genre into sitemapEntries
+    genres.forEach((data: any) => {
+      sitemapEntries.push({
+        url: `${baseUrl}/genre/${data.id}-${spaceToHyphen(data.name || "")}/tv`,
+        lastModified: new Date().toISOString(),
+        priority: 0.5,
+      });
+    });
+  } catch (error) {
+    console.error(`Error fetching tv genres:`, error);
+    return [];
+  }
+}
+
+
+async function generateMovieKeywordEntries(movies: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  const keywordPromises = movies.map(async (movie) => {
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/${movie.id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
+      )
+      if (!response.ok) throw new Error(`Failed to fetch keywords for movie with id ${movie.id}`)
+      const data = await response.json()
+      return data.keywords
+    } catch (error) {
+      console.error(`Error fetching keywords for movie ${movie.id}:`, error)
+      return []
+    }
+  })
+
+  const keywords = (await Promise.all(keywordPromises)).flat()
+  sitemapEntries.push(
+    ...keywords.map((keyword: any) => ({
+      url: `${baseUrl}/keyword/${keyword.id}/movie`,
+      lastModified: new Date().toISOString(),
+      priority: 0.5,
+      changefreq: "monthly",
+    })),
+  )
+}
+
+async function generateMovieGenresEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  try {
+    const genres = await fetchMovieGenres(); // Fetch genres
+    if (!genres || genres.length === 0) return; // Handle empty response
+    // Correctly map over genres and push each genre into sitemapEntries
+    genres.forEach((data: any) => {
+      sitemapEntries.push({
+        url: `${baseUrl}/genre/${data.id}-${spaceToHyphen(data.name)}/movie`,
+        lastModified: new Date().toISOString(),
+        priority: 0.5,
+      });
+    });
+  } catch (error) {
+    console.error(`Error fetching movie genres:`, error);
+    return [];
   }
 }
 
@@ -264,56 +409,22 @@ async function fetchNetwork(): Promise<any> {
   return response.json()
 }
 
-async function generateTVKeywordEntries(tvShows: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
-  const keywordPromises = tvShows.map(async (show) => {
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/tv/${show.id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
-      )
-      if (!response.ok) throw new Error(`Failed to fetch keywords for TV show with id ${show.id}`)
-      const data = await response.json()
-      return data.results
-    } catch (error) {
-      console.error(`Error fetching keywords for TV show ${show.id}:`, error)
-      return []
-    }
-  })
-
-  const keywords = (await Promise.all(keywordPromises)).flat()
-  sitemapEntries.push(
-    ...keywords.map((keyword: any) => ({
-      url: `${baseUrl}/keyword/${keyword.id}/tv`,
-      lastModified: new Date().toISOString(),
-      priority: 0.3,
-      changefreq: "monthly",
-    })),
+async function fetchTvGenres(): Promise<any> {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/genre/tv/list?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
   )
+  if (!response.ok) throw new Error("Failed to fetch movie genre")
+  const data = await response.json()
+  return data.genres
 }
 
-async function generateMovieKeywordEntries(movies: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
-  const keywordPromises = movies.map(async (movie) => {
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movie.id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
-      )
-      if (!response.ok) throw new Error(`Failed to fetch keywords for movie with id ${movie.id}`)
-      const data = await response.json()
-      return data.keywords
-    } catch (error) {
-      console.error(`Error fetching keywords for movie ${movie.id}:`, error)
-      return []
-    }
-  })
-
-  const keywords = (await Promise.all(keywordPromises)).flat()
-  sitemapEntries.push(
-    ...keywords.map((keyword: any) => ({
-      url: `${baseUrl}/keyword/${keyword.id}/movie`,
-      lastModified: new Date().toISOString(),
-      priority: 0.3,
-      changefreq: "monthly",
-    })),
+async function fetchMovieGenres(): Promise<any> {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
   )
+  if (!response.ok) throw new Error("Failed to fetch movie genre")
+  const data = await response.json()
+  return data.genres
 }
 
 function generateStaticPageEntries(baseUrl: string): MetadataRoute.Sitemap {

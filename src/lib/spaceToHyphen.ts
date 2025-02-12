@@ -1,3 +1,7 @@
 export const spaceToHyphen = (name: string) => {
-    return name && name.replace(/ /g, '-').toLocaleLowerCase()
-}
+    return name
+      .toLowerCase()
+      .replace(/ /g, "-") // Replace spaces with hyphens
+      .replace(/&/g, "%26"); // Encode ampersands
+  };
+  

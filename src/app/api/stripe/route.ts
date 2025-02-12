@@ -9,8 +9,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 export async function POST(req: NextRequest) {
   try {
   const { items, email } = await req.json();
-  console.log("Received items:", items);
-  console.log("Received email:", email);
   if (!email) {
     return NextResponse.json({ error: "User email is required" }, { status: 400 });
   }
@@ -23,9 +21,6 @@ export async function POST(req: NextRequest) {
     success_url: `${process.env.NEXTAUTH_URL}/success`,
     cancel_url: `${process.env.NEXTAUTH_URL}/cancel`,
   });
-  console.log("Success", {
-    email,items
-  })
 
   return NextResponse.json({ sessionId: session.id });
   } catch (error) {

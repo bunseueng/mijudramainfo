@@ -52,40 +52,23 @@ interface PersonContentProps {
   >;
   isCurrentUserLoved: JsonValue | undefined;
   handleLove: (data: TPersonLove) => Promise<void>;
-  personFullDetails: {
-    results: Array<{
-      known_for_department: string;
-      known_for: Array<{
-        title?: string | null;
-        name?: string | null;
-        media_type: string;
-        id: number;
-        poster_path: string | null;
-        backdrop_path: string | null;
-        first_air_date: string;
-        release_date: string;
-      }>;
-    }>;
-  };
 }
 
-const renderKnownFor = (
-  personDetails: PersonContentProps["personFullDetails"]["results"][0]
-) => {
-  const sortedContent = personDetails.known_for?.sort((a: any, b: any) => {
-    const dateA = a.first_air_date || a.release_date;
-    const dateB = b.first_air_date || b.release_date;
+const renderKnownFor = (persons: Person) => {
+  const sortedContent = persons.combined_credits?.cast?.sort(
+    (a: any, b: any) => {
+      const dateA = a.first_air_date || a.release_date;
+      const dateB = b.first_air_date || b.release_date;
 
-    // If either is upcoming (no date), sort it first
-    if (!dateA && !dateB) return 0;
-    if (!dateA) return -1; // a is upcoming
-    if (!dateB) return 1; // b is upcoming
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return -1;
+      if (!dateB) return 1;
 
-    // Otherwise sort by newest date
-    return new Date(dateB).getTime() - new Date(dateA).getTime();
-  });
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
+    }
+  );
 
-  if (sortedContent?.length === 0) {
+  if (!sortedContent || sortedContent.length === 0) {
     return (
       <div className="text-md font-semibold text-start">No data available.</div>
     );
@@ -94,15 +77,15 @@ const renderKnownFor = (
   return (
     <div className="mb-4">
       <p className="text-lg font-semibold mb-2">
-        {personDetails.known_for_department}
+        {persons.known_for_department}
       </p>
       <ul className="w-auto min-h-[221px] flex flex-nowrap justify-start overflow-hidden overflow-x overflow-y-hidden pb-2">
-        {sortedContent.map((item, index) => {
+        {sortedContent.map((item: any, index: number) => {
           const type = item?.media_type === "tv" ? "/tv" : "/movie";
           return (
             <li
               className={`w-[130px] max-w-[195px] ${
-                index === sortedContent?.length - 1 ? "mr-0" : "mr-2"
+                index === sortedContent.length - 1 ? "mr-0" : "mr-2"
               }`}
               key={index}
             >
@@ -173,7 +156,6 @@ export default function PersonContent({
   handleSubmit,
   isCurrentUserLoved,
   handleLove,
-  personFullDetails,
   sortedChanges,
 }: PersonContentProps) {
   const isActor = persons?.known_for_department.toLowerCase() === "acting";
@@ -213,12 +195,10 @@ export default function PersonContent({
       const dateA = a.first_air_date || a.release_date;
       const dateB = b.first_air_date || b.release_date;
 
-      // If either is upcoming (no date), sort it first
       if (!dateA && !dateB) return 0;
-      if (!dateA) return -1; // a is upcoming
-      if (!dateB) return 1; // b is upcoming
+      if (!dateA) return -1;
+      if (!dateB) return 1;
 
-      // Otherwise sort by newest date
       return new Date(dateB).getTime() - new Date(dateA).getTime();
     });
 
@@ -290,6 +270,7 @@ export default function PersonContent({
       </ul>
     );
   };
+
   const fullName = `${detail?.last_name ?? ""} ${
     detail?.first_name ?? ""
   }`.trim();
@@ -315,12 +296,7 @@ export default function PersonContent({
         </div>
         <PersonBiography persons={persons} detail={detail} />
         {persons?.known_for_department.toLowerCase() !== "acting" && (
-          <>
-            {personFullDetails &&
-              personFullDetails.results.map((personDetails, index) => (
-                <div key={index}>{renderKnownFor(personDetails)}</div>
-              ))}
-          </>
+          <div>{renderKnownFor(persons)}</div>
         )}
       </div>
 

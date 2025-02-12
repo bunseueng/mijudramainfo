@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useEffect, useState } from "react";
-import Image from "next/image";
+import Images from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import dynamic from "next/dynamic";
@@ -34,13 +34,22 @@ const SliderContent: React.FC<SliderContentProps> = ({
   direction,
 }) => {
   const result_id = filteredData?.map((data) => data.id);
-  // Only fetch ratings when we have result_ids
   const { data: tvRating } = useQuery({
     queryKey: ["home_tvRating", result_id],
     queryFn: () => fetchRatings(result_id),
     staleTime: 3600000,
+    gcTime: 3600000,
   });
   const [isContentVisible, setIsContentVisible] = useState(false);
+
+  const imageUrl = useMemo(() => {
+    const width = typeof window !== "undefined" ? window.innerWidth : 1920;
+    const optimalSize = width <= 768 ? "w780" : "original";
+    const path = currentItem.backdrop_path || currentItem.poster_path;
+
+    return `https://image.tmdb.org/t/p/${optimalSize}/${path}`;
+  }, [currentItem.backdrop_path, currentItem.poster_path]);
+
   const itemLink = useMemo(
     () =>
       `/tv/${currentItem?.id}-${spaceToHyphen(
@@ -48,20 +57,6 @@ const SliderContent: React.FC<SliderContentProps> = ({
       )}`,
     [currentItem?.id, currentItem?.name, currentItem?.title]
   );
-
-  const imageUrl = useMemo(() => {
-    const width = typeof window !== "undefined" ? window.innerWidth : 1920;
-    const optimalSize = width <= 768 ? "w780" : "original";
-
-    return {
-      initial: `https://image.tmdb.org/t/p/w300/${
-        currentItem.backdrop_path || currentItem.poster_path
-      }`,
-      optimal: `https://image.tmdb.org/t/p/${optimalSize}/${
-        currentItem.backdrop_path || currentItem.poster_path
-      }`,
-    };
-  }, [currentItem.backdrop_path, currentItem.poster_path]);
 
   useEffect(() => {
     setIsContentVisible(true);
@@ -98,7 +93,7 @@ const SliderContent: React.FC<SliderContentProps> = ({
       opacity: 1,
     },
     exit: (direction: number) => ({
-      zIndex: 1,
+      zIndex: 0,
       x: direction < 0 ? "100%" : "-100%",
       opacity: 0,
     }),
@@ -119,7 +114,7 @@ const SliderContent: React.FC<SliderContentProps> = ({
   return (
     <>
       <div className="w-full h-full absolute top-0 left-0">
-        <AnimatePresence initial={false} custom={direction}>
+        <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={currentItem.id}
             custom={direction}
@@ -128,17 +123,24 @@ const SliderContent: React.FC<SliderContentProps> = ({
             animate="center"
             exit="exit"
             transition={{
-              x: { type: "spring", stiffness: 100, damping: 18, duration: 0.6 },
-              opacity: { duration: 0.1 },
+              x: { type: "spring", stiffness: 300, damping: 35, duration: 0.3 },
+              opacity: { duration: 0.2 },
             }}
             className="w-full h-full bg-center bg-cover bg-no-repeat absolute top-0 left-0"
             style={{ background: left, borderColor: right }}
           >
-            <BackgroundImage
-              initialSrc={imageUrl.initial}
-              optimalSrc={imageUrl.optimal}
-              title={currentItem.name || currentItem.title}
-            />
+            <div className="w-full h-[98.49%] relative bg-gray-900">
+              <Images
+                src={imageUrl}
+                alt={`Poster for ${currentItem.name || currentItem.title}`}
+                fill
+                className="object-cover"
+                sizes="100vw"
+                priority
+                quality={75}
+                loading="eager"
+              />
+            </div>
             <DynamicGradientOverlays
               left={left}
               right={right}
@@ -158,33 +160,5 @@ const SliderContent: React.FC<SliderContentProps> = ({
     </>
   );
 };
-
-interface BackgroundImageProps {
-  initialSrc: string;
-  optimalSrc: string;
-  title: string;
-}
-
-const BackgroundImage: React.FC<BackgroundImageProps> = React.memo(
-  ({ initialSrc, optimalSrc, title }) => {
-    return (
-      <div className="w-full h-[98.49%] relative bg-gray-900">
-        <Image
-          src={optimalSrc || "/placeholder-image.avif"}
-          alt={`Poster for ${title}`}
-          fetchPriority="high"
-          priority={true}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 1920px"
-          quality={75}
-          placeholder="blur"
-          blurDataURL={initialSrc}
-        />
-      </div>
-    );
-  }
-);
-BackgroundImage.displayName = "BackgroundImage";
 
 export default React.memo(SliderContent);

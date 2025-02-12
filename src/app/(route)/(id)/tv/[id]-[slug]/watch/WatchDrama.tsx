@@ -13,6 +13,8 @@ import WatchInfo from "@/app/component/ui/Watch/WatchInfo";
 import VideoPlayer from "@/app/component/ui/Watch/VideoPlayer";
 import CastSection from "@/app/component/ui/Watch/CastSection";
 import RelatedContent from "@/app/component/ui/Watch/RelatedContent";
+import { useQuery } from "@tanstack/react-query";
+import { fetchRatings } from "@/app/actions/fetchMovieApi";
 
 interface WatchDramaProps {
   tv_id: string;
@@ -25,6 +27,20 @@ const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
   const related_content = tv?.similar?.results as TVShow[];
   const [detail]: DramaDetails[] = (getDrama?.details ||
     []) as unknown as DramaDetails[];
+
+  const { data: rating_db } = useQuery({
+    queryKey: ["ratings", tv_id],
+    queryFn: () => fetchRatings([tv_id.toString()]), // ✅ Pass id as a string array
+  });
+  const findRatingDB = rating_db?.filter(
+    (p: any) => p.tvId || p.movieId === tv_id
+  );
+  const averageRating = findRatingDB
+    ? findRatingDB.reduce(
+        (sum: number, rating: any) => sum + rating.rating,
+        0
+      ) / findRatingDB.length
+    : 0;
 
   const episodes = React.useMemo(() => {
     if (!tv?.number_of_episodes) return [];
@@ -76,12 +92,21 @@ const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
   }
   return (
     <main className="max-w-[1808px] mx-auto px-4 py-6">
-      <div className="flex items-center bg-red-400 my-4 p-4 rounded-md">
-        <div className="pr-1">
-          <Info />
+      <div
+        className="flex items-center bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-4 rounded-md shadow-sm"
+        role="alert"
+        aria-live="polite"
+      >
+        <div className="flex-shrink-0 pr-2">
+          <Info
+            className="h-5 w-5 text-yellow-500 dark:text-yellow-400"
+            aria-hidden="true"
+          />
         </div>
-        <div className="text-sm md:text-md">
-          If video is not available, try switching to another server.
+        <div className="flex-1 text-sm md:text-base text-yellow-800 dark:text-yellow-200">
+          If the video is unavailable or doesn&apos;t match the title, try
+          switching to another server. Some servers may provide incorrect
+          videos. 😥
         </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
@@ -105,7 +130,17 @@ const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
             genres={tv?.genres?.map((data: any) => data?.name)}
             year={tv?.first_air_date}
             episodes={tv?.number_of_episodes}
-            rating={tv?.vote_average}
+            rating={
+              tv && tv.vote_average && averageRating
+                ? (
+                    (tv.vote_average * tv.vote_count +
+                      averageRating * averageRating) /
+                    (tv.vote_count + averageRating)
+                  ).toFixed(1) // Apply toFixed(1) to the entire expression
+                : averageRating
+                ? averageRating.toFixed(1)
+                : tv && tv.vote_average.toFixed(1)
+            }
             duration={tv?.episode_run_time[0] || "Duration not yet available"}
             type={`${getNationality(tv?.type[0])} Drama`}
             imageUrl={

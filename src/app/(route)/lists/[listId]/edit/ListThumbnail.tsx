@@ -38,7 +38,6 @@ const ListThumbnail: React.FC<ListThumbnailProps> = ({
   const onUpload = async () => {
     setLoading(true);
     try {
-      console.log(thumbnail);
       const res = await fetch(`/api/list/${list?.listId}`, {
         method: "PUT",
         headers: {
@@ -72,7 +71,6 @@ const ListThumbnail: React.FC<ListThumbnailProps> = ({
             onClick={() => {
               const newThumbnail = result?.backdrop_path || result?.poster_path;
               setThumbnail(newThumbnail);
-              console.log("Selected thumbnail:", newThumbnail); // Check the selected thumbnail
               onUpload();
             }}
           >

@@ -83,13 +83,14 @@ export default function PersonHeader({
       <div className="aspect-square sm:aspect-[4/3] lg:aspect-square relative">
         <LazyImage
           coverFromDB={getPersons?.cover}
-          src={`https://image.tmdb.org/t/p/h632/${persons?.profile_path}`}
+          src={`https://image.tmdb.org/t/p/original/${persons?.profile_path}`}
           alt={`${persons?.name}'s Avatar` || "Person Profile"}
           width={600}
           height={600}
           quality={100}
           className="w-full h-full object-cover"
           priority
+          fetchPriority="high"
         />
       </div>
 

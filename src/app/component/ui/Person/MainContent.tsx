@@ -22,21 +22,6 @@ interface MainContentProps {
   users: UserProps[];
   getComment: CommentProps[];
   tv_id: number;
-  personFullDetails: {
-    results: Array<{
-      known_for_department: string;
-      known_for: Array<{
-        title?: string | null;
-        name?: string | null;
-        media_type: string;
-        id: number;
-        poster_path: string | null;
-        backdrop_path: string | null;
-        first_air_date: string;
-        release_date: string;
-      }>;
-    }>;
-  };
   sortedChanges: {
     userId: string;
     timestamp: string;
@@ -55,7 +40,6 @@ export default function MainContent({
   users,
   getComment,
   tv_id,
-  personFullDetails,
   sortedChanges,
 }: MainContentProps) {
   const router = useRouter();
@@ -109,7 +93,6 @@ export default function MainContent({
       handleSubmit={handleSubmit}
       isCurrentUserLoved={isCurrentUserLoved}
       handleLove={handleLove}
-      personFullDetails={personFullDetails}
       sortedChanges={sortedChanges}
     />
   );

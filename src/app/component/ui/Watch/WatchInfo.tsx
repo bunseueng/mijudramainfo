@@ -67,9 +67,7 @@ const WatchInfo = ({
 
               <div className="flex items-center gap-2 mt-1">
                 <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                <span className="font-semibold text-lg">
-                  {rating.toFixed(1)}
-                </span>
+                <span className="font-semibold text-lg">{rating}</span>
               </div>
             </div>
             <Badge variant="outline" className="text-sm font-normal">

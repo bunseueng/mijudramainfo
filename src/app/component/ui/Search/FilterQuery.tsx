@@ -84,13 +84,8 @@ const FilterQuery = ({ BASE_URL }: any) => {
 
       // Combine the base URL with the built query string
       const url = `${BASE_URL}?${params.toString()}`;
-
-      console.log("Final URL:", url);
-
       const res = await fetch(url);
       const data = await res.json();
-
-      console.log("API Response:", data);
 
       return data;
     } catch (error: any) {

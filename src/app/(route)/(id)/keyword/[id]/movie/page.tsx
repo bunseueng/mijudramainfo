@@ -15,7 +15,7 @@ export async function generateMetadata(props: any): Promise<Metadata> {
 
   return {
     title: `${keyword?.name}`,
-    description: `All Movie of keyword ${keyword?.name}`,
+    description: `Explore Movie of keyword (${keyword?.name}) and more...`,
     keywords: keyword?.name,
     alternates: {
       canonical: url,
@@ -24,7 +24,7 @@ export async function generateMetadata(props: any): Promise<Metadata> {
       type: "website",
       url: url,
       title: keyword?.name,
-      description: `All Movie of ${keyword?.name}`,
+      description: `Explore Movie of keyword (${keyword?.name}) and more...`,
       images: [
         {
           url: `/opengraph-image.png`,

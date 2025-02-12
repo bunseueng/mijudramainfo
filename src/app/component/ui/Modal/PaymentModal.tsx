@@ -99,7 +99,6 @@ const PaymentModal: React.FC<PaymentType> = ({
     try {
       const id = session?.user.id as string;
       const email = session?.user.email as string;
-      console.log(`Passing id: ${id}, price: ${price}`);
 
       const res = await fetch("/api/create-order", {
         method: "POST",
@@ -121,7 +120,6 @@ const PaymentModal: React.FC<PaymentType> = ({
       }
 
       const { data: orderID } = await res.json();
-      console.log("PayPal order created successfully:", orderID);
       return orderID;
     } catch (error) {
       console.error("Error in creating PayPal order:", error);

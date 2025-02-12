@@ -11,11 +11,11 @@ import { useForm } from "react-hook-form";
 import { FaShare } from "react-icons/fa6";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdDelete, MdEdit } from "react-icons/md";
-import { toast } from "react-toastify";
 import { GrPowerReset } from "react-icons/gr";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { isValidUrl, sanitizeUrl } from "@/lib/isValidUrl";
+import { toast, useToast } from "react-toastify";
 
 const ExternalEditModal = dynamic(
   () => import("@/app/component/ui/Modal/ExternalEditModal"),
@@ -129,7 +129,7 @@ const ExternalLink: React.FC<movieId & Movie> = ({
       setOpenExternal(false);
       reset();
     } catch (error) {
-      console.log(error);
+      throw new Error(error);
     }
   };
 
@@ -164,7 +164,7 @@ const ExternalLink: React.FC<movieId & Movie> = ({
       handleDropdownToggle("external");
       setExternals(label);
     } else {
-      console.log("Item already in the database.");
+      toast.info("Item already in the database.");
     }
   };
 

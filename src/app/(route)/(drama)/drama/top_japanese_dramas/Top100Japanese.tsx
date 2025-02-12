@@ -73,7 +73,6 @@ const Top100Japanese = () => {
 
   // Show loading state if any query is loading
   const isLoading = isTopDramasLoading || isRatingLoading || isTopDramaLoading;
-  console.log(top_drama);
   if (isLoading) {
     return <SearchLoading />;
   }

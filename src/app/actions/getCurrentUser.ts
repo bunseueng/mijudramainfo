@@ -2,8 +2,9 @@ import { getServerSession } from "next-auth/next"
 import prisma from "@/lib/db"
 import { authOptions } from "@/lib/auth"
 import { currentUserProps } from "@/helper/type"
+import { cache } from 'react'
 
-export async function getCurrentUser():Promise<currentUserProps | null> { 
+export const getCurrentUser = cache(async (): Promise<currentUserProps | null> => {
   try {
     const session = await getServerSession(authOptions)
 
@@ -31,5 +32,4 @@ export async function getCurrentUser():Promise<currentUserProps | null> {
     console.error("Error in getCurrentUser:", error)
     return null
   }
-}
-
+})

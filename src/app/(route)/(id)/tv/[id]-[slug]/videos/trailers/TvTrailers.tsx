@@ -29,7 +29,6 @@ const TvTrailers: React.FC<TrailerType> = ({ trailer, tv }) => {
 
         try {
           const responses = await Promise.all(promises);
-          console.log(responses);
           const thumbnailsData = responses.map((response: any) => ({
             thumbnailUrl: response.items[0].snippet.thumbnails.medium.url,
             channelName: response.items[0].snippet.channelTitle,
@@ -58,7 +57,6 @@ const TvTrailers: React.FC<TrailerType> = ({ trailer, tv }) => {
             ?.filter((type: any) => type?.type === "Trailer")
             ?.map((item: any, index: number) => {
               const thumbnailData = thumbnails[index];
-              console.log(thumbnailData?.duration);
               return (
                 <div
                   className="flex items-start border-[1px] border-[#e3e3e3] rounded-md mb-5"

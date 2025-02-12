@@ -92,7 +92,6 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
                     type: "movie"
                 },
             });
-            console.log("Created new comment:", creatingComment);
 
             if (!creatingComment) {
                 console.error("Failed to create comment");
@@ -313,7 +312,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
             return NextResponse.json({message: "You're not owner of this comment"}, {status: 405})
         }
 
-        console.log(currentUser?.id !== targetComment.repliedUserId)
 
         if (!targetComment) {
             console.error("Comment not found for commentId:", commentId);

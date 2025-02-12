@@ -50,7 +50,7 @@ const TagResult = ({
       const data = await res.json();
       return data.results;
     } catch (error: any) {
-      console.log("Failed to fetch", error);
+      console.error("Failed to fetch", error);
     }
   };
 

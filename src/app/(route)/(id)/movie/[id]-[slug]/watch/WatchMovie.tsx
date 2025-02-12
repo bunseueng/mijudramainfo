@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import type { DramaDetails, MovieDB, TVShow } from "@/helper/type";
 import { Info } from "lucide-react";
 import { countryToNationalityMap } from "@/helper/item-list";
@@ -12,6 +12,8 @@ import VideoPlayer from "@/app/component/ui/Watch/VideoPlayer";
 import CastSection from "@/app/component/ui/Watch/CastSection";
 import RelatedContent from "@/app/component/ui/Watch/RelatedContent";
 import { useMovieData } from "@/hooks/useMovieData";
+import { fetchRatings } from "@/app/actions/fetchMovieApi";
+import { useQuery } from "@tanstack/react-query";
 
 interface WatchMovieProps {
   movie_id: string;
@@ -23,7 +25,19 @@ const WatchMovie = ({ movie_id, getMovie }: WatchMovieProps) => {
   const related_content = movie?.similar?.results as TVShow[];
   const [detail]: DramaDetails[] = (getMovie?.details ||
     []) as unknown as DramaDetails[];
-
+  const { data: rating_db } = useQuery({
+    queryKey: ["ratings", movie_id],
+    queryFn: () => fetchRatings([movie_id.toString()]), // ✅ Pass id as a string array
+  });
+  const findRatingDB = rating_db?.filter(
+    (p: any) => p.tvId || p.movieId === movie_id
+  );
+  const averageRating = findRatingDB
+    ? findRatingDB.reduce(
+        (sum: number, rating: any) => sum + rating.rating,
+        0
+      ) / findRatingDB.length
+    : 0;
   const videoUrl = React.useMemo(() => {
     return `https://player.embed-api.stream/?id=${movie_id}`;
   }, [movie_id]);
@@ -77,7 +91,17 @@ const WatchMovie = ({ movie_id, getMovie }: WatchMovieProps) => {
             genres={movie?.genres?.map((data: any) => data?.name)}
             year={movie?.release_date}
             episodes={0}
-            rating={movie?.vote_average}
+            rating={
+              movie && movie.vote_average && averageRating
+                ? (
+                    (movie.vote_average * movie.vote_count +
+                      averageRating * averageRating) /
+                    (movie.vote_count + averageRating)
+                  ).toFixed(1) // Apply toFixed(1) to the entire expression
+                : averageRating
+                ? averageRating.toFixed(1)
+                : movie && movie.vote_average.toFixed(1)
+            }
             duration={movie?.runtime || "Duration not yet available"}
             type={`${getNationality(movie?.type[0])} Movie`}
             imageUrl={

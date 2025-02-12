@@ -19,12 +19,15 @@ export async function generateMetadata(props: {
 
   const [person_id] = params["id]-[slug"].split("-");
   const data = await getPersonDetails(person_id);
+  const person_detail = data?.person?.results?.find(
+    (p: any) => p.id === Number(person_id) // Convert person_id to number
+  );
   const url = `${process.env.BASE_URL}/person/${
     data.person?.results[0]?.id
   }-${spaceToHyphen(data?.person?.results[0]?.name)}`;
 
   return {
-    title: `${data?.person?.results[0]?.name} (${data.person?.results[0]?.original_name})`,
+    title: `${person_detail?.name} (${person_detail?.original_name})`,
     description: data.personDetails?.biography,
     keywords: data.personDetails?.also_known_as,
     alternates: {
@@ -37,7 +40,7 @@ export async function generateMetadata(props: {
       description: data.personDetails?.biography,
       images: [
         {
-          url: `https://image.tmdb.org/t/p/original/${data.person?.results[0]?.profile_path}`,
+          url: `https://image.tmdb.org/t/p/original/${person_detail?.profile_path}`,
           width: 1200,
           height: 630,
         },

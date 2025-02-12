@@ -6,7 +6,7 @@ import {
 
 export function usePersonData(person_id: string) {
     const { data: person, isLoading, refetch } = useQuery({
-        queryKey: ["tv", person_id, {
+        queryKey: ["person", person_id, {
           staleTime: 120000,
           cacheTime: 120000,
         }],

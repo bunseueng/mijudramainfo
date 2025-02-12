@@ -36,9 +36,10 @@ export async function generateMetadata(props: {
   )}`;
 
   return {
-    title: `${tvDetails?.title} (${languageName} Movie ${getYearFromDate(
-      tvDetails?.first_air_date || tvDetails?.release_date
-    )})`,
+    title: `${tvDetails?.title} ( ${languageName} Movie ${
+      getYearFromDate(tvDetails?.first_air_date || tvDetails?.release_date) ||
+      ""
+    })`,
     description: tvDetails?.overview,
     keywords: tvDetails?.genres?.map((data: any) => data?.name),
     alternates: {

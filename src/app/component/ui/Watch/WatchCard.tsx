@@ -236,7 +236,7 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
           </div>
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 min-[500px]:grid-cols-2 min-[670px]:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {data.results.map((show: any) => (
           <WatchImage key={show.id} {...show} type={type} />
         ))}

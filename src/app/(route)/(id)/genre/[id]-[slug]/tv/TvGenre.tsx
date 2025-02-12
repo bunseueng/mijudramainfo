@@ -2,9 +2,9 @@
 
 import { convertToFiveStars } from "@/app/actions/convertToFiveStar";
 import {
-  fetchTvKeywords,
   fetchTv,
   fetchRatings,
+  fetchTvGenre,
 } from "@/app/actions/fetchMovieApi";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { StyledRating } from "@/app/actions/StyleRating";
@@ -24,16 +24,16 @@ import { countryFilter } from "@/helper/item-list";
 import { useInView } from "react-intersection-observer";
 import SearchLoading from "@/app/component/ui/Loading/SearchLoading";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
-import AdBanner from "@/app/component/ui/Adsense/AdBanner";
 import AdArticle from "@/app/component/ui/Adsense/AdArticle";
+import AdBanner from "@/app/component/ui/Adsense/AdBanner";
 
 const PlayTrailer = dynamic(
   () => import("@/app/(route)/(drama)/drama/top/PlayTrailer"),
   { ssr: false }
 );
 
-interface Network {
-  keyword_id: string;
+interface Genre {
+  genre_id: string;
 }
 
 const DramaCard = ({ drama, tvDetail, ratings, overallIndex }: any) => {
@@ -150,46 +150,39 @@ const DramaCard = ({ drama, tvDetail, ratings, overallIndex }: any) => {
   );
 };
 
-const Keyword: React.FC<Network> = ({ keyword_id }) => {
+const TvGenre: React.FC<Genre> = ({ genre_id }) => {
   const [sortby, setSortby] = useState<string>();
-  const [genre, setGenre] = useState<string>("18");
+  const [type, setType] = useState<string>("18");
+  const [withoutGenre, setWithoutGenre] = useState<string>("16");
   const [country, setCountry] = useState<string>("CN");
-  const [withoutGenre, setWithoutGenre] = useState<string>("16|10767|10764|35");
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
   const currentPage = Number.parseInt(searchParams.get("page") || "1");
   const per_page = Number.parseInt(searchParams?.get("per_page") || "20");
 
   // Update the component to use the TV details again
-  const { data: keywordDetails, isLoading: isKeywordLoading } = useQuery({
+  const { data: genreDetails, isLoading: isKeywordLoading } = useQuery({
     queryKey: [
-      "keywordDetails",
+      "genre_details",
       currentPage,
-      keyword_id,
+      genre_id,
       sortby,
-      genre,
       withoutGenre,
       country,
     ],
     queryFn: () =>
-      fetchTvKeywords(
-        currentPage,
-        keyword_id,
-        sortby,
-        genre,
-        withoutGenre,
-        country
-      ),
+      fetchTvGenre(currentPage, genre_id, sortby, withoutGenre, country),
     staleTime: 3600000,
+    gcTime: 3600000,
   });
 
-  const totalItems = keywordDetails?.results?.slice(0, per_page) || [];
+  const totalItems = genreDetails?.results?.slice(0, per_page) || [];
   const tvIds = totalItems.map((item: any) => item.id.toString());
-
   const { data: tvDetails, isLoading: isTvDetailsLoading } = useQuery({
     queryKey: ["tvDetails", tvIds],
     queryFn: () => fetchTv(tvIds),
     staleTime: 3600000,
+    gcTime: 3600000,
     enabled: !!tvIds.length,
   });
 
@@ -197,6 +190,7 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
     queryKey: ["ratings", tvIds],
     queryFn: () => fetchRatings(tvIds),
     staleTime: 3600000,
+    gcTime: 3600000,
     enabled: !!tvIds.length,
   });
 
@@ -228,10 +222,10 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
       </div>
       <div className="mt-10">
         <div className="flex flex-col md:flex-row mt-10 w-full">
-          <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3 order-1 md:order-2">
+          <div className="w-full md:w-[30%] px-1 md:pl-3 md:pr-1 lg:px-3 md:order-2">
             <FilterSection
-              genre={genre}
-              setGenre={setGenre}
+              type={type}
+              setType={setType}
               setWithoutGenre={setWithoutGenre}
               country={country}
               setCountry={setCountry}
@@ -239,9 +233,9 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
               setSortby={setSortby}
             />
           </div>
-          <div className="w-full md:w-[70%] px-1 md:px-3 order-2 md:order-1">
+          <div className="w-full md:w-[70%] px-1 md:px-3 md:order-1">
             <div className="flex items-center justify-between mb-5">
-              <p>{keywordDetails?.total_results} results</p>
+              <p>{genreDetails?.total_results} results</p>
             </div>
             {totalItems?.map((drama: any, idx: number) => {
               const startCal = (currentPage - 1) * per_page;
@@ -267,7 +261,7 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
       <div className="flex flex-wrap items-center justify-between px-1 md:px-2 mt-3">
         <SearchPagination
           setPage={setPage}
-          totalItems={keywordDetails?.total_results}
+          totalItems={genreDetails?.total_results}
           per_page={per_page.toString()}
         />
       </div>
@@ -276,16 +270,16 @@ const Keyword: React.FC<Network> = ({ keyword_id }) => {
 };
 
 const FilterSection: React.FC<{
-  genre: string;
-  setGenre: (genre: string) => void;
+  type: string;
+  setType: (type: string) => void;
   setWithoutGenre: (withoutGenre: string) => void;
   country: string;
   setCountry: (country: string) => void;
   sortby: string | undefined;
   setSortby: (sortby: string) => void;
 }> = ({
-  genre,
-  setGenre,
+  type,
+  setType,
   setWithoutGenre,
   country,
   setCountry,
@@ -294,7 +288,6 @@ const FilterSection: React.FC<{
 }) => {
   return (
     <>
-      {" "}
       <div className="hidden md:block relative w-full min-h-[200px] mb-10">
         <div className="absolute inset-0">
           <AdArticle dataAdFormat="auto" dataAdSlot="4321696148" />
@@ -325,16 +318,13 @@ const FilterSection: React.FC<{
             <label className="block text-sm font-medium mb-1">Type</label>
             <select
               className="w-full border rounded-md p-2 text-sm"
-              value={genre}
+              value={type}
               onChange={(e) => {
-                setGenre(e.target.value);
-                setWithoutGenre(
-                  e.target.value === "18" ? "16|10767|10764|35" : "10767|10764"
-                );
+                setType(e.target.value);
+                setWithoutGenre(e.target.value === "18" ? "16" : "");
               }}
             >
               <option value="18">Drama</option>
-              <option value="16">Anime</option>
             </select>
           </div>
           <div className="w-1/2 px-2 mb-2">
@@ -365,41 +355,21 @@ const FilterSection: React.FC<{
               <div className="relative float-left w-full px-3">
                 <label
                   className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                    genre === "18" ? "text-[#409eff] font-bold" : ""
+                    type === "18" ? "text-[#409eff] font-bold" : ""
                   }`}
                 >
                   <input
                     type="radio"
                     name="18"
                     value="18"
-                    checked={genre === "18"}
+                    checked={type === "18"}
                     onChange={() => {
-                      setGenre("18");
-                      setWithoutGenre("16|10767|10764|35");
+                      setType("18");
+                      setWithoutGenre("16");
                     }}
                     className="transform duration-300 cursor-pointer mr-2"
                   />
                   <span>Drama</span>
-                </label>
-              </div>
-              <div className="relative float-left w-full px-3 mt-2">
-                <label
-                  className={`flex items-center text-sm transform duration-300 cursor-pointer ${
-                    genre === "16" ? "text-[#409eff] font-bold" : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="16"
-                    value="16"
-                    checked={genre === "16"}
-                    onChange={() => {
-                      setGenre("16");
-                      setWithoutGenre("10767|10764");
-                    }}
-                    className="transform duration-300 cursor-pointer mr-2"
-                  />
-                  <span>Anime</span>
                 </label>
               </div>
             </div>
@@ -432,35 +402,35 @@ const FilterSection: React.FC<{
             </div>
           </div>
         </div>
+        <SortOption
+          title="Popularity"
+          options={[
+            { value: "popularity.asc", label: "Ascending" },
+            { value: "popularity.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
+        <SortOption
+          title="Rating"
+          options={[
+            { value: "vote_average.asc", label: "Ascending" },
+            { value: "vote_average.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
+        <SortOption
+          title="First Air Date"
+          options={[
+            { value: "first_air_date.asc", label: "Ascending" },
+            { value: "first_air_date.desc", label: "Descending" },
+          ]}
+          sortby={sortby}
+          setSortby={setSortby}
+        />
       </div>
-      <SortOption
-        title="Popularity"
-        options={[
-          { value: "popularity.asc", label: "Ascending" },
-          { value: "popularity.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />
-      <SortOption
-        title="Rating"
-        options={[
-          { value: "vote_average.asc", label: "Ascending" },
-          { value: "vote_average.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />
-      <SortOption
-        title="First Air Date"
-        options={[
-          { value: "first_air_date.asc", label: "Ascending" },
-          { value: "first_air_date.desc", label: "Descending" },
-        ]}
-        sortby={sortby}
-        setSortby={setSortby}
-      />{" "}
-      <div className="hidden md:block relative w-full min-h-[200px] mt-24">
+      <div className="relative w-full min-h-[200px] mt-24 hidden md:block">
         <div className="absolute inset-0">
           <AdArticle dataAdFormat="auto" dataAdSlot="4321696148" />
         </div>
@@ -476,7 +446,7 @@ const SortOption: React.FC<{
   setSortby: (sortby: string) => void;
 }> = ({ title, options, sortby, setSortby }) => {
   return (
-    <div className="hidden md:block mt-5">
+    <div className="mt-5">
       <div className="border-b border-b-slate-400">{title}:</div>
       <div className="relative float-left w-full text-left mb-4 my-5">
         <div className="-mx-3">
@@ -564,4 +534,4 @@ const getDramaType = (drama: any) => {
   return "Other";
 };
 
-export default Keyword;
+export default TvGenre;

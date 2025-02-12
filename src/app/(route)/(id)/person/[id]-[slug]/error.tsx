@@ -16,8 +16,10 @@ export default function Error({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h2 className="text-2xl font-bold mb-4">Something went wrong!</h2>
-      <p className="text-xl mb-8">
+      <h2 className="text-2xl font-bold mb-4 text-black">
+        Something went wrong!
+      </h2>
+      <p className="text-xl mb-8 text-black">
         We&#39;re sorry, but we couldn&#39;t load the person&#39;s data.
       </p>
       <div className="flex space-x-4">
@@ -28,6 +30,7 @@ export default function Error({
           Try again
         </button>
         <Link
+          prefetch={false}
           href="/"
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
         >

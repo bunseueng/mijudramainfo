@@ -7,9 +7,6 @@ export async function POST(req: Request) {
   try {
     const { id, email,price }: { id: string; email:string; price: number } = await req.json();
 
-    // Debug log
-    console.log(`Received id: ${id}, price: ${price}`);
-
     const customer = await prisma.user.findFirst({
       where: {
         id: id,

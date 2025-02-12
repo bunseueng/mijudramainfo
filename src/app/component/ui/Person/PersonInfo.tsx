@@ -58,9 +58,7 @@ export default function PersonInfo({
       <div className="my-2">
         <h1 className="text-md font-semibold px-3 md:px-6">Native Name</h1>
         <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
-          {detail?.native_name ||
-            personFullDetails?.results[0]?.original_name ||
-            "N/A"}
+          {detail?.native_name || personFullDetails?.original_name || "N/A"}
         </p>
       </div>
       <div className="my-2">
@@ -93,13 +91,15 @@ export default function PersonInfo({
       <div className="my-2">
         <h1 className="text-md font-semibold px-3 md:px-6">Place of Birth</h1>
         <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
-          {persons?.place_of_birth}
+          {persons?.place_of_birth || "?"}
         </p>
       </div>{" "}
       <div className="my-2">
         <h1 className="text-md font-semibold px-3 md:px-6">Nationality</h1>
         <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
-          {detail?.nationality || getNationality(persons?.place_of_birth)}
+          {detail?.nationality ||
+            getNationality(persons?.place_of_birth) ||
+            "?"}
         </p>
       </div>
       <div className="my-2">

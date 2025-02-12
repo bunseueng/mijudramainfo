@@ -29,10 +29,6 @@ async function manualSignOut() {
   });
 
   if (response.ok) {
-    console.log("Signed out successfully");
-
-    // Additional post processing after signout and the session is cleared...
-
     window.location.href = "/";
   } else {
     console.error("Failed to sign out");

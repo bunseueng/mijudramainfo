@@ -164,13 +164,11 @@ const EditSeasonModal: React.FC<EditModal> = ({
 
   const handleDeleteStoredData = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log("Deleting item at index:", idx);
 
     // Remove the item at the specified index (idx) from the storedData array
     const updatedStoredData = storedData.filter(
       (item, index) => item?.title !== defaultValue?.title
     );
-    console.log("Updated storedData:", updatedStoredData);
     setStoredData(updatedStoredData);
     // Close the modal after deletion
     setOpenEditModal(false);

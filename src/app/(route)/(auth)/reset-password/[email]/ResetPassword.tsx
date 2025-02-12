@@ -174,7 +174,7 @@ const ResetPassword = ({ params }: { params: { email: string } }) => {
             {isLoading ? "Processing..." : "Change Password"}
           </button>
           <Link
-            prefetch={true}
+            prefetch={false}
             href="/sign-in"
             className="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer text-end"
           >

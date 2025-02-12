@@ -13,6 +13,7 @@ import SearchLoading from "../Loading/SearchLoading";
 import { usePersonData } from "@/hooks/usePersonData";
 import AdBanner from "../Adsense/AdBanner";
 import { usePersonDatabase } from "@/hooks/usePersonDatabase";
+import { usePersonFullDetails } from "@/hooks/usePersonFullDetails";
 
 interface IFetchPerson {
   person_id: number;
@@ -37,15 +38,12 @@ const FetchPerson: React.FC<IFetchPerson> = ({ person_id, currentUser }) => {
   const [isLoading, setIsLoading] = useState(false);
   const hasFetched = useRef(false);
   const currentPage = `https://mijudramalist.com/person/${person_id}`;
-
-  const { data: personFullDetails } = useQuery({
-    queryKey: ["personFullDetails", person?.name],
-    queryFn: () => fetchPersonSearch(person?.name),
-    staleTime: 3600000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
-
+  const { data: personFullDetails } = usePersonFullDetails(
+    person_id.toString()
+  );
+  const person_detail = personFullDetails?.person?.results?.find(
+    (p: any) => p.id === Number(person_id) // Convert person_id to number
+  );
   const uniqueChanges = Array.from(
     new Map(
       getPersons?.changes?.map((change) => [change.userId, change])
@@ -225,13 +223,13 @@ const FetchPerson: React.FC<IFetchPerson> = ({ person_id, currentUser }) => {
               currentUser={currentUser}
               getPersons={getPersons as PersonDBType | null}
               currentPage={currentPage}
-              personFullDetails={personFullDetails}
+              personFullDetails={person_detail}
             />
 
             <div className="hidden lg:block bg-white dark:bg-[#242526] rounded-lg shadow-sm">
               <PersonInfo
                 persons={person}
-                personFullDetails={personFullDetails}
+                personFullDetails={person_detail}
                 getCredits={getCredits}
                 person_db={getPersons as PersonDBType | null}
               />
@@ -274,7 +272,6 @@ const FetchPerson: React.FC<IFetchPerson> = ({ person_id, currentUser }) => {
             users={users as UserProps[]}
             getComment={getComment as CommentProps[]}
             tv_id={person_id}
-            personFullDetails={personFullDetails}
             sortedChanges={sortedChanges}
           />
         </div>

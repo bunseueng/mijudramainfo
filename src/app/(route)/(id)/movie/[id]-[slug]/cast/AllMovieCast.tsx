@@ -97,7 +97,6 @@ const AllMovieCast = ({ movie_id, getMovie }: any) => {
     ); // Add loading state if data is being fetched
   }
 
-  console.log(cast);
   return (
     <div className="bg-slate-100 dark:bg-[#1e1e1e]">
       <div

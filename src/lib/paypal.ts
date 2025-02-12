@@ -84,7 +84,6 @@ async function generateAccessToken() {
     });
 
     const jsonData = await handleResponse(response);
-    console.log('Access token:', jsonData.access_token);
     return jsonData.access_token;
   } catch (error) {
     console.error('Error generating PayPal access token:', error);

@@ -33,6 +33,7 @@ export default function Card({
   const tvIds = results
     ?.filter((item: any) => item.media_type === "tv")
     .map((data: any) => data.id.toString());
+  const tv_ids = results?.map((data: any) => data.id);
 
   const { data: tmdb_drama } = useQuery({
     queryKey: ["tmdb_drama", tvIds],
@@ -42,10 +43,10 @@ export default function Card({
   });
 
   const { data: tvRating } = useQuery({
-    queryKey: ["tvRating", tvIds],
-    queryFn: () => fetchRatings(tvIds),
+    queryKey: ["tvRating", tv_ids],
+    queryFn: () => fetchRatings(tv_ids),
     staleTime: 3600000,
-    enabled: Boolean(tvIds?.length),
+    enabled: Boolean(tv_ids?.length),
   });
 
   const path = BASE_URL.split("/").pop();
@@ -65,6 +66,40 @@ export default function Card({
       origin_country = [],
       original_language,
     } = result;
+
+    // Get query parameters
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryType = searchParams.get("type");
+    const queryCountry = searchParams.get("country");
+
+    // If we have query parameters, prioritize them
+    if (queryType || queryCountry) {
+      const countryPrefix =
+        {
+          CN: "Chinese",
+          KR: "Korean",
+          JP: "Japanese",
+          HK: "Hong Kong",
+          TW: "Taiwanese",
+          TH: "Thai",
+        }[queryCountry || ""] || "";
+
+      if (queryType === "movie")
+        return countryPrefix ? `${countryPrefix} Movie` : "Movie";
+      if (queryType === "tv")
+        return countryPrefix ? `${countryPrefix} Drama` : "Drama";
+      if (queryType === "tvShows")
+        return countryPrefix ? `${countryPrefix} TV Show` : "TV Show";
+
+      // If only country is specified
+      if (queryCountry && !queryType) {
+        if (genre_ids.includes(16)) return "Anime";
+        if (genre_ids.includes(10764)) return `${countryPrefix} TV Show`;
+        return `${countryPrefix} Drama`;
+      }
+    }
+
+    // If no query parameters, fall back to original logic
     const isDrama =
       media_type === "tv" &&
       !genre_ids.includes(16) &&
