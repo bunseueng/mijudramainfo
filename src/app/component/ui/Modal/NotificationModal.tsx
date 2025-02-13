@@ -70,10 +70,10 @@ const NotificationModal: React.FC<Notification> = ({
         localStorage.getItem(`notificationsRead_${currentUser.id}`) === "true";
       if (isRead) {
         setLocalFriend((prev) =>
-          prev.map((friend) => ({ ...friend, notification: "read" }))
+          prev?.map((friend) => ({ ...friend, notification: "read" }))
         );
         setLocalComment((prev) =>
-          prev.map((comment) => ({
+          prev?.map((comment) => ({
             ...comment,
             replies: comment.replies?.map((reply) => ({
               ...reply,
@@ -179,7 +179,7 @@ const NotificationModal: React.FC<Notification> = ({
   );
 
   const tv_id = useMemo(
-    () => localComment.map((item) => item.postId),
+    () => localComment?.map((item) => item.postId),
     [localComment]
   );
 
@@ -194,13 +194,13 @@ const NotificationModal: React.FC<Notification> = ({
   });
 
   const friendNoti = useMemo(
-    () => status.map((fri) => fri?.notification).flat(),
+    () => status?.map((fri) => fri?.notification).flat(),
     [status]
   );
   const findReply = useMemo(
     () =>
       localComment
-        .map((com) =>
+        ?.map((com) =>
           com.replies?.filter((rp) => rp?.userId === currentUser?.id)
         )
         .flat(),
@@ -215,7 +215,7 @@ const NotificationModal: React.FC<Notification> = ({
   const isRepliedItself = useMemo(
     () =>
       localComment
-        .map((com) =>
+        ?.map((com) =>
           com.replies?.filter((rp) => rp?.repliedUserId === currentUser?.id)
         )
         .flat(),
@@ -265,7 +265,7 @@ const NotificationModal: React.FC<Notification> = ({
         if (!res.ok) throw new Error("Failed to mark notifications as read");
 
         setLocalComment((prev) =>
-          prev.map((comment) => ({
+          prev?.map((comment) => ({
             ...comment,
             replies: comment.replies?.map((reply) => ({
               ...reply,
@@ -302,7 +302,7 @@ const NotificationModal: React.FC<Notification> = ({
         if (!res.ok) throw new Error("Failed to mark notifications as read");
 
         setLocalFriend((prev) =>
-          prev.map((friend) => ({
+          prev?.map((friend) => ({
             ...friend,
             notification: "read",
           }))
@@ -321,15 +321,15 @@ const NotificationModal: React.FC<Notification> = ({
   );
 
   const handleMarkAsRead = useCallback(() => {
-    const commentIds = localComment.map((item) => item.id).flat();
+    const commentIds = localComment?.map((item) => item.id).flat();
     const replyIds = localComment
-      .map((item) =>
+      ?.map((item) =>
         item.replies
           ?.filter((r) => currentUser?.id === r.userId)
-          .map((rp) => rp?.id)
+          ?.map((rp) => rp?.id)
       )
       .flat();
-    const friendRequestIds = status.map((fri) => fri.friendRequestId).flat();
+    const friendRequestIds = status?.map((fri) => fri.friendRequestId).flat();
 
     Promise.all([
       readRepliesNoti(commentIds as any, replyIds as any),
@@ -391,7 +391,7 @@ const NotificationModal: React.FC<Notification> = ({
             <>
               {hasUnreadFriends && (
                 <>
-                  {status.map((req, idx) => {
+                  {status?.map((req, idx) => {
                     const isRequester = req.friendRequestId === currentUser?.id;
                     const isResponder = req.friendRespondId === currentUser?.id;
 
@@ -506,7 +506,7 @@ const NotificationModal: React.FC<Notification> = ({
 
               {hasUnreadReplies && (
                 <>
-                  {localComment.map((commentItem) => {
+                  {localComment?.map((commentItem) => {
                     return commentItem.replies
                       ?.filter((rp) => rp?.notification !== "read")
                       ?.filter((rp) => rp?.userId === currentUser?.id)
