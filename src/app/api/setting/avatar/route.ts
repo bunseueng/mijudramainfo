@@ -24,6 +24,7 @@ export async function PUT(request: Request) {
         const uploadRes = await cloudinary.uploader.upload(profileAvatar, {
             upload_preset: "mijudrama_avatar",
             format: "avif",
+            secure: true
         });
 
         if (uploadRes) {
@@ -31,7 +32,7 @@ export async function PUT(request: Request) {
             const updateUserInfo = await prisma.user.update({
                 where: { id: user.id },
                 data: {
-                    profileAvatar: uploadRes.url,
+                    profileAvatar: uploadRes.secure_url,
                     public_avatar_id: uploadRes.public_id
                 }
             });

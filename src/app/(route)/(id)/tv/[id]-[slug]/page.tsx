@@ -82,7 +82,6 @@ export default async function tvPage(props: {
 
   try {
     const [tv_id] = slug.split("-");
-
     // Get user data with error handling
     let user = null;
     try {

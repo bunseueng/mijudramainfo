@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useEffect, useState } from "react";
-import Images from "next/image";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import dynamic from "next/dynamic";
@@ -43,12 +43,14 @@ const SliderContent: React.FC<SliderContentProps> = ({
   const [isContentVisible, setIsContentVisible] = useState(false);
 
   const imageUrl = useMemo(() => {
+    if (!currentItem?.backdrop_path && !currentItem?.poster_path) {
+      return null;
+    }
     const width = typeof window !== "undefined" ? window.innerWidth : 1920;
     const optimalSize = width <= 768 ? "w780" : "original";
     const path = currentItem.backdrop_path || currentItem.poster_path;
-
-    return `https://image.tmdb.org/t/p/${optimalSize}/${path}`;
-  }, [currentItem.backdrop_path, currentItem.poster_path]);
+    return `https://image.tmdb.org/t/p/${optimalSize}${path}`;
+  }, [currentItem?.backdrop_path, currentItem?.poster_path]);
 
   const itemLink = useMemo(
     () =>
@@ -130,16 +132,18 @@ const SliderContent: React.FC<SliderContentProps> = ({
             style={{ background: left, borderColor: right }}
           >
             <div className="w-full h-[98.49%] relative bg-gray-900">
-              <Images
-                src={imageUrl}
-                alt={`Poster for ${currentItem.name || currentItem.title}`}
-                fill
-                className="object-cover"
-                sizes="100vw"
-                priority
-                quality={75}
-                loading="eager"
-              />
+              {imageUrl && (
+                <Image
+                  src={imageUrl}
+                  alt={`Poster for ${currentItem.name || currentItem.title}`}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                  priority
+                  quality={75}
+                  unoptimized={false}
+                />
+              )}
             </div>
             <DynamicGradientOverlays
               left={left}

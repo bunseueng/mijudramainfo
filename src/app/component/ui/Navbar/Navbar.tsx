@@ -15,7 +15,9 @@ import NavbarLogo from "./NavbarLogo";
 import NavbarItems from "./NavbarItems";
 import NavbarActions from "./NavbarActions";
 import NavbarDropdownMenu from "./NavbarDropdownMenu";
-import NotificationModal from "../Modal/NotificationModal";
+import NotificationModal, {
+  CommentWithReplies,
+} from "../Modal/NotificationModal";
 
 // Custom hooks
 import { useNotificationStatus } from "@/hooks/useNotificationStatus";
@@ -26,8 +28,8 @@ import { Bell, LogOut, Search, Settings, Text, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarItem from "./SidebarItem";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUserData } from "@/hooks/useUserData";
 import { useOutsideClickNav } from "@/hooks/useOutsideClickNav";
+import { useProfileData } from "@/hooks/useProfileData";
 
 const Navbar = () => {
   const { smoothScrollProgress } = useScrollContext();
@@ -43,7 +45,7 @@ const Navbar = () => {
   const outsideRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
-  const { data } = useUserData();
+  const { data, refetch } = useProfileData(session?.user?.name as string);
 
   const { notificationCount, hasUnreadFriends, findRpNoti } =
     useNotificationStatus(
@@ -169,6 +171,10 @@ const Navbar = () => {
       setSessionDrop(false);
     }
   });
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
   return (
     <nav className="flex flex-col top-0 sticky z-[9999]">
       <motion.div
@@ -239,7 +245,7 @@ const Navbar = () => {
             findSpecificUser={data?.findSpecificUser ?? []}
             yourFriend={data?.yourFriend ?? []}
             friend={data?.friend ?? []}
-            comment={data?.comment ?? []}
+            comment={data?.comment as CommentWithReplies[] | []}
             outsideRef={outsideRef}
           />
         )}

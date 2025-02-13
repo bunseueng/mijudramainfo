@@ -23,7 +23,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "image.tmdb.org",
-        pathname: "/t/p/**",
+        pathname: "/t/p/original/**",
       },
     ],
   },
@@ -51,6 +51,41 @@ const nextConfig = {
               "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
           },
         ],
+      },
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Credentials", value: "true" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value:
+              "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+          },
+        ],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/tv/:id/edit//:path*", // Matches double slashes
+        destination: "/tv/:id/edit/:path*", // Fixes double slashes
+        permanent: true, // 301 Redirect
+      },
+      {
+        source: "/movie/:id/edit//:path*", // Matches double slashes
+        destination: "/movie/:id/edit/:path*", // Fixes double slashes
+        permanent: true, // 301 Redirect
+      },
+      {
+        source: "/person/:id/edit//:path*", // Matches double slashes
+        destination: "/person/:id/edit/:path*", // Fixes double slashes
+        permanent: true, // 301 Redirect
       },
     ];
   },

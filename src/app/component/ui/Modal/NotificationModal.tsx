@@ -16,9 +16,28 @@ import { fetchTv } from "@/app/actions/fetchMovieApi";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
-import { MutableRefObject, useState } from "react";
+import {
+  MutableRefObject,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import React from "react";
+
+interface Reply {
+  [key: string]: string | number | boolean | null | undefined;
+  id: string;
+  userId: string;
+  repliedUserId: string;
+  notification: string;
+  createdAt: string;
+}
+
+export type CommentWithReplies = Omit<CommentProps, "replies"> & {
+  replies?: Reply[];
+};
 
 interface Notification {
   users: UserProps[] | undefined;
@@ -26,7 +45,7 @@ interface Notification {
   friend: FriendRequestProps[];
   findSpecificUser: findSpecificUserProps[] | null[];
   yourFriend: findSpecificUserProps[] | null[];
-  comment: CommentProps[];
+  comment: CommentWithReplies[];
   outsideRef: MutableRefObject<HTMLDivElement | null>;
 }
 
@@ -40,142 +59,287 @@ const NotificationModal: React.FC<Notification> = ({
   outsideRef,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [localFriend, setLocalFriend] = useState(friend);
+  const [localComment, setLocalComment] =
+    useState<CommentWithReplies[]>(comment);
   const router = useRouter();
 
-  // Filter notifications based on their status
-  const acceptedRequests = friend.filter(
-    (item) => item.status === "accepted" && item.notification === "unread"
-  );
-  const rejectedRequests = friend.filter(
-    (item) => item.status === "rejected" && item.notification === "unread"
-  );
-  const pendingRequests = friend.filter(
-    (item) => item.status === "pending" && item.notification === "unread"
-  );
+  const checkNotificationStatus = useCallback(() => {
+    if (typeof window !== "undefined" && currentUser?.id) {
+      const isRead =
+        localStorage.getItem(`notificationsRead_${currentUser.id}`) === "true";
+      if (isRead) {
+        setLocalFriend((prev) =>
+          prev.map((friend) => ({ ...friend, notification: "read" }))
+        );
+        setLocalComment((prev) =>
+          prev.map((comment) => ({
+            ...comment,
+            replies: comment.replies?.map((reply) => ({
+              ...reply,
+              notification: "read",
+            })),
+          }))
+        );
+      }
+    }
+  }, [currentUser?.id]);
 
-  // Combine and sort notifications
-  const status = [...acceptedRequests, ...rejectedRequests, ...pendingRequests];
-  status.sort((a, b) => {
-    return (
-      new Date(b.actionDatetime).getTime() -
-      new Date(a.actionDatetime).getTime()
+  useEffect(() => {
+    checkNotificationStatus();
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `notificationsRead_${currentUser?.id}`) {
+        checkNotificationStatus();
+        router.refresh();
+      }
+    };
+
+    const handleNotificationUpdate = (
+      e: CustomEvent<{ userId: string; status: string }>
+    ) => {
+      if (e.detail.userId === currentUser?.id) {
+        checkNotificationStatus();
+        router.refresh();
+      }
+    };
+
+    const handleGlobalNotificationUpdate = () => {
+      checkNotificationStatus();
+      router.refresh();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(
+      "notificationUpdate",
+      handleNotificationUpdate as EventListener
     );
-  });
+    window.addEventListener(
+      "globalNotificationUpdate",
+      handleGlobalNotificationUpdate
+    );
 
-  const tv_id = comment.map((item) => item.postId);
+    // Poll for updates every 30 seconds
+    const pollInterval = setInterval(() => {
+      checkNotificationStatus();
+      router.refresh();
+    }, 30000);
 
-  const {
-    data: allTv,
-    isError,
-    isLoading,
-  } = useQuery({
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        "notificationUpdate",
+        handleNotificationUpdate as EventListener
+      );
+      window.removeEventListener(
+        "globalNotificationUpdate",
+        handleGlobalNotificationUpdate
+      );
+      clearInterval(pollInterval);
+    };
+  }, [checkNotificationStatus, currentUser?.id, router]);
+
+  useEffect(() => {
+    setLocalFriend(friend);
+    setLocalComment(comment);
+  }, [friend, comment]);
+
+  const acceptedRequests = useMemo(
+    () =>
+      localFriend.filter(
+        (item) => item.status === "accepted" && item.notification === "unread"
+      ),
+    [localFriend]
+  );
+
+  const rejectedRequests = useMemo(
+    () =>
+      localFriend.filter(
+        (item) => item.status === "rejected" && item.notification === "unread"
+      ),
+    [localFriend]
+  );
+
+  const pendingRequests = useMemo(
+    () =>
+      localFriend.filter(
+        (item) => item.status === "pending" && item.notification === "unread"
+      ),
+    [localFriend]
+  );
+
+  const status = useMemo(
+    () =>
+      [...acceptedRequests, ...rejectedRequests, ...pendingRequests].sort(
+        (a, b) =>
+          new Date(b.actionDatetime).getTime() -
+          new Date(a.actionDatetime).getTime()
+      ),
+    [acceptedRequests, rejectedRequests, pendingRequests]
+  );
+
+  const tv_id = useMemo(
+    () => localComment.map((item) => item.postId),
+    [localComment]
+  );
+
+  const { data: allTv, refetch } = useQuery({
     queryKey: ["allTvShows", tv_id],
     queryFn: () => fetchTv(tv_id.flat()),
-    staleTime: 3600000, // Cache data for 1 hour
-    refetchOnWindowFocus: true, // Refetch when window is focused
-    refetchOnMount: true, // Refetch on mount to get the latest data
+    staleTime: 3600000,
+    gcTime: 3600000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
-  const friendNoti = status.map((fri) => fri?.notification).flat();
-  const findReply = comment
-    .map((com) =>
-      com.replies?.filter((rp: any) => rp?.userId === currentUser?.id)
-    )
-    .flat();
-
-  const findRpNoti = findReply.map(
-    (item: any) => item?.notification === "unread"
+  const friendNoti = useMemo(
+    () => status.map((fri) => fri?.notification).flat(),
+    [status]
+  );
+  const findReply = useMemo(
+    () =>
+      localComment
+        .map((com) =>
+          com.replies?.filter((rp) => rp?.userId === currentUser?.id)
+        )
+        .flat(),
+    [localComment, currentUser?.id]
   );
 
-  const isRepliedItself = comment
-    .map((com) =>
-      com.replies?.filter((rp: any) => rp?.repliedUserId === currentUser?.id)
-    )
-    .flat();
+  const findRpNoti = useMemo(
+    () => findReply?.map((item) => item?.notification === "unread"),
+    [findReply]
+  );
 
-  const hasUnreadReplies = findRpNoti.includes(true);
+  const isRepliedItself = useMemo(
+    () =>
+      localComment
+        .map((com) =>
+          com.replies?.filter((rp) => rp?.repliedUserId === currentUser?.id)
+        )
+        .flat(),
+    [localComment, currentUser?.id]
+  );
 
-  // Check if there are any unread friend notifications
+  const hasUnreadReplies = findRpNoti?.includes(true);
   const hasUnreadFriends = friendNoti.includes("unread");
 
-  const readRepliesNoti = async (
-    commentIds: string,
-    parentIds: string | null
-  ) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/tv/${tv_id}/notification`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          commentIds: commentIds,
-          parentIds: parentIds || [],
-          notification: "read",
-        }),
-      });
+  const broadcastNotificationUpdate = useCallback(() => {
+    localStorage.setItem(`notificationsRead_${currentUser?.id}`, "true");
 
-      if (res.ok) {
-        router.refresh();
-      } else {
-        toast.error("Failed to mark as read");
-      }
-    } catch (error: any) {
-      console.error("Error:", error);
-      toast.error("Failed to mark as read");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const readFriendNoti = async (friendRequestId: string) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/friend/notification`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          friendRequestId: friendRequestId,
-          notification: "read",
-        }),
-      });
-
-      if (res.ok) {
-        router.refresh();
-      } else {
-        toast.error("Failed to mark as read");
-      }
-    } catch (error: any) {
-      console.error("Error:", error);
-      toast.error("Failed to mark as read");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMarkAsRead = () => {
-    readRepliesNoti(
-      comment.map((item) => item.id).flat() as any,
-      comment
-        .map((item) =>
-          item.replies
-            ?.filter((r: any) => currentUser?.id === r.userId)
-            .map((rp: any) => rp?.id)
-        )
-        .flat() as any
+    window.dispatchEvent(
+      new StorageEvent("storage", {
+        key: `notificationsRead_${currentUser?.id}`,
+        newValue: "true",
+        oldValue: null,
+        storageArea: localStorage,
+      })
     );
-    readFriendNoti(status.map((fri) => fri.friendRequestId).flat() as any);
-  };
 
-  if (isLoading) {
-    <div>Fetching...</div>;
-  } else if (isError) {
-    console.error("Failed to fetch tv");
-  }
+    window.dispatchEvent(
+      new CustomEvent("notificationUpdate", {
+        detail: { userId: currentUser?.id, status: "read" },
+      })
+    );
 
+    window.dispatchEvent(new Event("globalNotificationUpdate"));
+  }, [currentUser?.id]);
+
+  const readRepliesNoti = useCallback(
+    async (commentIds: string, parentIds: string | null) => {
+      if (!localComment.length || !tv_id.length) return;
+
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/tv/${tv_id[0]}/notification`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            commentIds,
+            parentIds: parentIds || [],
+            notification: "read",
+          }),
+        });
+
+        if (!res.ok) throw new Error("Failed to mark notifications as read");
+
+        setLocalComment((prev) =>
+          prev.map((comment) => ({
+            ...comment,
+            replies: comment.replies?.map((reply) => ({
+              ...reply,
+              notification: "read",
+            })),
+          }))
+        );
+
+        broadcastNotificationUpdate();
+        router.refresh();
+      } catch (error) {
+        console.error("Error marking notifications as read:", error);
+        toast.error("Failed to mark notifications as read");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [localComment, tv_id, broadcastNotificationUpdate, router]
+  );
+
+  const readFriendNoti = useCallback(
+    async (friendRequestId: string) => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/friend/notification`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            friendRequestId,
+            notification: "read",
+          }),
+        });
+
+        if (!res.ok) throw new Error("Failed to mark notifications as read");
+
+        setLocalFriend((prev) =>
+          prev.map((friend) => ({
+            ...friend,
+            notification: "read",
+          }))
+        );
+
+        broadcastNotificationUpdate();
+        router.refresh();
+      } catch (error) {
+        console.error("Error marking notifications as read:", error);
+        toast.error("Failed to mark notifications as read");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [broadcastNotificationUpdate, router]
+  );
+
+  const handleMarkAsRead = useCallback(() => {
+    const commentIds = localComment.map((item) => item.id).flat();
+    const replyIds = localComment
+      .map((item) =>
+        item.replies
+          ?.filter((r) => currentUser?.id === r.userId)
+          .map((rp) => rp?.id)
+      )
+      .flat();
+    const friendRequestIds = status.map((fri) => fri.friendRequestId).flat();
+
+    Promise.all([
+      readRepliesNoti(commentIds as any, replyIds as any),
+      readFriendNoti(friendRequestIds as any),
+    ]);
+  }, [localComment, currentUser?.id, readRepliesNoti, readFriendNoti, status]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
   return (
     <AnimatePresence>
       <motion.div
@@ -200,24 +364,27 @@ const NotificationModal: React.FC<Notification> = ({
             >
               See All Notifications
             </Link>
-            <button
-              className="bg-white dark:bg-[#3a3b3c] border border-[#d3d3d38c] dark:border-[#3e4042] hover:bg-neutral-400 hover:bg-opacity-40 dark:hover:bg-opacity-50 my-4 mx-3 py-1 px-3 shadow-sm rounded-md"
-              onClick={handleMarkAsRead}
-            >
-              <span className="inline-flex">
-                {loading ? (
-                  <ClipLoader
-                    color="#c3c3c3"
-                    loading={loading}
-                    size={16}
-                    className="mr-1"
-                  />
-                ) : (
-                  <FaCheck className="mr-1" />
-                )}
-                <span className="text-sm">Mark these as read</span>
-              </span>
-            </button>
+            {(hasUnreadReplies || hasUnreadFriends) && (
+              <button
+                className="bg-white dark:bg-[#3a3b3c] border border-[#d3d3d38c] dark:border-[#3e4042] hover:bg-neutral-400 hover:bg-opacity-40 dark:hover:bg-opacity-50 my-4 mx-3 py-1 px-3 shadow-sm rounded-md"
+                onClick={handleMarkAsRead}
+                disabled={loading}
+              >
+                <span className="inline-flex">
+                  {loading ? (
+                    <ClipLoader
+                      color="#c3c3c3"
+                      loading={loading}
+                      size={16}
+                      className="mr-1"
+                    />
+                  ) : (
+                    <FaCheck className="mr-1" />
+                  )}
+                  <span className="text-sm">Mark these as read</span>
+                </span>
+              </button>
+            )}
           </div>
           {(isRepliedItself?.length < 1 && hasUnreadReplies) ||
           hasUnreadFriends ? (
@@ -228,7 +395,6 @@ const NotificationModal: React.FC<Notification> = ({
                     const isRequester = req.friendRequestId === currentUser?.id;
                     const isResponder = req.friendRespondId === currentUser?.id;
 
-                    // Skip rendering if the current user is the requester for pending requests
                     if (
                       isRequester &&
                       pendingRequests.find(
@@ -252,10 +418,9 @@ const NotificationModal: React.FC<Notification> = ({
                             See Past Notifications
                           </Link>
                         </div>
-                      ); // Skip this notification
+                      );
                     }
 
-                    // Find the corresponding user
                     const user = isRequester
                       ? yourFriend.find(
                           (friend) => friend?.id === req.friendRespondId
@@ -266,7 +431,6 @@ const NotificationModal: React.FC<Notification> = ({
 
                     if (!user) return null;
 
-                    // Determine the type of request
                     const isPending = pendingRequests.find(
                       (request) =>
                         request.friendRequestId === user?.id ||
@@ -283,7 +447,6 @@ const NotificationModal: React.FC<Notification> = ({
                         request.friendRespondId === user?.id
                     );
 
-                    // Adjust message based on whether the currentUser is the requester or responder
                     let notificationMessage = null;
                     if (isRequester) {
                       notificationMessage = isAccepted ? (
@@ -296,7 +459,7 @@ const NotificationModal: React.FC<Notification> = ({
                           <span className="text-[#1675b6]">{user?.name}</span>{" "}
                           has rejected your friend request
                         </>
-                      ) : null; // Removed pending case for current user
+                      ) : null;
                     } else if (isResponder) {
                       notificationMessage = isAccepted ? (
                         <>
@@ -343,14 +506,13 @@ const NotificationModal: React.FC<Notification> = ({
 
               {hasUnreadReplies && (
                 <>
-                  {comment.map((commentItem) => {
+                  {localComment.map((commentItem) => {
                     return commentItem.replies
-                      ?.filter((rp: any) => rp?.notification !== "read")
-                      ?.filter((rp: any) => rp?.userId === currentUser?.id)
-                      ?.map((reply: any, idx) => {
-                        // Step 1: Find the user details based on repliedUserId
+                      ?.filter((rp) => rp?.notification !== "read")
+                      ?.filter((rp) => rp?.userId === currentUser?.id)
+                      ?.map((reply, idx) => {
                         const user = users?.find(
-                          (user: any) => user.id === reply.repliedUserId
+                          (user) => user.id === reply.repliedUserId
                         );
                         if (!user || reply.userId === reply.repliedUserId)
                           return null;

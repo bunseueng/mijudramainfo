@@ -23,10 +23,6 @@ export interface FriendRequestProps {
   actionDatetime: Date;
 }
 
-export interface IFriend {
-  friend: FriendRequestProps[];
-}
-
 type popularitySent = {
   itemId: string;
   personId: string;
@@ -114,11 +110,6 @@ export interface findSpecificUserProps {
   createdAt: Date;
   updatedAt: Date;
   role: string;
-}
-
-export interface IFindSpecificUser {
-  findSpecificUser: findSpecificUserProps[] | null[];
-  yourFriend: findSpecificUserProps[] | null[];
 }
 
 export interface List {

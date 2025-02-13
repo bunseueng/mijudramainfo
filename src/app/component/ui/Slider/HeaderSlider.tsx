@@ -77,7 +77,7 @@ const HeaderSlider = () => {
       // Use smaller image size for color extraction
       const imageUrl = `https://image.tmdb.org/t/p/${
         currentItem?.backdrop_path ? "w300" : "w154"
-      }/${currentItem?.backdrop_path || currentItem?.poster_path}`;
+      }${currentItem?.backdrop_path || currentItem?.poster_path}`;
       const [r, g, b] = await getColorFromImage(imageUrl);
 
       setColorState({
@@ -95,7 +95,7 @@ const HeaderSlider = () => {
       const firstItem = filteredData[0];
       const imageUrl = `https://image.tmdb.org/t/p/${
         firstItem?.backdrop_path ? "w300" : "w154"
-      }/${firstItem?.backdrop_path || firstItem?.poster_path}`;
+      }${firstItem?.backdrop_path || firstItem?.poster_path}`;
 
       preloadFirstImage(imageUrl).then(() => {
         setIsFirstImageLoaded(true);

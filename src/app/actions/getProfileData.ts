@@ -19,8 +19,6 @@ export const getProfileData = async (name: string) => {
       if (!isNaN(date.getTime())) {
         formattedDate = date.toISOString().split("T")[0]; // Format the date as YYYY-MM-DD
       } else {
-        // Handle invalid date case if needed
-        console.error("Invalid date:", createdAt);
         formattedDate = ""; // or some default value
       }
     } else {
@@ -85,6 +83,7 @@ export const getProfileData = async (name: string) => {
         postId: getUniqueFeed?.id,
       },
     });
+    const comment = await prisma.comment.findMany({})
     const formattedReviews: ITvReview[] = getReview.map((review) => ({
       ...review,
       review: review?.review as ITvReview["review"],
@@ -96,6 +95,13 @@ export const getProfileData = async (name: string) => {
       createdAt: review.createdAt, // Keep as Date
     }));
 
+    const findSpecificUser = users.filter((user: any) =>
+      friend.map((friend: any) => friend.friendRequestId).includes(user.id)
+    );
+    
+    const yourFriend = users.filter((user: any) =>
+      friend.map((friend: any) => friend.friendRespondId).includes(user.id)
+    );
     return {
       user,
       users,
@@ -113,7 +119,10 @@ export const getProfileData = async (name: string) => {
       formattedReviews,
       getFeeds,
       getComment,
-      friend
+      friend,
+      comment,
+      findSpecificUser,
+      yourFriend
     };
   } catch (error) {
     throw new Error("Failed to fetch user data");

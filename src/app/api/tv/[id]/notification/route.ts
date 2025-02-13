@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 
-export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export async function PUT(
+  req: Request,
+  props: { params: Promise<{ id: string }> }
+) {
   try {
     const currentUser = await getCurrentUser();
+    const params = await props.params;
 
     if (!currentUser) {
-      console.error("Invalid User");
       return NextResponse.json({ message: "Invalid User" }, { status: 400 });
     }
 
@@ -16,7 +18,6 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
 
     // Ensure commentIds and parentIds are arrays
     if (!Array.isArray(commentIds) || !Array.isArray(parentIds)) {
-      console.error("commentIds and parentIds must be arrays");
       return NextResponse.json({ message: "commentIds and parentIds must be arrays" }, { status: 400 });
     }
 

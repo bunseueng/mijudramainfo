@@ -902,24 +902,6 @@ export const fetchUpcomingMovie = cache(async (pages = 1) => {
   return json;
 });
 
-// Fetch movie keyword
-export const fetchMovieKeyword = cache(async (movie_id: any) => {
-  const url = `https://api.themoviedb.org/3/movie/${movie_id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`;
-  const options = {
-    method: "GET",
-    headers,
-  };
-
-  const res = await fetch(url, options);
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch movies");
-  }
-
-  const json = await res.json();
-  return json;
-});
-
 // fetch movie images
 export const fetchMovieImages = cache(async (movie_id: any) => {
   const url = `https://api.themoviedb.org/3/movie/${movie_id}/images?api_key=${process.env.NEXT_PUBLIC_API_KEY}`;
@@ -1138,7 +1120,7 @@ export const fetchTrailer = cache(async (ids: string[]) => {
   }
 });
 
-const fetchApi = async (endpoint: string, params: Record<string, any> = {}) => {
+const fetchApi = cache( async (endpoint: string, params: Record<string, any> = {}) => {
   const searchParams = new URLSearchParams({
     api_key: apiKey!,
     ...params,
@@ -1151,7 +1133,7 @@ const fetchApi = async (endpoint: string, params: Record<string, any> = {}) => {
   }
 
   return response.json();
-};
+});
 
 export interface FilterParams {
   page?: number;
@@ -1162,24 +1144,25 @@ export interface FilterParams {
   sort_by?: string;
 }
 
-export const getPopularByParams = async (
+export const getPopularByParams = cache(async (
   type: string,
   params: FilterParams
 ) => {
   return fetchApi(`/discover/${type}`, params);
-};
-export const getImageUrl = (
+});
+
+export const getImageUrl = cache((
   path: string,
   backdrop: string,
   size = "original"
 ) => {
   return `https://image.tmdb.org/t/p/${size}${path || backdrop}`;
-};
+});
 
-export const getGenres = async (type: string) => {
+export const getGenres = cache(async (type: string) => {
   return fetchApi(`/genre/${type}/list`);
-};
+});
 
-export const getCountries = async () => {
+export const getCountries = cache(async () => {
   return fetchApi("/configuration/countries");
-};
+});
