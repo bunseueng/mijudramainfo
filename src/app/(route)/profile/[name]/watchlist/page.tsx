@@ -7,7 +7,7 @@ export const maxDuration = 60;
 export async function generateMetadata(props: any): Promise<Metadata> {
   const params = await props.params;
   const userData = await getProfileData(params.name);
-  const user = userData.user;
+  const user = userData?.user;
   const url = `${process.env.BASE_URL}/profile/${user?.name}/watchlist`;
 
   const isUserExisted = userData?.users?.some((u) => u.name === params.name);
