@@ -26,13 +26,13 @@ export async function generateMetadata(props: {
   };
 
   const languageName = countryToLanguageMap[original_country] || "Unknown";
-  const url = `${process.env.BASE_URL}/tv/${
-    tvDetails?.id
-  }-${spaceToHyphen(tvDetails?.name)}/videos/teasers`;
+  const url = `${process.env.BASE_URL}/tv/${tvDetails?.id}-${spaceToHyphen(
+    tvDetails?.name
+  )}/videos/teasers`;
   return {
     title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
-    )})'s Teasers`,
+    )}) | Teasers`,
     description: tvDetails?.overview,
     keywords: tvDetails?.genres?.map((data: any) => data.name),
     alternates: {
@@ -41,7 +41,9 @@ export async function generateMetadata(props: {
     openGraph: {
       type: "website",
       url: url,
-      title: tvDetails?.name,
+      title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
+        tvDetails?.first_air_date || tvDetails?.release_date
+      )}) | Teasers`,
       description: tvDetails?.overview,
       images: [
         {

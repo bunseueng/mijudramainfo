@@ -213,7 +213,7 @@ const DramaMain = ({
   return (
     <section className="w-full relative z-50">
       <div className="w-full h-full">
-        <TvList tv_id={tv_id} tv={tv} drama_poster={drama_poster} />
+        <TvList tv_id={tv_id} />
 
         <DramaHeader
           tv={tv}

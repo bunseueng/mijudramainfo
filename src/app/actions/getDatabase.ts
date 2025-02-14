@@ -6,11 +6,9 @@ export const getDatabase = async () => {
       const getDrama = await prisma.drama.findMany();
       const getMovie = await prisma.movie.findMany();
       const personDB = await prisma.person.findMany();
-      const rating = prisma.rating.findMany();
       return {
         getDrama,
         getMovie,
         personDB,
-        rating
       }
 }

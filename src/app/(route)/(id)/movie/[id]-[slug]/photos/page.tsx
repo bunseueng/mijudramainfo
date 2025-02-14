@@ -5,6 +5,8 @@ import { getMovieData, getMovieDetails } from "@/app/actions/movieActions";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import { Metadata } from "next";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import MoviePhotoAlbum from "./PhotoAlbum";
+import { MovieDB } from "@/helper/type";
 export async function generateMetadata(props: {
   params: Promise<{ "id]-[slug": string }>;
 }): Promise<Metadata> {
@@ -29,11 +31,9 @@ export async function generateMetadata(props: {
   )}/photos`;
 
   return {
-    title: `Photos of ${
-      tvDetails?.title
-    } (${languageName} Movie ${getYearFromDate(
+    title: `${tvDetails?.title} (${languageName} Movie ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
-    )})`,
+    )}) | Photos`,
     description: tvDetails?.overview,
     keywords: tvDetails?.genres?.map((data: any) => data?.name),
     alternates: {
@@ -42,7 +42,9 @@ export async function generateMetadata(props: {
     openGraph: {
       type: "website",
       url: url,
-      title: tvDetails?.title,
+      title: `${tvDetails?.title} (${languageName} Movie ${getYearFromDate(
+        tvDetails?.first_air_date || tvDetails?.release_date
+      )}) | Photos`,
       description: tvDetails?.overview,
       images: [
         {
@@ -64,7 +66,12 @@ const MoviePhotosPage = async (props: {
   const [movie_id] = params["id]-[slug"].split("-");
   const user = await getCurrentUser();
   const { getAllMovie } = await getMovieData(movie_id, user?.id);
-  return <PhotoAlbum getMovie={getAllMovie} />;
+  return (
+    <MoviePhotoAlbum
+      getMovie={getAllMovie as MovieDB[] | []}
+      movie_id={movie_id}
+    />
+  );
 };
 
 export default MoviePhotosPage;

@@ -36,7 +36,7 @@ export async function generateMetadata(props: {
     openGraph: {
       type: "website",
       url: url,
-      title: data.person?.results[0]?.name,
+      title: `${person_detail?.name} (${person_detail?.original_name})`,
       description: data.personDetails?.biography,
       images: [
         {

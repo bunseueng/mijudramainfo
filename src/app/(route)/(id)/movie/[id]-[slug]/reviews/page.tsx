@@ -30,11 +30,9 @@ export async function generateMetadata(props: {
   )}/reviews`;
 
   return {
-    title: `Review of ${
-      tvDetails?.title
-    } (${languageName} Movie ${getYearFromDate(
+    title: `${tvDetails?.title} (${languageName} Movie ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
-    )})`,
+    )}) | Reviews`,
     description: tvDetails?.overview,
     keywords: tvDetails?.genres?.map((data: any) => data?.name),
     alternates: {
@@ -43,7 +41,9 @@ export async function generateMetadata(props: {
     openGraph: {
       type: "website",
       url: url,
-      title: tvDetails?.title,
+      title: `${tvDetails?.title} (${languageName} Movie ${getYearFromDate(
+        tvDetails?.first_air_date || tvDetails?.release_date
+      )}) | Reviews`,
       description: tvDetails?.overview,
       images: [
         {

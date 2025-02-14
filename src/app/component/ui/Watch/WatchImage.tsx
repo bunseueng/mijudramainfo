@@ -4,8 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatDate } from "@/app/actions/formatDate";
-import { fetchRatings, getImageUrl } from "@/app/actions/fetchMovieApi";
-import { useQuery } from "@tanstack/react-query";
+import { getImageUrl } from "@/app/actions/fetchMovieApi";
 
 interface TVShowCardProps {
   id: number;
@@ -17,6 +16,7 @@ interface TVShowCardProps {
   vote_average: number;
   type: string;
   vote_count: number;
+  rating_db: string[];
 }
 
 export const WatchImage: React.FC<TVShowCardProps> = ({
@@ -29,22 +29,31 @@ export const WatchImage: React.FC<TVShowCardProps> = ({
   vote_average,
   type,
   vote_count,
+  rating_db,
 }) => {
   const displayTitle = name || title;
   const displayDate = formatDate(first_air_date || release_date);
-  const { data: rating_db } = useQuery({
-    queryKey: ["ratings", id],
-    queryFn: () => fetchRatings([id.toString()]), // ✅ Pass id as a string array
-  });
   const findRatingDB = rating_db?.filter(
     (p: any) => p.tvId || p.movieId === id
   );
-  const averageRating = findRatingDB
-    ? findRatingDB.reduce(
-        (sum: number, rating: any) => sum + rating.rating,
-        0
-      ) / findRatingDB.length
-    : 0;
+  const averageRating =
+    findRatingDB?.length > 0
+      ? findRatingDB.reduce(
+          (sum: number, rating: any) => sum + rating.rating,
+          0
+        ) / findRatingDB.length
+      : 0;
+
+  const calculateRating = () => {
+    if (vote_average && averageRating) {
+      return (
+        (vote_average * vote_count + averageRating * averageRating) /
+        (vote_count + averageRating)
+      ).toFixed(1);
+    }
+    return averageRating ? averageRating.toFixed(1) : vote_average.toFixed(1);
+  };
+
   return (
     <Link href={`/${type}/${id}-${title || name}/watch`} className="group">
       <div className="relative overflow-hidden rounded-lg">
@@ -63,18 +72,7 @@ export const WatchImage: React.FC<TVShowCardProps> = ({
           <h3 className="text-white font-semibold text-lg">{displayTitle}</h3>
           <div className="flex items-center justify-between text-sm text-gray-300">
             <span>{displayDate}</span>
-            <span className="flex items-center">
-              ⭐{" "}
-              {vote_average && vote_average && averageRating
-                ? (
-                    (vote_average * vote_count +
-                      averageRating * averageRating) /
-                    (vote_count + averageRating)
-                  ).toFixed(1) // Apply toFixed(1) to the entire expression
-                : averageRating
-                ? averageRating.toFixed(1)
-                : vote_average && vote_average.toFixed(1)}
-            </span>
+            <span className="flex items-center">⭐ {calculateRating()}</span>
           </div>
         </div>
       </div>

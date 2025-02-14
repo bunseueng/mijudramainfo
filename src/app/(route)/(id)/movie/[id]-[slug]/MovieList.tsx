@@ -26,10 +26,9 @@ type DropdownItem =
 
 interface MovieListProps {
   movie_id: string;
-  movie: any; // Replace 'any' with the actual type of your movie object
 }
 
-const MovieList = ({ movie_id, movie }: MovieListProps) => {
+const MovieList = ({ movie_id }: MovieListProps) => {
   const [activeItem, setActiveItem] = useState<string>("Overview");
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
@@ -77,7 +76,8 @@ const MovieList = ({ movie_id, movie }: MovieListProps) => {
       label: "Media",
       icon: Image,
       dropdownItems: [
-        { label: "Photos", href: `/movie/${movie_id}/photos` },
+        { label: "Backdrop", href: `/movie/${movie_id}/photos` },
+        { label: "Poster", href: `/movie/${movie_id}/photos/poster` },
         { label: "Videos", href: `/movie/${movie_id}/videos` },
       ],
     },

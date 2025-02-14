@@ -4,7 +4,7 @@ import { fetchHomepageDrama } from "@/app/actions/fetchMovieApi";
 import HomeCard from "../Card/HomeCard";
 import Actor from "../Card/Actor";
 import SearchLoading from "../Loading/SearchLoading";
-import { DramaDB, IRating } from "@/helper/type";
+import { DramaDB } from "@/helper/type";
 
 const CATEGORIES = [
   { key: "trending", title: "Trending Drama", path: "tv" },
@@ -21,7 +21,6 @@ const CATEGORIES = [
 
 interface DramaCategoriesProps {
   getDrama: DramaDB[];
-  existingRatings: IRating[];
   personDB: any;
   visibleCategories: number;
   ref: (node?: Element | null | undefined) => void;
@@ -30,7 +29,6 @@ interface DramaCategoriesProps {
 
 const HomeDrama: React.FC<DramaCategoriesProps> = ({
   getDrama,
-  existingRatings,
   personDB,
   visibleCategories,
   hasMoreCategories,
@@ -64,7 +62,6 @@ const HomeDrama: React.FC<DramaCategoriesProps> = ({
               key={key}
               heading={title}
               getDrama={getDrama}
-              existingRatings={existingRatings}
               categoryData={{ results: data?.responseData?.[key] || [] }}
               isDataLoading={isLoading}
               path={path}

@@ -6,9 +6,22 @@ import React, { Suspense } from "react";
 export async function generateMetadata(): Promise<Metadata> {
   const url = `${process.env.BASE_URL}/watch/tv`;
   return {
-    title: "Watch Tv Shows Steaming Online",
+    title: "Watch Drama Online With English Subtitles For Free",
     alternates: {
       canonical: url,
+    },
+    openGraph: {
+      type: "website",
+      url: url,
+      title: "Watch Drama Online With English Subtitles For Free",
+      siteName: "MijuDramaInfo",
+      images: [
+        {
+          url: "/opengraph-image.png",
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
   };
 }

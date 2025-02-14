@@ -3,15 +3,53 @@ import { safelyFormatDate } from "@/lib/safetyDate"
 import { spaceToHyphen } from "@/lib/spaceToHyphen"
 import type { MetadataRoute } from "next"
 
-// This will ensure Next.js generates a proper XML sitemap
+const MAX_RETRIES = 3;
+const BATCH_SIZE = 5;
+const MAX_PAGES = 20;
+
+async function fetchWithRetry(url: string, retries = MAX_RETRIES): Promise<Response> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response;
+  } catch (error) {
+    if (retries > 0) {
+      return fetchWithRetry(url, retries - 1);
+    }
+    throw error;
+  }
+}
+
+async function processBatch<T, R>(
+  items: T[],
+  processItem: (item: T) => Promise<R>,
+  batchSize = BATCH_SIZE
+): Promise<R[]> {
+  const results: R[] = [];
+  
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.all(
+      batch.map(processItem)
+    );
+    results.push(...batchResults);
+  }
+  
+  return results;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.BASE_URL || `${process.env.BASE_URL}`
   const sitemapEntries: MetadataRoute.Sitemap = []
 
   try {
+    // Add static pages first for faster initial response
     sitemapEntries.push(...generateStaticPageEntries(baseUrl))
 
-    await Promise.all([
+    // Process dynamic entries in parallel with proper error handling
+    const results = await Promise.allSettled([
       generateTVShowEntries(baseUrl, sitemapEntries),
       generateMovieEntries(baseUrl, sitemapEntries),
       generatePersonEntries(baseUrl, sitemapEntries),
@@ -21,15 +59,145 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       generateTvGenresEntries(baseUrl, sitemapEntries),
       generateMovieGenresEntries(baseUrl, sitemapEntries),
     ])
+
+    // Log any errors that occurred during generation
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`Error in task ${index}:`, result.reason)
+      }
+    })
   } catch (error) {
     console.error("Error generating sitemap:", error)
   }
 
-  // Next.js will automatically convert this to proper XML format
   return sitemapEntries
 }
 
-// Rest of your code remains exactly the same
+async function fetchTVShows(): Promise<TVShow[]> {
+  let allTVShows: TVShow[] = [];
+  let page = 1;
+
+  try {
+    while (page <= MAX_PAGES) {
+      const response = await fetchWithRetry(
+        `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=${page}&sort_by=popularity.desc&with_origin_country=CN&without_genres=16,10764,10767,99`
+      );
+      
+      const data = await response.json();
+      if (!data.results?.length) break;
+      
+      allTVShows.push(...data.results);
+      if (page >= Math.min(data.total_pages, MAX_PAGES)) break;
+      
+      page++;
+    }
+    return allTVShows;
+  } catch (error) {
+    console.error('Error fetching TV shows:', error);
+    return [];
+  }
+}
+
+async function fetchKoreanTVShows(): Promise<TVShow[]> {
+  let allKoreanTv: TVShow[] = [];
+  let page = 1;
+
+  try {
+    while (page <= MAX_PAGES) {
+      const response = await fetchWithRetry(
+        `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=${page}&sort_by=popularity.desc&with_origin_country=KR&without_genres=16,10764,10767,99`
+      );
+      
+      const data = await response.json();
+      if (!data.results?.length) break;
+      
+      allKoreanTv.push(...data.results);
+      if (page >= Math.min(data.total_pages, MAX_PAGES)) break;
+      
+      page++;
+    }
+    return allKoreanTv;
+  } catch (error) {
+    console.error('Error fetching Korean TV shows:', error);
+    return [];
+  }
+}
+
+async function fetchMovies(): Promise<TVShow[]> {
+  let allMovies: TVShow[] = [];
+  let page = 1;
+
+  try {
+    while (page <= MAX_PAGES) {
+      const response = await fetchWithRetry(
+        `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=${page}&sort_by=popularity.desc&with_origin_country=CN`
+      );
+      
+      const data = await response.json();
+      if (!data.results?.length) break;
+      
+      allMovies.push(...data.results);
+      if (page >= Math.min(data.total_pages, MAX_PAGES)) break;
+      
+      page++;
+    }
+    return allMovies;
+  } catch (error) {
+    console.error('Error fetching movies:', error);
+    return [];
+  }
+}
+
+async function fetchPersons(): Promise<PersonType[]> {
+  let allPersons: PersonType[] = [];
+  let page = 1;
+
+  try {
+    while (page <= MAX_PAGES) {
+      const response = await fetchWithRetry(
+        `https://api.themoviedb.org/3/trending/person/week?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&page=${page}`
+      );
+      
+      const data = await response.json();
+      if (!data.results?.length) break;
+      
+      allPersons.push(...data.results);
+      if (page >= Math.min(data.total_pages, MAX_PAGES)) break;
+      
+      page++;
+    }
+    return allPersons;
+  } catch (error) {
+    console.error('Error fetching persons:', error);
+    return [];
+  }
+}
+
+async function fetchPopularPersons(): Promise<PersonType[]> {
+  let allPersons: PersonType[] = [];
+  let page = 1;
+
+  try {
+    while (page <= MAX_PAGES) {
+      const response = await fetchWithRetry(
+        `https://api.themoviedb.org/3/person/popular?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US&page=${page}`
+      );
+      
+      const data = await response.json();
+      if (!data.results?.length) break;
+      
+      allPersons.push(...data.results);
+      if (page >= Math.min(data.total_pages, MAX_PAGES)) break;
+      
+      page++;
+    }
+    return allPersons;
+  } catch (error) {
+    console.error('Error fetching popular persons:', error);
+    return [];
+  }
+}
+
 async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
     const tvShows = await fetchTVShows()
@@ -39,39 +207,39 @@ async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRo
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 1.0,
-          changefreq: "daily",
+          changeFrequency: "daily" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/watch`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 1.0,
-          changefreq: "daily",
+          changeFrequency: "daily" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/photos`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.8,
-          changefreq: "weekly",
+          changeFrequency: "weekly" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/reviews`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.6,
-          changefreq: "daily",
+          changeFrequency: "daily" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/seasons`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.6,
-          changefreq: "weekly",
+          changeFrequency: "weekly" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/cast`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.7,
-          changefreq: "monthly",
+          changeFrequency: "monthly" as const,
         },
-      ]),
+      ])
     )
     await generateTVKeywordEntries(tvShows, baseUrl, sitemapEntries)
     await generateTvCastEntries(tvShows, baseUrl, sitemapEntries)
@@ -79,7 +247,6 @@ async function generateTVShowEntries(baseUrl: string, sitemapEntries: MetadataRo
     console.error("Error generating TV show entries:", error)
   }
 }
-
 
 async function generateKoreanTVShowEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
@@ -90,44 +257,44 @@ async function generateKoreanTVShowEntries(baseUrl: string, sitemapEntries: Meta
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 1.0,
-          changefreq: "daily",
+          changeFrequency: "daily" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/watch`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 1.0,
-          changefreq: "daily",
+          changeFrequency: "daily" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/photos`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.8,
-          changefreq: "weekly",
+          changeFrequency: "weekly" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/reviews`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.6,
-          changefreq: "daily",
+          changeFrequency: "daily" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/seasons`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.6,
-          changefreq: "weekly",
+          changeFrequency: "weekly" as const,
         },
         {
           url: `${baseUrl}/tv/${tvShow.id}-${spaceToHyphen(tvShow.name)}/cast`,
           lastModified: safelyFormatDate(tvShow.last_air_date || tvShow.first_air_date),
           priority: 0.7,
-          changefreq: "monthly",
+          changeFrequency: "monthly" as const,
         },
-      ]),
+      ])
     )
     await generateTVKeywordEntries(tvShows, baseUrl, sitemapEntries)
     await generateTvCastEntries(tvShows, baseUrl, sitemapEntries)
   } catch (error) {
-    console.error("Error generating TV show entries:", error)
+    console.error("Error generating Korean TV show entries:", error)
   }
 }
 
@@ -140,26 +307,27 @@ async function generateMovieEntries(baseUrl: string, sitemapEntries: MetadataRou
           url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}`,
           lastModified: safelyFormatDate(movie.release_date),
           priority: 1.0,
-          changefreq: "daily",
-        }, {
+          changeFrequency: "daily" as const,
+        },
+        {
           url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/watch`,
           lastModified: safelyFormatDate(movie.release_date),
           priority: 1.0,
-          changefreq: "daily",
+          changeFrequency: "daily" as const,
         },
         {
           url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/cast`,
           lastModified: safelyFormatDate(movie.release_date),
           priority: 0.6,
-          changefreq: "monthly",
+          changeFrequency: "monthly" as const,
         },
         {
           url: `${baseUrl}/movie/${movie.id}-${spaceToHyphen(movie.title)}/photos`,
           lastModified: safelyFormatDate(movie.release_date),
           priority: 0.8,
-          changefreq: "weekly",
+          changeFrequency: "weekly" as const,
         },
-      ]),
+      ])
     )
     await generateMovieKeywordEntries(movies, baseUrl, sitemapEntries)
     await generateMovieCastEntries(movies, baseUrl, sitemapEntries)
@@ -176,8 +344,8 @@ async function generatePersonEntries(baseUrl: string, sitemapEntries: MetadataRo
         url: `${baseUrl}/person/${person.id}-${spaceToHyphen(person.name)}`,
         lastModified: new Date().toISOString(),
         priority: 1.0,
-        changefreq: "weekly",
-      })),
+        changeFrequency: "weekly" as const,
+      }))
     )
   } catch (error) {
     console.error("Error generating person entries:", error)
@@ -192,272 +360,234 @@ async function generatePopularPersonEntries(baseUrl: string, sitemapEntries: Met
         url: `${baseUrl}/person/${person.id}-${spaceToHyphen(person.name)}`,
         lastModified: new Date().toISOString(),
         priority: 1.0,
-        changefreq: "weekly",
-      })),
+        changeFrequency: "weekly" as const,
+      }))
     )
   } catch (error) {
-    console.error("Error generating person entries:", error)
+    console.error("Error generating popular person entries:", error)
   }
 }
 
 async function generateTvCastEntries(tvShows: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
-  const castPromises = tvShows.map(async (show) => {
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/tv/${show.id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
-      )
-      if (!response.ok) throw new Error(`Failed to fetch keywords for TV show with id ${show.id}`)
-      const data = await response.json()
-      return data.cast
-    } catch (error) {
-      console.error(`Error fetching keywords for TV show ${show.id}:`, error)
-      return []
-    }
-  })
+  try {
+    const castResults = await processBatch(
+      tvShows,
+      async (show) => {
+        try {
+          const response = await fetchWithRetry(
+            `https://api.themoviedb.org/3/tv/${show.id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+          );
+          const data = await response.json();
+          return data.cast || [];
+        } catch (error) {
+          console.error(`Error fetching cast for show ${show.id}:`, error);
+          return [];
+        }
+      }
+    );
 
-  const casts = (await Promise.all(castPromises)).flat()
-  sitemapEntries.push(
-    ...casts.map((cast: any) => ({
-      url: `${baseUrl}/person/${cast.id}-${spaceToHyphen(cast.name)}`,
-      lastModified: new Date().toISOString(),
-      priority: 1.0,
-      changefreq: "monthly",
-    })),
-  )
+    const casts = castResults.flat();
+    sitemapEntries.push(
+      ...casts.map((cast: any) => ({
+        url: `${baseUrl}/person/${cast.id}-${spaceToHyphen(cast.name)}`,
+        lastModified: new Date().toISOString(),
+        priority: 1.0,
+        changeFrequency: "monthly" as const,
+      }))
+    );
+  } catch (error) {
+    console.error('Error generating TV cast entries:', error);
+  }
 }
 
-async function generateMovieCastEntries(tvShows: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
-  const castPromises = tvShows.map(async (show) => {
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${show.id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
-      )
-      if (!response.ok) throw new Error(`Failed to fetch keywords for movie with id ${show.id}`)
-      const data = await response.json()
-      return data.cast
-    } catch (error) {
-      console.error(`Error fetching keywords for movie ${show.id}:`, error)
-      return []
-    }
-  })
+async function generateMovieCastEntries(movies: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  try {
+    const castResults = await processBatch(
+      movies,
+      async (movie) => {
+        try {
+          const response = await fetchWithRetry(
+            `https://api.themoviedb.org/3/movie/${movie.id}/credits?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+          );
+          const data = await response.json();
+          return data.cast || [];
+        } catch (error) {
+          console.error(`Error fetching cast for movie ${movie.id}:`, error);
+          return [];
+        }
+      }
+    );
 
-  const casts = (await Promise.all(castPromises)).flat()
-  sitemapEntries.push(
-    ...casts.map((cast: any) => ({
-      url: `${baseUrl}/person/${cast.id}-${spaceToHyphen(cast.name)}`,
-      lastModified: new Date().toISOString(),
-      priority: 1.0,
-      changefreq: "monthly",
-    })),
-  )
+    const casts = castResults.flat();
+    sitemapEntries.push(
+      ...casts.map((cast: any) => ({
+        url: `${baseUrl}/person/${cast.id}-${spaceToHyphen(cast.name)}`,
+        lastModified: new Date().toISOString(),
+        priority: 1.0,
+        changeFrequency: "monthly" as const,
+      }))
+    );
+  } catch (error) {
+    console.error('Error generating movie cast entries:', error);
+  }
 }
 
 async function generateNetworkEntry(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
-    const network = await fetchNetwork()
+    const response = await fetchWithRetry(
+      `https://api.themoviedb.org/3/network/2007?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+    );
+    const network = await response.json();
+    
     if (network) {
       sitemapEntries.push({
         url: `${baseUrl}/network/${network.id}`,
         lastModified: new Date().toISOString(),
         priority: 0.5,
-      })
+        changeFrequency: "monthly" as const,
+      });
     }
   } catch (error) {
-    console.error("Error generating network entry:", error)
+    console.error("Error generating network entry:", error);
   }
 }
 
 async function generateTVKeywordEntries(tvShows: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
-  const keywordPromises = tvShows.map(async (show) => {
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/tv/${show.id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
-      )
-      if (!response.ok) throw new Error(`Failed to fetch keywords for TV show with id ${show.id}`)
-      const data = await response.json()
-      return data.results
-    } catch (error) {
-      console.error(`Error fetching keywords for TV show ${show.id}:`, error)
-      return []
-    }
-  })
+  try {
+    const keywordResults = await processBatch(
+      tvShows,
+      async (show) => {
+        try {
+          const response = await fetchWithRetry(
+            `https://api.themoviedb.org/3/tv/${show.id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+          );
+          const data = await response.json();
+          return data.results || [];
+        } catch (error) {
+          console.error(`Error fetching keywords for show ${show.id}:`, error);
+          return [];
+        }
+      }
+    );
 
-  const keywords = (await Promise.all(keywordPromises)).flat()
-  sitemapEntries.push(
-    ...keywords.map((keyword: any) => ({
-      url: `${baseUrl}/keyword/${keyword.id}/tv`,
-      lastModified: new Date().toISOString(),
-      priority: 0.5,
-      changefreq: "monthly",
-    })),
-  )
+    const keywords = keywordResults.flat();
+    sitemapEntries.push(
+      ...keywords.map((keyword: any) => ({
+        url: `${baseUrl}/keyword/${keyword.id}/tv`,
+        lastModified: new Date().toISOString(),
+        priority: 0.5,
+        changeFrequency: "monthly" as const,
+      }))
+    );
+  } catch (error) {
+    console.error('Error generating TV keyword entries:', error);
+  }
+}
+
+async function generateMovieKeywordEntries(movies: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
+  try {
+    const keywordResults = await processBatch(
+      movies,
+      async (movie) => {
+        try {
+          const response = await fetchWithRetry(
+            `https://api.themoviedb.org/3/movie/${movie.id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`
+          );
+          const data = await response.json();
+          return data.keywords || [];
+        } catch (error) {
+          console.error(`Error fetching keywords for movie ${movie.id}:`, error);
+          return [];
+        }
+      }
+    );
+
+    const keywords = keywordResults.flat();
+    sitemapEntries.push(
+      ...keywords.map((keyword: any) => ({
+        url: `${baseUrl}/keyword/${keyword.id}/movie`,
+        lastModified: new Date().toISOString(),
+        priority: 0.5,
+        changeFrequency: "monthly" as const,
+      }))
+    );
+  } catch (error) {
+    console.error('Error generating movie keyword entries:', error);
+  }
 }
 
 async function generateTvGenresEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
-    const genres = await fetchTvGenres(); // Fetch genres
-    if (!genres || genres.length === 0) return; // Handle empty response
-    // Correctly map over genres and push each genre into sitemapEntries
-    genres.forEach((data: any) => {
-      sitemapEntries.push({
-        url: `${baseUrl}/genre/${data.id}-${spaceToHyphen(data.name || "")}/tv`,
+    const response = await fetchWithRetry(
+      `https://api.themoviedb.org/3/genre/tv/list?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+    );
+    const data = await response.json();
+    const genres = data.genres || [];
+
+    sitemapEntries.push(
+      ...genres.map((genre: any) => ({
+        url: `${baseUrl}/genre/${genre.id}-${spaceToHyphen(genre.name)}/tv`,
         lastModified: new Date().toISOString(),
         priority: 0.5,
-      });
-    });
+        changeFrequency: "monthly" as const,
+      }))
+    );
   } catch (error) {
-    console.error(`Error fetching tv genres:`, error);
-    return [];
+    console.error('Error generating TV genre entries:', error);
   }
-}
-
-
-async function generateMovieKeywordEntries(movies: TVShow[], baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
-  const keywordPromises = movies.map(async (movie) => {
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movie.id}/keywords?api_key=${process.env.NEXT_PUBLIC_API_KEY}`,
-      )
-      if (!response.ok) throw new Error(`Failed to fetch keywords for movie with id ${movie.id}`)
-      const data = await response.json()
-      return data.keywords
-    } catch (error) {
-      console.error(`Error fetching keywords for movie ${movie.id}:`, error)
-      return []
-    }
-  })
-
-  const keywords = (await Promise.all(keywordPromises)).flat()
-  sitemapEntries.push(
-    ...keywords.map((keyword: any) => ({
-      url: `${baseUrl}/keyword/${keyword.id}/movie`,
-      lastModified: new Date().toISOString(),
-      priority: 0.5,
-      changefreq: "monthly",
-    })),
-  )
 }
 
 async function generateMovieGenresEntries(baseUrl: string, sitemapEntries: MetadataRoute.Sitemap) {
   try {
-    const genres = await fetchMovieGenres(); // Fetch genres
-    if (!genres || genres.length === 0) return; // Handle empty response
-    // Correctly map over genres and push each genre into sitemapEntries
-    genres.forEach((data: any) => {
-      sitemapEntries.push({
-        url: `${baseUrl}/genre/${data.id}-${spaceToHyphen(data.name)}/movie`,
+    const response = await fetchWithRetry(
+      `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`
+    );
+    const data = await response.json();
+    const genres = data.genres || [];
+
+    sitemapEntries.push(
+      ...genres.map((genre: any) => ({
+        url: `${baseUrl}/genre/${genre.id}-${spaceToHyphen(genre.name)}/movie`,
         lastModified: new Date().toISOString(),
         priority: 0.5,
-      });
-    });
+        changeFrequency: "monthly" as const,
+      }))
+    );
   } catch (error) {
-    console.error(`Error fetching movie genres:`, error);
-    return [];
+    console.error('Error generating movie genre entries:', error);
   }
-}
-
-async function fetchTVShows(): Promise<TVShow[]> {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN&without_genres=16,10764,10767,99`,
-  )
-  if (!response.ok) throw new Error("Failed to fetch TV shows")
-  const data = await response.json()
-  return data.results
-}
-
-async function fetchKoreanTVShows(): Promise<TVShow[]> {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=KR&without_genres=16,10764,10767,99`,
-  )
-  if (!response.ok) throw new Error("Failed to fetch TV shows")
-  const data = await response.json()
-  return data.results
-}
-
-async function fetchMovies(): Promise<TVShow[]> {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.NEXT_PUBLIC_API_KEY}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc&with_origin_country=CN`,
-  )
-  if (!response.ok) throw new Error("Failed to fetch movies")
-  const data = await response.json()
-  return data.results
-}
-
-async function fetchPersons(): Promise<PersonType[]> {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/trending/person/day?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
-  )
-  if (!response.ok) throw new Error("Failed to fetch persons")
-  const data = await response.json()
-  return data.results
-}
-
-async function fetchPopularPersons(): Promise<PersonType[]> {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/person/popular?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
-  )
-  if (!response.ok) throw new Error("Failed to fetch persons")
-  const data = await response.json()
-  return data.results
-}
-
-async function fetchNetwork(): Promise<any> {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/network/2007?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
-  )
-  if (!response.ok) throw new Error("Failed to fetch network")
-  return response.json()
-}
-
-async function fetchTvGenres(): Promise<any> {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/genre/tv/list?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
-  )
-  if (!response.ok) throw new Error("Failed to fetch movie genre")
-  const data = await response.json()
-  return data.genres
-}
-
-async function fetchMovieGenres(): Promise<any> {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.NEXT_PUBLIC_API_KEY}&language=en-US`,
-  )
-  if (!response.ok) throw new Error("Failed to fetch movie genre")
-  const data = await response.json()
-  return data.genres
 }
 
 function generateStaticPageEntries(baseUrl: string): MetadataRoute.Sitemap {
   const staticPages = [
-    { url: "/", priority: 1.0, changefreq: "daily" },
-    { url: "/watch/tv", priority: 1.0, changefreq: "daily" },
-    { url: "/watch/movie", priority: 1.0, changefreq: "daily" },
-    { url: "/watch/anime", priority: 1.0, changefreq: "daily" },
-    { url: "/drama/newest", priority: 0.9, changefreq: "daily" },
-    { url: "/drama/top", priority: 0.9, changefreq: "daily" },
-    { url: "/drama/upcoming", priority: 0.9, changefreq: "daily" },
-    { url: "/drama/top_chinese_dramas", priority: 0.9, changefreq: "daily" },
-    { url: "/drama/top_korean_dramas", priority: 0.9, changefreq: "daily" },
-    { url: "/drama/top_japanese_dramas", priority: 0.9, changefreq: "daily" },
-    { url: "/movie/newest", priority: 0.9, changefreq: "daily" },
-    { url: "/movie/top", priority: 0.9, changefreq: "daily" },
-    { url: "/movie/upcoming", priority: 0.9, changefreq: "daily" },
-    { url: "/shows/variety", priority: 0.9, changefreq: "daily" },
-    { url: "/people/top", priority: 0.9, changefreq: "daily" },
-    { url: "/coin", priority: 0.7, changefreq: "weekly" },
-    { url: "/signin", priority: 0.6, changefreq: "monthly" },
-    { url: "/signup", priority: 0.6, changefreq: "monthly" },
-    { url: "/faq", priority: 0.5, changefreq: "monthly" },
-    { url: "/about", priority: 0.5, changefreq: "monthly" },
-    { url: "/contact", priority: 0.5, changefreq: "monthly" },
-    { url: "/terms", priority: 0.5, changefreq: "monthly" },
+    { url: "/", priority: 1.0, changeFrequency: "daily" as const },
+    { url: "/watch/tv", priority: 1.0, changeFrequency: "daily" as const },
+    { url: "/watch/movie", priority: 1.0, changeFrequency: "daily" as const },
+    { url: "/watch/anime", priority: 1.0, changeFrequency: "daily" as const },
+    { url: "/drama/newest", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/drama/top", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/drama/upcoming", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/drama/top_chinese_dramas", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/drama/top_korean_dramas", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/drama/top_japanese_dramas", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/movie/newest", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/movie/top", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/movie/upcoming", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/shows/variety", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/people/top", priority: 0.9, changeFrequency: "daily" as const },
+    { url: "/coin", priority: 0.7, changeFrequency: "weekly" as const },
+    { url: "/signin", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/signup", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/faq", priority: 0.5, changeFrequency: "monthly" as const },
+    { url: "/about", priority: 0.5, changeFrequency: "monthly" as const },
+    { url: "/contact", priority: 0.5, changeFrequency: "monthly" as const },
+    { url: "/terms", priority: 0.5, changeFrequency: "monthly" as const },
   ]
 
-  return staticPages.map(({ url, priority, changefreq }) => ({
+  return staticPages.map(({ url, priority, changeFrequency }) => ({
     url: `${baseUrl}${url}`,
     lastModified: new Date().toISOString(),
     priority,
-    changefreq,
+    changeFrequency,
   }))
 }
-

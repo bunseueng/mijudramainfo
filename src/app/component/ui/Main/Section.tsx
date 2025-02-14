@@ -4,7 +4,6 @@ import { DramaDB } from "@/helper/type";
 export type HomeDramaT = {
   heading: string;
   getDrama: DramaDB[];
-  existingRatings: any;
   categoryData: any;
   isDataLoading: boolean;
   path: string;

@@ -8,11 +8,12 @@ import HomeCardSkeleton from "../Loading/HomeLoading";
 import HomeCardHover from "./HomeCardHover";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
 import HomeCardItem from "./HomeCardItem";
+import { useQuery } from "@tanstack/react-query";
+import { fetchRatings } from "@/app/actions/fetchMovieApi";
 
 const HomeCard = ({
   heading,
   getDrama,
-  existingRatings,
   categoryData,
   isDataLoading,
   path,
@@ -49,21 +50,62 @@ const HomeCard = ({
     [emblaApi]
   );
 
+  const ids = categoryData?.results?.map((data: { id: string }) => data.id);
+  const { data: ratings } = useQuery({
+    queryKey: ["home_card_rating", ids],
+    queryFn: () => fetchRatings(ids),
+    enabled: Array.isArray(ids) && ids.length > 0,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    gcTime: 1000 * 60 * 30, // Cache for 30 minutes
+  });
+
+  const getSpecificRating = (itemId: string) => {
+    if (!ratings || !Array.isArray(ratings)) return 0;
+
+    // Find rating where tvId matches the itemId
+    const matchingRating = ratings.find(
+      (rating) => rating.tvId === itemId.toString()
+    );
+
+    return matchingRating?.rating || 0;
+  };
+
+  const getRating = (result: any) => {
+    if (!result?.id) return "0.0";
+
+    // Convert ID to string for consistent comparison
+    const itemId = result.id.toString();
+    const userRating = getSpecificRating(itemId);
+    const tmdbRating = result.vote_average || 0;
+    const voteCount = result.vote_count || 0;
+
+    if (userRating > 0 && tmdbRating > 0) {
+      // Calculate weighted average giving more weight to user rating
+      const userWeight = 10; // Give user rating more weight
+      const weightedAverage =
+        (tmdbRating * voteCount + userRating * userWeight) /
+        (voteCount + userWeight);
+      return weightedAverage.toFixed(1);
+    }
+
+    // If only user rating exists
+    if (userRating > 0) {
+      return userRating.toFixed(1);
+    }
+
+    // If only TMDB rating exists
+    if (tmdbRating > 0) {
+      return tmdbRating.toFixed(1);
+    }
+
+    return "0.0";
+  };
+
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setPrevBtnEnabled(emblaApi.canScrollPrev());
     setNextBtnEnabled(emblaApi.canScrollNext());
   }, [emblaApi]);
-
-  const getRating = (result: any) => {
-    const existingRating =
-      Array.isArray(existingRatings) &&
-      existingRatings?.find((item: any) => item.id === result.id)?.rating;
-    if (existingRating) {
-      return existingRating.toFixed(1);
-    }
-    return result.vote_average ? result.vote_average.toFixed(1) : "NR";
-  };
 
   useEffect(() => {
     if (!emblaApi) return;

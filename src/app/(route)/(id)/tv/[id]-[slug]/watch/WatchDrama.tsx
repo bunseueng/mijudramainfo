@@ -31,6 +31,8 @@ const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
   const { data: rating_db } = useQuery({
     queryKey: ["ratings", tv_id],
     queryFn: () => fetchRatings([tv_id.toString()]), // ✅ Pass id as a string array
+    staleTime: 3600000,
+    gcTime: 3600000,
   });
   const findRatingDB = rating_db?.filter(
     (p: any) => p.tvId || p.movieId === tv_id

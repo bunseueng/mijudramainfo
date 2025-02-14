@@ -32,7 +32,7 @@ export async function generateMetadata(props: {
   return {
     title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
-    )})'s Videos`,
+    )}) | Videos`,
     description: tvDetails?.overview,
     keywords: tvDetails?.genres?.map((data: any) => data.name),
     alternates: {
@@ -41,7 +41,9 @@ export async function generateMetadata(props: {
     openGraph: {
       type: "website",
       url: url,
-      title: tvDetails?.name,
+      title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
+        tvDetails?.first_air_date || tvDetails?.release_date
+      )}) | Videos`,
       description: tvDetails?.overview,
       images: [
         {

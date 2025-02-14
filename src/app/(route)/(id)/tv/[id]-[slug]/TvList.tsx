@@ -26,11 +26,9 @@ type DropdownItem =
 
 type TvListProps = {
   tv_id: string;
-  tv: any; // Replace 'any' with the actual type of your TV show object
-  drama_poster: string;
 };
 
-const TvList = ({ tv_id, tv, drama_poster }: TvListProps) => {
+const TvList = ({ tv_id }: TvListProps) => {
   const [activeItem, setActiveItem] = useState<string>("Overview");
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
@@ -72,7 +70,8 @@ const TvList = ({ tv_id, tv, drama_poster }: TvListProps) => {
       label: "Media",
       icon: Image,
       dropdownItems: [
-        { label: "Photos", href: `/tv/${tv_id}/photos` },
+        { label: "Backdrop", href: `/tv/${tv_id}/photos` },
+        { label: "Poster", href: `/tv/${tv_id}/photos/poster` },
         { label: "Videos", href: `/tv/${tv_id}/videos` },
       ],
     },

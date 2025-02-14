@@ -19,9 +19,11 @@ export async function generateMetadata(props: {
   const url = `${process.env.BASE_URL}/person/${
     data.person?.results[0]?.id
   }-${spaceToHyphen(data.person?.results[0]?.name)}/edit/cast`;
-
+  const person_detail = data?.person?.results?.find(
+    (p: any) => p.id === Number(person_id) // Convert person_id to number
+  );
   return {
-    title: `${data.person?.results[0]?.original_name}'s Edit`,
+    title: `${person_detail?.name} (${person_detail?.original_name}) | Edit Cast`,
     description: data.personDetails?.biography,
     keywords: data.personDetails?.also_known_as,
     alternates: {
@@ -30,7 +32,7 @@ export async function generateMetadata(props: {
     openGraph: {
       type: "website",
       url: url,
-      title: data.person?.results[0]?.name,
+      title: `${person_detail?.name} (${person_detail?.original_name}) | Edit Cast`,
       description: data.personDetails?.biography,
       images: [
         {

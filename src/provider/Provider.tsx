@@ -7,7 +7,9 @@ const Provider = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <SessionProvider refetchOnWindowFocus={false}>{children}</SessionProvider>
+  );
 };
 
 export default Provider;

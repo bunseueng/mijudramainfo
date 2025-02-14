@@ -4,7 +4,7 @@ import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import HomeCardSkeleton from "../Loading/HomeLoading";
 import { useDatabase } from "@/hooks/useDatabase";
-import { DramaDB, IRating } from "@/helper/type";
+import { DramaDB } from "@/helper/type";
 
 const HomeDrama = lazy(() => import("./HomeDrama"));
 
@@ -23,7 +23,7 @@ const CATEGORIES = [
 
 function SectionContent() {
   const { data } = useDatabase();
-  const { getDrama, personDB, rating } = { ...data };
+  const { getDrama, personDB } = { ...data };
   const [visibleCategories, setVisibleCategories] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -74,7 +74,6 @@ function SectionContent() {
         <Suspense fallback={<HomeCardSkeleton />}>
           <HomeDrama
             getDrama={getDrama as DramaDB[] | []}
-            existingRatings={rating as unknown as IRating[] | []}
             personDB={personDB}
             visibleCategories={hasScrolled ? visibleCategories : 1}
             hasMoreCategories={hasMoreCategories}

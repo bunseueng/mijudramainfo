@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import {
+  fetchRatings,
   FilterParams,
   getCountries,
   getGenres,
@@ -43,19 +44,32 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
   const { data: genres } = useQuery({
     queryKey: [`${type}_genres`],
     queryFn: () => getGenres(type),
+    staleTime: Infinity, // Genres don't change often
+    gcTime: 1000 * 60 * 60, // Cache for 1 hour
   });
 
   const { data: countries } = useQuery({
     queryKey: ["countries"],
     queryFn: getCountries,
+    staleTime: Infinity, // Countries don't change often
+    gcTime: 1000 * 60 * 60, // Cache for 1 hour
   });
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: [`"popular_${type}_watch"`, filters, currentPage],
+    queryKey: [`popular_${type}_watch`, filters, currentPage],
     queryFn: () => getPopularByParams(type, { ...filters, page: currentPage }),
   });
 
-  // Scroll to top when page changes
+  const ids = data?.results?.map((data: { id: string }) => data.id) || [];
+
+  const { data: rating_db } = useQuery({
+    queryKey: ["ratings", ids],
+    queryFn: () => fetchRatings(ids),
+    enabled: ids.length > 0, // Only fetch when we have IDs
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    gcTime: 1000 * 60 * 30, // Cache for 30 minutes
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
@@ -115,7 +129,6 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
 
   return (
     <div className="max-w-[1788px] mx-auto px-4 py-8">
-      {" "}
       <div className="hidden md:block w-full h-[200px] bg-gray-200 dark:bg-black mb-10 order-first">
         <AdArticle dataAdFormat="auto" dataAdSlot="3527489220" />
       </div>
@@ -238,10 +251,14 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
       )}
       <div className="grid grid-cols-1 min-[500px]:grid-cols-2 min-[670px]:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {data.results.map((show: any) => (
-          <WatchImage key={show.id} {...show} type={type} />
+          <WatchImage
+            key={show.id}
+            {...show}
+            type={type}
+            rating_db={rating_db}
+          />
         ))}
       </div>
-      {/* Pagination */}
       <div className="mt-8 flex justify-center items-center gap-2">
         <button
           onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
@@ -286,7 +303,7 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
         >
           <ChevronRight className="w-5 h-5" />
         </button>
-      </div>{" "}
+      </div>
       <div className="w-full h-[200px] bg-gray-200 dark:bg-black my-10 order-first">
         <AdArticle dataAdFormat="auto" dataAdSlot="3527489220" />
       </div>

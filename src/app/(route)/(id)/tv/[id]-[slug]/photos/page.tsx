@@ -27,11 +27,9 @@ export async function generateMetadata(props: {
       TH: "Thai",
     };
     const languageName = countryToLanguageMap[original_country] || "Unknown";
-    const title = `Photos of ${
-      tvDetails?.name
-    } (${languageName} Drama ${getYearFromDate(
+    const title = `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
-    )})`;
+    )}) | Photos`;
     const url = `${process.env.BASE_URL}/tv/${tvDetails?.id}-${spaceToHyphen(
       tvDetails?.name
     )}/photos`;

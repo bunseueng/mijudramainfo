@@ -32,7 +32,7 @@ export async function generateMetadata(props: {
       tvDetails?.name
     } (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
-    )})`;
+    )}) | Watch Free With English Subtitles`;
     const url = `${process.env.BASE_URL}/tv/${tvDetails?.id}-${spaceToHyphen(
       tvDetails?.name
     )}/watch`;
@@ -46,7 +46,7 @@ export async function generateMetadata(props: {
       openGraph: {
         type: "website",
         url: url,
-        title: tvDetails?.name,
+        title: title,
         description: tvDetails?.overview,
         siteName: "MijuDramaInfo",
         images: [

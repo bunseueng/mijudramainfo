@@ -301,7 +301,7 @@ const MovieMain = ({
   return (
     <section className="relative w-full z-50">
       <div className="w-full h-full">
-        <MovieList movie_id={movie_id} movie={movie} />
+        <MovieList movie_id={movie_id} />
         <div
           className="relative overflow-hidden bg-cover bg-no-repeat h-auto"
           style={{

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getYearFromDate } from "@/app/actions/getYearFromDate";
 import dynamic from "next/dynamic";
 import Images from "next/image";
-import type { MovieDB } from "@/helper/type";
+import type { DramaDB, MovieDB } from "@/helper/type";
 import ReusedImage from "@/components/ui/allreusedimage";
 import { SearchPagination } from "@/app/component/ui/Pagination/SearchPagination";
 import {
@@ -25,6 +25,7 @@ import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
 import { useColorFromImage } from "@/hooks/useColorFromImage";
+import { useDramaData } from "@/hooks/useDramaData";
 import { useMovieData } from "@/hooks/useMovieData";
 
 const SearchLoading = dynamic(
@@ -32,12 +33,12 @@ const SearchLoading = dynamic(
   { ssr: false }
 );
 
-type MovieDatabase = {
+type DramaDatabase = {
   movie_id: string;
-  getMovie: MovieDB[] | [];
+  getAllMovie: MovieDB[] | [];
 };
 
-const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
+const MoviePoster = ({ getAllMovie, movie_id }: DramaDatabase) => {
   const searchParams = useSearchParams();
   const route = useRouter();
   const { movie, isLoading } = useMovieData(movie_id);
@@ -52,8 +53,8 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const currentBackdrops = movie?.images?.backdrops?.map((item: any) => item);
-  const currentPosters = getMovie
+  const currentBackdrops = movie?.images?.posters?.map((item: any) => item);
+  const currentPosters = getAllMovie
     ?.filter((data: any) => data.movie_id === movie_id)
     ?.map((item: any) => item?.photo);
   const combinedItems = currentPosters
@@ -64,10 +65,9 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
   const end = start + Number(per_page);
   const totalItems = combinedItems?.length;
   const currentItems = combinedItems?.slice(start, end) || combinedItems;
-  const coverFromDB = getMovie?.find((g: any) =>
+  const coverFromDB = getAllMovie?.find((g: any) =>
     g?.movie_id?.includes(movie?.id)
   );
-
   const extractColor = useCallback(async () => {
     if (imgRef.current) {
       const imageUrl =
@@ -113,8 +113,8 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
       const img = new Image();
       img.onload = () => {
         const aspectRatio = img.width / img.height;
-        // Allow a small tolerance for aspect ratio (e.g., 0.1)
-        resolve(Math.abs(aspectRatio - 16 / 9) < 0.1);
+        // Allow a small tolerance for aspect ratio (e.g., 0.05)
+        resolve(Math.abs(aspectRatio - 2 / 3) < 0.05);
       };
       img.src = URL.createObjectURL(file);
     });
@@ -125,11 +125,11 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      const isBackdropSize = await checkImageDimensions(file);
+      const isPosterSize = await checkImageDimensions(file);
 
-      if (!isBackdropSize) {
+      if (!isPosterSize) {
         toast.error(
-          "Please upload an image with a backdrop aspect ratio (approximately 16:9)"
+          "Please upload an image with a poster aspect ratio (approximately 2:3)"
         );
         // Clear the input
         event.target.value = "";
@@ -207,7 +207,6 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
   if (isLoading) {
     return <SearchLoading />;
   }
-
   return (
     <div>
       <div
@@ -224,7 +223,7 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
                   movie?.poster_path ? "w154" : "w300"
                 }/${movie?.poster_path || movie?.backdrop_path}`
               }
-              alt={`${movie?.name || movie?.title}'s Poster` || "Movie Poster"}
+              alt={`${movie?.name || movie?.title}'s Poster` || "Drama Poster"}
               width={80}
               height={90}
               quality={100}
@@ -234,11 +233,14 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
             />
             <div className="flex flex-col pl-5 py-2">
               <h1 className="text-white text-xl font-bold">
-                {movie?.title} ({getYearFromDate(movie?.release_date)})
+                {movie?.title} (
+                {getYearFromDate(movie?.first_air_date || movie?.release_date)})
               </h1>
               <Link
                 prefetch={false}
-                href={`/movie/${movie_id}-${spaceToHyphen(movie?.title)}`}
+                href={`/movie/${movie_id}-${spaceToHyphen(
+                  movie?.name || movie?.title
+                )}`}
                 className="flex items-center text-sm my-1 opacity-75 hover:opacity-90"
               >
                 <FaArrowLeft className="text-white" size={20} />
@@ -252,7 +254,7 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
         <div className="border-[1px] rounded-lg bg-white dark:bg-[#242424] dark:border-[#272727] px-2">
           <div className="flex justify-between items-center p-5 border-b-[1px] border-b-slate-200 dark:border-[#2f2f2f]">
             <h1 className="text-2xl font-bold dark:text-[#2196f3]">
-              {movie?.title}
+              {movie?.name}
             </h1>
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
@@ -278,8 +280,9 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
                         className="w-full"
                       />
                       <p className="text-sm text-gray-500 mt-1">
-                        Please upload an image with a backdrop aspect ratio
-                        (approximately 16:9)
+                        {selectedFile
+                          ? `Selected: ${selectedFile.name}`
+                          : "Please upload an image with a poster aspect ratio (approximately 2:3)"}
                       </p>
                     </div>
                   </div>
@@ -290,9 +293,9 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
                         <Images
                           src={previewUrl || "/placeholder.svg"}
                           alt="Preview"
-                          width={320}
-                          height={180}
-                          className="rounded-md object-cover w-full"
+                          width={200}
+                          height={300}
+                          className="rounded-md object-cover"
                         />
                       </div>
                     </div>
@@ -333,21 +336,24 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
               </DialogContent>
             </Dialog>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4">
             {currentItems?.map((img: any, idx: number) => {
               return (
                 <div
                   key={idx}
-                  className="aspect-video overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                  className="aspect-[2/3] overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                 >
                   <ReusedImage
                     src={
                       img?.url ||
                       `https://image.tmdb.org/t/p/original/${img?.file_path}`
                     }
-                    alt={`${movie?.title}'s Backdrop` || "Movie Backdrop"}
-                    width={1280}
-                    height={720}
+                    alt={
+                      `${movie?.name || movie?.title}'s Poster` ||
+                      "Drama Poster"
+                    }
+                    width={300}
+                    height={450}
                     quality={100}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-105 cursor-pointer"
@@ -369,4 +375,4 @@ const MoviePhotoAlbum = ({ getMovie, movie_id }: MovieDatabase) => {
   );
 };
 
-export default MoviePhotoAlbum;
+export default MoviePoster;

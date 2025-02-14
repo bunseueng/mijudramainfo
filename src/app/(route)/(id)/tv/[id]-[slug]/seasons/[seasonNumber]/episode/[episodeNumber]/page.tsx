@@ -45,13 +45,15 @@ export async function generateMetadata(props: {
   return {
     title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
       tvDetails?.first_air_date || tvDetails?.release_date
-    )})'`,
+    )}) | Full Episode`,
     description: tvDetails?.overview,
     keywords: tvDetails?.genres?.map((data: any) => data.name),
     openGraph: {
       type: "website",
       url: `${process.env.BASE_URL}/tv/${tvDetails?.id}`,
-      title: tvDetails?.name,
+      title: `${tvDetails?.name} (${languageName} Drama ${getYearFromDate(
+        tvDetails?.first_air_date || tvDetails?.release_date
+      )}) | Full Episode`,
       description: tvDetails?.overview,
       images: [
         {

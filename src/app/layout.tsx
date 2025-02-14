@@ -44,9 +44,13 @@ export const metadata: Metadata = {
     "asian",
     "chinese Drama",
     "c-drama",
+    "c drama",
     "actress",
     "information",
     "watch",
+    "wetv",
+    "youku",
+    "iqiyi",
   ],
   authors: [{ name: "Eng Bunseu", url: `${process.env.BASE_URL}` }],
   creator: "Eng Bunseu",
@@ -88,7 +92,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Optimize provider component to reduce nesting
 function Providers({ children }: { children: React.ReactNode }) {
   return (
     <PHProvider>
