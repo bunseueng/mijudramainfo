@@ -5,24 +5,31 @@ import prisma from "@/lib/db";
 import moment from "moment";
 import { getCurrentUser } from "./getCurrentUser";
 
-export const getProfileData = async (name: string) => {
+export const getProfileData = async (name?: string) => {
   try {
-    const user = await prisma?.user?.findUnique({ where: { name: name } });
+    // Return early if no name is provided
+    if (!name) {
+      return null;
+    }
+
+    const user = await prisma?.user?.findUnique({ where: { name } });
+    
+    // Return early if no user is found
+    if (!user) {
+      return null;
+    }
+
     const users = await prisma?.user?.findMany({});
     const currentUser = await getCurrentUser();
-    // Check if user?.createdAt is valid
+    
     const createdAt = user?.createdAt;
-    let formattedDate;
+    let formattedDate = "";
+    
     if (createdAt) {
       const date = new Date(createdAt);
-      // Ensure the date is valid
       if (!isNaN(date.getTime())) {
-        formattedDate = date.toISOString().split("T")[0]; // Format the date as YYYY-MM-DD
-      } else {
-        formattedDate = ""; // or some default value
+        formattedDate = date.toISOString().split("T")[0];
       }
-    } else {
-      formattedDate = ""; // Handle the case when createdAt is undefined
     }
 
     const lists = await prisma.dramaList.findMany({
@@ -30,26 +37,28 @@ export const getProfileData = async (name: string) => {
         userId: user?.id,
       },
     });
+    
     const formattedLists = lists.map((list) => ({
       ...list,
       tvId: list.tvId.flat(),
       movieId: list.movieId.flat(),
     }));
+    
     const watchlist = await prisma?.watchlist?.findMany({
       where: { userId: user?.id },
       orderBy: { createdAt: "asc" },
     });
 
     const tvid = formattedLists?.map((item: any) => item?.tvId);
-    const tv_id = watchlist?.map((id: any) => id?.tvId).flat(); // Flatten the array of arrays
-    const movie_id = watchlist?.map((id: any) => id?.movieId).flat(); // Flatten the array of arrays
+    const tv_id = watchlist?.map((id: any) => id?.tvId).flat();
+    const movie_id = watchlist?.map((id: any) => id?.movieId).flat();
     const existedFavorite = watchlist
       ?.map((id: any) => id?.favoriteIds?.map((item: any) => item?.id))
-      ?.flat(); // Flatten the array of arrays
+      ?.flat();
 
     const lastLogin = user?.lastLogin
       ? moment(user?.lastLogin).fromNow()
-      : "Unknown"; // or any other fallback value you'd like to show
+      : "Unknown";
 
     const findFriendId = await prisma.friend?.findFirst({
       where: {
@@ -63,36 +72,42 @@ export const getProfileData = async (name: string) => {
         OR: [{ friendRequestId: user?.id }, { friendRespondId: user?.id }],
       },
     });
+    
     const friend = await prisma.friend.findMany({});
     const getDrama = await prisma.drama.findMany({});
     const getReview = await prisma.tvReview.findMany({
       where: { userId: user?.id },
     });
+    
     const getFeeds = await prisma.feeds.findMany({
       where: {
         username: name,
       },
     });
+    
     const getUniqueFeed = await prisma.feeds.findUnique({
       where: {
         username: name,
       },
     });
+    
     const getComment = await prisma.comment.findMany({
       where: {
         postId: getUniqueFeed?.id,
       },
     });
-    const comment = await prisma.comment.findMany({})
+    
+    const comment = await prisma.comment.findMany({});
+
     const formattedReviews: ITvReview[] = getReview.map((review) => ({
       ...review,
       review: review?.review as ITvReview["review"],
-      rating_score: review.rating_score as ITvReview["rating_score"], // Assuming this JSON is structured correctly
-      userInfo: review.userInfo as ITvReview["userInfo"], // Assuming this JSON is structured correctly
-      overall_score: review.overall_score ? Number(review.overall_score) : 0, // Ensure it's a number
-      reviewBy: review.reviewBy as ITvReview["reviewBy"], // Assuming this JSON is structured correctly
-      updatedAt: review.updatedAt.toISOString(), // Convert Date to string if needed
-      createdAt: review.createdAt, // Keep as Date
+      rating_score: review.rating_score as ITvReview["rating_score"],
+      userInfo: review.userInfo as ITvReview["userInfo"],
+      overall_score: review.overall_score ? Number(review.overall_score) : 0,
+      reviewBy: review.reviewBy as ITvReview["reviewBy"],
+      updatedAt: review.updatedAt.toISOString(),
+      createdAt: review.createdAt,
     }));
 
     const findSpecificUser = users.filter((user: any) =>
@@ -102,6 +117,7 @@ export const getProfileData = async (name: string) => {
     const yourFriend = users.filter((user: any) =>
       friend.map((friend: any) => friend.friendRespondId).includes(user.id)
     );
+
     return {
       user,
       users,
@@ -125,6 +141,7 @@ export const getProfileData = async (name: string) => {
       yourFriend
     };
   } catch (error) {
-    throw new Error("Failed to fetch user data");
+    console.error("Profile data fetch error:", error);
+    return null;
+  }
 }
-};

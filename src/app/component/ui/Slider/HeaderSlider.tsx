@@ -13,6 +13,7 @@ const preloadFirstImage = async (imageUrl: string) => {
   return new Promise((resolve) => {
     const img = new Image();
     img.src = imageUrl;
+    img.crossOrigin = "anonymous";
     img.onload = resolve;
   });
 };
@@ -74,18 +75,19 @@ const HeaderSlider = () => {
   const handleExtractColor = useCallback(async () => {
     const currentItem = filteredData && filteredData[currentIndex];
     if (currentItem?.backdrop_path) {
-      // Use smaller image size for color extraction
-      const imageUrl = `https://image.tmdb.org/t/p/${
-        currentItem?.backdrop_path ? "w300" : "w154"
-      }${currentItem?.backdrop_path || currentItem?.poster_path}`;
-      const [r, g, b] = await getColorFromImage(imageUrl);
+      try {
+        const imageUrl = `https://image.tmdb.org/t/p/w780${currentItem?.backdrop_path}`;
+        const [r, g, b] = await getColorFromImage(imageUrl);
 
-      setColorState({
-        left: `linear-gradient(269deg, rgba(${r}, ${g}, ${b}, 0) 1%, rgba(${r}, ${g}, ${b}, 0.02) 10%, rgba(${r}, ${g}, ${b}, 0.05) 18%, rgba(${r}, ${g}, ${b}, 0.12) 25%, rgba(${r}, ${g}, ${b}, 0.2) 32%, rgba(${r}, ${g}, ${b}, 0.29) 38%, rgba(${r}, ${g}, ${b}, 0.39) 44%, rgba(${r}, ${g}, ${b}, 0.5) 50%, rgba(${r}, ${g}, ${b}, 0.61) 57%, rgba(${r}, ${g}, ${b}, 0.71) 63%, rgba(${r}, ${g}, ${b}, 0.8) 69%, rgba(${r}, ${g}, ${b}, 0.88) 76%, rgba(${r}, ${g}, ${b}, 0.95) 83%, rgba(${r}, ${g}, ${b}, 0.98) 91%, rgb(${r}, ${g}, ${b}) 100%)`,
-        right: `linear-gradient(90deg, rgba(${r}, ${g}, ${b}, 0) 1%, rgba(${r}, ${g}, ${b}, 0.02) 10%, rgba(${r}, ${g}, ${b}, 0.05) 18%, rgba(${r}, ${g}, ${b}, 0.12) 25%, rgba(${r}, ${g}, ${b}, 0.2) 32%, rgba(${r}, ${g}, ${b}, 0.29) 38%, rgba(${r}, ${g}, ${b}, 0.39) 44%, rgba(${r}, ${g}, ${b}, 0.5) 50%, rgba(${r}, ${g}, ${b}, 0.61) 57%, rgba(${r}, ${g}, ${b}, 0.71) 63%, rgba(${r}, ${g}, ${b}, 0.8) 69%, rgba(${r}, ${g}, ${b}, 0.88) 76%, rgba(${r}, ${g}, ${b}, 0.95) 83%, rgba(${r}, ${g}, ${b}, 0.98) 91%, rgb(${r}, ${g}, ${b}) 100%)`,
-        genreBG: `rgb(${r}, ${g}, ${b})`,
-        center: `linear-gradient(179.5deg, rgba(${r}, ${g}, ${b}, 0.88) 0%, rgba(${r}, ${g}, ${b}, 0.89) 9%, rgba(${r}, ${g}, ${b}, 0.85) 17%, rgba(${r}, ${g}, ${b}, 0.79) 24%, rgba(${r}, ${g}, ${b}, 0.72) 31%, rgba(${r}, ${g}, ${b}, 0.64) 37%, rgba(${r}, ${g}, ${b}, 0.55) 44%, rgba(${r}, ${g}, ${b}, 0.45) 50%, rgba(${r}, ${g}, ${b}, 0.35) 56%, rgba(${r}, ${g}, ${b}, 0.26) 63%, rgba(${r}, ${g}, ${b}, 0.18) 69%, rgba(${r}, ${g}, ${b}, 0.11) 76%, rgba(${r}, ${g}, ${b}, 0.05) 83%, rgba(${r}, ${g}, ${b}, 0.01) 91%, rgba(${r}, ${g}, ${b}, 0) 100%)`,
-      });
+        setColorState({
+          left: `linear-gradient(269deg, rgba(${r}, ${g}, ${b}, 0) 1%, rgba(${r}, ${g}, ${b}, 0.02) 10%, rgba(${r}, ${g}, ${b}, 0.05) 18%, rgba(${r}, ${g}, ${b}, 0.12) 25%, rgba(${r}, ${g}, ${b}, 0.2) 32%, rgba(${r}, ${g}, ${b}, 0.29) 38%, rgba(${r}, ${g}, ${b}, 0.39) 44%, rgba(${r}, ${g}, ${b}, 0.5) 50%, rgba(${r}, ${g}, ${b}, 0.61) 57%, rgba(${r}, ${g}, ${b}, 0.71) 63%, rgba(${r}, ${g}, ${b}, 0.8) 69%, rgba(${r}, ${g}, ${b}, 0.88) 76%, rgba(${r}, ${g}, ${b}, 0.95) 83%, rgba(${r}, ${g}, ${b}, 0.98) 91%, rgb(${r}, ${g}, ${b}) 100%)`,
+          right: `linear-gradient(90deg, rgba(${r}, ${g}, ${b}, 0) 1%, rgba(${r}, ${g}, ${b}, 0.02) 10%, rgba(${r}, ${g}, ${b}, 0.05) 18%, rgba(${r}, ${g}, ${b}, 0.12) 25%, rgba(${r}, ${g}, ${b}, 0.2) 32%, rgba(${r}, ${g}, ${b}, 0.29) 38%, rgba(${r}, ${g}, ${b}, 0.39) 44%, rgba(${r}, ${g}, ${b}, 0.5) 50%, rgba(${r}, ${g}, ${b}, 0.61) 57%, rgba(${r}, ${g}, ${b}, 0.71) 63%, rgba(${r}, ${g}, ${b}, 0.8) 69%, rgba(${r}, ${g}, ${b}, 0.88) 76%, rgba(${r}, ${g}, ${b}, 0.95) 83%, rgba(${r}, ${g}, ${b}, 0.98) 91%, rgb(${r}, ${g}, ${b}) 100%)`,
+          genreBG: `rgb(${r}, ${g}, ${b})`,
+          center: `linear-gradient(179.5deg, rgba(${r}, ${g}, ${b}, 0.88) 0%, rgba(${r}, ${g}, ${b}, 0.89) 9%, rgba(${r}, ${g}, ${b}, 0.85) 17%, rgba(${r}, ${g}, ${b}, 0.79) 24%, rgba(${r}, ${g}, ${b}, 0.72) 31%, rgba(${r}, ${g}, ${b}, 0.64) 37%, rgba(${r}, ${g}, ${b}, 0.55) 44%, rgba(${r}, ${g}, ${b}, 0.45) 50%, rgba(${r}, ${g}, ${b}, 0.35) 56%, rgba(${r}, ${g}, ${b}, 0.26) 63%, rgba(${r}, ${g}, ${b}, 0.18) 69%, rgba(${r}, ${g}, ${b}, 0.11) 76%, rgba(${r}, ${g}, ${b}, 0.05) 83%, rgba(${r}, ${g}, ${b}, 0.01) 91%, rgba(${r}, ${g}, ${b}, 0) 100%)`,
+        });
+      } catch (error) {
+        console.error("Error extracting color:", error);
+      }
     }
   }, [currentIndex, filteredData, getColorFromImage]);
 
@@ -93,9 +95,7 @@ const HeaderSlider = () => {
   useEffect(() => {
     if (filteredData.length > 0 && !isFirstImageLoaded) {
       const firstItem = filteredData[0];
-      const imageUrl = `https://image.tmdb.org/t/p/${
-        firstItem?.backdrop_path ? "w300" : "w154"
-      }${firstItem?.backdrop_path || firstItem?.poster_path}`;
+      const imageUrl = `https://image.tmdb.org/t/p/w780${firstItem?.backdrop_path}`;
 
       preloadFirstImage(imageUrl).then(() => {
         setIsFirstImageLoaded(true);
@@ -135,10 +135,9 @@ const HeaderSlider = () => {
       <Head>
         <link
           rel="preload"
-          href={`https://image.tmdb.org/t/p/${
-            currentItem?.backdrop_path ? "w300" : "w154"
-          }/${currentItem?.backdrop_path || currentItem?.poster_path}`}
+          href={`https://image.tmdb.org/t/p/w780${currentItem?.backdrop_path}`}
           as="image"
+          crossOrigin="anonymous"
         />
       </Head>
       <div

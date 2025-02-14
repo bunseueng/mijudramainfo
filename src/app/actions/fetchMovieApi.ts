@@ -15,6 +15,7 @@ const sevenDaysAgo = currentDate.subtract(7, "days");
 const formattedDate = sevenDaysAgo.format("YYYY-MM-DD");
 
 const headers = {
+  "Access-Control-Request-Headers": "Content-Type",
   accept: "application/json",
   Authorization: "Bearer " + apiKey,
   "Cache-Control": "s-maxage=3600, stale-while-revalidate",

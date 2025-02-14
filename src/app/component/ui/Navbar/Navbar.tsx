@@ -45,7 +45,7 @@ const Navbar = () => {
   const outsideRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
-  const { data, refetch } = useProfileData(session?.user?.name as string);
+  const { data, refetch } = useProfileData(session?.user?.name || undefined);
 
   const { notificationCount, hasUnreadFriends, findRpNoti } =
     useNotificationStatus(
@@ -173,8 +173,10 @@ const Navbar = () => {
   });
 
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    if (session?.user?.name) {
+      refetch();
+    }
+  }, [refetch, session?.user?.name]);
   return (
     <nav className="flex flex-col top-0 sticky z-[9999]">
       <motion.div
