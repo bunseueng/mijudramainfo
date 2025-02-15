@@ -13,23 +13,22 @@ import { PiTelevisionDuotone } from "react-icons/pi";
 import { MdLocalMovies } from "react-icons/md";
 import { RiHistoryFill } from "react-icons/ri";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRouter } from "next/navigation";
 import { spaceToHyphen } from "@/lib/spaceToHyphen";
+import { useRouter } from "next/navigation";
 
 interface SearchResultProps {
   query: string;
   debouncedSearchQuery: string;
   onResultSelect: (item: SearchResultItem) => void;
-  onSearch: (query: string) => void;
 }
 
 const SearchResult: React.FC<SearchResultProps> = ({
   query,
   debouncedSearchQuery,
   onResultSelect,
-  onSearch,
 }) => {
   const router = useRouter();
+
   const {
     data: results,
     isLoading,
@@ -55,21 +54,27 @@ const SearchResult: React.FC<SearchResultProps> = ({
   const displayResults = query ? results : popular_search;
 
   const handleItemClick = (item: SearchResultItem) => {
-    const itemName = item.title || item.name || "";
+    const itemName = spaceToHyphen(item.title || item.name || "");
+    let route = "";
 
     switch (item.media_type) {
       case "movie":
-        router.push(`/movie/${item.id}-${spaceToHyphen(itemName)}`);
+        route = `/movie/${item.id}-${itemName}`;
         break;
       case "tv":
-        router.push(`/tv/${item.id}-${spaceToHyphen(itemName)}`);
+        route = `/tv/${item.id}-${itemName}`;
         break;
       case "person":
-        router.push(`/person/${item.id}-${spaceToHyphen(itemName)}`);
+        route = `/person/${item.id}-${itemName}`;
         break;
       default:
-        onResultSelect(item);
+        route = `/search?query=${encodeURIComponent(
+          item.title || item.name || ""
+        )}`;
     }
+
+    router.push(route);
+    onResultSelect(item);
   };
 
   return (
