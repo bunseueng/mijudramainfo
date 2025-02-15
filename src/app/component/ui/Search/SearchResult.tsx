@@ -13,6 +13,8 @@ import { PiTelevisionDuotone } from "react-icons/pi";
 import { MdLocalMovies } from "react-icons/md";
 import { RiHistoryFill } from "react-icons/ri";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 
 interface SearchResultProps {
   query: string;
@@ -27,6 +29,7 @@ const SearchResult: React.FC<SearchResultProps> = ({
   onResultSelect,
   onSearch,
 }) => {
+  const router = useRouter();
   const {
     data: results,
     isLoading,
@@ -35,6 +38,7 @@ const SearchResult: React.FC<SearchResultProps> = ({
     queryKey: ["searchResults", debouncedSearchQuery],
     queryFn: () => fetchMultiSearch(debouncedSearchQuery),
     staleTime: 3600000,
+    gcTime: 3600000,
     refetchOnWindowFocus: true,
     enabled: debouncedSearchQuery.length > 0,
   });
@@ -43,6 +47,7 @@ const SearchResult: React.FC<SearchResultProps> = ({
     queryKey: ["popular_search"],
     queryFn: () => fetchPopularSearch(),
     staleTime: 3600000,
+    gcTime: 3600000,
     refetchOnWindowFocus: true,
     enabled: debouncedSearchQuery.length === 0,
   });
@@ -50,14 +55,20 @@ const SearchResult: React.FC<SearchResultProps> = ({
   const displayResults = query ? results : popular_search;
 
   const handleItemClick = (item: SearchResultItem) => {
-    if (
-      item.media_type === "movie" ||
-      item.media_type === "tv" ||
-      item.media_type === "person"
-    ) {
-      onSearch(item.title || item.name || "");
-    } else {
-      onResultSelect(item);
+    const itemName = item.title || item.name || "";
+
+    switch (item.media_type) {
+      case "movie":
+        router.push(`/movie/${item.id}-${spaceToHyphen(itemName)}`);
+        break;
+      case "tv":
+        router.push(`/tv/${item.id}-${spaceToHyphen(itemName)}`);
+        break;
+      case "person":
+        router.push(`/person/${item.id}-${spaceToHyphen(itemName)}`);
+        break;
+      default:
+        onResultSelect(item);
     }
   };
 

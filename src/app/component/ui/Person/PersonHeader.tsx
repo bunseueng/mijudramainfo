@@ -80,7 +80,7 @@ export default function PersonHeader({
 
   return (
     <div className="bg-white dark:bg-[#242526] rounded-lg shadow-sm overflow-hidden">
-      <div className="aspect-square sm:aspect-[4/3] lg:aspect-square relative">
+      <div className="aspect-square sm:aspect-[4/3] md:aspect-[3/4] relative">
         <LazyImage
           coverFromDB={getPersons?.cover}
           src={`https://image.tmdb.org/t/p/original/${persons?.profile_path}`}
@@ -133,9 +133,9 @@ export default function PersonHeader({
           </PinterestShareButton>
         </div>
 
-        <div className="lg:hidden mt-6">
+        <div className="md:hidden mt-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl text-[#2490da] font-bold px-3 md:px-6">
+            <h1 className="text-xl text-[#2490da] font-bold md:px-6">
               {persons?.name}
             </h1>
             <button

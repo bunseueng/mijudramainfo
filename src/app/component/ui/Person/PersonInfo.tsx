@@ -56,55 +56,55 @@ export default function PersonInfo({
   return (
     <div className="py-4">
       <div className="my-2">
-        <h1 className="text-md font-semibold px-3 md:px-6">Native Name</h1>
-        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
+        <h1 className="text-md font-semibold md:px-6">Native Name</h1>
+        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal md:px-6">
           {detail?.native_name || personFullDetails?.original_name || "N/A"}
         </p>
       </div>
       <div className="my-2">
-        <h1 className="text-md font-semibold px-3 md:px-6">Career</h1>
-        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
+        <h1 className="text-md font-semibold md:px-6">Career</h1>
+        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal md:px-6">
           {persons?.known_for_department}
         </p>
       </div>
       {getCredits && (
         <div className="my-2">
-          <h1 className="text-md font-semibold px-3 md:px-6">Known Credits</h1>
-          <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
+          <h1 className="text-md font-semibold md:px-6">Known Credits</h1>
+          <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal md:px-6">
             {String(knownCredits)}
           </p>
         </div>
       )}
       <div className="my-2">
-        <h1 className="text-md font-semibold px-3 md:px-6">Gender</h1>
-        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
+        <h1 className="text-md font-semibold md:px-6">Gender</h1>
+        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal md:px-6">
           {detail?.gender || persons?.gender === 1 ? "Female" : "Male"}
         </p>
       </div>
       <div className="my-2">
-        <h1 className="text-md font-semibold px-3 md:px-6">Birthday</h1>
-        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
+        <h1 className="text-md font-semibold md:px-6">Birthday</h1>
+        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal md:px-6">
           {detail?.birthday || persons?.birthday} ({String(calculatedAge)} years
           old)
         </p>
       </div>
       <div className="my-2">
-        <h1 className="text-md font-semibold px-3 md:px-6">Place of Birth</h1>
-        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
+        <h1 className="text-md font-semibold md:px-6">Place of Birth</h1>
+        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal md:px-6">
           {persons?.place_of_birth || "?"}
         </p>
       </div>{" "}
       <div className="my-2">
-        <h1 className="text-md font-semibold px-3 md:px-6">Nationality</h1>
-        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
+        <h1 className="text-md font-semibold md:px-6">Nationality</h1>
+        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal md:px-6">
           {detail?.nationality ||
             getNationality(persons?.place_of_birth) ||
             "?"}
         </p>
       </div>
       <div className="my-2">
-        <h1 className="text-md font-semibold px-3 md:px-6">Also Known As</h1>
-        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal px-3 md:px-6">
+        <h1 className="text-md font-semibold md:px-6">Also Known As</h1>
+        <p className="text-slate-500 dark:text-[hsla(0,0%,100%,0.87)] text-xs font-normal md:px-6">
           {detail?.also_known_as || persons?.also_known_as?.join(" , ")}
         </p>
       </div>

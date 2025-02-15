@@ -22,7 +22,7 @@ export default function PopularityRanking({
     <>
       <div className="border-y-[1px] border-y-[#06090c21] dark:border-y-[#3e4042] mt-4">
         <div className="mx-2 py-5">
-          <h1 className="text-center lg:text-lg">Top Popularity Senders</h1>
+          <h1 className="text-center md:text-lg">Top Popularity Senders</h1>
           {sortedUsers?.map((user, idx: number) => (
             <div className="flex items-center mt-3" key={idx}>
               <Image

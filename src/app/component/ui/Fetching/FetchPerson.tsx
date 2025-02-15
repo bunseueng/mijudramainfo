@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchPersonSearch } from "@/app/actions/fetchMovieApi";
 import type { CommentProps, PersonDBType, UserProps } from "@/helper/type";
 import PersonHeader from "../Person/PersonHeader";
 import PersonInfo from "../Person/PersonInfo";
@@ -214,9 +212,9 @@ const FetchPerson: React.FC<IFetchPerson> = ({ person_id, currentUser }) => {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 overflow-hidden">
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
         {/* Left Column */}
-        <div className="w-full lg:w-1/3">
+        <div className="w-full md:w-1/3">
           <div className="space-y-6">
             <PersonHeader
               persons={person}
@@ -226,7 +224,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({ person_id, currentUser }) => {
               personFullDetails={person_detail}
             />
 
-            <div className="hidden lg:block bg-white dark:bg-[#242526] rounded-lg shadow-sm">
+            <div className="hidden md:block bg-white dark:bg-[#242526] rounded-lg shadow-sm">
               <PersonInfo
                 persons={person}
                 personFullDetails={person_detail}
@@ -262,7 +260,7 @@ const FetchPerson: React.FC<IFetchPerson> = ({ person_id, currentUser }) => {
         </div>
 
         {/* Right Column */}
-        <div className="w-full lg:w-2/3 mb-10">
+        <div className="w-full md:w-2/3 mb-10">
           <MainContent
             persons={person}
             currentUser={currentUser}

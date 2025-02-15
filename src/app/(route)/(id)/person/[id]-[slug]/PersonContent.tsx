@@ -277,7 +277,7 @@ export default function PersonContent({
 
   return (
     <div className="mb-5">
-      <div className="hidden lg:block">
+      <div className="hidden md:block">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl text-[#2490da] font-bold">
             {fullName || persons?.name}

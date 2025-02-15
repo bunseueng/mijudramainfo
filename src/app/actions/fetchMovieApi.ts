@@ -414,19 +414,19 @@ export const fetchPerson = cache(async (ids: string | string[]) => {
       body: JSON.stringify({ ids }),
       next: {
         revalidate: 3600,
-        tags: ["movie-details"],
+        tags: ["person-details"],
       },
     };
     const res = await fetch(url, options);
 
     if (!res.ok) {
-      console.log("Failed to fetch movies");
+      throw new Error("Failed to fetch person");
     }
 
     const json = await res.json();
     return json;
   } catch (error) {
-    console.log("Failed to fetch", error);
+    throw new Error("Failed to fetch person");
     return null;
   }
 });

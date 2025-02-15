@@ -1,30 +1,23 @@
-import { useQuery } from "@tanstack/react-query"
-import {
-  fetchLanguages,
-  fetchPerson,
-} from "@/app/actions/fetchMovieApi"
+import { useQuery } from "@tanstack/react-query";
+import { fetchPerson } from "@/app/actions/fetchMovieApi";
 
 export function usePersonData(person_id: string) {
-    const { data: person, isLoading, refetch } = useQuery({
-        queryKey: ["person", person_id, {
-          staleTime: 120000,
-          cacheTime: 120000,
-        }],
-        queryFn: () => fetchPerson(person_id),
-    });
-    
-    const { data: language } = useQuery({
-        queryKey: ["language", person_id, {
-          staleTime: 120000,
-          cacheTime: 120000,
-        }],
-        queryFn: () => fetchLanguages(),
-    });
+  const {
+    data: person,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["person", person_id],
+    queryFn: () => fetchPerson(person_id),
+    staleTime: 3600000, // 1 hour
+    gcTime: 3600000, // 1 hour
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
-    return {
-        person,
-        isLoading,
-        refetch,
-        language,
-    }
+  return {
+    person,
+    isLoading,
+    refetch,
+  };
 }
