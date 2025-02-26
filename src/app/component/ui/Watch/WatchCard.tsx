@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import {
   fetchRatings,
-  FilterParams,
   getCountries,
   getGenres,
   getPopularByParams,
@@ -14,14 +13,13 @@ import { cn } from "@/lib/utils";
 import AdArticle from "@/app/component/ui/Adsense/AdArticle";
 import { WatchImage } from "./WatchImage";
 
-const sortOptions = [
-  { value: "popularity.desc", label: "Popularity Descending" },
-  { value: "popularity.asc", label: "Popularity Ascending" },
-  { value: "first_air_date.desc", label: "Newest First" },
-  { value: "first_air_date.asc", label: "Oldest First" },
-  { value: "vote_average.desc", label: "Rating Descending" },
-  { value: "vote_average.asc", label: "Rating Ascending" },
-];
+interface FilterParams {
+  page: number;
+  sort_by: string;
+  with_genres: string;
+  with_origin_country: string;
+  [key: string]: string | number; // This allows for dynamic keys
+}
 
 interface WatchTvProps {
   title: string;
@@ -37,21 +35,46 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
     sort_by: "popularity.desc",
     with_genres: genre,
     with_origin_country: "CN",
-    "first_air_date.gte": "",
-    "first_air_date.lte": "",
+    [type === "movie" ? "primary_release_date.gte" : "first_air_date.gte"]: "",
+    [type === "movie" ? "primary_release_date.lte" : "first_air_date.lte"]: "",
   });
+
+  const sortOptions =
+    type === "movie"
+      ? [
+          { value: "popularity.desc", label: "Popularity Descending" },
+          { value: "popularity.asc", label: "Popularity Ascending" },
+          {
+            value: "primary_release_date.desc",
+            label: "Release Date Descending",
+          },
+          {
+            value: "primary_release_date.asc",
+            label: "Release Date Ascending",
+          },
+          { value: "vote_average.desc", label: "Rating Descending" },
+          { value: "vote_average.asc", label: "Rating Ascending" },
+        ]
+      : [
+          { value: "popularity.desc", label: "Popularity Descending" },
+          { value: "popularity.asc", label: "Popularity Ascending" },
+          { value: "first_air_date.desc", label: "Newest First" },
+          { value: "first_air_date.asc", label: "Oldest First" },
+          { value: "vote_average.desc", label: "Rating Descending" },
+          { value: "vote_average.asc", label: "Rating Ascending" },
+        ];
 
   const { data: genres } = useQuery({
     queryKey: [`${type}_genres`],
     queryFn: () => getGenres(type),
-    staleTime: Infinity, // Genres don't change often
+    staleTime: Number.POSITIVE_INFINITY, // Genres don't change often
     gcTime: 1000 * 60 * 60, // Cache for 1 hour
   });
 
   const { data: countries } = useQuery({
     queryKey: ["countries"],
     queryFn: getCountries,
-    staleTime: Infinity, // Countries don't change often
+    staleTime: Number.POSITIVE_INFINITY, // Countries don't change often
     gcTime: 1000 * 60 * 60, // Cache for 1 hour
   });
 
@@ -72,7 +95,7 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [currentPage]);
+  }, []);
 
   const handleFilterChange = (name: keyof FilterParams, value: string) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -203,13 +226,24 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-white">
-              Air Date From
+              {type === "movie" ? "Release Date From" : "Air Date From"}
             </label>
             <input
               type="date"
-              value={filters["first_air_date.gte"]}
+              value={
+                filters[
+                  type === "movie"
+                    ? "primary_release_date.gte"
+                    : "first_air_date.gte"
+                ]
+              }
               onChange={(e) =>
-                handleFilterChange("first_air_date.gte", e.target.value)
+                handleFilterChange(
+                  type === "movie"
+                    ? "primary_release_date.gte"
+                    : "first_air_date.gte",
+                  e.target.value
+                )
               }
               className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -217,13 +251,24 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-white">
-              Air Date To
+              {type === "movie" ? "Release Date To" : "Air Date To"}
             </label>
             <input
               type="date"
-              value={filters["first_air_date.lte"]}
+              value={
+                filters[
+                  type === "movie"
+                    ? "primary_release_date.lte"
+                    : "first_air_date.lte"
+                ]
+              }
               onChange={(e) =>
-                handleFilterChange("first_air_date.lte", e.target.value)
+                handleFilterChange(
+                  type === "movie"
+                    ? "primary_release_date.lte"
+                    : "first_air_date.lte",
+                  e.target.value
+                )
               }
               className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -237,8 +282,12 @@ const WatchCard = ({ title, type, genre }: WatchTvProps) => {
                   sort_by: "popularity.desc",
                   with_genres: genre,
                   with_origin_country: "CN",
-                  "first_air_date.gte": "",
-                  "first_air_date.lte": "",
+                  [type === "movie"
+                    ? "primary_release_date.gte"
+                    : "first_air_date.gte"]: "",
+                  [type === "movie"
+                    ? "primary_release_date.lte"
+                    : "first_air_date.lte"]: "",
                 });
                 setCurrentPage(1);
               }}

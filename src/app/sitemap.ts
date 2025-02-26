@@ -1,5 +1,5 @@
 import type { TVShow, PersonType } from "@/helper/type"
-import { safelyFormatDate } from "@/lib/safetyDate"
+import { safelyFormatDate } from "@/lib/safetyDate";
 import { spaceToHyphen } from "@/lib/spaceToHyphen"
 import type { MetadataRoute } from "next"
 
@@ -591,3 +591,4 @@ function generateStaticPageEntries(baseUrl: string): MetadataRoute.Sitemap {
     changeFrequency,
   }))
 }
+

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { EpisodeList } from "./EpisodeList";
 import { useDramaData } from "@/hooks/useDramaData";
 import type { DramaDB, DramaDetails, TVShow } from "@/helper/type";
-import { Info } from "lucide-react";
+import { Info, Subtitles } from "lucide-react";
 import { countryToNationalityMap } from "@/helper/item-list";
 import AdBanner from "@/app/component/ui/Adsense/AdBanner";
 import AdArticle from "@/app/component/ui/Adsense/AdArticle";
@@ -15,25 +15,81 @@ import CastSection from "@/app/component/ui/Watch/CastSection";
 import RelatedContent from "@/app/component/ui/Watch/RelatedContent";
 import { useQuery } from "@tanstack/react-query";
 import { fetchRatings } from "@/app/actions/fetchMovieApi";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-interface WatchDramaProps {
+type VideoSource = {
+  id: string;
+  name: string;
+  getUrl: (tvId: string, episode: number) => string;
+};
+
+const VIDEO_SOURCES: VideoSource[] = [
+  {
+    id: "default",
+    name: "RGShows",
+    getUrl: (tvId, episode) =>
+      `https://embed.rgshows.me/api/1/tv/?id=${tvId}&s=1&e=${episode}`,
+  },
+  {
+    id: "vidapi",
+    name: "Vidapi",
+    getUrl: (tvId, episode) =>
+      `https://vidapi.click/embed/tv/${tvId}/1/${episode}`,
+  },
+  {
+    id: "vidlink",
+    name: "VidLink",
+    getUrl: (tvId, episode) =>
+      `https://vidlink.pro/tv/${tvId}/1/${episode}?primaryColor=ff0044&secondaryColor=f788a6&iconColor=ff0044&title=false&poster=true&autoplay=false`,
+  },
+  {
+    id: "videasy",
+    name: "Videasy",
+    getUrl: (tvId, episode) =>
+      `https://player.videasy.net/tv/${tvId}/1/${episode}`,
+  },
+  {
+    id: "vidbinge",
+    name: "VidBinge",
+    getUrl: (tvId, episode) =>
+      `https://vidbinge.dev/embed/tv/${tvId}/1/${episode}`,
+  },
+  {
+    id: "autoembed",
+    name: "AutoEmbed",
+    getUrl: (tvId, episode) =>
+      `https://player.autoembed.cc/embed/tv/${tvId}/1/${episode}`,
+  },
+];
+
+const WatchDrama = ({
+  tv_id,
+  getDrama,
+}: {
   tv_id: string;
   getDrama: DramaDB | null;
-}
-
-const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
+}) => {
   const { tv, isLoading } = useDramaData(tv_id);
   const [currentEpisode, setCurrentEpisode] = useState(1);
+  const [currentSource, setCurrentSource] = useState<string>("default");
   const related_content = tv?.similar?.results as TVShow[];
   const [detail]: DramaDetails[] = (getDrama?.details ||
     []) as unknown as DramaDetails[];
 
   const { data: rating_db } = useQuery({
     queryKey: ["ratings", tv_id],
-    queryFn: () => fetchRatings([tv_id.toString()]), // ✅ Pass id as a string array
+    queryFn: () => fetchRatings([tv_id.toString()]),
     staleTime: 3600000,
     gcTime: 3600000,
   });
+
   const findRatingDB = rating_db?.filter(
     (p: any) => p.tvId || p.movieId === tv_id
   );
@@ -64,26 +120,23 @@ const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
   ]);
 
   const videoUrl = React.useMemo(() => {
-    return `https://player.embed-api.stream/?id=${tv_id}&s=1&e=${currentEpisode}`;
-  }, [tv_id, currentEpisode]);
+    const source = VIDEO_SOURCES.find((s) => s.id === currentSource);
+    return source ? source.getUrl(tv_id, currentEpisode) : "";
+  }, [tv_id, currentEpisode, currentSource]);
 
   const getNationality = (type: string) => {
     if (!type) return "";
-
     const parts = type.split(", ");
     const country = parts[parts.length - 1].trim();
-
     if ((countryToNationalityMap as Record<string, string>)[country]) {
       return (countryToNationalityMap as Record<string, string>)[country];
     }
-
     const countryKeys = Object.keys(countryToNationalityMap);
     const matchingKey = countryKeys.find(
       (key) =>
         country.toLowerCase().includes(key.toLowerCase()) ||
         key.toLowerCase().includes(country.toLowerCase())
     );
-
     return matchingKey
       ? (countryToNationalityMap as Record<string, string>)[matchingKey]
       : "";
@@ -92,25 +145,40 @@ const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
   if (isLoading) {
     return <SearchLoading />;
   }
+
   return (
     <main className="max-w-[1808px] mx-auto px-4 py-6">
-      <div
-        className="flex items-center bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-4 rounded-md shadow-sm"
-        role="alert"
-        aria-live="polite"
-      >
-        <div className="flex-shrink-0 pr-2">
-          <Info
-            className="h-5 w-5 text-yellow-500 dark:text-yellow-400"
-            aria-hidden="true"
-          />
-        </div>
-        <div className="flex-1 text-sm md:text-base text-yellow-800 dark:text-yellow-200">
+      <Alert className="mb-6">
+        <Info className="h-4 w-4" />
+        <AlertTitle>Video Availability</AlertTitle>
+        <AlertDescription>
           If the video is unavailable or doesn&apos;t match the title, try
           switching to another server. Some servers may provide incorrect
-          videos. 😥
-        </div>
-      </div>
+          videos.
+        </AlertDescription>
+      </Alert>
+      <Alert variant="default" className="mb-6">
+        <Subtitles className="h-4 w-4" />
+        <AlertTitle>Video Source</AlertTitle>
+        <AlertDescription className="flex items-center justify-between">
+          <span>
+            If subtitles are not available or the video doesn&apos;t load, try
+            another video provider from the dropdown.
+          </span>
+          <Select value={currentSource} onValueChange={setCurrentSource}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select source" />
+            </SelectTrigger>
+            <SelectContent>
+              {VIDEO_SOURCES.map((source) => (
+                <SelectItem key={source.id} value={source.id}>
+                  {source.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </AlertDescription>
+      </Alert>
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-6">
           <VideoPlayer videoUrl={videoUrl} />
@@ -138,7 +206,7 @@ const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
                     (tv.vote_average * tv.vote_count +
                       averageRating * averageRating) /
                     (tv.vote_count + averageRating)
-                  ).toFixed(1) // Apply toFixed(1) to the entire expression
+                  ).toFixed(1)
                 : averageRating
                 ? averageRating.toFixed(1)
                 : tv && tv.vote_average.toFixed(1)
@@ -170,7 +238,6 @@ const WatchDrama = ({ tv_id, getDrama }: WatchDramaProps) => {
               onEpisodeSelect={(episodeId) => setCurrentEpisode(episodeId)}
             />
           </div>
-
           <div className="flex flex-col gap-6 my-10">
             <div className="w-full order-first md:order-last">
               <RelatedContent related_content={related_content} type="tv" />

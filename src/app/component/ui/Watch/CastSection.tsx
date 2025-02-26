@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import { spaceToHyphen } from "@/lib/spaceToHyphen";
 
 interface CastMember {
   id: number;
@@ -37,20 +38,27 @@ const CastSection = ({ cast, tv_id, type }: CastSectionProps) => {
               className="flex flex-col items-center text-center"
             >
               <div className="relative w-full pb-[150%] rounded-md overflow-hidden mb-2">
-                <Image
-                  src={
-                    member.profile_path
-                      ? `https://image.tmdb.org/t/p/w185${member.profile_path}`
-                      : "/default-pf.webp"
-                  }
-                  alt={member.name}
-                  fill
-                  className="object-cover"
-                />
+                <Link
+                  href={`/person/${member.id}-${spaceToHyphen(member.name)}`}
+                >
+                  <Image
+                    src={
+                      member.profile_path
+                        ? `https://image.tmdb.org/t/p/w185${member.profile_path}`
+                        : "/default-pf.webp"
+                    }
+                    alt={member.name}
+                    fill
+                    quality={100}
+                    className="object-cover"
+                  />
+                </Link>
               </div>
-              <h3 className="font-semibold text-sm line-clamp-1">
-                {member.name}
-              </h3>
+              <Link href={`/person/${member.id}-${spaceToHyphen(member.name)}`}>
+                <h3 className="font-semibold text-sm line-clamp-1">
+                  {member.name}
+                </h3>
+              </Link>
               <p className="text-xs text-muted-foreground line-clamp-1">
                 {member.character}
               </p>

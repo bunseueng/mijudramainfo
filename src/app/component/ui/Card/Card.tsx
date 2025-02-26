@@ -212,10 +212,17 @@ export default function Card({
               )}
             </span>
           )}
-          {!detail?.episode ||
-            (number_of_episodes && (
-              <>, {detail?.episode || number_of_episodes} Episodes</>
-            ))}
+          {detail?.episode ? (
+            <span>
+              <>, {detail?.episode} Episodes</>
+            </span>
+          ) : number_of_episodes ? (
+            <span>
+              <>, {number_of_episodes} Episodes</>
+            </span>
+          ) : (
+            ""
+          )}
         </p>
 
         <div className="flex items-center">
