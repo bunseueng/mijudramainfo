@@ -144,11 +144,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <script
+        <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3369705912051027"
           crossOrigin="anonymous"
-        ></script>
+          strategy="lazyOnload"
+        />
       </head>
       <body className="bg-white dark:bg-[#111319]" suppressHydrationWarning>
         <Providers>
