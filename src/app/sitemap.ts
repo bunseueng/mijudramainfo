@@ -2,6 +2,7 @@ import type { TVShow, PersonType } from "@/helper/type"
 import { safelyFormatDate } from "@/lib/safetyDate"
 import { spaceToHyphen } from "@/lib/spaceToHyphen"
 import type { MetadataRoute } from "next"
+export const dynamic = 'force-dynamic'
 
 const MAX_RETRIES = 3;
 const BATCH_SIZE = 5;
