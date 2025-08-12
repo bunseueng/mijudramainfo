@@ -27,7 +27,7 @@ const AdBanner = ({ dataAdSlot, dataAdFormat }: AdBannerType) => {
         data-ad-format={dataAdFormat}
         data-full-width-responsive="true"
       ></ins>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
+      {/* <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div className="text-3xl font-bold text-gray-400 dark:text-gray-600 mb-2">
           Advertisement
         </div>
@@ -39,7 +39,7 @@ const AdBanner = ({ dataAdSlot, dataAdFormat }: AdBannerType) => {
           <div className="w-2 h-2 bg-gray-400 dark:bg-gray-600 rounded-full animate-pulse delay-150"></div>
           <div className="w-2 h-2 bg-gray-400 dark:bg-gray-600 rounded-full animate-pulse delay-300"></div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
