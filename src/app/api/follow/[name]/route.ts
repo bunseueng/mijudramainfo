@@ -1,6 +1,5 @@
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import prisma from "@/lib/db";
-import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request, props: { params: Promise<{ name: string }> }) {
