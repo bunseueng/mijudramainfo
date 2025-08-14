@@ -18,7 +18,7 @@ const AdBanner = ({ dataAdSlot, dataAdFormat }: AdBannerType) => {
     }
   }, []);
   return (
-    <div className="w-full h-full relative overflow-hidden rounded-lg shadow-md bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+    <div className="w-full h-full relative overflow-hidden rounded-lg shadow-md">
       <ins
         className="adsbygoogle"
         style={{ display: "block" }}
