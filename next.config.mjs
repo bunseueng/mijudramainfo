@@ -74,24 +74,24 @@ const nextConfig = {
     return [
       {
         source: "/tv/:id/edit//:path*", // Matches double slashes
-        destination: "https://mijudramainfo.netlify.app/tv/:id/edit/:path*", // Fixes double slashes
+        destination: "/tv/:id/edit/:path*", // Fixes double slashes
         permanent: true, // 301 Redirect
       },
       {
         source: "/movie/:id/edit//:path*", // Matches double slashes
-        destination: "https://mijudramainfo.netlify.app/movie/:id/edit/:path*", // Fixes double slashes
+        destination: "/movie/:id/edit/:path*", // Fixes double slashes
         permanent: true, // 301 Redirect
       },
       {
         source: "/person/:id/edit//:path*", // Matches double slashes
-        destination: "https://mijudramainfo.netlify.app/person/:id/edit/:path*", // Fixes double slashes
+        destination: "/person/:id/edit/:path*", // Fixes double slashes
         permanent: true, // 301 Redirect
       },
-      {
-        source: "/:path*",
-        destination: "https://mijudramainfo.netlify.app/:path*", // Netlify URL
-        permanent: true, // 308 redirect (good for SEO)
-      },
+      // {
+      //   source: "/:path*",
+      //   destination: "/:path*", // Netlify URL
+      //   permanent: true, // 308 redirect (good for SEO)
+      // },
     ];
   },
 };
