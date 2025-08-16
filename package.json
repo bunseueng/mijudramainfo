@@ -92,7 +92,7 @@
     "tiptap-extension-resize-image": "^1.0.4",
     "use-debounce": "^10.0.0",
     "uuid": "^9.0.1",
-    "zod": "^3.22.4"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@builder.io/partytown": "^0.10.3",
