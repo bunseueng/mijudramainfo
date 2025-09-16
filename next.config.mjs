@@ -74,24 +74,24 @@ const nextConfig = {
     return [
       {
         source: "/tv/:id/edit//:path*", // Matches double slashes
-        destination: "/tv/:id/edit/:path*", // Fixes double slashes
+        destination: `${process.env.NEXT_PUBLIC_APP_URL}/tv/:id/edit/:path*`, // Fixes double slashes
         permanent: true, // 301 Redirect
       },
       {
         source: "/movie/:id/edit//:path*", // Matches double slashes
-        destination: "/movie/:id/edit/:path*", // Fixes double slashes
+        destination: `${process.env.NEXT_PUBLIC_APP_URL}/movie/:id/edit/:path*`, // Fixes double slashes
         permanent: true, // 301 Redirect
       },
       {
         source: "/person/:id/edit//:path*", // Matches double slashes
-        destination: "/person/:id/edit/:path*", // Fixes double slashes
+        destination: `${process.env.NEXT_PUBLIC_APP_URL}/person/:id/edit/:path*`, // Fixes double slashes
         permanent: true, // 301 Redirect
       },
-      // {
-      //   source: "/:path*",
-      //   destination: "/:path*", // Netlify URL
-      //   permanent: true, // 308 redirect (good for SEO)
-      // },
+      {
+        source: "/:path*",
+        destination: `${process.env.NEXT_PUBLIC_APP_URL}/:path*`, // Netlify URL
+        permanent: true, // 308 redirect (good for SEO)
+      },
     ];
   },
 };
