@@ -1,0 +1,5 @@
+[[redirects]]
+    from = "https://mijukh.com/*"
+    to = "https://mijudramainfo.mijukh.com/:splat"
+    status = 301
+    force = true
