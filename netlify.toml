@@ -1,6 +1,5 @@
 [[redirects]]
-  from = "/*"
-  to = "https://mijudramainfo.mijukh.com/:splat"
-  status = 301
-  force = true
-  conditions = { Host = ["mijudramainfo.netlify.app"] }
+    from = "https://mijukh.com/*"
+    to = "https://mijudramainfo.mijukh.com/:splat"
+    status = 301
+    force = true
