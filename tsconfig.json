@@ -33,7 +33,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/lib/spaceToHyphen.js", "src/lib/safetyDate.js"  ],
   "exclude": [
     "node_modules"
   ]

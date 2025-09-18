@@ -1,4 +1,4 @@
-export function safelyFormatDate(dateString: string | undefined): string {
+export function safelyFormatDate(dateString) {
   const now = new Date();
 
   if (!dateString) {
@@ -16,7 +16,9 @@ export function safelyFormatDate(dateString: string | undefined): string {
   // Check for suspiciously old dates (before 2000-01-01)
   const minValidDate = new Date("2000-01-01T00:00:00Z");
   if (date < minValidDate) {
-    console.warn(`Suspiciously old date: ${dateString}. Using current date instead.`);
+    console.warn(
+      `Suspiciously old date: ${dateString}. Using current date instead.`
+    );
     return now.toISOString();
   }
 
