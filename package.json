@@ -67,7 +67,7 @@
     "framer-motion": "^11.0.24",
     "lucide-react": "^0.363.0",
     "moment": "^2.30.1",
-    "mongodb": "^6.5.0",
+    "mongodb": "^6.19.0",
     "next": "15.1.5",
     "next-auth": "^4.24.7",
     "next-share": "^0.27.0",
