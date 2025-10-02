@@ -1,10 +1,4 @@
 [[redirects]]
-    from = "https://mijukh.com/*"
-    to = "https://mijudramainfo.mijukh.com/:splat"
-    status = 301
-    force = true
-
-[[redirects]]
     from = "https://mijudramainfo.netlify.app/*"
     to = "https://mijudramainfo.mijukh.com/:splat"
     status = 301
