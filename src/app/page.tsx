@@ -13,9 +13,7 @@ export default async function Home() {
           <HeaderSlider />
         </div>
       </Suspense>
-      <Suspense fallback={<SearchLoading />}>
-        <Section />
-      </Suspense>
+      <Section />
       <div className="max-w-[1808px] mx-auto w-[80%] md:w-full min-h-[200px] my-10">
         <div className="relative w-full min-h-[200px]">
           <div className="absolute inset-0">
