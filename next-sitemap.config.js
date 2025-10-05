@@ -523,7 +523,7 @@ async function generateNetworkPaths() {
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl:
-    process.env.NEXT_PUBLIC_APP_URL || "https://mijudramainfo.mijublog.com",
+    process.env.NEXT_PUBLIC_APP_URL || "https://mijudramainfo.mijukh.com",
   generateRobotsTxt: true,
   changefreq: "daily",
   priority: 0.7,
