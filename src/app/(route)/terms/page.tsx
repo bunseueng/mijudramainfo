@@ -1,262 +1,257 @@
-export const dynamic = "force-dynamic";
-import Link from "next/link";
-import React from "react";
+import { Metadata } from "next";
 
-const TermsOfUsePage = () => {
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description:
+    "Read the terms and conditions for using MijuDramaInfo. Understand your rights and responsibilities when using our platform.",
+};
+
+export default function TermsPage() {
   return (
-    <div className="relative min-h-screen z-1 pt-14">
-      <div className="max-w-6xl mx-auto">
-        <div className="min-h-8 text-center py-7 mx-auto"></div>
-        <div className="mx-auto px-4">
-          <div className="relative float-right bg-white dark:bg-[#242526] border-[1px] border-[#00000024] rounded-md shadow-md mb-6">
-            <div className="relative py-3 px-4">
-              <h1 className="text-2xl font-bold">Terms Of Use</h1>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-[#111319] dark:to-[#1a1d2e]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          Terms of Service
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-8">
+          Last Updated: October 27, 2025
+        </p>
+
+        <div className="bg-white dark:bg-[#1a1d2e] rounded-2xl shadow-xl p-8 space-y-8">
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              1. Agreement to Terms
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              By accessing and using MijuDramaInfo (&#34;we,&#34; &#34;us,&#34;
+              or &#34;our&#34;), you accept and agree to be bound by the terms
+              and provisions of this agreement. If you do not agree to these
+              Terms of Service, please do not use our website.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              2. Use License
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                Permission is granted to temporarily access the materials
+                (information or software) on MijuDramaInfo for personal,
+                non-commercial viewing only. This is the grant of a license, not
+                a transfer of title, and under this license you may not:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>Modify or copy the materials</li>
+                <li>
+                  Use the materials for any commercial purpose or for any public
+                  display (commercial or non-commercial)
+                </li>
+                <li>
+                  Attempt to decompile or reverse engineer any software
+                  contained on our website
+                </li>
+                <li>
+                  Remove any copyright or other proprietary notations from the
+                  materials
+                </li>
+                <li>
+                  Transfer the materials to another person or &#34;mirror&#34;
+                  the materials on any other server
+                </li>
+              </ul>
             </div>
-            <div className="relative py-3 px-4">
-              <div className="-mx-3">
-                <div className="relative float-left w-full md:w-[75%] px-3">
-                  <div className="block">
-                    <p className="text-sm mb-5">
-                      Welcome to MijuDramaInfo (&#34;we,&#34; &#34;our,&#34; or
-                      &#34;us&#34;), your go-to destination for information and
-                      resources on Asian dramas and films. By accessing or using
-                      our website (the &#34;Site&#34;), you agree to comply with
-                      and be bound by the following terms and conditions (the
-                      &#34;Terms of Use&#34;). Please read them carefully.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      Acceptance of Terms
-                    </h1>
-                    <p className="text-sm mb-5">
-                      By accessing or using MijuDramaInfo, you agree to be bound
-                      by these Terms of Use and our Privacy Policy. We reserve
-                      the right to modify these terms at any time, and your
-                      continued use of the site constitutes your acceptance of
-                      any changes.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">Privacy Policy</h1>
-                    <p className="text-sm mb-5">
-                      Our Privacy Policy describes the information MijuDramaInfo
-                      collects when you and others use this website. It also
-                      describes how MijuDramaInfo uses any personal information
-                      you share with it. Our Privacy Policy is part of these
-                      Terms of Service. By agreeing to these Terms of Service,
-                      you are also consenting to our use of your personal
-                      information in accordance with our Privacy Policy. Please
-                      click here to review our Privacy Policy.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      Use of the Website
-                    </h1>
-                    <p className="text-sm mb-5">
-                      MijuDramaInfo is a website dedicated to providing
-                      information and resources related to Asian dramas and
-                      films, particularly from South Korea, Japan, China, and
-                      Taiwan. You may use our website for personal,
-                      non-commercial purposes, including browsing our database
-                      of TV shows, movies, and actors, as well as creating and
-                      managing personal lists, tracking progress, and
-                      interacting with other users.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      User-Generated Content
-                    </h1>
-                    <p className="text-sm mb-5">
-                      Users may contribute content such as reviews, ratings,
-                      recommendations, and other information. By submitting
-                      content to MijuDramaInfo, you grant us a non-exclusive,
-                      royalty-free, perpetual, and worldwide license to use,
-                      reproduce, modify, and distribute such content in any
-                      media.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">User Conduct</h1>
-                    <p className="text-sm mb-5">
-                      You agree to use MijuDramaInfo in a lawful manner and to
-                      respect the rights of others. You shall not:
-                    </p>
-                    <ul className="list-item pl-8 mb-5">
-                      <li className="list-disc text-sm">
-                        Own or have sufficient rights to post your Contributions
-                        on or through this site;
-                      </li>
-                      <li className="list-disc text-sm">
-                        Post or transmit any content that is unlawful,
-                        defamatory, obscene, or otherwise objectionable.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Engage in any activity that could damage, disable,
-                        overburden, or impair the website or interfere with
-                        others&#34; use of the site.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Attempt to gain unauthorized access to any portion of
-                        the site, other users&#34; accounts, or computer
-                        systems.
-                      </li>
-                    </ul>
-                    <h1 className="font-bold text-md mb-1">
-                      Intellectual Property
-                    </h1>
-                    <p className="text-sm mb-5">
-                      All content on MijuDramaInfo, including text, graphics,
-                      logos, and images, is the property of MijuDramaInfo or its
-                      licensors and is protected by copyright, trademark, and
-                      other intellectual property laws. You may not use,
-                      reproduce, or distribute any content from the site without
-                      our prior written consent.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">Payment Terms</h1>
-                    <p className="text-sm mb-5">
-                      Access to the service, or to certain features of the
-                      service, may require you to pay fees. Before you pay any
-                      fees, you will have an opportunity to review and accept
-                      the fees that you will be charged. All fees are in U.S.
-                      dollars and are non-refundable.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      Disclaimer of Warranties
-                    </h1>
-                    <p className="text-sm mb-5">
-                      MijuDramaInfo provides its services on an &#34;as-is&#34;
-                      and &#34;as-available&#34; basis. We do not warrant that
-                      the site will be uninterrupted, error-free, or free from
-                      viruses or other harmful components. We make no
-                      representations or warranties of any kind, express or
-                      implied, regarding the operation or availability of the
-                      site.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      Limitation of Liability
-                    </h1>
-                    <p className="text-sm mb-5">
-                      To the fullest extent permitted by law, MijuDramaInfo
-                      shall not be liable for any indirect, incidental, special,
-                      consequential, or punitive damages arising out of or
-                      related to your use of the site, even if we have been
-                      advised of the possibility of such damages.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      Third-Party Links
-                    </h1>
-                    <p className="text-sm mb-5">
-                      Our website may contain links to third-party websites.
-                      These links are provided for your convenience and do not
-                      imply endorsement or responsibility for the content of any
-                      linked site. We are not liable for any damages or losses
-                      arising from your use of third-party websites.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">Termination</h1>
-                    <p className="text-sm mb-5">
-                      We reserve the right to terminate or suspend your access
-                      to MijuDramaInfo at our sole discretion, without notice,
-                      for any reason, including but not limited to violations of
-                      these Terms of Use.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      Ownership and Rights:
-                    </h1>
-                    <p className="text-sm mb-5">
-                      1. Permission: You must be, or have first obtained
-                      permission from, the rightful owner of any User Material
-                      you post.
-                    </p>
-                    <p className="text-sm mb-5">
-                      2. Warranties: By submitting User Material, you represent
-                      and warrant that:
-                    </p>
-                    <ul className="list-item pl-8 mb-5">
-                      <li className="list-disc text-sm">
-                        You own the User Material or have the right to grant
-                        MijuDramaInfo the license provided below.
-                      </li>
-                      <li className="list-disc text-sm">
-                        The posting of your User Material does not violate any
-                        rights of any party, including privacy rights, publicity
-                        rights, and intellectual property rights.
-                      </li>
-                    </ul>
-                    <h1 className="font-bold text-md mb-1">
-                      License to MijuDramaInfo:
-                    </h1>
-                    <ul className="list-item pl-8 mb-5">
-                      <li className="list-disc text-sm">
-                        Non-Ownership: MijuDramaInfo does not claim any
-                        ownership rights in User Material you post.
-                      </li>
-                      <li className="list-disc text-sm">
-                        License Granted: By posting your User Material, you
-                        grant MijuDramaInfo a limited, non-exclusive,
-                        transferable, sublicensable, worldwide, royalty-free,
-                        fully paid-up, perpetual, irrevocable license to use,
-                        display, reproduce, transmit, distribute, modify, delete
-                        from, add to, prepare derivative works of, publicly
-                        perform, and publish such User Material through the
-                        MijuDramaInfo Services, in any media formats and any
-                        media channels now known or hereinafter created.
-                      </li>
-                      <li className="list-disc text-sm">
-                        License to Users: By posting your User Material, you
-                        also grant each user of the MijuDramaInfo Services a
-                        non-exclusive limited license to access your User
-                        Material through the Sites, and to use, display,
-                        reproduce, distribute, and perform such User Material as
-                        permitted through the functionality of the MijuDramaInfo
-                        Services and under these Terms of Use.
-                      </li>
-                    </ul>
-                    <h1 className="font-bold text-md mb-1">Advertisements</h1>
-                    <p className="text-sm mb-5">
-                      We are not responsible for advertisements or third-party
-                      materials posted on our site, nor for the products or
-                      services provided by advertisers. Any dealings with
-                      advertisers are between you and the advertiser.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">Changes to Terms</h1>
-                    <p className="text-sm mb-5">
-                      We may update these Terms of Use from time to time. We
-                      will notify you of any material changes by posting the new
-                      Terms of Use on the Site. Your continued use of the Site
-                      after such changes constitutes your acceptance of the
-                      updated Terms of Use.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">Entire Agreement</h1>
-                    <p className="text-sm mb-5">
-                      These Terms of Use constitute the entire agreement between
-                      you and MijuDramaInfo regarding your use of the site and
-                      supersede all prior agreements and understandings, whether
-                      written or oral.
-                    </p>
-                    <p className="text-sm mb-5">
-                      Thank you for visiting MijuDramaInfo!
-                    </p>
-                  </div>
-                </div>
-                <div className="relative float-left w-full md:w-[25%] px-3">
-                  <div className="flex flex-col items-start">
-                    <Link href="/faq" className="py-2 md:py-3">
-                      F.A.Q
-                    </Link>
-                    <Link href="/about_us" className="py-2 md:py-3">
-                      About Us
-                    </Link>
-                    <Link href="/contact_us" className="py-2 md:py-3">
-                      Contact Us
-                    </Link>
-                    <Link href="/terms" className="py-2 md:py-3">
-                      Terms of Use
-                    </Link>
-                    <Link href="/privacy" className="py-2 md:py-3">
-                      Privacy
-                    </Link>
-                  </div>
-                </div>
-              </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              3. User Accounts
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                When you create an account with us, you must provide information
+                that is accurate, complete, and current at all times. Failure to
+                do so constitutes a breach of the Terms, which may result in
+                immediate termination of your account on our service.
+              </p>
+              <p className="leading-relaxed">
+                You are responsible for safeguarding the password that you use
+                to access the service and for any activities or actions under
+                your password. You agree not to disclose your password to any
+                third party and to take responsibility for any activities using
+                your account.
+              </p>
             </div>
-          </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              4. User Content and Conduct
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                Users may post content including reviews, comments, and ratings.
+                By posting content, you grant us the right to use, modify,
+                publicly perform, publicly display, reproduce, and distribute
+                such content on and through the service.
+              </p>
+              <p className="leading-relaxed">You agree not to:</p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  Post content that is unlawful, harmful, threatening, abusive,
+                  harassing, defamatory, or otherwise objectionable
+                </li>
+                <li>Impersonate any person or entity</li>
+                <li>Post spam or unsolicited promotional content</li>
+                <li>
+                  Upload viruses or any other malicious code that may harm our
+                  service
+                </li>
+                <li>Harass, intimidate, or threaten other users</li>
+                <li>
+                  Violate any applicable local, state, national, or
+                  international law
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              5. Intellectual Property Rights
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                The service and its original content (excluding user-generated
+                content), features, and functionality are and will remain the
+                exclusive property of MijuDramaInfo and its licensors. The
+                service is protected by copyright, trademark, and other laws.
+              </p>
+              <p className="leading-relaxed">
+                Our trademarks and trade dress may not be used in connection
+                with any product or service without our prior written consent.
+                All drama and movie data, including images and descriptions, are
+                sourced from The Movie Database (TMDB) and are subject to their
+                terms of use.
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              6. Third-Party Links and Content
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Our service may contain links to third-party websites or services
+              that are not owned or controlled by MijuDramaInfo. We have no
+              control over, and assume no responsibility for, the content,
+              privacy policies, or practices of any third-party websites or
+              services. You acknowledge and agree that we shall not be
+              responsible or liable for any damage or loss caused by or in
+              connection with the use of any such content or services.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              7. Disclaimer
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                Your use of the service is at your sole risk. The service is
+                provided on an &#34;AS IS&#34; and &#34;AS AVAILABLE&#34; basis.
+                The service is provided without warranties of any kind, whether
+                express or implied.
+              </p>
+              <p className="leading-relaxed">
+                MijuDramaInfo does not warrant that the service will be
+                uninterrupted, secure, or error-free. We do not warrant the
+                accuracy or completeness of the content provided through the
+                service.
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              8. Limitation of Liability
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              In no event shall MijuDramaInfo, its directors, employees,
+              partners, agents, suppliers, or affiliates be liable for any
+              indirect, incidental, special, consequential, or punitive damages,
+              including without limitation loss of profits, data, use, goodwill,
+              or other intangible losses, resulting from your access to or use
+              of or inability to access or use the service.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              9. Termination
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              We may terminate or suspend your account immediately, without
+              prior notice or liability, for any reason whatsoever, including
+              without limitation if you breach the Terms. Upon termination, your
+              right to use the service will immediately cease. If you wish to
+              terminate your account, you may simply discontinue using the
+              service.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              10. Governing Law
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              These Terms shall be governed and construed in accordance with
+              applicable laws, without regard to its conflict of law provisions.
+              Our failure to enforce any right or provision of these Terms will
+              not be considered a waiver of those rights.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              11. Changes to Terms
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              We reserve the right, at our sole discretion, to modify or replace
+              these Terms at any time. If a revision is material, we will try to
+              provide at least 30 days&#34; notice prior to any new terms taking
+              effect. What constitutes a material change will be determined at
+              our sole discretion. By continuing to access or use our service
+              after those revisions become effective, you agree to be bound by
+              the revised terms.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              12. Contact Us
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              If you have any questions about these Terms of Service, please
+              contact us through our contact page. We are committed to
+              addressing your concerns and will respond to all inquiries in a
+              timely manner.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              13. Acknowledgment
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              By using MijuDramaInfo, you acknowledge that you have read these
+              Terms of Service and agree to be bound by them. These terms
+              constitute the entire agreement between you and MijuDramaInfo
+              regarding your use of the service.
+            </p>
+          </section>
         </div>
       </div>
     </div>
   );
-};
-
-export default TermsOfUsePage;
+}

@@ -7,7 +7,14 @@ const FAQPage = () => {
   return (
     <div className="relative min-h-screen z-1 pt-14">
       <div className="max-w-6xl mx-auto">
-        <div className="min-h-8 text-center py-7 mx-auto"></div>
+        <div className="mx-auto px-4">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Frequently Asked Questions (FAQ)
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Last Updated: October 27, 2025
+          </p>
+        </div>
         <div className="mx-auto px-4">
           <div className="relative float-right bg-white dark:bg-[#242526] border-[1px] border-[#00000024] rounded-md shadow-md mb-6">
             <div className="relative py-3 px-4">
@@ -300,10 +307,10 @@ const FAQPage = () => {
                     <Link href="/faq" className="py-2 md:py-3">
                       F.A.Q
                     </Link>
-                    <Link href="/about_us" className="py-2 md:py-3">
+                    <Link href="/about" className="py-2 md:py-3">
                       About Us
                     </Link>
-                    <Link href="/contact_us" className="py-2 md:py-3">
+                    <Link href="/contact" className="py-2 md:py-3">
                       Contact Us
                     </Link>
                     <Link href="/terms" className="py-2 md:py-3">

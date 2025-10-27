@@ -16,3 +16,7 @@ Host: http://localhost:3000
 
 # Sitemaps
 Sitemap: http://localhost:3000/sitemap.xml
+
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1

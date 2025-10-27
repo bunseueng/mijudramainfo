@@ -256,11 +256,6 @@ const FilterSection: React.FC<{
   return (
     <>
       {" "}
-      <div className="hidden md:block relative w-full min-h-[200px] mb-10">
-        <div className="absolute inset-0">
-          <AdArticle dataAdFormat="auto" dataAdSlot="4321696148" />
-        </div>
-      </div>
       <div className="md:hidden mb-4">
         <div className="flex items-center justify-between mb-2">
           <BiSort className="inline-block" />

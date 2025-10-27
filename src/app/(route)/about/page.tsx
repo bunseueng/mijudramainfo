@@ -1,130 +1,201 @@
-export const dynamic = "force-dynamic";
-
 import { Metadata } from "next";
 import Link from "next/link";
-import React from "react";
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "About Us.",
+  description:
+    "Learn about MijuDramaInfo, your ultimate destination for discovering Asian dramas, movies, and entertainment. Our mission is to connect drama enthusiasts worldwide.",
 };
 
-const AboutUsPage = () => {
+export default function AboutPage() {
   return (
-    <div className="relative min-h-screen z-1 pt-14">
-      <div className="max-w-6xl mx-auto">
-        <div className="min-h-8 text-center py-7 mx-auto"></div>
-        <div className="mx-auto px-4">
-          <div className="relative float-right bg-white dark:bg-[#242526] border-[1px] border-[#00000024] rounded-md shadow-md mb-6">
-            <div className="relative py-3 px-4">
-              <h1 className="text-2xl font-bold">About Us</h1>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-[#111319] dark:to-[#1a1d2e]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            About MijuDramaInfo
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Your comprehensive platform for exploring the captivating world of
+            Asian entertainment
+          </p>
+        </div>
+
+        <div className="space-y-12">
+          <section className="bg-white dark:bg-[#1a1d2e] rounded-2xl shadow-xl p-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+              Our Story
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                MijuDramaInfo was founded with a passion for Asian entertainment
+                and a vision to create a comprehensive platform where drama
+                enthusiasts from around the world can discover, explore, and
+                discuss their favorite shows and movies. Since our inception, we
+                have been dedicated to providing accurate, up-to-date
+                information about the ever-growing world of Asian dramas.
+              </p>
+              <p className="leading-relaxed">
+                What started as a small project has evolved into a thriving
+                community of drama lovers. We understand that Asian dramas offer
+                unique storytelling, compelling characters, and cultural
+                insights that resonate with audiences globally. Our platform
+                serves as a bridge, connecting viewers with the content they
+                love and helping them discover new favorites.
+              </p>
             </div>
-            <div className="relative py-3 px-4">
-              <div className="-mx-3">
-                <div className="relative float-left w-full md:w-[75%] px-3">
-                  <div className="block">
-                    <h1 className="font-bold text-md mb-1">
-                      Welcome to MijuDramaInfo!
-                    </h1>
-                    <p className="text-sm mb-5">
-                      At MijuDramaInfo, we are passionate about bringing you the
-                      best of Asian entertainment. Our website is dedicated to
-                      providing comprehensive information and resources about
-                      Asian dramas and films, with a special focus on content
-                      from South Korea, Japan, China, and Taiwan.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">Our Mission</h1>
-                    <p className="text-sm mb-5">
-                      Our mission is to be the go-to destination for fans of
-                      Asian entertainment. We strive to create a vibrant
-                      community where you can explore, discover, and discuss
-                      your favorite TV shows, movies, and actors. Whether
-                      you&#34;re a seasoned fan or new to the world of Asian
-                      dramas, we&#34;re here to help you find the best content
-                      and connect with like-minded enthusiasts.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">What We Offer</h1>
-                    <ul className="list-item pl-8 mb-5">
-                      <li className="list-disc text-sm">
-                        Extensive Database: Access a vast collection of TV
-                        shows, movies, and actors from across Asia. Our database
-                        is continuously updated with the latest releases and
-                        timeless classics.
-                      </li>
-                      <li className="list-disc text-sm">
-                        User-Generated Content: Share your thoughts with the
-                        community by writing reviews, rating shows and movies,
-                        and making recommendations. Your contributions help
-                        others discover great content.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Personalized Features: Create and manage your own
-                        watchlists, track your progress, and receive tailored
-                        recommendations based on your interests.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Community Interaction: Connect with other fans through
-                        comments, forums, and personal profiles. Build
-                        friendships, share your passion, and engage in
-                        meaningful discussions about your favorite
-                        entertainment.
-                      </li>
-                    </ul>
+          </section>
 
-                    <h1 className="font-bold text-md mb-1">Our Team</h1>
-                    <p className="text-sm mb-5">
-                      We are a team of dedicated individuals who love Asian
-                      dramas and films. Our diverse backgrounds and shared
-                      enthusiasm for Asian entertainment drive us to
-                      continuously improve and expand our offerings. We value
-                      your feedback and are committed to providing a top-notch
-                      experience for all our users.
-                    </p>
+          <section className="bg-white dark:bg-[#1a1d2e] rounded-2xl shadow-xl p-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+              Our Mission
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                At MijuDramaInfo, our mission is to be the most trusted and
+                comprehensive resource for Asian drama and movie information. We
+                strive to:
+              </p>
+              <ul className="list-disc list-inside space-y-3 ml-4">
+                <li className="leading-relaxed">
+                  Provide detailed, accurate information about dramas, movies,
+                  actors, and production teams
+                </li>
+                <li className="leading-relaxed">
+                  Create an engaging platform where fans can discover new
+                  content tailored to their preferences
+                </li>
+                <li className="leading-relaxed">
+                  Foster a respectful community where drama enthusiasts can
+                  share their thoughts and recommendations
+                </li>
+                <li className="leading-relaxed">
+                  Keep our users informed about the latest releases, trending
+                  shows, and industry news
+                </li>
+                <li className="leading-relaxed">
+                  Make Asian entertainment accessible and enjoyable for both
+                  longtime fans and newcomers
+                </li>
+              </ul>
+            </div>
+          </section>
 
-                    <p className="text-sm mb-5">
-                      We invite you to join our community and be part of the
-                      MijuDramaInfo family. Whether you’re here to explore new
-                      content, contribute reviews, or connect with fellow fans,
-                      we’re excited to have you with us!
-                    </p>
-                    <h1 className="font-bold text-md mb-1">Need Help?</h1>
-                    <p className="text-sm mb-5">
-                      For any questions or suggestions, feel free to reach out
-                      through our Contact Us page. We look forward to hearing
-                      from you and enhancing your experience with us.
-                    </p>
-                    <p className="text-sm mb-5">
-                      Thank you for visiting MijuDramaInfo. Enjoy your journey
-                      through the world of Asian entertainment!
-                    </p>
-                  </div>
-                </div>
-                <div className="relative float-left w-full md:w-[25%] px-3">
-                  <div className="flex flex-col items-start">
-                    <Link href="/faq" className="py-2 md:py-3">
-                      F.A.Q
-                    </Link>
-                    <Link href="/about_us" className="py-2 md:py-3">
-                      About Us
-                    </Link>
-                    <Link href="/contact_us" className="py-2 md:py-3">
-                      Contact Us
-                    </Link>
-                    <Link href="/terms" className="py-2 md:py-3">
-                      Terms of Use
-                    </Link>
-                    <Link href="/privacy" className="py-2 md:py-3">
-                      Privacy
-                    </Link>
-                  </div>
-                </div>
+          <section className="bg-white dark:bg-[#1a1d2e] rounded-2xl shadow-xl p-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+              What We Offer
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-gray-50 dark:bg-[#111319] p-6 rounded-xl">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Extensive Database
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Access comprehensive information about thousands of dramas and
+                  movies from China, Korea, Japan, Thailand, and beyond.
+                </p>
+              </div>
+              <div className="bg-gray-50 dark:bg-[#111319] p-6 rounded-xl">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Actor Profiles
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Explore detailed profiles of your favorite actors and
+                  actresses, including their filmography and latest projects.
+                </p>
+              </div>
+              <div className="bg-gray-50 dark:bg-[#111319] p-6 rounded-xl">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Curated Lists
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Discover trending dramas, top-rated shows, and specially
+                  curated collections to help you find your next watch.
+                </p>
+              </div>
+              <div className="bg-gray-50 dark:bg-[#111319] p-6 rounded-xl">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Latest Updates
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Stay informed with the newest releases, upcoming shows, and
+                  breaking news from the Asian entertainment industry.
+                </p>
               </div>
             </div>
-          </div>
+          </section>
+
+          <section className="bg-white dark:bg-[#1a1d2e] rounded-2xl shadow-xl p-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+              Our Values
+            </h2>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Accuracy & Reliability
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  We are committed to providing accurate, verified information
+                  about dramas, movies, and entertainment professionals.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  User Experience
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  We prioritize creating an intuitive, enjoyable experience that
+                  makes discovering content effortless and engaging.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Community Respect
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  We foster a welcoming environment where all fans can share
+                  their passion for Asian entertainment respectfully.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Continuous Improvement
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  We constantly evolve our platform based on user feedback and
+                  emerging trends in the entertainment industry.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-white dark:bg-[#1a1d2e] rounded-2xl shadow-xl p-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+              Join Our Community
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+              Whether you&#39;re a seasoned drama enthusiast or just beginning
+              your journey into Asian entertainment, MijuDramaInfo welcomes you.
+              Join thousands of users who trust us as their go-to resource for
+              drama information and recommendations.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                href="/"
+                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors text-center"
+              >
+                Explore Dramas
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-block bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold px-8 py-3 rounded-lg transition-colors text-center"
+              >
+                Contact Us
+              </Link>
+            </div>
+          </section>
         </div>
       </div>
     </div>
   );
-};
-
-export default AboutUsPage;
+}

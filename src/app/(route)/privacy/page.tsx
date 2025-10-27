@@ -1,205 +1,240 @@
-export const dynamic = "force-dynamic";
-import Link from "next/link";
-import React from "react";
+import { Metadata } from "next";
 
-const PrivacyPage = () => {
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "Learn how MijuDramaInfo collects, uses, and protects your personal information. Read our comprehensive privacy policy.",
+};
+
+export default function PrivacyPage() {
   return (
-    <div className="relative min-h-screen z-1 pt-14">
-      <div className="max-w-6xl mx-auto">
-        <div className="min-h-8 text-center py-7 mx-auto"></div>
-        <div className="mx-auto px-4">
-          <div className="relative float-right bg-white dark:bg-[#242526] border-[1px] border-[#00000024] rounded-md shadow-md mb-6">
-            <div className="relative py-3 px-4">
-              <h1 className="text-2xl font-bold">Terms Of Use</h1>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-[#111319] dark:to-[#1a1d2e]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          Privacy Policy
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-8">
+          Last Updated: October 27, 2025
+        </p>
+
+        <div className="bg-white dark:bg-[#1a1d2e] rounded-2xl shadow-xl p-8 space-y-8">
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              1. Introduction
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Welcome to MijuDramaInfo. We respect your privacy and are
+              committed to protecting your personal data. This privacy policy
+              will inform you about how we look after your personal data when
+              you visit our website and tell you about your privacy rights and
+              how the law protects you.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              2. Information We Collect
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                We may collect, use, store, and transfer different kinds of
+                personal data about you:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Identity Data:</strong> Username, profile information
+                </li>
+                <li>
+                  <strong>Contact Data:</strong> Email address
+                </li>
+                <li>
+                  <strong>Technical Data:</strong> IP address, browser type,
+                  device information, operating system
+                </li>
+                <li>
+                  <strong>Usage Data:</strong> Information about how you use our
+                  website and services
+                </li>
+                <li>
+                  <strong>Profile Data:</strong> Your preferences, feedback, and
+                  survey responses
+                </li>
+              </ul>
             </div>
-            <div className="relative py-3 px-4">
-              <div className="-mx-3">
-                <div className="relative float-left w-full md:w-[75%] px-3">
-                  <div className="block">
-                    <p className="text-sm mb-5">
-                      Here&#34;s a draft for the Privacy Policy for
-                      MijuDramaInfo. Please review and adjust it according to
-                      your specific needs and legal requirements, and consider
-                      consulting with a legal professional to ensure compliance
-                      with applicable laws. Privacy Policy Effective
-                      MijuDramaInfo (&#34;we,&#34; &#34;our,&#34; or
-                      &#34;us&#34;) is committed to protecting your privacy.
-                      This Privacy Policy explains how we collect, use,
-                      disclose, and safeguard your information when you visit
-                      our website MijuDramaInfo.vercel.app (the &#34;Site&#34;).
-                      By using the Site, you agree to the collection and use of
-                      information in accordance with this policy.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      1. Information We Collect
-                    </h1>
-                    <p className="text-sm mb-5">
-                      Personal Information: We may collect personal information
-                      that you provide to us directly, such as your name, email
-                      address, and any other details you provide when creating
-                      an account, leaving reviews, or contacting us.
-                    </p>
-                    <p className="text-sm mb-5">
-                      Usage Data: We collect information about your interactions
-                      with our website, including IP addresses, browser types,
-                      operating systems, pages visited, and the date and time of
-                      your visits.
-                    </p>
-                    <p className="text-sm mb-5">
-                      Cookies and Tracking Technologies: We use cookies and
-                      similar tracking technologies to enhance your experience
-                      on our site. Cookies are small files placed on your device
-                      that help us remember your preferences and understand how
-                      you use our website.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      2. How We Use Your Information
-                    </h1>
-                    <p className="text-sm mb-5">
-                      We use the information we collect to:
-                    </p>
-                    <ul className="list-item pl-8 mb-5">
-                      <li className="list-disc text-sm">
-                        Provide, operate, and maintain our website.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Improve your experience and personalize content.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Communicate with you, including sending updates,
-                        newsletters, and promotional materials.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Respond to your inquiries and provide customer support.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Analyze usage patterns and trends to enhance our
-                        services.
-                      </li>
-                    </ul>
-                    <h1 className="font-bold text-md mb-1">
-                      3. How We Share Your Information
-                    </h1>
-                    <p className="text-sm mb-5">
-                      We do not sell, trade, or otherwise transfer your personal
-                      information to outside parties without your consent,
-                      except in the following circumstances:
-                    </p>
-                    <ul className="list-item pl-8 mb-5">
-                      <li className="list-disc text-sm">
-                        Service Providers: We may share information with
-                        third-party service providers who assist us in operating
-                        our website and delivering services to you. These
-                        providers are obligated to protect your information and
-                        use it only for the purposes for which it was disclosed.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Legal Requirements: We may disclose your information if
-                        required to do so by law or in response to legal
-                        requests, including compliance with subpoenas, court
-                        orders, or legal processes.
-                      </li>
-                      <li className="list-disc text-sm">
-                        Business Transfers: In the event of a merger,
-                        acquisition, or sale of assets, your information may be
-                        transferred as part of the transaction.
-                      </li>
-                    </ul>
-                    <h1 className="font-bold text-md mb-1">
-                      4. Security of Your Information
-                    </h1>
-                    <p className="text-sm mb-5">
-                      We take reasonable measures to protect your personal
-                      information from unauthorized access, use, or disclosure.
-                      However, no method of transmission over the internet or
-                      electronic storage is completely secure, and we cannot
-                      guarantee absolute security.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">5. Your Choices</h1>
-                    <p className="text-sm mb-5">
-                      Access and Update: You may access and update your personal
-                      information by logging into your account and making the
-                      necessary changes.
-                    </p>
-                    <p className="text-sm mb-5">
-                      Opt-Out: You can opt-out of receiving promotional emails
-                      from us by following the unsubscribe instructions provided
-                      in those emails. Please note that even if you opt-out, we
-                      may still send you transactional or administrative
-                      communications related to your account.
-                    </p>
-                    <p className="text-sm mb-5">
-                      Cookies: You can manage cookies through your browser
-                      settings. However, disabling cookies may affect the
-                      functionality of our website.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      6. Children’s Privacy
-                    </h1>
-                    <p className="text-sm mb-5">
-                      Our Services are for users age 13 and over and we do not
-                      knowingly collect personal information from children under
-                      the age of 13. If you are a parent or guardian of a child
-                      under the age of 13 and believe he or she has disclosed
-                      personal information to us please contact us at
-                      support@mijudramainfo.com. For residents of the EEA, where
-                      processing of personal information is based on consent,
-                      MijuDramaInfo will not knowingly engage in that processing
-                      for users under the age of consent established by
-                      applicable data protection law.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      7. Third-Party Links
-                    </h1>
-                    <p className="text-sm mb-5">
-                      Our website may contain links to third-party websites. We
-                      are not responsible for the privacy practices or content
-                      of these sites. We encourage you to review the privacy
-                      policies of any third-party sites you visit.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">
-                      8. Changes to This Privacy Policy
-                    </h1>
-                    <p className="text-sm mb-5">
-                      We may update this Privacy Policy from time to time. Any
-                      changes will be posted on this page, and your continued
-                      use of the site constitutes your acceptance of the revised
-                      policy.
-                    </p>
-                    <h1 className="font-bold text-md mb-1">9. Contact Us</h1>
-                    <p className="text-sm mb-5">
-                      If you have any questions or concerns about this Privacy
-                      Policy or our data practices, please contact us at
-                      privacy@MijuDramaInfo.com
-                    </p>
-                  </div>
-                </div>
-                <div className="relative float-left w-full md:w-[25%] px-3">
-                  <div className="flex flex-col items-start">
-                    <Link href="/faq" className="py-2 md:py-3">
-                      F.A.Q
-                    </Link>
-                    <Link href="/about_us" className="py-2 md:py-3">
-                      About Us
-                    </Link>
-                    <Link href="/contact_us" className="py-2 md:py-3">
-                      Contact Us
-                    </Link>
-                    <Link href="/terms" className="py-2 md:py-3">
-                      Terms of Use
-                    </Link>
-                    <Link href="/privacy" className="py-2 md:py-3">
-                      Privacy
-                    </Link>
-                  </div>
-                </div>
-              </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              3. How We Use Your Information
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                We use your personal data for the following purposes:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>To provide and maintain our services</li>
+                <li>To personalize your experience on our platform</li>
+                <li>To improve our website and user experience</li>
+                <li>To communicate with you about updates and features</li>
+                <li>To analyze usage patterns and trends</li>
+                <li>To detect and prevent fraud and abuse</li>
+                <li>
+                  To comply with legal obligations and enforce our terms of
+                  service
+                </li>
+              </ul>
             </div>
-          </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              4. Cookies and Tracking Technologies
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                We use cookies and similar tracking technologies to track
+                activity on our website and hold certain information. Cookies
+                are files with small amounts of data that are sent to your
+                browser from a website and stored on your device.
+              </p>
+              <p className="leading-relaxed">Types of cookies we use:</p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Essential Cookies:</strong> Required for the website
+                  to function properly
+                </li>
+                <li>
+                  <strong>Analytics Cookies:</strong> Help us understand how
+                  visitors interact with our website
+                </li>
+                <li>
+                  <strong>Preference Cookies:</strong> Remember your preferences
+                  and settings
+                </li>
+                <li>
+                  <strong>Advertising Cookies:</strong> Used to deliver relevant
+                  advertisements
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              5. Third-Party Services
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                We may use third-party services that collect, monitor, and
+                analyze data to improve our service:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Google Analytics:</strong> To understand how users
+                  interact with our website
+                </li>
+                <li>
+                  <strong>Google AdSense:</strong> To display relevant
+                  advertisements
+                </li>
+                <li>
+                  <strong>The Movie Database (TMDB) API:</strong> To provide
+                  drama and movie information
+                </li>
+              </ul>
+              <p className="leading-relaxed">
+                These third parties have their own privacy policies addressing
+                how they use such information.
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              6. Data Security
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              We have implemented appropriate security measures to prevent your
+              personal data from being accidentally lost, used, accessed in an
+              unauthorized way, altered, or disclosed. We limit access to your
+              personal data to those employees, agents, contractors, and other
+              third parties who have a business need to know.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              7. Data Retention
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              We will only retain your personal data for as long as necessary to
+              fulfill the purposes we collected it for, including for the
+              purposes of satisfying any legal, accounting, or reporting
+              requirements. To determine the appropriate retention period, we
+              consider the amount, nature, and sensitivity of the personal data.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              8. Your Legal Rights
+            </h2>
+            <div className="space-y-4 text-gray-700 dark:text-gray-300">
+              <p className="leading-relaxed">
+                Under certain circumstances, you have rights under data
+                protection laws in relation to your personal data:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>Request access to your personal data</li>
+                <li>Request correction of your personal data</li>
+                <li>Request erasure of your personal data</li>
+                <li>Object to processing of your personal data</li>
+                <li>Request restriction of processing your personal data</li>
+                <li>Request transfer of your personal data</li>
+                <li>Right to withdraw consent</li>
+              </ul>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              9. Children&apos;s Privacy
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Our service is not directed to children under the age of 13. We do
+              not knowingly collect personally identifiable information from
+              children under 13. If you are a parent or guardian and you are
+              aware that your child has provided us with personal data, please
+              contact us.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              10. Changes to This Privacy Policy
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              We may update our privacy policy from time to time. We will notify
+              you of any changes by posting the new privacy policy on this page
+              and updating the &apos;Last Updated&apos; date at the top of this
+              privacy policy. You are advised to review this privacy policy
+              periodically for any changes.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              11. Contact Us
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              If you have any questions about this privacy policy or our privacy
+              practices, please contact us through our contact page or email us
+              directly. We take all privacy concerns seriously and will respond
+              to your inquiries as quickly as possible.
+            </p>
+          </section>
         </div>
       </div>
     </div>
   );
-};
-
-export default PrivacyPage;
+}
