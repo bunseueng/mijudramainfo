@@ -14,7 +14,7 @@ import Loading from "./loading";
 import Footer from "./component/ui/Main/Footer";
 import type React from "react";
 import Navbar from "./component/ui/Navbar/Navbar";
-
+import { SpeedInsights } from "@vercel/speed-insights/next";
 // Optimize font loading
 const nunito = Nunito({
   weight: ["400", "500", "600", "700"],
@@ -163,6 +163,7 @@ export default function RootLayout({
           <main className="min-h-screen flex flex-col">
             <Navbar />
             {children}
+            <SpeedInsights />
             <Footer />
           </main>
           <ToastContainer position="top-right" toastStyle={{ zIndex: 9999 }} />
