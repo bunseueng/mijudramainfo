@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
+  // ❌ REMOVED: output: "standalone"
+  // This was causing HUGE builds (500MB-2GB)
+  // Only use standalone for Docker/self-hosting, NOT for Vercel/Netlify!
+
   images: {
     domains: [
       "image.tmdb.org",
@@ -33,7 +36,20 @@ const nextConfig = {
     optimizeCss: true,
   },
   reactStrictMode: true,
-  productionBrowserSourceMaps: true,
+
+  // ❌ REMOVED: productionBrowserSourceMaps: true
+  // Source maps add 100-500MB to build size
+  // Enable only when debugging production issues
+  productionBrowserSourceMaps: false,
+
+  // ✅ ADDED: Compiler optimizations
+  compiler: {
+    // Remove console.log in production (smaller bundles)
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+
   async headers() {
     return [
       {
@@ -88,11 +104,6 @@ const nextConfig = {
         destination: "/person/:id/edit/:path*", // Fixes double slashes
         permanent: true, // 301 Redirect
       },
-      // {
-      //   source: "/:path*",
-      //   destination: "/:path*", // Netlify URL
-      //   permanent: true, // 308 redirect (good for SEO)
-      // },
     ];
   },
 };

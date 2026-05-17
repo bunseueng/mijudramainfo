@@ -122,13 +122,9 @@ export async function PATCH(request: Request, props: { params: Promise<{ listId:
 
 export async function DELETE(
   request: Request,
-  props: { params: Promise<{ listId: string }>, body: { movieId?: string, tvId?: string } }
+  props: { params: Promise<{ listId: string }> }
 ) {
   const params = await props.params;
-
-  const {
-    body
-  } = props;
 
   try {
     // Fetch the current user
