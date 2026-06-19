@@ -3,6 +3,16 @@
 # Section-level mapping preserves topical SEO equity; everything else -> home.
 # Keep these live permanently (>= 1 year) so link equity fully transfers.
 
+# Redirect-only deploy: do NOT build the Next.js app (its DB is paused, so a
+# real build fails at prerender). Skip the Next plugin and publish a tiny
+# static fallback; the [[redirects]] below are applied at the edge regardless.
+[build]
+  command = "mkdir -p _site && printf '<!doctype html><title>Moved</title><meta http-equiv=refresh content=0;url=https://mijudrama.com/>Moved to https://mijudrama.com/' > _site/index.html"
+  publish = "_site"
+
+[build.environment]
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+
 # detail + listing pages -> closest matching new section
 [[redirects]]
   from = "/tv/*"

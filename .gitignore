@@ -37,3 +37,5 @@ yarn-error.log*
 next-env.d.ts
 
 .codegpt
+# Netlify redirect-only build output
+_site/
