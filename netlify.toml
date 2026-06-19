@@ -1,5 +1,54 @@
+# Site retired -> 301 everything to the new site (mijudrama.com).
+# App is paused; these edge redirects run without booting Next.js.
+# Section-level mapping preserves topical SEO equity; everything else -> home.
+# Keep these live permanently (>= 1 year) so link equity fully transfers.
+
+# detail + listing pages -> closest matching new section
 [[redirects]]
-    from = "https://mijudramainfo.netlify.app/*"
-    to = "https://mijudramainfo.mijukh.com/:splat"
-    status = 301
-    force = true
+  from = "/tv/*"
+  to = "https://mijudrama.com/drama"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/drama/*"
+  to = "https://mijudrama.com/drama"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/movie/*"
+  to = "https://mijudrama.com/movie"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/person/*"
+  to = "https://mijudrama.com/people"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/people/*"
+  to = "https://mijudrama.com/people"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/lists/*"
+  to = "https://mijudrama.com/lists"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/search/*"
+  to = "https://mijudrama.com/search"
+  status = 301
+  force = true
+
+# everything else -> homepage
+[[redirects]]
+  from = "/*"
+  to = "https://mijudrama.com/"
+  status = 301
+  force = true
