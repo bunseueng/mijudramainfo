@@ -37,19 +37,8 @@ interface PersonContentProps {
     newValue: string;
   }[];
   tv_id: number;
-  register: UseFormRegister<{
-    userId?: string | undefined;
-    love?: number | undefined;
-    loveBy?: string[] | undefined;
-  }>;
-  handleSubmit: UseFormHandleSubmit<
-    {
-      userId?: string | undefined;
-      love?: number | undefined;
-      loveBy?: string[] | undefined;
-    },
-    undefined
-  >;
+  register: UseFormRegister<TPersonLove>;
+  handleSubmit: UseFormHandleSubmit<TPersonLove>;
   isCurrentUserLoved: JsonValue | undefined;
   handleLove: (data: TPersonLove) => Promise<void>;
 }
